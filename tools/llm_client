@@ -1,0 +1,139 @@
+"""LLM client wrapper for P3 Agent Engine.
+
+Provides an async interface to ZAI (智谱 GLM) via the z-ai-web-dev-sdk
+Node.js SDK, using subprocess calls.
+"""
+
+import json
+import os
+import re
+import subprocess
+from typing import Optional
+
+
+class LLMClient:
+    """Wrapper for calling ZAI (智谱 GLM) via the z-ai-web-dev-sdk Node.js SDK.
+
+    Since the SDK is JavaScript-based, this client invokes it through a
+    Node.js subprocess. The SDK must be installed in the project root.
+    """
+
+    def __init__(self) -> None:
+        self._sdk_available: bool = self._check_sdk()
+
+    def _check_sdk(self) -> bool:
+        """Check if z-ai-web-dev-sdk is available.
+
+        Returns:
+            True if the SDK can be required from Node.js, False otherwise.
+        """
+        try:
+            result = subprocess.run(
+                ["node", "-e", "require('z-ai-web-dev-sdk')"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                cwd="/home/z/my-project",
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    @property
+    def sdk_available(self) -> bool:
+        """Whether the z-ai-web-dev-sdk is available for use."""
+        return self._sdk_available
+
+    async def chat(
+        self,
+        system_prompt: str,
+        user_message: str,
+        temperature: float = 0.3,
+        max_tokens: int = 8192,
+    ) -> str:
+        """Call ZAI chat completions via Node.js subprocess.
+
+        Args:
+            system_prompt: System message for the LLM.
+            user_message: User message for the LLM.
+            temperature: Sampling temperature (0.0–1.0). Defaults to 0.3.
+            max_tokens: Maximum tokens to generate. Defaults to 8192.
+
+        Returns:
+            The assistant's response text.
+
+        Raises:
+            RuntimeError: If the LLM call fails or returns a non-zero exit
+                code.
+        """
+        js_code = (
+            "const ZAI = require('z-ai-web-dev-sdk').default;\n"
+            "\n"
+            "async function main() {\n"
+            f"  const zai = await ZAI.create();\n"
+            "  const completion = await zai.chat.completions.create({\n"
+            "    messages: [\n"
+            f"      {{ role: 'system', content: {json.dumps(system_prompt)} }},\n"
+            f"      {{ role: 'user', content: {json.dumps(user_message)} }}\n"
+            "    ],\n"
+            f"    temperature: {temperature},\n"
+            f"    max_tokens: {max_tokens}\n"
+            "  });\n"
+            "  console.log(JSON.stringify(completion.choices[0]?.message?.content || ''));\n"
+            "}\n"
+            "main().catch(e => { console.error(e.message); process.exit(1); });\n"
+        )
+
+        result = subprocess.run(
+            ["node", "-e", js_code],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd="/home/z/my-project",
+        )
+
+        if result.returncode != 0:
+            raise RuntimeError(f"LLM call failed: {result.stderr}")
+
+        return result.stdout.strip().strip('"')
+
+    async def chat_json(
+        self,
+        system_prompt: str,
+        user_message: str,
+        temperature: float = 0.1,
+    ) -> dict | list:
+        """Call chat and parse JSON response.
+
+        Handles markdown code fences and trailing commas that LLMs commonly
+        produce.
+
+        Args:
+            system_prompt: System message for the LLM.
+            user_message: User message for the LLM.
+            temperature: Sampling temperature. Defaults to 0.1 for more
+                deterministic JSON output.
+
+        Returns:
+            Parsed JSON object (dict or list).
+
+        Raises:
+            RuntimeError: If the LLM call fails.
+            json.JSONDecodeError: If the response cannot be parsed as JSON.
+        """
+        raw = await self.chat(system_prompt, user_message, temperature)
+
+        # Strip markdown code fences
+        text = raw.strip()
+        if text.startswith("```"):
+            first_nl = text.index("\n")
+            text = text[first_nl + 1 :]
+        if text.endswith("```"):
+            text = text[:-3]
+        text = text.strip()
+
+        # Fix trailing commas (common LLM artifact)
+        text = re.sub(r",\s*}", "}", text)
+        text = re.sub(r",\s*]", "]", text)
+
+        return json.loads(text)
