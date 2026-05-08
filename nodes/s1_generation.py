@@ -40,21 +40,63 @@ def _resolve_entity_names(name_str: str) -> list[str]:
 
 def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
                    state: AgentState | None = None) -> str:
-    """I21: Resolve role with human-decision-keyword fallback chain.
-
-    Priority:
-    1. role in _context.roles and not system → use directly
-    2. role==system/null AND action has human decision keywords → fallback:
-       a) entity_parent[entity] role
-       b) upstream transition entity role
-       c) "[待确认角色]" + warning
-    3. role==system AND action has auto semantics → "系统"
-    4. from==null creation → "系统"
-    """
+    """I21: Resolve role with human-decision-keyword fallback chain."""
     base = ROLE_MAP.get(role_id, role_id) or '系统'
 
     if role_id and role_id != 'system' and base != '系统':
         return base
+
+    has_human_kw = any(kw in action for kw in HUMAN_DECISION_KEYWORDS)
+    has_auto_kw = any(kw in action for kw in AUTO_KEYWORDS)
+
+    def _role_lookup(roles_data, key: str) -> str | None:
+        """Look up role by entity key, handling both list and dict formats."""
+        if isinstance(roles_data, dict):
+            return roles_data.get(key)
+        if isinstance(roles_data, list):
+            for item in roles_data:
+                if isinstance(item, dict):
+                    if item.get('entity') == key or item.get('id') == key:
+                        return item.get('role') or item.get('name') or item.get(key)
+            for item in roles_data:
+                if isinstance(item, dict) and key in item:
+                    return item[key]
+        return None
+
+    if has_human_kw:
+        if state:
+            ep = state.get('entity_parent', {})
+            parent = ep.get(entity)
+            if parent:
+                ctx = state.get('coverage_model', {}).get('_context', {})
+                roles = ctx.get('roles', {})
+                parent_role = _role_lookup(roles, parent)
+                if parent_role and parent_role != 'system':
+                    return ROLE_MAP.get(parent_role, parent_role)
+
+            upstream_map = state.get('transition_upstream_map', {})
+            tos = state.get('coverage_model', {}).get('transition_obligations', [])
+            to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
+            for tid, ups in upstream_map.items():
+                t = to_by_tid.get(tid)
+                if t and t.get('entity') == entity:
+                    for uid in ups:
+                        ut = to_by_tid.get(uid)
+                        if ut and ut.get('entity') != entity:
+                            ctx = state.get('coverage_model', {}).get('_context', {})
+                            r = _role_lookup(ctx.get('roles', {}), ut.get('entity', ''))
+                            if r and r != 'system':
+                                return ROLE_MAP.get(r, r)
+
+        return '[待确认角色]'
+
+    if has_auto_kw or role_id == 'system':
+        return '系统'
+
+    if not action or action == '创建':
+        return '系统'
+
+    return base
 
     has_human_kw = any(kw in action for kw in HUMAN_DECISION_KEYWORDS)
     has_auto_kw = any(kw in action for kw in AUTO_KEYWORDS)
