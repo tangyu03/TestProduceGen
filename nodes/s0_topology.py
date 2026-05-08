@@ -5,6 +5,7 @@ Reads existing S0 engine_state from the V2 output file, or discovers it via LLM.
 from __future__ import annotations
 import json
 import os
+from pathlib import Path
 from typing import Any
 from models.state import AgentState
 
@@ -68,13 +69,14 @@ def s0_topology_node(state: AgentState) -> dict:
     errors = list(state.get("errors", []))
     
     # Load coverage model
-    cm_path = state.get("coverage_model_path", "/home/z/my-project/download/coverage_model.json")
+    cm_path = state["coverage_model_path"]
     with open(cm_path, 'r', encoding='utf-8') as f:
         cm_data = json.load(f)
     coverage_model = cm_data.get('coverage_model', cm_data)
     
     # Try loading existing S0 from V2 output
-    s0_path = "/home/z/my-project/download/p3_s2_s3_s4_result.json"
+    # Try loading existing S0 from V2 output (same directory as coverage model)
+    s0_path = str(Path(cm_path).parent / "p3_s2_s3_s4_result.json")
     engine_state = _load_existing_s0(s0_path)
     
     if engine_state is None:

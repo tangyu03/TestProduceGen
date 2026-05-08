@@ -2,11 +2,7 @@
 """P3 Agent Engine — Main Entry Point.
 
 Usage:
-    python main.py [coverage_model_path] [output_path]
-
-Defaults:
-    coverage_model_path = /home/z/my-project/download/coverage_model.json
-    output_path         = /home/z/my-project/download/p3_agent_output.json
+    python main.py <coverage_model_path> [output_path]
 """
 import json
 import sys
@@ -18,8 +14,8 @@ from models.state import AgentState
 
 
 def run_p3_pipeline(
-    coverage_model_path: str = "/home/z/my-project/download/coverage_model.json",
-    output_path: str = "/home/z/my-project/download/p3_agent_output.json",
+    coverage_model_path: str,
+    output_path: str,
 ) -> dict:
     """Run the complete P3 agent pipeline.
     
@@ -89,7 +85,7 @@ def run_p3_pipeline(
     print(f"      ✓ Pipeline completed in {elapsed:.2f}s")
     
     # Process results
-    procedures = result.get("procedures", [])
+    procedures = result.get("procedures") or []
     warnings = result.get("warnings", [])
     errors = result.get("errors", [])
     current_stage = result.get("current_stage", "unknown")
@@ -232,7 +228,9 @@ def _generate_markdown(procedures: list[dict], md_path: str):
 
 
 if __name__ == "__main__":
-    cm_path = sys.argv[1] if len(sys.argv) > 1 else "/home/z/my-project/download/coverage_model.json"
-    out_path = sys.argv[2] if len(sys.argv) > 2 else "/home/z/my-project/download/p3_agent_output.json"
-    
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <coverage_model_path> [output_path]")
+        sys.exit(1)
+    cm_path = sys.argv[1]
+    out_path = sys.argv[2] if len(sys.argv) > 2 else str(Path(cm_path).parent / "p3_agent_output.json")
     run_p3_pipeline(cm_path, out_path)
