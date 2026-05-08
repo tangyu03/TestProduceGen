@@ -1,3 +1,4 @@
+from __future__ import annotations
 """LLM client wrapper for P3 Agent Engine.
 
 Provides an async interface to ZAI (智谱 GLM) via the z-ai-web-dev-sdk

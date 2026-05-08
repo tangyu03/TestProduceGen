@@ -7,8 +7,8 @@ AgentState   : TypedDict that flows through every LangGraph node.
 schema       : Pydantic models and validation helpers for stage invariants.
 """
 
-from p3_agent_engine.models.state import AgentState
-from p3_agent_engine.models import schema
+from models.state import AgentState
+from models import schema
 
 __all__ = [
     "AgentState",

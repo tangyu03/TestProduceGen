@@ -5,7 +5,7 @@ replicating the V2 JS engine's S2 stage.
 """
 import copy
 from typing import Any
-from p3_agent_engine.models.state import AgentState
+from models.state import AgentState
 
 
 def s2_sorting_node(state: AgentState) -> dict:

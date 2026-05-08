@@ -1,3 +1,4 @@
+from __future__ import annotations
 """S1 Procedure Generation Node.
 
 Deterministic procedure generation, faithfully replicating V2 JS engine logic.
@@ -7,8 +8,8 @@ are fully implemented with complete logic translated from p3_engine_v2.mjs.
 import json
 import re
 from typing import Any
-from p3_agent_engine.models.state import AgentState
-from p3_agent_engine.nodes.s0_topology import (
+from models.state import AgentState
+from nodes.s0_topology import (
     ENTITY_NAME_MAP, ROLE_MAP, TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS, L0_L1_L5_ENTITIES
 )
 
@@ -1358,7 +1359,7 @@ def s1_generation_node(state: AgentState) -> dict:
     }
 
     # Calculate chain depths
-    from p3_agent_engine.tools.graph_algo import calc_all_chain_depths
+    from tools.graph_algo import calc_all_chain_depths
     depth_cache = calc_all_chain_depths(state["transition_upstream_map"])
 
     # Generate procedures by type
@@ -1383,7 +1384,7 @@ def s1_generation_node(state: AgentState) -> dict:
     procedures = _apply_contextual_phase_rules(procedures, state)
 
     # Validate all procedures
-    from p3_agent_engine.models.schema import validate_procedures
+    from models.schema import validate_procedures
     valid_procs, val_errors = validate_procedures(procedures)
     errors.extend(val_errors)
 

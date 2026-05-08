@@ -9,9 +9,12 @@ structured messages (tool calls, reasoning, etc.) that LangGraph stores
 automatically alongside the domain-specific fields below.
 """
 
-from typing import Optional
+from __future__ import annotations
 
-from langgraph.graph import MessagesState
+from typing import Annotated, Optional
+
+from langgraph.graph import MessagesState, add_messages
+from langchain_core.messages import AnyMessage
 
 
 class AgentState(MessagesState):

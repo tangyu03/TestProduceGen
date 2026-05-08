@@ -2,10 +2,11 @@
 
 Reads existing S0 engine_state from the V2 output file, or discovers it via LLM.
 """
+from __future__ import annotations
 import json
 import os
 from typing import Any
-from p3_agent_engine.models.state import AgentState
+from models.state import AgentState
 
 # Constants matching V2 engine
 ENTITY_NAME_MAP = {
@@ -80,8 +81,8 @@ def s0_topology_node(state: AgentState) -> dict:
         # Try LLM-based discovery
         warnings.append("No existing S0 state found, attempting LLM discovery")
         try:
-            from p3_agent_engine.tools.llm_client import LLMClient
-            from p3_agent_engine.prompts.s0_prompt import S0_SYSTEM_PROMPT, S0_USER_PROMPT_TEMPLATE
+            from tools.llm_client import LLMClient
+            from prompts.s0_prompt import S0_SYSTEM_PROMPT, S0_USER_PROMPT_TEMPLATE
             import asyncio
             
             client = LLMClient()
@@ -95,7 +96,7 @@ def s0_topology_node(state: AgentState) -> dict:
     
     # Validate
     try:
-        from p3_agent_engine.models.schema import validate_engine_state
+        from models.schema import validate_engine_state
         validated = validate_engine_state(engine_state)
         warnings.append(f"S0 validated: primary_entity={validated.primary_entity}, phases={validated.phase_table.phase_count}")
     except Exception as e:

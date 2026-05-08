@@ -3,7 +3,7 @@
 Deterministic dependency binding between procedures, faithfully replicating
 the V2 JS engine's S3 stage. Optimized for O(n log n) performance.
 """
-from p3_agent_engine.models.state import AgentState
+from models.state import AgentState
 
 
 def s3_dependency_node(state: AgentState) -> dict:

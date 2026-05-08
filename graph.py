@@ -4,11 +4,11 @@ Defines the state machine: S0 → S1 → S2 → S3 → Done
 """
 from langgraph.graph import StateGraph, END
 
-from p3_agent_engine.models.state import AgentState
-from p3_agent_engine.nodes.s0_topology import s0_topology_node
-from p3_agent_engine.nodes.s1_generation import s1_generation_node
-from p3_agent_engine.nodes.s2_sorting import s2_sorting_node
-from p3_agent_engine.nodes.s3_dependency import s3_dependency_node
+from models.state import AgentState
+from nodes.s0_topology import s0_topology_node
+from nodes.s1_generation import s1_generation_node
+from nodes.s2_sorting import s2_sorting_node
+from nodes.s3_dependency import s3_dependency_node
 
 
 def should_continue_after_s0(state: AgentState) -> str:

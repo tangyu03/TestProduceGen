@@ -13,8 +13,8 @@ import sys
 import time
 from pathlib import Path
 
-from p3_agent_engine.graph import compile_p3_graph
-from p3_agent_engine.models.state import AgentState
+from graph import compile_p3_graph
+from models.state import AgentState
 
 
 def run_p3_pipeline(
