@@ -10,7 +10,8 @@ import re
 from typing import Any
 from models.state import AgentState
 from nodes.s0_topology import (
-    ENTITY_NAME_MAP, ROLE_MAP, TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS, L0_L1_L5_ENTITIES
+    ENTITY_NAME_MAP, ROLE_MAP, TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS,
+    L0_L1_L5_ENTITIES, HUMAN_DECISION_KEYWORDS, AUTO_KEYWORDS,
 )
 
 # ---------------------------------------------------------------------------
@@ -37,9 +38,62 @@ def _resolve_entity_names(name_str: str) -> list[str]:
             for n in re.split(r'[,，、\s]+', name_str) if n.strip()]
 
 
-def _get_role_name(role_id: str | None) -> str:
-    """Resolve role ID to name."""
-    return ROLE_MAP.get(role_id, role_id) or '系统'
+def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
+                   state: AgentState | None = None) -> str:
+    """I21: Resolve role with human-decision-keyword fallback chain.
+
+    Priority:
+    1. role in _context.roles and not system → use directly
+    2. role==system/null AND action has human decision keywords → fallback:
+       a) entity_parent[entity] role
+       b) upstream transition entity role
+       c) "[待确认角色]" + warning
+    3. role==system AND action has auto semantics → "系统"
+    4. from==null creation → "系统"
+    """
+    base = ROLE_MAP.get(role_id, role_id) or '系统'
+
+    if role_id and role_id != 'system' and base != '系统':
+        return base
+
+    has_human_kw = any(kw in action for kw in HUMAN_DECISION_KEYWORDS)
+    has_auto_kw = any(kw in action for kw in AUTO_KEYWORDS)
+
+    if has_human_kw:
+        if state:
+            ep = state.get('entity_parent', {})
+            parent = ep.get(entity)
+            if parent:
+                ctx = state.get('coverage_model', {}).get('_context', {})
+                roles = ctx.get('roles', {})
+                parent_role = roles.get(parent)
+                if parent_role and parent_role != 'system':
+                    return ROLE_MAP.get(parent_role, parent_role)
+
+            upstream_map = state.get('transition_upstream_map', {})
+            tos = state.get('coverage_model', {}).get('transition_obligations', [])
+            to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
+            for tid, ups in upstream_map.items():
+                t = to_by_tid.get(tid)
+                if t and t.get('entity') == entity:
+                    for uid in ups:
+                        ut = to_by_tid.get(uid)
+                        if ut and ut.get('entity') != entity:
+                            ctx = state.get('coverage_model', {}).get('_context', {})
+                            roles = ctx.get('roles', {})
+                            r = roles.get(ut.get('entity'))
+                            if r and r != 'system':
+                                return ROLE_MAP.get(r, r)
+
+        return '[待确认角色]'
+
+    if has_auto_kw or role_id == 'system':
+        return '系统'
+
+    if not action or action == '创建':
+        return '系统'
+
+    return base
 
 
 def _make_step(aaa: str, location: str, input: str, expected: str) -> dict:
@@ -278,23 +332,44 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
             else:
                 steps.append(_make_step("S", f"{te['entity']}.{dimension}", s_input, ""))
 
-            # A step (action)
+            # A step (action) — I21: pass action/entity/state for role fallback
             steps.append(_make_step("A", f"{te['entity']}.{dimension}",
-                                    f"{_get_role_name(to.get('role'))}执行{to.get('action', '')}", ""))
+                                    f"{_get_role_name(to.get('role'), to.get('action', ''), entity, state)}执行{to.get('action', '')}", ""))
 
-            # Main V step
-            steps.append(_make_step("V", f"{te['entity']}.{dimension}",
-                                    "查看状态", f"状态验证: {to.get('to', '')}"))
+            # Main V step — from==to uses expected_results[0]
+            if to.get('from') and to.get('from') == to.get('to'):
+                er = (to.get('expected_results') or [''])[0] if to.get('expected_results') else '效果验证'
+                steps.append(_make_step("V", f"{te['entity']}.{dimension}",
+                                        "查看效果", f"效果验证: {er}"))
+            else:
+                steps.append(_make_step("V", f"{te['entity']}.{dimension}",
+                                        "查看状态", f"状态验证: {to.get('to', '')}"))
 
-            # Side effects as V steps (Type2 embedding)
+            # Side effects as V steps (Type2 embedding) — I20: ≤1 hop constraint
+            cos = state.get("coverage_model", {}).get("cross_entity_obligations", [])
             side_effects = to.get("side_effects") or []
             for se in side_effects:
-                steps.append(_make_step(
-                    "V",
-                    f"{se['target_entity']}.{se.get('target_dimension') or dimension}",
-                    "查看副作用效果",
-                    f"副作用验证: {se.get('effect_desc', '')}"
-                ))
+                target = se.get('target_entity', '')
+                # (a) Same entity → add directly
+                if target == entity:
+                    steps.append(_make_step(
+                        "V", f"{target}.{se.get('target_dimension') or dimension}",
+                        "查看副作用效果", f"副作用验证: {se.get('effect_desc', '')}"
+                    ))
+                else:
+                    # (b) Cross-entity with direct CO link → add with causal check
+                    direct_co = next((co for co in cos
+                                      if co.get('enabler_entity') == entity
+                                      and co.get('dependent_entity') == target), None)
+                    if direct_co:
+                        dep_cond = direct_co.get('dependent_condition', '')
+                        effect_desc = se.get('effect_desc', '')
+                        if dep_cond and effect_desc and dep_cond in effect_desc:
+                            steps.append(_make_step(
+                                "V", f"{target}.{se.get('target_dimension') or dimension}",
+                                "查看副作用效果", f"副作用验证: {effect_desc}"
+                            ))
+                    # (c) No direct CO → skip (indirect causal, covered by own entity)
 
             base_proc = {
                 "temp_id": f"PROC-T1-{_next_gen_seq()}",
@@ -307,7 +382,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                 "gen_seq": _gen_seq_counter,
                 "post_state": f"{te['entity']}.{dimension}→{to.get('to', '')}",
                 "cascade_chain": None,
-                "br_embedded": [],
+                "embedded_brs": [],
                 "_S2_fields": {
                     "phase": phase_info.get("phase") if phase_info.get("phase") is not None else 0,
                     "phase_name": phase_table["phase_names"][phase_info["phase"]] if phase_info.get("phase") is not None and phase_info["phase"] < len(phase_table["phase_names"]) else f"P{phase_info.get('phase', 0)}",
@@ -324,16 +399,31 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                 "_S3_fields": {"dependencies": [], "weak_dependencies": []},
                 "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
             }
+            # --- data_constraint: skip if has branch, 1 procedure if no branch ---
+            if "data_constraint" in risk_traits:
+                has_branch = any(
+                    bd.get('entity') == entity and bd.get('dimension') == dimension
+                    for bd in state.get('coverage_model', {}).get('_context', {}).get('branch_dimensions', [])
+                )
+                if has_branch:
+                    continue
+
+            # --- rollback: embed as V step after main V ---
+            if "rollback" in risk_traits:
+                steps.append(_make_step("V", f"{te['entity']}.{dimension}",
+                                        "查看回退效果", "回退验证: 状态可回退至前驱"))
+
             procedures.append(base_proc)
 
-            # --- Audit rejection variant ---
+            # --- Audit rejection variant --- I21: role fallback for rejection
             if "audit" in risk_traits:
+                reject_role = _get_role_name(to.get('role'), '驳回', entity, state)
                 reject_steps = [
                     _make_step("S", f"{te['entity']}.{dimension}",
                                (f"[{te['context']}] " if te["context"] else "") +
                                f"{te['entity']}.{dimension} = {to.get('from') or '(初始)'}; 已提请审批", ""),
                     _make_step("A", f"{te['entity']}.{dimension}",
-                               f"{_get_role_name(to.get('role'))}执行驳回操作", ""),
+                               f"{reject_role}执行驳回操作", ""),
                     _make_step("V", f"{te['entity']}.{dimension}",
                                "查看状态和驳回原因",
                                f"状态验证: {to.get('from') or '原状态'}; 驳回原因已记录"),
@@ -351,7 +441,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→{to.get('from') or '原状态'}(驳回)",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": reject_phase,
                         "phase_name": phase_table["phase_names"][reject_phase] if reject_phase < len(phase_table["phase_names"]) else f"P{reject_phase}",
@@ -392,7 +482,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→{to.get('to', '')}(时间边界)",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": ts_phase,
                         "phase_name": phase_table["phase_names"][ts_phase] if ts_phase < len(phase_table["phase_names"]) else f"P{ts_phase}",
@@ -429,7 +519,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→(过期未执行)",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": ts_phase,
                         "phase_name": phase_table["phase_names"][ts_phase] if ts_phase < len(phase_table["phase_names"]) else f"P{ts_phase}",
@@ -454,6 +544,25 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
 # ---------------------------------------------------------------------------
 # Type3 — Attribute Config procedures
 # ---------------------------------------------------------------------------
+
+def _type3_v_expected(eo: dict, branch: dict, state: AgentState) -> str:
+    """I19: Generate non-tautological V step expected for Type3.
+
+    Priority: ① BR effect → ② branch path condition → ③ display value
+    """
+    attr = eo.get('attribute_name', '')
+    val = branch.get('value', '')
+    bds = state.get('coverage_model', {}).get('_context', {}).get('branch_dimensions', [])
+    for bd in bds:
+        if bd.get('entity') == eo['entity'] and bd.get('dimension') == attr:
+            brs = bd.get('business_rules', []) or bd.get('coverage', {}).get('business_rules', [])
+            for br_id in brs:
+                return f"[{br_id}]验证: 配置{attr}={val}的效果"
+            bp = bd.get('branch_path') or branch.get('desc', '')
+            if bp:
+                return f"行为验证: {bp}已生效，{attr}可见{val}对应选项"
+    return f"状态验证: {attr}显示为{val}"
+
 
 def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list[dict]:
     """Generate Type3 (attribute_config) procedures.
@@ -491,12 +600,12 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                         _make_step("S", f"{eo['entity']}", f"导航配置入口，确认当前{eo['attribute_name']}值", ""),
                         _make_step("A", f"{eo['entity']}", f"修改{eo['attribute_name']}为\"{branch['value']}\"", ""),
                         _make_step("V", f"{eo['entity']}.{eo['attribute_name']}", "查看效果",
-                                   f"验证{eo['attribute_name']}=\"{branch['value']}\"后流转影响: {branch.get('desc', '')}"),
+                                   _type3_v_expected(eo, branch, state)),
                     ],
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{eo['entity']}.{eo['attribute_name']}→{branch['value']}",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": phase_info.get("phase", 0) if phase_info.get("phase") is not None else 0,
                         "phase_name": phase_table["phase_names"][phase_info["phase"]] if phase_info.get("phase") is not None and phase_info["phase"] < len(phase_table["phase_names"]) else f"P{phase_info.get('phase', 0)}",
@@ -532,12 +641,12 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                     _make_step("S", f"{eo['entity']}", f"导航配置入口，确认当前{eo['attribute_name']}值", ""),
                     _make_step("A", f"{eo['entity']}", f"修改{eo['attribute_name']}", ""),
                     _make_step("V", f"{eo['entity']}.{eo['attribute_name']}", "查看效果",
-                               f"验证{eo['attribute_name']}修改后流转影响"),
+                               f"状态验证: {eo['attribute_name']}显示为修改后值"),
                 ],
                 "gen_seq": _gen_seq_counter,
                 "post_state": f"{eo['entity']}.{eo['attribute_name']}→(已修改)",
                 "cascade_chain": None,
-                "br_embedded": [],
+                "embedded_brs": [],
                 "_S2_fields": {
                     "phase": phase,
                     "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
@@ -564,28 +673,20 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
 # ---------------------------------------------------------------------------
 
 def _generate_type4a(state: AgentState, indices: dict, depth_cache: dict) -> list[dict]:
-    """Generate Type4a (constraint CO) procedures.
-
-    For each constraint CO:
-    - Skip if ref_to is set (covered by existing TO)
-    - If enabler_entity has VEs matching this CO → generate per VE
-    - Build S/A/V with cascade_chain
-    """
+    """Generate Type4a (constraint CO) procedures — v3 with I22, rejection, aggregation."""
     phase_table = state["phase_table"]
     ves = state.get("virtual_entities", {})
     topo = state["topology_levels"]
+    cm = state.get("coverage_model", {})
+    tos = cm.get("transition_obligations", [])
 
     procedures: list[dict] = []
 
     for co in indices["co_constraint"]:
-        if co.get("ref_to"):
-            # Covered by existing TO procedure — skip
-            continue
-
         enabler_entity = co["enabler_entity"]
         dependent_entity = co["dependent_entity"]
+        ref_to = co.get("ref_to")
 
-        # Check if enabler_entity has VEs that reference this CO
         enabler_ves = [
             (ve_name, ve) for ve_name, ve in ves.items()
             if ve.get("original_entity") == enabler_entity and co["id"] in ve.get("co_ids", [])
@@ -606,6 +707,39 @@ def _generate_type4a(state: AgentState, indices: dict, depth_cache: dict) -> lis
             enabler_depth = depth_cache.get(co.get("enabler_transition_id", ""), 0) if co.get("enabler_transition_id") else 0
             chain_depth = enabler_depth + 1
 
+            # S step — aggregation=="all" handling
+            agg = co.get("aggregation")
+            if agg == "all":
+                s_input = f"所有{enabler_entity}的{co.get('enabler_dimension', '')}均达到{co.get('enabler_state', '')}"
+            else:
+                s_input = f"前置条件: {te['entity']}.{co.get('enabler_dimension', '')} = {co.get('enabler_state', '')}"
+
+            # A step — I21 role resolution + suggested_action
+            enabler_role = co.get("enabler_role")
+            trigger = co.get("trigger")
+            suggested = co.get("suggested_action")
+            if suggested:
+                a_input = suggested
+            elif trigger:
+                a_input = trigger
+            elif co.get("enabler_transition_id"):
+                et = next((t for t in tos if t.get("transition_id") == co["enabler_transition_id"]), None)
+                a_input = et.get("action", f"触发{enabler_entity}状态推进") if et else f"触发{enabler_entity}状态推进"
+            else:
+                a_input = f"触发{enabler_entity}状态推进"
+
+            role = _get_role_name(enabler_role, a_input, enabler_entity, state)
+            if role != '系统':
+                a_input = f"{role}执行{a_input}"
+
+            # V step — I22: must not copy dependent_condition
+            if ref_to:
+                v_expected = f"此条件已在{ref_to.get('obligation_id', ref_to)}前置条件中体现"
+            elif co.get("enabler_transition_id"):
+                v_expected = f"状态验证: {enabler_entity}.{co.get('enabler_dimension', '')} = {co.get('enabler_state', '')}"
+            else:
+                v_expected = f"行为验证: {enabler_entity}的{co.get('enabler_dimension', '')}已达到{co.get('enabler_state', '')}，{dependent_entity}的{co.get('dependent_dimension', '')}可执行后续操作"
+
             proc = {
                 "temp_id": f"PROC-T4a-{_next_gen_seq()}",
                 "source_ids": [co["id"]],
@@ -614,18 +748,15 @@ def _generate_type4a(state: AgentState, indices: dict, depth_cache: dict) -> lis
                 "obligation_type": 4,
                 "risk_trait": "",
                 "steps": [
-                    _make_step("S", f"{te['entity']}.{co.get('enabler_dimension', '')}",
-                               f"前置条件: {te['entity']}.{co.get('enabler_dimension', '')} = {co.get('enabler_state', '')}", ""),
-                    _make_step("A", f"{te['entity']}.{co.get('enabler_dimension', '')}",
-                               f"触发: {co.get('trigger') or co.get('desc', '')}", ""),
+                    _make_step("S", f"{te['entity']}.{co.get('enabler_dimension', '')}", s_input, ""),
+                    _make_step("A", f"{te['entity']}.{co.get('enabler_dimension', '')}", a_input, ""),
                     _make_step("V", f"{dependent_entity}.{co.get('dependent_dimension', '')}",
-                               "验证依赖条件",
-                               f"{dependent_entity}.{co.get('dependent_dimension', '')} = {co.get('dependent_condition', '')}"),
+                               "验证约束效果", v_expected),
                 ],
                 "gen_seq": _gen_seq_counter,
                 "post_state": f"{dependent_entity}.{co.get('dependent_dimension', '')}→{co.get('dependent_condition', '')}",
                 "cascade_chain": f"{te['entity']}.{co.get('enabler_dimension', '')}={co.get('enabler_state', '')}→{dependent_entity}.{co.get('dependent_dimension', '')}={co.get('dependent_condition', '')}",
-                "br_embedded": [],
+                "embedded_brs": [],
                 "_S2_fields": {
                     "phase": dep_phase_info.get("phase", 0) if dep_phase_info.get("phase") is not None else 0,
                     "phase_name": phase_table["phase_names"][dep_phase_info["phase"]] if dep_phase_info.get("phase") is not None and dep_phase_info["phase"] < len(phase_table["phase_names"]) else f"P{dep_phase_info.get('phase', 0)}",
@@ -643,6 +774,48 @@ def _generate_type4a(state: AgentState, indices: dict, depth_cache: dict) -> lis
                 "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
             }
             procedures.append(proc)
+
+            # Rejection variant — dependent_role non-null + audit risk
+            dep_role = co.get("dependent_role")
+            if dep_role and dep_role != "system" and "audit" in (co.get("risk_traits") or []):
+                reject_role = _get_role_name(dep_role, '驳回', dependent_entity, state)
+                reject_proc = {
+                    "temp_id": f"PROC-T4a-{_next_gen_seq()}",
+                    "source_ids": [co["id"]],
+                    "entity": te["entity"],
+                    "dimension": co.get("enabler_dimension", ""),
+                    "obligation_type": 4,
+                    "risk_trait": "audit_rejection",
+                    "steps": [
+                        _make_step("S", f"{te['entity']}.{co.get('enabler_dimension', '')}",
+                                   f"前置条件已满足，{dependent_entity}审批已提交", ""),
+                        _make_step("A", f"{dependent_entity}.{co.get('dependent_dimension', '')}",
+                                   f"{reject_role}执行驳回操作", ""),
+                        _make_step("V", f"{dependent_entity}.{co.get('dependent_dimension', '')}",
+                                   "查看状态和驳回原因",
+                                   f"状态验证: {dependent_entity}状态回退; 驳回原因已记录"),
+                    ],
+                    "gen_seq": _gen_seq_counter,
+                    "post_state": f"{dependent_entity}.{co.get('dependent_dimension', '')}→(驳回)",
+                    "cascade_chain": proc["cascade_chain"],
+                    "embedded_brs": [],
+                    "_S2_fields": {
+                        "phase": dep_phase_info.get("phase", 0) if dep_phase_info.get("phase") is not None else 0,
+                        "phase_name": phase_table["phase_names"][dep_phase_info.get("phase", 0)] if dep_phase_info.get("phase") is not None and dep_phase_info["phase"] < len(phase_table["phase_names"]) else f"P{dep_phase_info.get('phase', 0)}",
+                        "phase_basis": dep_phase_info.get("basis", "") + " (rejection)",
+                        "topology_level": topo.get(te["entity"], 0),
+                        "sort_key": [],
+                        "operation_lifecycle": 3,
+                        "chain_depth": chain_depth + 1,
+                        "type_label": "audit",
+                        "type_priority": 4,
+                        "dimension_priority": 1,
+                        "context": te["context"],
+                    },
+                    "_S3_fields": {"dependencies": [proc["temp_id"]], "weak_dependencies": []},
+                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                }
+                procedures.append(reject_proc)
 
     return procedures
 
@@ -686,7 +859,7 @@ def _generate_type4b(state: AgentState, indices: dict, depth_cache: dict) -> lis
             "gen_seq": _gen_seq_counter,
             "post_state": f"{co['dependent_entity']}.{co.get('dependent_dimension', '')}→{co.get('dependent_condition', '')}",
             "cascade_chain": f"{co['enabler_entity']}.{co.get('enabler_dimension', '')}={co.get('enabler_state', '')}→{co['dependent_entity']}.{co.get('dependent_dimension', '')}={co.get('dependent_condition', '')}",
-            "br_embedded": [],
+            "embedded_brs": [],
             "_S2_fields": {
                 "phase": phase_info.get("phase", 0) if phase_info.get("phase") is not None else 0,
                 "phase_name": phase_table["phase_names"][phase_info["phase"]] if phase_info.get("phase") is not None and phase_info["phase"] < len(phase_table["phase_names"]) else f"P{phase_info.get('phase', 0)}",
@@ -775,7 +948,7 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{ve_name}→({eo['operation_name']}完成)",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": ve_phase,
                         "phase_name": phase_table["phase_names"][ve_phase] if ve_phase < len(phase_table["phase_names"]) else f"P{ve_phase}",
@@ -809,7 +982,7 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                 "gen_seq": _gen_seq_counter,
                 "post_state": f"{eo['entity']}→({eo['operation_name']}完成)",
                 "cascade_chain": None,
-                "br_embedded": [],
+                "embedded_brs": [],
                 "_S2_fields": {
                     "phase": phase,
                     "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
@@ -893,7 +1066,7 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
             "gen_seq": _gen_seq_counter,
             "post_state": f"{entity}→(操作被阻止)",
             "cascade_chain": None,
-            "br_embedded": [],
+            "embedded_brs": [],
             "_S2_fields": {
                 "phase": phase,
                 "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
@@ -920,9 +1093,10 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
 # ---------------------------------------------------------------------------
 
 def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
-    """Classify BRs into 5 categories per prompt S1.8.
+    """S1.8.1: Classify BRs with full degradation chain.
 
-    Priority: attribute_effect > transition_constraint > crud_constraint > negative_test > standalone
+    Priority: attribute_effect > transition_constraint > crud_constraint > negative_test > standalone.
+    If high-priority category has no host → downgrade to next, with warning.
     """
     cm = state["coverage_model"]
     bds = cm.get("_context", {}).get("branch_dimensions", [])
@@ -940,22 +1114,20 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
         desc = br.get("description", "")
         br_entities = _resolve_entity_names(br.get("entities", ""))
 
+        candidates = []
+
         # 1. attribute_effect
-        matched = False
         for bd in bds:
             cov = bd.get("coverage", {})
             if cov and br_id in cov.get("business_rules", []):
                 cfg_eos = [eo for eo in eo_by_type.get("attribute_config", [])
                            if eo["entity"] == bd["entity"] and eo.get("attribute_name") == bd["dimension"]]
                 if cfg_eos:
-                    classifications.append({
-                        "br": br, "category": "attribute_effect", "host_proc_type": 3,
-                        "host_eo_ids": [eo["id"] for eo in cfg_eos], "bd": bd
+                    candidates.append({
+                        "category": "attribute_effect", "host_proc_type": 3,
+                        "host_eo_ids": [eo["id"] for eo in cfg_eos], "bd": bd,
+                        "priority": 1
                     })
-                    matched = True
-                    break
-        if matched:
-            continue
 
         # 2. transition_constraint
         if re.search(r'需先.*后|才可|必须.*后', desc) and len(br_entities) >= 2:
@@ -965,14 +1137,13 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
             co_match = next((co for co in co_constraint
                              if co["enabler_entity"] in br_entities or co["dependent_entity"] in br_entities), None)
             if to_match or co_match:
-                classifications.append({
-                    "br": br, "category": "transition_constraint",
+                candidates.append({
+                    "category": "transition_constraint",
                     "host_proc_type": 1 if to_match else 4,
                     "host_to_id": to_match["id"] if to_match else None,
-                    "host_co_id": co_match["id"] if co_match else None
+                    "host_co_id": co_match["id"] if co_match else None,
+                    "priority": 2
                 })
-                matched = True
-                continue
 
         # 3. crud_constraint
         crud_ops = ['删除', '修改', '新增', '退款', '撤销']
@@ -982,30 +1153,43 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
             matching_eo = next((eo for eo in eo_by_type.get("crud_operation", [])
                                 if eo["entity"] in br_entities and any(op in eo["operation_name"] for op in crud_ops)), None)
             if matching_eo and _is_type5_retained(matching_eo, state):
-                classifications.append({
-                    "br": br, "category": "crud_constraint", "host_proc_type": 5,
-                    "host_eo_id": matching_eo["id"]
+                candidates.append({
+                    "category": "crud_constraint", "host_proc_type": 5,
+                    "host_eo_id": matching_eo["id"],
+                    "priority": 3
                 })
-                matched = True
-                continue
-            else:
-                warnings.append(f"BR {br_id} crud_constraint host EO filtered, downgrading to standalone")
 
         # 4. negative_test
         if re.search(r'不可.*选择|不可.*删除|不可.*修改|不可.*操作|不可.*发布|不允许.*删除|不允许.*操作|不能.*删除|不能.*混合', desc):
             matching_it = next((ro for ro in ro_by_type.get("invalid_transition", [])
                                 if ro["entity"] in br_entities), None)
-            if matching_it:
-                classifications.append({"br": br, "category": "negative_test", "host_proc_type": 6,
-                                        "host_ro_id": matching_it["id"]})
-            else:
-                classifications.append({"br": br, "category": "negative_test", "host_proc_type": 6,
-                                        "generate_variant": True})
-            matched = True
-            continue
+            candidates.append({
+                "category": "negative_test", "host_proc_type": 6,
+                "host_ro_id": matching_it["id"] if matching_it else None,
+                "generate_variant": matching_it is None,
+                "priority": 4
+            })
 
-        # 5. standalone
-        classifications.append({"br": br, "category": "standalone", "host_proc_type": 7})
+        candidates.sort(key=lambda c: c["priority"])
+
+        chosen = None
+        for cand in candidates:
+            has_host = (
+                cand.get("host_eo_ids") or cand.get("host_to_id") or
+                cand.get("host_co_id") or cand.get("host_eo_id") or
+                cand.get("host_ro_id") or cand.get("generate_variant")
+            )
+            if has_host:
+                chosen = cand
+                break
+            else:
+                warnings.append(f"BR {br_id}: {cand['category']} has no host, downgrading")
+
+        if chosen:
+            chosen["br"] = br
+            classifications.append(chosen)
+        else:
+            classifications.append({"br": br, "category": "standalone", "host_proc_type": 7, "priority": 5})
 
     return classifications
 
@@ -1014,7 +1198,8 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
 # Type7 — Standalone BR procedures (only for standalone-classified BRs)
 # ---------------------------------------------------------------------------
 
-def _generate_type7_standalone(br_classifications: list[dict], state: AgentState) -> list[dict]:
+def _generate_type7_standalone(br_classifications: list[dict], state: AgentState,
+                               depth_cache: dict | None = None) -> list[dict]:
     """Generate standalone Type7 procedures from standalone BRs only."""
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
@@ -1073,7 +1258,9 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         chain_depth = 0
         for to in tos:
             if br_entities and to["entity"] in br_entities:
-                chain_depth = max(chain_depth, 0)  # simplified; depth_cache not available here
+                if to["entity"] in br_entities:
+                    t_depth = depth_cache.get(to.get("transition_id", ""), 0) if depth_cache else 0
+                    chain_depth = max(chain_depth, t_depth)
 
         proc = {
             "temp_id": f"PROC-T7-{_next_gen_seq()}",
@@ -1086,7 +1273,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             "gen_seq": _gen_seq_counter,
             "post_state": f"{primary_br_entity}→(规则验证完成)",
             "cascade_chain": None,
-            "br_embedded": [],
+            "embedded_brs": [],
             "_S2_fields": {
                 "phase": phase,
                 "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
@@ -1214,7 +1401,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{primary_br_entity}→(操作被阻止)",
                     "cascade_chain": None,
-                    "br_embedded": [],
+                    "embedded_brs": [],
                     "_S2_fields": {
                         "phase": phase,
                         "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
@@ -1238,74 +1425,84 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
         for proc in host_procs:
             entity = proc["entity"]
             dimension = proc.get("dimension") or ""
+            loc = f"{entity}.{dimension}"
+            br_entities = _resolve_entity_names(br.get("entities", ""))
+            cross_refs = [e for e in br_entities if e != entity] if len(br_entities) > 1 else []
+            if cross_refs:
+                loc += f" cross_refs={cross_refs}"
 
             if enforcement == "conditional":
-                proc["steps"].append(_make_step("V", f"{entity}.{dimension}", "查看效果(正面)",
+                proc["steps"].append(_make_step("V", loc, "查看效果(正面)",
                                                 f"[{br_id}]验证(正面): {br_desc}"))
-                proc["steps"].append(_make_step("V", f"{entity}.{dimension}", "查看效果(负面)",
+                proc["steps"].append(_make_step("V", loc, "查看效果(负面)",
                                                 f"[{br_id}]验证(负面): 不满足条件时规则不触发"))
             else:
-                proc["steps"].append(_make_step("V", f"{entity}.{dimension}", "查看效果",
+                proc["steps"].append(_make_step("V", loc, "查看效果",
                                                 f"[{br_id}]验证: {br_desc}"))
-            proc.setdefault("br_embedded", []).append(br_id)
+            proc.setdefault("embedded_brs", []).append(br_id)
             total_embedded += 1
 
     return procedures
 
 
 # ---------------------------------------------------------------------------
-# Contextual Phase Rule expansion (E-REG.通知状态, etc.)
+# S1.10 Procedure Dedup (I24)
 # ---------------------------------------------------------------------------
 
-def _apply_contextual_phase_rules(procedures: list[dict], state: AgentState) -> list[dict]:
-    """Expand procedures that hit contextual phase rules.
+def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[str]) -> list[dict]:
+    """S1.10: Deduplicate procedures — complete duplicate / causal merge / semantic similarity."""
+    co_map = {}
+    for co in cos:
+        co_map.setdefault(co.get('enabler_entity', ''), []).append(co)
+        co_map.setdefault(co.get('dependent_entity', ''), []).append(co)
 
-    For each procedure whose phase_basis is 'contextual', look up the rules
-    and create one expanded procedure per context rule.
-    """
-    ctx_rules = state.get("contextual_phase_rules", {})
-    phase_table = state["phase_table"]
+    to_remove: set[str] = set()
+    proc_by_id = {p["temp_id"]: p for p in procedures}
 
-    if not ctx_rules:
-        return procedures
+    for i, p1 in enumerate(procedures):
+        if p1["temp_id"] in to_remove:
+            continue
+        for j in range(i + 1, len(procedures)):
+            p2 = procedures[j]
+            if p2["temp_id"] in to_remove:
+                continue
 
-    procs_to_remove: list[str] = []
-    procs_to_add: list[dict] = []
+            same_entity = p1["entity"] == p2["entity"]
+            action1 = p1["steps"][1]["input"] if len(p1["steps"]) > 1 else ""
+            action2 = p2["steps"][1]["input"] if len(p2["steps"]) > 1 else ""
+            similar_action = (action1 == action2 or
+                              any(kw in action1 and kw in action2
+                                  for kw in ['审核', '审批', '核验', '确认', '发布', '驳回', '撤销']))
 
-    for proc in procedures:
-        s2 = proc.get("_S2_fields", {})
-        if s2.get("phase_basis") == "contextual":
-            ctx_key = s2.get("context") or f"{proc['entity']}.{proc.get('dimension', '')}"
-            if ctx_key in ctx_rules:
-                rule_set = ctx_rules[ctx_key]
-                procs_to_remove.append(proc["temp_id"])
+            if same_entity and similar_action and p1["post_state"] == p2["post_state"]:
+                if len(p1["steps"]) >= len(p2["steps"]):
+                    p1["source_ids"] = list(set(p1.get("source_ids", []) + p2.get("source_ids", [])))
+                    to_remove.add(p2["temp_id"])
+                    warnings.append(f"DEDUP: {p2['temp_id']} merged into {p1['temp_id']} (reason: 完全重复)")
+                else:
+                    p2["source_ids"] = list(set(p2.get("source_ids", []) + p1.get("source_ids", [])))
+                    to_remove.add(p1["temp_id"])
+                    warnings.append(f"DEDUP: {p1['temp_id']} merged into {p2['temp_id']} (reason: 完全重复)")
+                continue
 
-                for rule in rule_set.get("rules", []):
-                    import copy
-                    expanded = copy.deepcopy(proc)
-                    expanded["temp_id"] = f"{proc['temp_id']}-{rule.get('context', '')}"
-                    resolved_phase = rule.get("resolved_phase", 0)
-                    expanded["_S2_fields"]["phase"] = resolved_phase
-                    expanded["_S2_fields"]["phase_name"] = (
-                        phase_table["phase_names"][resolved_phase]
-                        if resolved_phase < len(phase_table["phase_names"])
-                        else f"P{resolved_phase}"
-                    )
-                    expanded["_S2_fields"]["phase_basis"] = f"contextual.{rule.get('context', '')}"
-                    expanded["_S2_fields"]["context"] = rule.get("context")
+            if not same_entity and similar_action:
+                has_co = any(
+                    co.get('enabler_entity') == p1['entity'] and co.get('dependent_entity') == p2['entity']
+                    or co.get('enabler_entity') == p2['entity'] and co.get('dependent_entity') == p1['entity']
+                    for co in co_map.get(p1['entity'], []) + co_map.get(p2['entity'], [])
+                )
+                if has_co:
+                    primary_proc = p1 if p1["obligation_type"] <= p2["obligation_type"] else p2
+                    secondary_proc = p2 if primary_proc is p1 else p1
+                    for step in secondary_proc.get("steps", []):
+                        if step.get("aaa") == "V" and step not in primary_proc["steps"]:
+                            primary_proc["steps"].append(step)
+                    primary_proc["source_ids"] = list(set(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
+                    to_remove.add(secondary_proc["temp_id"])
+                    warnings.append(f"DEDUP: {secondary_proc['temp_id']} merged into {primary_proc['temp_id']} (reason: 因果合并)")
+                    continue
 
-                    # Add context annotation to first step
-                    if expanded["steps"]:
-                        expanded["steps"][0]["input"] = f"[{rule.get('context', '')}] {expanded['steps'][0]['input']}"
-
-                    procs_to_add.append(expanded)
-
-    # Remove originals, add expanded
-    if procs_to_remove:
-        procedures = [p for p in procedures if p["temp_id"] not in procs_to_remove]
-        procedures.extend(procs_to_add)
-
-    return procedures
+    return [p for p in procedures if p["temp_id"] not in to_remove]
 
 
 # ---------------------------------------------------------------------------
@@ -1374,14 +1571,14 @@ def s1_generation_node(state: AgentState) -> dict:
     # BR classification and embedding
     br_classifications = _classify_business_rules(state, indices)
 
-    # Type7 standalone
-    procedures.extend(_generate_type7_standalone(br_classifications, state))
+    # Type7 standalone — pass depth_cache
+    procedures.extend(_generate_type7_standalone(br_classifications, state, depth_cache))
 
     # BR embedding (non-standalone → V steps in host procedures)
     procedures = _embed_brs(procedures, br_classifications, state)
 
-    # Apply contextual phase rules (expand procedures with contextual phase)
-    procedures = _apply_contextual_phase_rules(procedures, state)
+    # S1.10 Dedup (I24)
+    procedures = _dedup_procedures(procedures, cos, warnings)
 
     # Validate all procedures
     from models.schema import validate_procedures
@@ -1398,9 +1595,9 @@ def s1_generation_node(state: AgentState) -> dict:
     standalone_count = len([bc for bc in br_classifications if bc["category"] == "standalone"])
 
     # BR embedded count
-    br_embedded_count = sum(len(p.get("br_embedded", [])) for p in procedures)
+    embedded_brs_count = sum(len(p.get("embedded_brs", [])) for p in procedures)
 
-    warnings.append(f"S1 summary: standalone_type7={standalone_count}, br_embedded={br_embedded_count}, type5_filtered={len(type5_filtered)}")
+    warnings.append(f"S1 summary: standalone_type7={standalone_count}, embedded_brs={embedded_brs_count}, type5_filtered={len(type5_filtered)}")
 
     return {
         "procedures": [p.model_dump(by_alias=True) if hasattr(p, 'model_dump') else p for p in valid_procs],

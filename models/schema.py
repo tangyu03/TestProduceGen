@@ -110,7 +110,7 @@ class Procedure(BaseModel):
     gen_seq: int
     post_state: str
     cascade_chain: Optional[str] = None
-    br_embedded: list = Field(default_factory=list)
+    embedded_brs: list = Field(default_factory=list, alias="embedded_brs")
 
     # Stage-attached fields (populated progressively)
     # Field names avoid leading underscores (Pydantic v2 restriction);

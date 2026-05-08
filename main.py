@@ -36,9 +36,9 @@ def run_p3_pipeline(
         sys.exit(1)
     
     # Compile the graph
-    print("\n[1/4] Compiling LangGraph pipeline...")
+    print("\n[1/5] Compiling LangGraph pipeline...")
     app = compile_p3_graph()
-    print("      ✓ Graph compiled: S0 → S1 → S2 → S3 → Done")
+    print("      ✓ Graph compiled: S0 → S1 → S2 → S3 → S4 → Done")
     
     # Initialize state
     initial_state: AgentState = {
@@ -76,7 +76,7 @@ def run_p3_pipeline(
     }
     
     # Run the pipeline
-    print("\n[2/4] Running pipeline...")
+    print("\n[2/5] Running pipeline...")
     start_time = time.time()
     
     result = app.invoke(initial_state)
@@ -90,7 +90,7 @@ def run_p3_pipeline(
     errors = result.get("errors", [])
     current_stage = result.get("current_stage", "unknown")
     
-    print(f"\n[3/4] Results Summary:")
+    print(f"\n[3/5] Results Summary:")
     print(f"      Final stage: {current_stage}")
     print(f"      Total procedures: {len(procedures)}")
     print(f"      Warnings: {len(warnings)}")
@@ -123,8 +123,13 @@ def run_p3_pipeline(
     for phase_name, count in sorted(phase_counts.items()):
         print(f"        {phase_name}: {count}")
     
+    # Multi-instance summary
+    multi_count = sum(1 for p in procedures if p.get("_S4_fields", {}).get("multi_instance"))
+    total_instances = sum(p.get("_S4_fields", {}).get("multi_count", 1) for p in procedures)
+    print(f"\n[4/5] Multi-instance: {multi_count} procedures with multiple instances, {total_instances} total instances")
+
     # Save output
-    print(f"\n[4/4] Saving output to: {output_path}")
+    print(f"\n[5/5] Saving output to: {output_path}")
     
     output = {
         "engine_state": {
@@ -143,6 +148,7 @@ def run_p3_pipeline(
         "procedures": procedures,
         "br_classifications": result.get("br_classifications", []),
         "type5_filtered": result.get("type5_filtered", []),
+        "entity_instance_counts": result.get("entity_instance_counts", {}),
         "warnings": warnings,
         "errors": errors,
         "statistics": {
