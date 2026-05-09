@@ -124,8 +124,12 @@ def detect_cycles_in_dependencies(procedures: list[dict]) -> list[list[str]]:
         for dep_id in proc.get("_S3_fields", {}).get("weak_dependencies", []):
             G.add_edge(dep_id, proc["temp_id"])
 
-    cycles = list(nx.simple_cycles(G))
-    return cycles
+    try:
+        cycle_edges = nx.find_cycle(G)
+        cycle_nodes = [edge[0] for edge in cycle_edges]
+        return [cycle_nodes]
+    except nx.NetworkXNoCycle:
+        return []
 
 
 def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:

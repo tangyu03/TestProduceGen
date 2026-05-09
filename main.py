@@ -5,6 +5,7 @@ Usage:
     python main.py <coverage_model_path> [output_path]
 """
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -75,11 +76,29 @@ def run_p3_pipeline(
         "errors": [],
     }
     
-    # Run the pipeline
+    # Run the pipeline with streaming progress
     print("\n[2/5] Running pipeline...")
     start_time = time.time()
     
-    result = app.invoke(initial_state)
+    stage_labels = {
+        "s0": "S0 - Topology Discovery",
+        "s1": "S1 - Procedure Generation",
+        "s2": "S2 - Sorting & Ordering",
+        "s3": "S3 - Dependency Binding",
+        "s4": "S4 - Multi-instance Expansion",
+    }
+    result = dict(initial_state)
+    
+    for event in app.stream(initial_state):
+        for node_name, node_output in event.items():
+            result.update(node_output)
+            stage = node_output.get("current_stage", node_name)
+            label = stage_labels.get(stage, f"Stage {stage}")
+            procs = result.get("procedures") or []
+            n_procs = len(procs)
+            n_warn = len(result.get("warnings", []))
+            n_err = len(result.get("errors", []))
+            print(f"      ✓ {label} ({n_procs} procedures, {n_warn} warnings, {n_err} errors)")
     
     elapsed = time.time() - start_time
     print(f"      ✓ Pipeline completed in {elapsed:.2f}s")
@@ -181,56 +200,101 @@ def run_p3_pipeline(
     return output
 
 
+def _safe_join(value):
+    """Safely join a list of strings, handling None and non-string items."""
+    if not value:
+        return ""
+    if isinstance(value, list):
+        return ", ".join(str(v) for v in value)
+    return str(value)
+
+
 def _generate_markdown(procedures: list[dict], md_path: str):
-    """Generate human-readable markdown from procedures."""
+    """Generate human-readable markdown from procedures.
+
+    Collapses multi-instance copies (PROC-001.1, PROC-001.2, ...) into
+    a single entry per base procedure with an instance-count badge.
+    """
     lines = ["# 测试规程\n"]
-    
+
+    # Group multi-instance copies by base ID (strip .N suffix)
+    groups: dict[str, list[dict]] = {}
+    group_order: list[str] = []
     for proc in procedures:
-        s2 = proc.get("_S2_fields", {})
-        s3 = proc.get("_S3_fields", {})
-        s4 = proc.get("_S4_fields", {})
-        
-        lines.append(f"### {proc['temp_id']}：{proc.get('post_state', '')}")
-        lines.append(f"**业务定位**：{s2.get('phase_name', '')} ｜ "
-                     f"{s2.get('type_label', '')} ｜ "
-                     f"溯源: `{', '.join(proc.get('source_ids', []))}`")
-        
+        tid = proc.get("temp_id", "?")
+        base = re.sub(r"\.\d+$", "", tid)
+        if base not in groups:
+            groups[base] = []
+            group_order.append(base)
+        groups[base].append(proc)
+
+    for base in group_order:
+        procs = groups[base]
+        proc = procs[0]
+        instance_count = len(procs)
+        has_multi = instance_count > 1
+
+        s2 = proc.get("_S2_fields") or {}
+        s3 = proc.get("_S3_fields") or {}
+        s4 = proc.get("_S4_fields") or {}
+
+        temp_id = base
+        if has_multi:
+            temp_id = f"{base} (×{instance_count})"
+        post_state = proc.get("post_state", "")
+        lines.append(f"### {temp_id}：{post_state}")
+
+        phase_name = s2.get("phase_name", "")
+        type_label = s2.get("type_label", "")
+        source_ids = _safe_join(proc.get("source_ids"))
+        lines.append(f"**业务定位**：{phase_name} ｜ {type_label} ｜ 溯源: `{source_ids}`")
+
         if s2.get("phase_basis"):
-            lines.append(f"**阶段依据**：{s2['phase_basis']}")
+            lines.append(f"**阶段依据**：{s2.get('phase_basis')}")
         if s2.get("context"):
-            lines.append(f"**场景**：{s2['context']}")
+            lines.append(f"**场景**：{s2.get('context')}")
         if proc.get("br_embedded"):
-            lines.append(f"**BR嵌入**：{', '.join(proc['br_embedded'])}")
-        
+            lines.append(f"**BR嵌入**：{_safe_join(proc.get('br_embedded'))}")
+
         # Steps table
-        lines.append("\n| # | AAA | 位置 | 输入 | 预期 |")
-        lines.append("|---|-----|------|------|------|")
-        for i, step in enumerate(proc.get("steps", []), 1):
-            lines.append(f"| {i} | {step['aaa']} | {step['location']} | "
-                        f"{step['input']} | {step['expected']} |")
-        
+        steps = proc.get("steps")
+        if steps:
+            lines.append("\n| # | AAA | 位置 | 输入 | 预期 |")
+            lines.append("|---|-----|------|------|------|")
+            for i, step in enumerate(steps, 1):
+                aaa = step.get("aaa", "")
+                loc = step.get("location", "")
+                inp = step.get("input", "")
+                exp = step.get("expected", "")
+                lines.append(f"| {i} | {aaa} | {loc} | {inp} | {exp} |")
+
         # Post state
         if proc.get("post_state"):
-            lines.append(f"\n**后置状态**：{proc['post_state']}")
-        
+            lines.append(f"\n**后置状态**：{proc.get('post_state')}")
+
         # Cascade chain
-        if proc.get("cascade_chain"):
-            lines.append(f"**级联链**：{proc['cascade_chain']}")
-        
+        cascade = proc.get("cascade_chain")
+        if cascade:
+            lines.append(f"**级联链**：{cascade}")
+
         # Dependencies
-        if s3.get("dependencies"):
-            lines.append(f"**依赖**：{', '.join(s3['dependencies'])}")
-        if s3.get("weak_dependencies"):
-            lines.append(f"**弱依赖**：{', '.join(s3['weak_dependencies'])}")
-        
+        deps = s3.get("dependencies")
+        if deps:
+            lines.append(f"**依赖**：{_safe_join(deps)}")
+        weak_deps = s3.get("weak_dependencies")
+        if weak_deps:
+            lines.append(f"**弱依赖**：{_safe_join(weak_deps)}")
+
         # Multi instance
         if s4.get("multi_instance"):
-            lines.append(f"**多实例**：{s4['multi_count']} × {s4['multi_reason']}")
-        
+            mc = s4.get("multi_count", "?")
+            mr = s4.get("multi_reason", "")
+            lines.append(f"**多实例**：{mc} × {mr}")
+
         lines.append("")
-    
+
     with open(md_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+        f.write("\n".join(lines))
 
 
 if __name__ == "__main__":

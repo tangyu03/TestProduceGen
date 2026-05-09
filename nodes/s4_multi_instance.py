@@ -11,11 +11,11 @@ from models.state import AgentState
 def s4_multi_instance_node(state: AgentState) -> dict:
     """S4: Multi-instance determination.
 
-    Instance count rules:
-    - Primary entity + multi-state: min(dim_count+1, 5)
-    - Dependent entity: parent_instance × min(dim_count+1, 5)
-    - Virtual entity: parent(VE.parent_entity instances) × min(VE.dim_count+1, 5)
-    - Others: max(1, min(dim_count+1, 5))
+    Each entity's instance count is based solely on its own dimension count:
+    count = max(1, min(dim_count + 1, 3))
+
+    0 dimensions → 1 instance, 1 dim → 2 instances, 2+ dims → 3 instances.
+    No parent-chain multiplication.
 
     Embedded BRs inherit host multi_count.
     Independent Type7 uses BR.entities[0] entity count.
@@ -52,23 +52,10 @@ def s4_multi_instance_node(state: AgentState) -> dict:
             return entity_instances[entity]
 
         dc = entity_dim_count.get(entity, 0)
-        base = min(dc + 1, 5)
+        if entity in ves:
+            dc = ve_original_dims.get(entity, dc)
 
-        if entity == primary:
-            count = base
-        elif entity in ves:
-            ve = ves[entity]
-            parent = ve.get("parent_entity", "")
-            parent_count = _calc_instances(parent) if parent else 1
-            ve_dc = ve_original_dims.get(entity, dc)
-            count = parent_count * min(ve_dc + 1, 5)
-        elif entity in dep_entities:
-            parent = entity_parent.get(entity, primary)
-            parent_count = _calc_instances(parent) if parent else 1
-            count = parent_count * base
-        else:
-            count = max(1, base)
-
+        count = max(1, min(dc + 1, 3))
         entity_instances[entity] = count
         return count
 
@@ -106,15 +93,7 @@ def s4_multi_instance_node(state: AgentState) -> dict:
         s4["multi_instance"] = count > 1
         s4["multi_reason"] = f"entity={entity} dim_count={entity_dim_count.get(entity, 0)} instances={count}"
 
-        if count > 1:
-            for i in range(count):
-                instance_proc = dict(proc)
-                instance_proc["_S4_fields"] = dict(s4)
-                instance_proc["temp_id"] = f"{proc['temp_id']}.{i + 1}"
-                expanded.append(instance_proc)
-            warnings.append(f"S4: {proc['temp_id']} expanded to {count} instances")
-        else:
-            expanded.append(proc)
+        expanded.append(proc)
 
     warnings.append(f"S4: {len(expanded)} procedures after multi-instance expansion")
 
