@@ -98,44 +98,6 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
 
     return base
 
-    has_human_kw = any(kw in action for kw in HUMAN_DECISION_KEYWORDS)
-    has_auto_kw = any(kw in action for kw in AUTO_KEYWORDS)
-
-    if has_human_kw:
-        if state:
-            ep = state.get('entity_parent', {})
-            parent = ep.get(entity)
-            if parent:
-                ctx = state.get('coverage_model', {}).get('_context', {})
-                roles = ctx.get('roles', {})
-                parent_role = roles.get(parent)
-                if parent_role and parent_role != 'system':
-                    return ROLE_MAP.get(parent_role, parent_role)
-
-            upstream_map = state.get('transition_upstream_map', {})
-            tos = state.get('coverage_model', {}).get('transition_obligations', [])
-            to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
-            for tid, ups in upstream_map.items():
-                t = to_by_tid.get(tid)
-                if t and t.get('entity') == entity:
-                    for uid in ups:
-                        ut = to_by_tid.get(uid)
-                        if ut and ut.get('entity') != entity:
-                            ctx = state.get('coverage_model', {}).get('_context', {})
-                            roles = ctx.get('roles', {})
-                            r = roles.get(ut.get('entity'))
-                            if r and r != 'system':
-                                return ROLE_MAP.get(r, r)
-
-        return '[待确认角色]'
-
-    if has_auto_kw or role_id == 'system':
-        return '系统'
-
-    if not action or action == '创建':
-        return '系统'
-
-    return base
 
 
 def _make_step(aaa: str, location: str, input: str, expected: str) -> dict:
@@ -143,7 +105,7 @@ def _make_step(aaa: str, location: str, input: str, expected: str) -> dict:
     return {"aaa": aaa, "location": location, "input": input, "expected": expected}
 
 
-def _is_type5_retained(eo: dict, state: AgentState) -> bool:
+def _is_type5_retained(eo: dict, state: AgentState, warnings: list[str] | None = None) -> bool:
     """Type5 retention check — V2 logic.
 
     An EO of type crud_operation is retained if ANY of these hold:
@@ -176,6 +138,8 @@ def _is_type5_retained(eo: dict, state: AgentState) -> bool:
         trigger = co.get("trigger")
         if trigger and op_name in trigger:
             return True
+    if warnings is not None:
+        warnings.append(f"Type5 filtered: {eo['id']} ({eo['entity']}.{eo['operation_name']}) - does not meet retention criteria")
     return False
 
 
@@ -1239,9 +1203,7 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Type7 — Standalone BR procedures (only for standalone-classified BRs)
 # ---------------------------------------------------------------------------
-
-def _generate_type7_standalone(br_classifications: list[dict], state: AgentState,
-                               depth_cache: dict | None = None) -> list[dict]:
+def _generate_type7_standalone(br_classifications: list[dict], state: AgentState, depth_cache: dict) -> list[dict]:
     """Generate standalone Type7 procedures from standalone BRs only."""
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
@@ -1301,8 +1263,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         for to in tos:
             if br_entities and to["entity"] in br_entities:
                 if to["entity"] in br_entities:
-                    t_depth = depth_cache.get(to.get("transition_id", ""), 0) if depth_cache else 0
-                    chain_depth = max(chain_depth, t_depth)
+                    chain_depth = max(chain_depth, depth_cache.get(to.get("transition_id", ""), 0))
 
         proc = {
             "temp_id": f"PROC-T7-{_next_gen_seq()}",
@@ -1615,7 +1576,6 @@ def s1_generation_node(state: AgentState) -> dict:
 
     # Type7 standalone — pass depth_cache
     procedures.extend(_generate_type7_standalone(br_classifications, state, depth_cache))
-
     # BR embedding (non-standalone → V steps in host procedures)
     procedures = _embed_brs(procedures, br_classifications, state)
 
@@ -1624,7 +1584,8 @@ def s1_generation_node(state: AgentState) -> dict:
 
     # Validate all procedures
     from models.schema import validate_procedures
-    valid_procs, val_errors = validate_procedures(procedures)
+    from p3_agent_engine.models.schema import validate_procedures
+    _, val_errors = validate_procedures(procedures)
     errors.extend(val_errors)
 
     warnings.append(f"S1 generated {len(valid_procs)} procedures ({len(procedures) - len(valid_procs)} validation failures)")
@@ -1642,7 +1603,7 @@ def s1_generation_node(state: AgentState) -> dict:
     warnings.append(f"S1 summary: standalone_type7={standalone_count}, embedded_brs={embedded_brs_count}, type5_filtered={len(type5_filtered)}")
 
     return {
-        "procedures": [p.model_dump(by_alias=True) if hasattr(p, 'model_dump') else p for p in valid_procs],
+        "procedures": procedures,
         "br_classifications": br_classifications,
         "type5_filtered": type5_filtered,
         "gen_seq_counter": _gen_seq_counter,

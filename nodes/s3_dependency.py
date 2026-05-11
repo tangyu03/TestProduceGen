@@ -37,13 +37,15 @@ def s3_dependency_node(state: AgentState) -> dict:
             if to and to.get("transition_id"):
                 trans_id_to_proc_ids.setdefault(to["transition_id"], []).append(proc["temp_id"])
 
-    enabler_state_to_procs: dict[tuple, list] = {}
+    enabler_state_to_procs = {}  # (entity, dimension, state_in_post) → [proc_id]
     for proc in procedures:
         post = proc.get("post_state", "")
         entity = proc["entity"]
+        dimension = proc.get("dimension") or ""
         if "→" in post:
             state_part = post.split("→")[-1].split("(")[0].strip()
-            enabler_state_to_procs.setdefault((entity, state_part), []).append(proc["temp_id"])
+            key = (entity, dimension, state_part)
+            enabler_state_to_procs.setdefault(key, []).append(proc["temp_id"])
 
     entity_dim_procs: dict[str, list] = {}
     for proc in procedures:
@@ -81,12 +83,14 @@ def s3_dependency_node(state: AgentState) -> dict:
         for sid in proc.get("source_ids", []):
             co = co_by_id.get(sid)
             if co:
-                ee = co.get("enabler_entity")
-                es = co.get("enabler_state")
-                if ee and es:
-                    for mid in enabler_state_to_procs.get((ee, es), []):
-                        if mid != proc["temp_id"]:
-                            deps.add(mid)
+                enabler_entity = co.get("enabler_entity")
+                enabler_state = co.get("enabler_state")
+                enabler_dimension = co.get("enabler_dimension", "")
+                if enabler_entity and enabler_state:
+                     key = (enabler_entity, enabler_dimension, enabler_state)
+                     for match_id in enabler_state_to_procs.get(key, []):
+                        if match_id != proc["temp_id"]:
+                             deps.add(match_id)
 
         # 4. VE.co_ids dependency binding
         entity = proc["entity"]

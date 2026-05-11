@@ -119,7 +119,7 @@ def run_p3_pipeline(
     type_counts = {}
     type_labels = {
         1: "Type1(Transition)", 3: "Type3(Attribute)", 
-        4: "Type4a(Constraint)", 5: "Type4b(Lifecycle)",
+        4: "Type4(Cross-Entity)",  # Type4a和Type4b都是4
         6: "Type5(CRUD)", 7: "Type6(Invalid)", 8: "Type7(BR)"
     }
     for proc in procedures:
