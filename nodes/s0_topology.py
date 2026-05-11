@@ -665,10 +665,15 @@ def _decompose_virtual_entities(
     for entity, parents in entity_active_parents.items():
         if len(parents) < 2:
             continue
-        entity_tids = [t.get('transition_id') for t in tos if t.get('entity') == entity and t.get('transition_id')]
+        # V2约束：parent实体必须互不相同(去重)
+        unique_parent_entities = set(p[0] for p in parents)
+        if len(unique_parent_entities) < 2:
+            continue
+        # V2约束：entity自身必须有≥2个transition
+        entity_tids = [t.get('transition_id') for t in tos 
+            if t.get('entity') == entity and t.get('transition_id')]
         if len(entity_tids) < 2:
             continue
-
         for i, (parent, rel) in enumerate(parents):
             ve_name = f"{entity}{chr(65 + i)}"
             virtual_entities[ve_name] = {
