@@ -1584,8 +1584,7 @@ def s1_generation_node(state: AgentState) -> dict:
 
     # Validate all procedures
     from models.schema import validate_procedures
-    from p3_agent_engine.models.schema import validate_procedures
-    _, val_errors = validate_procedures(procedures)
+    valid_procs, val_errors = validate_procedures(procedures)
     errors.extend(val_errors)
 
     warnings.append(f"S1 generated {len(valid_procs)} procedures ({len(procedures) - len(valid_procs)} validation failures)")

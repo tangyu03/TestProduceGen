@@ -39,7 +39,7 @@ def run_p3_pipeline(
     # Compile the graph
     print("\n[1/5] Compiling LangGraph pipeline...")
     app = compile_p3_graph()
-    print("      ✓ Graph compiled: S0 → S1 → S2 → S3 → S4 → Done")
+    print("      [OK] Graph compiled: S0 -> S1 -> S2 -> S3 -> S4 -> Done")
     
     # Initialize state
     initial_state: AgentState = {
@@ -98,10 +98,10 @@ def run_p3_pipeline(
             n_procs = len(procs)
             n_warn = len(result.get("warnings", []))
             n_err = len(result.get("errors", []))
-            print(f"      ✓ {label} ({n_procs} procedures, {n_warn} warnings, {n_err} errors)")
+            print(f"      [OK] {label} ({n_procs} procedures, {n_warn} warnings, {n_err} errors)")
     
     elapsed = time.time() - start_time
-    print(f"      ✓ Pipeline completed in {elapsed:.2f}s")
+    print(f"      [OK] Pipeline completed in {elapsed:.2f}s")
     
     # Process results
     procedures = result.get("procedures") or []
@@ -181,15 +181,15 @@ def run_p3_pipeline(
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
-    print(f"      ✓ Saved {len(json.dumps(output, ensure_ascii=False))} bytes")
+    print(f"      [OK] Saved {len(json.dumps(output, ensure_ascii=False))} bytes")
     
     # Also generate markdown test procedures
     md_path = output_path.replace(".json", ".md")
     _generate_markdown(procedures, md_path)
-    print(f"      ✓ Markdown saved to: {md_path}")
+    print(f"      [OK] Markdown saved to: {md_path}")
     
     if errors:
-        print(f"\n⚠ {len(errors)} errors encountered:")
+        print(f"\n[WARN] {len(errors)} errors encountered:")
         for err in errors[:10]:
             print(f"  - {err}")
     
