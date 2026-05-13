@@ -266,6 +266,7 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict]) -> dict:
     state_to_phase = {primary_dimension: phase_map}
 
     return {
+        'primary_entity': primary,
         'primary_dimension': primary_dimension,
         'state_to_phase': state_to_phase,
         'phase_names': phase_names,
@@ -274,22 +275,64 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict]) -> dict:
 
 
 def _classify_state_types(tos: list[dict], primary: str) -> dict[str, dict[str, dict[str, str]]]:
-    """S0.3 step 5: Classify states as driving/side_effect."""
+    """S0.3 step 5: Classify states as driving/side_effect.
+
+    A state is side_effect if ALL transitions reaching it are rollback/rejection
+    paths.  If ANY driving transition reaches the state, it is driving.
+
+    Detection sources (in priority order):
+    1. risk_traits / traits field containing 'rollback'
+    2. desc / description / action field containing side-effect keywords
+    """
     state_type_map: dict[str, dict[str, dict[str, str]]] = defaultdict(lambda: defaultdict(dict))
     side_effect_keywords = {'退', '撤销', '退款', '驳回'}
+
+    # Two-pass: first collect which states have at least one driving inbound
+    driving_states: dict[tuple[str, str, str], bool] = {}  # (entity, dim, target) → has_driving
+
     for to in tos:
         entity = to.get('entity', '')
         dim = to.get('dimension', '')
         target = to.get('to', '')
         if not target:
             continue
-        desc = to.get('desc', '') or to.get('description', '')
-        risk_traits = to.get('risk_traits', []) or []
-        is_se = (any(kw in desc for kw in side_effect_keywords) or 'rollback' in risk_traits)
+
+        # Check multiple fields for side-effect signals
+        desc = to.get('desc', '') or to.get('description', '') or ''
+        action = to.get('action', '') or ''
+        risk_traits = to.get('risk_traits', []) or to.get('traits', []) or []
+
+        is_se = (
+            any(kw in desc for kw in side_effect_keywords)
+            or any(kw in action for kw in side_effect_keywords)
+            or 'rollback' in risk_traits
+        )
+
         if entity == primary:
             state_type_map[entity][dim][target] = 'driving'
+            continue
+
+        key = (entity, dim, target)
+        if not is_se:
+            # This transition reaches the state as driving
+            driving_states[key] = True
+
+    # Second pass: classify each (entity, dim, target)
+    for to in tos:
+        entity = to.get('entity', '')
+        dim = to.get('dimension', '')
+        target = to.get('to', '')
+        if not target or entity == primary:
+            continue
+
+        key = (entity, dim, target)
+        # If ANY transition reaches this state as driving → driving
+        # Only side_effect if ALL inbound transitions are rollback/rejection
+        if driving_states.get(key):
+            state_type_map[entity][dim][target] = 'driving'
         else:
-            state_type_map[entity][dim][target] = 'side_effect' if is_se else 'driving'
+            state_type_map[entity][dim][target] = 'side_effect'
+
     return dict(state_type_map)
 
 
@@ -352,10 +395,14 @@ def _derive_dep_state_phase_map(
                 dim_tos[dim].append(to)
 
         for dim, dim_transitions in dim_tos.items():
-            # Build state graph for this dimension
+            # Build state graph for this dimension, keyed by (from_state, to_state)
+            # so we can look up whether a specific edge is a rollback.
             state_graph: dict[str, list[str]] = defaultdict(list)
+            edge_is_se: dict[tuple[str, str], bool] = {}  # (from, to) → is_side_effect
             initial_states = set()
             all_states = set()
+
+            se_keywords = {'退', '撤销', '退款', '驳回'}
 
             for to in dim_transitions:
                 f = to.get('from')
@@ -365,6 +412,16 @@ def _derive_dep_state_phase_map(
                 if f:
                     all_states.add(f)
                     state_graph[f].append(t)
+                    # Classify THIS TRANSITION (not the target state) as side_effect
+                    desc = to.get('desc', '') or to.get('description', '') or ''
+                    action = to.get('action', '') or ''
+                    traits = to.get('risk_traits', []) or to.get('traits', []) or []
+                    is_se = (
+                        any(kw in desc for kw in se_keywords)
+                        or any(kw in action for kw in se_keywords)
+                        or 'rollback' in traits
+                    )
+                    edge_is_se[(f, t)] = is_se
                 else:
                     initial_states.add(t)
                     all_states.add(t)
@@ -372,36 +429,47 @@ def _derive_dep_state_phase_map(
             # Determine entry phase for initial states via upstream anchoring
             entry_phase = _compute_entry_phase(entity, anchor, dim, tos, phase_table, dep_map, transition_upstream_map, cos=cos)
 
-            # Use longest-path DAG for this dimension
-            state_phase: dict[str, int] = {}
+            # Use Bellman-Ford iterative propagation (handles cycles naturally).
+            # Rollback/side_effect edges only assign phase to UNASSIGNED targets
+            # (at source's phase level) and NEVER increase an already-assigned
+            # target.  This prevents cycle inflation: a cycle like
+            # 待评价→评价中(driving)→待评价(rollback) has net increment > 0
+            # if rollback simply uses increment=0, because max() keeps pushing
+            # the driving side up.  By refusing to increase already-assigned
+            # states via rollback edges, the cycle converges.
+            UNASSIGNED = -1
+            state_phase: dict[str, int] = {s: UNASSIGNED for s in all_states}
             for s in initial_states:
                 state_phase[s] = entry_phase
 
-            # Topological sort with longest path
-            in_deg: dict[str, int] = defaultdict(int)
-            for f, succs in state_graph.items():
-                for s in succs:
-                    in_deg[s] = in_deg.get(s, 0) + 1
+            changed = True
+            max_iterations = len(all_states) * 2
+            iterations = 0
+            while changed and iterations < max_iterations:
+                changed = False
+                iterations += 1
+                for f_state, successors in state_graph.items():
+                    if state_phase[f_state] == UNASSIGNED:
+                        continue  # predecessor not yet reachable
+                    for nxt in successors:
+                        is_se = edge_is_se.get((f_state, nxt), False)
+                        if is_se:
+                            # Rollback/side-effect edge: only assign phase to
+                            # unvisited targets (at source's level).  Never
+                            # increase an already-assigned target's phase.
+                            if state_phase[nxt] == UNASSIGNED:
+                                state_phase[nxt] = state_phase[f_state]
+                                changed = True
+                        else:
+                            # Driving edge: forward propagation with +1
+                            new_phase = state_phase[f_state] + 1
+                            if new_phase > state_phase[nxt]:
+                                state_phase[nxt] = new_phase
+                                changed = True
 
-            queue = deque([s for s in all_states if in_deg.get(s, 0) == 0])
-            remaining_in = dict(in_deg)
-
-            while queue:
-                node = queue.popleft()
-                if node not in state_phase:
-                    state_phase[node] = entry_phase
-                for nxt in state_graph.get(node, []):
-                    is_se = False
-                    if entity in state_type_map and dim in state_type_map.get(entity, {}):
-                        is_se = state_type_map[entity][dim].get(nxt) == 'side_effect'
-                    increment = 0 if is_se else 1
-                    state_phase[nxt] = max(state_phase.get(nxt, entry_phase), state_phase[node] + increment)
-                    remaining_in[nxt] = remaining_in.get(nxt, 1) - 1
-                    if remaining_in.get(nxt, 0) <= 0:
-                        queue.append(nxt)
-
+            # Fill any remaining unreachable states with entry_phase
             for s in all_states:
-                if s not in state_phase:
+                if state_phase[s] == UNASSIGNED:
                     state_phase[s] = entry_phase
 
             dim_map[dim] = dict(state_phase)
