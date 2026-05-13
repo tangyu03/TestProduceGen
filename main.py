@@ -39,7 +39,7 @@ def run_p3_pipeline(
     # Compile the graph
     print("\n[1/5] Compiling LangGraph pipeline...")
     app = compile_p3_graph()
-    print("      [OK] Graph compiled: S0 -> S1 -> S2 -> S3 -> S4 -> Done")
+    print("      ✓ Graph compiled: S0 → S1 → S2 → S3 → S4 → Done")
     
     # Initialize state
     initial_state: AgentState = {
@@ -98,10 +98,10 @@ def run_p3_pipeline(
             n_procs = len(procs)
             n_warn = len(result.get("warnings", []))
             n_err = len(result.get("errors", []))
-            print(f"      [OK] {label} ({n_procs} procedures, {n_warn} warnings, {n_err} errors)")
+            print(f"      ✓ {label} ({n_procs} procedures, {n_warn} warnings, {n_err} errors)")
     
     elapsed = time.time() - start_time
-    print(f"      [OK] Pipeline completed in {elapsed:.2f}s")
+    print(f"      ✓ Pipeline completed in {elapsed:.2f}s")
     
     # Process results
     procedures = result.get("procedures") or []
@@ -119,7 +119,7 @@ def run_p3_pipeline(
     type_counts = {}
     type_labels = {
         1: "Type1(Transition)", 3: "Type3(Attribute)", 
-        4: "Type4(Cross-Entity)",  # Type4a和Type4b都是4
+        4: "Type4a(Constraint)", 5: "Type4b(Lifecycle)",
         6: "Type5(CRUD)", 7: "Type6(Invalid)", 8: "Type7(BR)"
     }
     for proc in procedures:
@@ -146,32 +146,6 @@ def run_p3_pipeline(
     multi_count = sum(1 for p in procedures if p.get("_S4_fields", {}).get("multi_instance"))
     total_instances = sum(p.get("_S4_fields", {}).get("multi_count", 1) for p in procedures)
     print(f"\n[4/5] Multi-instance: {multi_count} procedures with multiple instances, {total_instances} total instances")
-
-    # Print engine state
-    print(f"\n────────────────────────── Engine State ──────────────────────────")
-    print(f"  primary_entity       : {result.get('primary_entity')}")
-    print(f"  dependent_entities   : {result.get('dependent_entities')}")
-    print(f"  entity_parent        :")
-    for child, parent in (result.get("entity_parent") or {}).items():
-        print(f"    {child} -> {parent}")
-    print(f"  topology_levels      :")
-    topo = result.get("topology_levels") or {}
-    for entity, level in sorted(topo.items(), key=lambda x: (x[1], x[0])):
-        depth = (result.get("dependency_depth") or {}).get(entity, "-")
-        print(f"    L{level}  {entity}  (depth={depth})")
-    print(f"  virtual_entities ({len(result.get('virtual_entities') or {})}):")
-    for ve_name, ve in (result.get("virtual_entities") or {}).items():
-        orig = ve.get("original_entity", "")
-        parent = ve.get("parent_entity", "")
-        context = ve.get("context", "")
-        phase = ve.get("resolved_phase", "-")
-        print(f"    {ve_name}  orig={orig}  parent={parent}  phase={phase}  context={context[:40]}...")
-    print(f"  transition_upstream  : {len(result.get('transition_upstream_map') or {})} entries")
-    phase_table = result.get("phase_table") or {}
-    print(f"  phase_table          : {phase_table.get('phase_count', 0)} phases, primary_dim={phase_table.get('primary_dimension', '-')}")
-    print(f"  dep_state_phase_map  : {(result.get('dep_state_phase_map') or {}) and 'present' or 'none'}")
-    print(f"  state_type_map       : {(result.get('state_type_map') or {}) and 'present' or 'none'}")
-    print(f"──────────────────────────────────────────────────────────────────")
 
     # Save output
     print(f"\n[5/5] Saving output to: {output_path}")
@@ -207,15 +181,15 @@ def run_p3_pipeline(
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
-    print(f"      [OK] Saved {len(json.dumps(output, ensure_ascii=False))} bytes")
+    print(f"      ✓ Saved {len(json.dumps(output, ensure_ascii=False))} bytes")
     
     # Also generate markdown test procedures
     md_path = output_path.replace(".json", ".md")
     _generate_markdown(procedures, md_path)
-    print(f"      [OK] Markdown saved to: {md_path}")
+    print(f"      ✓ Markdown saved to: {md_path}")
     
     if errors:
-        print(f"\n[WARN] {len(errors)} errors encountered:")
+        print(f"\n⚠ {len(errors)} errors encountered:")
         for err in errors[:10]:
             print(f"  - {err}")
     
@@ -236,23 +210,39 @@ def _safe_join(value):
 
 
 def _generate_markdown(procedures: list[dict], md_path: str):
-    """Generate V2-aligned markdown — grouped by base ID with instance count badge."""
+    """Generate human-readable markdown from procedures.
+
+    Collapses multi-instance copies (PROC-001.1, PROC-001.2, ...) into
+    a single entry per base procedure with an instance-count badge.
+    """
     lines = ["# 测试规程\n"]
 
+    # Group multi-instance copies by base ID (strip .N suffix)
+    groups: dict[str, list[dict]] = {}
+    group_order: list[str] = []
     for proc in procedures:
+        tid = proc.get("temp_id", "?")
+        base = re.sub(r"\.\d+$", "", tid)
+        if base not in groups:
+            groups[base] = []
+            group_order.append(base)
+        groups[base].append(proc)
+
+    for base in group_order:
+        procs = groups[base]
+        proc = procs[0]
+        instance_count = len(procs)
+        has_multi = instance_count > 1
+
         s2 = proc.get("_S2_fields") or {}
         s3 = proc.get("_S3_fields") or {}
         s4 = proc.get("_S4_fields") or {}
 
-        temp_id = proc.get("temp_id", "?")
+        temp_id = base
+        if has_multi:
+            temp_id = f"{base} (×{instance_count})"
         post_state = proc.get("post_state", "")
-        mc = s4.get("multi_count", 1)
-
-        # Title with instance badge
-        if mc > 1:
-            lines.append(f"### {temp_id} (×{mc})：{post_state}")
-        else:
-            lines.append(f"### {temp_id}：{post_state}")
+        lines.append(f"### {temp_id}：{post_state}")
 
         phase_name = s2.get("phase_name", "")
         type_label = s2.get("type_label", "")
@@ -263,6 +253,8 @@ def _generate_markdown(procedures: list[dict], md_path: str):
             lines.append(f"**阶段依据**：{s2.get('phase_basis')}")
         if s2.get("context"):
             lines.append(f"**场景**：{s2.get('context')}")
+        if proc.get("br_embedded"):
+            lines.append(f"**BR嵌入**：{_safe_join(proc.get('br_embedded'))}")
 
         # Steps table
         steps = proc.get("steps")
@@ -276,13 +268,16 @@ def _generate_markdown(procedures: list[dict], md_path: str):
                 exp = step.get("expected", "")
                 lines.append(f"| {i} | {aaa} | {loc} | {inp} | {exp} |")
 
+        # Post state
         if proc.get("post_state"):
             lines.append(f"\n**后置状态**：{proc.get('post_state')}")
 
+        # Cascade chain
         cascade = proc.get("cascade_chain")
         if cascade:
             lines.append(f"**级联链**：{cascade}")
 
+        # Dependencies
         deps = s3.get("dependencies")
         if deps:
             lines.append(f"**依赖**：{_safe_join(deps)}")
@@ -290,7 +285,7 @@ def _generate_markdown(procedures: list[dict], md_path: str):
         if weak_deps:
             lines.append(f"**弱依赖**：{_safe_join(weak_deps)}")
 
-        # Multi instance (V2 format: metadata only)
+        # Multi instance
         if s4.get("multi_instance"):
             mc = s4.get("multi_count", "?")
             mr = s4.get("multi_reason", "")
@@ -300,6 +295,7 @@ def _generate_markdown(procedures: list[dict], md_path: str):
 
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(lines))
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

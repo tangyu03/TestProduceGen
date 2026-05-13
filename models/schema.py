@@ -153,7 +153,7 @@ class Procedure(BaseModel):
 class S2Fields(BaseModel):
     """Sorting / ordering fields populated by S2."""
 
-    phase: Optional[int] = None
+    phase: int
     phase_name: str
     phase_basis: str
     topology_level: int

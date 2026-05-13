@@ -10,8 +10,9 @@ import re
 from typing import Any
 from models.state import AgentState
 from nodes.s0_topology import (
-    ENTITY_NAME_MAP, ROLE_MAP, TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS,
-    L0_L1_L5_ENTITIES, HUMAN_DECISION_KEYWORDS, AUTO_KEYWORDS,
+    _build_entity_name_map, _build_role_map, _build_managed_entities,
+    TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS,
+    HUMAN_DECISION_KEYWORDS, AUTO_KEYWORDS,
 )
 
 # ---------------------------------------------------------------------------
@@ -30,18 +31,22 @@ def _next_gen_seq() -> int:
 # Helper functions (mirroring V2 JS engine)
 # ---------------------------------------------------------------------------
 
-def _resolve_entity_names(name_str: str) -> list[str]:
-    """Convert Chinese entity names to IDs."""
+def _resolve_entity_names(name_str: str, entity_name_map: dict | None = None) -> list[str]:
+    """Convert Chinese entity names to IDs using dynamic map."""
     if not name_str:
         return []
-    return [ENTITY_NAME_MAP.get(n.strip(), n.strip())
+    if entity_name_map is None:
+        entity_name_map = {}
+    return [entity_name_map.get(n.strip(), n.strip())
             for n in re.split(r'[,，、\s]+', name_str) if n.strip()]
 
 
 def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
                    state: AgentState | None = None) -> str:
     """I21: Resolve role with human-decision-keyword fallback chain."""
-    base = ROLE_MAP.get(role_id, role_id) or '系统'
+    # Build role_map dynamically from coverage_model._context
+    role_map = _build_role_map(state.get('coverage_model', {})) if state else {}
+    base = role_map.get(role_id, role_id) or '系统'
 
     if role_id and role_id != 'system' and base != '系统':
         return base
@@ -72,7 +77,7 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
                 roles = ctx.get('roles', {})
                 parent_role = _role_lookup(roles, parent)
                 if parent_role and parent_role != 'system':
-                    return ROLE_MAP.get(parent_role, parent_role)
+                    return role_map.get(parent_role, parent_role)
 
             upstream_map = state.get('transition_upstream_map', {})
             tos = state.get('coverage_model', {}).get('transition_obligations', [])
@@ -86,7 +91,7 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
                             ctx = state.get('coverage_model', {}).get('_context', {})
                             r = _role_lookup(ctx.get('roles', {}), ut.get('entity', ''))
                             if r and r != 'system':
-                                return ROLE_MAP.get(r, r)
+                                return role_map.get(r, r)
 
         return '[待确认角色]'
 
@@ -99,13 +104,12 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
     return base
 
 
-
 def _make_step(aaa: str, location: str, input: str, expected: str) -> dict:
     """Build a single procedure step dict."""
     return {"aaa": aaa, "location": location, "input": input, "expected": expected}
 
 
-def _is_type5_retained(eo: dict, state: AgentState, warnings: list[str] | None = None) -> bool:
+def _is_type5_retained(eo: dict, state: AgentState) -> bool:
     """Type5 retention check — V2 logic.
 
     An EO of type crud_operation is retained if ANY of these hold:
@@ -130,7 +134,7 @@ def _is_type5_retained(eo: dict, state: AgentState, warnings: list[str] | None =
     if eo.get("coverage_priority") in ("medium", "high", "critical"):
         return True
     # Rule 3: L0/L1/L5 + delete
-    if entity in L0_L1_L5_ENTITIES and op_name == "删除":
+    if entity in _build_managed_entities(state.get('coverage_model', {})) and op_name == "删除":
         return True
     # Rule 4: CO trigger match
     cm = state["coverage_model"]
@@ -138,8 +142,6 @@ def _is_type5_retained(eo: dict, state: AgentState, warnings: list[str] | None =
         trigger = co.get("trigger")
         if trigger and op_name in trigger:
             return True
-    if warnings is not None:
-        warnings.append(f"Type5 filtered: {eo['id']} ({eo['entity']}.{eo['operation_name']}) - does not meet retention criteria")
     return False
 
 
@@ -1118,7 +1120,7 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
     for br in br_list:
         br_id = br.get("constraint_id", "")
         desc = br.get("description", "")
-        br_entities = _resolve_entity_names(br.get("entities", ""))
+        br_entities = _resolve_entity_names(br.get("entities", ""), indices.get("entity_name_map"))
 
         candidates = []
 
@@ -1203,7 +1205,9 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Type7 — Standalone BR procedures (only for standalone-classified BRs)
 # ---------------------------------------------------------------------------
-def _generate_type7_standalone(br_classifications: list[dict], state: AgentState, depth_cache: dict) -> list[dict]:
+
+def _generate_type7_standalone(br_classifications: list[dict], state: AgentState,
+                               depth_cache: dict | None = None) -> list[dict]:
     """Generate standalone Type7 procedures from standalone BRs only."""
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
@@ -1218,7 +1222,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
 
     for bc in standalone_brs:
         br = bc["br"]
-        br_entities = _resolve_entity_names(br.get("entities", ""))
+        br_entities = _resolve_entity_names(br.get("entities", ""), indices.get("entity_name_map"))
         primary_br_entity = br_entities[0] if br_entities else "E-PRJ"
 
         tl = topo.get(primary_br_entity, 0)
@@ -1263,7 +1267,8 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         for to in tos:
             if br_entities and to["entity"] in br_entities:
                 if to["entity"] in br_entities:
-                    chain_depth = max(chain_depth, depth_cache.get(to.get("transition_id", ""), 0))
+                    t_depth = depth_cache.get(to.get("transition_id", ""), 0) if depth_cache else 0
+                    chain_depth = max(chain_depth, t_depth)
 
         proc = {
             "temp_id": f"PROC-T7-{_next_gen_seq()}",
@@ -1358,7 +1363,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                               and host_eo_id in p.get("source_ids", [])]
 
         elif bc["category"] == "negative_test":
-            br_entities = _resolve_entity_names(br.get("entities", ""))
+            br_entities = _resolve_entity_names(br.get("entities", ""), indices.get("entity_name_map"))
             # Find existing Type6 proc for same entity
             host_procs = [p for p in procedures
                           if p["obligation_type"] == 7
@@ -1429,7 +1434,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
             entity = proc["entity"]
             dimension = proc.get("dimension") or ""
             loc = f"{entity}.{dimension}"
-            br_entities = _resolve_entity_names(br.get("entities", ""))
+            br_entities = _resolve_entity_names(br.get("entities", ""), indices.get("entity_name_map"))
             cross_refs = [e for e in br_entities if e != entity] if len(br_entities) > 1 else []
             if cross_refs:
                 loc += f" cross_refs={cross_refs}"
@@ -1549,6 +1554,9 @@ def s1_generation_node(state: AgentState) -> dict:
             if eo["entity"] == bd["entity"] and eo.get("attribute_name") == bd["dimension"]:
                 cfg_eo_to_bd[eo["id"]] = bd
 
+    # Build dynamic maps from coverage_model._context
+    entity_name_map = _build_entity_name_map(cm)
+
     indices = {
         "eo_by_type": eo_by_type,
         "to_by_entity": to_by_entity,
@@ -1556,6 +1564,7 @@ def s1_generation_node(state: AgentState) -> dict:
         "co_lifecycle": co_lifecycle,
         "ro_by_type": ro_by_type,
         "cfg_eo_to_bd": cfg_eo_to_bd,
+        "entity_name_map": entity_name_map,
     }
 
     # Calculate chain depths
@@ -1576,6 +1585,7 @@ def s1_generation_node(state: AgentState) -> dict:
 
     # Type7 standalone — pass depth_cache
     procedures.extend(_generate_type7_standalone(br_classifications, state, depth_cache))
+
     # BR embedding (non-standalone → V steps in host procedures)
     procedures = _embed_brs(procedures, br_classifications, state)
 
@@ -1602,7 +1612,7 @@ def s1_generation_node(state: AgentState) -> dict:
     warnings.append(f"S1 summary: standalone_type7={standalone_count}, embedded_brs={embedded_brs_count}, type5_filtered={len(type5_filtered)}")
 
     return {
-        "procedures": procedures,
+        "procedures": [p.model_dump(by_alias=True) if hasattr(p, 'model_dump') else p for p in valid_procs],
         "br_classifications": br_classifications,
         "type5_filtered": type5_filtered,
         "gen_seq_counter": _gen_seq_counter,
