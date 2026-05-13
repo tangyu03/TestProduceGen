@@ -1308,7 +1308,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
 # ---------------------------------------------------------------------------
 
 def _embed_brs(procedures: list[dict], br_classifications: list[dict],
-               state: AgentState) -> list[dict]:
+               state: AgentState, indices: dict) -> list[dict]:
     """Embed non-standalone BRs into host procedures as V steps.
 
     For each non-standalone BR:
@@ -1587,7 +1587,7 @@ def s1_generation_node(state: AgentState) -> dict:
     procedures.extend(_generate_type7_standalone(br_classifications, state, indices, depth_cache))
 
     # BR embedding (non-standalone → V steps in host procedures)
-    procedures = _embed_brs(procedures, br_classifications, state)
+    procedures = _embed_brs(procedures, br_classifications, state, indices)
 
     # S1.10 Dedup (I24)
     procedures = _dedup_procedures(procedures, cos, warnings)
