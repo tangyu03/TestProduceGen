@@ -178,6 +178,11 @@ def run_p3_pipeline(
         }
     }
     
+    print("\n      Engine State:")
+    print(f"        primary_entity: {output['engine_state']['primary_entity']}")
+    print(f"        topology_levels: {json.dumps(output['engine_state']['topology_levels'], ensure_ascii=False)}")
+    print(f"        phase_table: {'present' if output['engine_state']['phase_table'] else 'not computed'}")
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
