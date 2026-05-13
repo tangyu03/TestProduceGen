@@ -1207,7 +1207,7 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def _generate_type7_standalone(br_classifications: list[dict], state: AgentState,
-                               depth_cache: dict | None = None) -> list[dict]:
+                               indices: dict, depth_cache: dict | None = None) -> list[dict]:
     """Generate standalone Type7 procedures from standalone BRs only."""
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
@@ -1584,7 +1584,7 @@ def s1_generation_node(state: AgentState) -> dict:
     br_classifications = _classify_business_rules(state, indices)
 
     # Type7 standalone — pass depth_cache
-    procedures.extend(_generate_type7_standalone(br_classifications, state, depth_cache))
+    procedures.extend(_generate_type7_standalone(br_classifications, state, indices, depth_cache))
 
     # BR embedding (non-standalone → V steps in host procedures)
     procedures = _embed_brs(procedures, br_classifications, state)
