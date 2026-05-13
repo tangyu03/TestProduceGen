@@ -179,9 +179,18 @@ def run_p3_pipeline(
     }
     
     print("\n      Engine State:")
-    print(f"        primary_entity: {output['engine_state']['primary_entity']}")
-    print(f"        topology_levels: {json.dumps(output['engine_state']['topology_levels'], ensure_ascii=False)}")
-    print(f"        phase_table: {'present' if output['engine_state']['phase_table'] else 'not computed'}")
+    es = output['engine_state']
+    print(f"        primary_entity: {es['primary_entity']}")
+    print(f"        phase_table: {json.dumps(es['phase_table'], ensure_ascii=False)}")
+    print(f"        dep_state_phase_map: {json.dumps(es['dep_state_phase_map'], ensure_ascii=False)}")
+    print(f"        contextual_phase_rules: {json.dumps(es['contextual_phase_rules'], ensure_ascii=False)}")
+    print(f"        state_type_map: {json.dumps(es['state_type_map'], ensure_ascii=False)}")
+    print(f"        dependent_entities: {json.dumps(es['dependent_entities'], ensure_ascii=False)}")
+    print(f"        entity_parent: {json.dumps(es['entity_parent'], ensure_ascii=False)}")
+    print(f"        dependency_depth: {json.dumps(es['dependency_depth'], ensure_ascii=False)}")
+    print(f"        topology_levels: {json.dumps(es['topology_levels'], ensure_ascii=False)}")
+    print(f"        virtual_entities: {json.dumps(es['virtual_entities'], ensure_ascii=False)}")
+    print(f"        transition_upstream_map: {json.dumps(es['transition_upstream_map'], ensure_ascii=False)}")
 
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
