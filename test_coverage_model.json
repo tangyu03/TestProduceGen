@@ -1,0 +1,51 @@
+{
+  "coverage_model": {
+    "entity_obligations": [
+      {"id": "EO-CFG-001", "entity": "E-PRJ", "type": "attribute_config", "attribute_name": "项目类型", "operation_name": "配置项目类型"},
+      {"id": "EO-CRU-001", "entity": "E-PRJ", "type": "crud_operation", "operation_name": "删除", "coverage_priority": "high", "description": "删除项目"},
+      {"id": "EO-CRU-002", "entity": "E-REG", "type": "crud_operation", "operation_name": "审核", "description": "审核报名"}
+    ],
+    "transition_obligations": [
+      {"id": "TO-001", "transition_id": "T-PRJ-01", "entity": "E-PRJ", "dimension": "项目状态", "from": null, "to": "待开始", "action": "创建项目", "role": "PM", "risk_traits": [], "preconditions": [], "expected_results": ["项目已创建"]},
+      {"id": "TO-002", "transition_id": "T-PRJ-02", "entity": "E-PRJ", "dimension": "项目状态", "from": "待开始", "to": "进行中", "action": "启动项目", "role": "PM", "risk_traits": ["audit"], "preconditions": ["审批已通过"], "expected_results": ["项目进行中"]},
+      {"id": "TO-003", "transition_id": "T-PRJ-03", "entity": "E-PRJ", "dimension": "项目状态", "from": "进行中", "to": "已完成", "action": "完成项目", "role": "PM", "risk_traits": [], "preconditions": ["验收通过"], "expected_results": ["项目已完成"]},
+      {"id": "TO-004", "transition_id": "T-REG-01", "entity": "E-REG", "dimension": "报名状态", "from": null, "to": "待审核", "action": "提交报名", "role": "USER", "risk_traits": [], "preconditions": [], "expected_results": ["报名已提交"]},
+      {"id": "TO-005", "transition_id": "T-REG-02", "entity": "E-REG", "dimension": "报名状态", "from": "待审核", "to": "已通过", "action": "审核报名", "role": "PM", "risk_traits": ["audit"], "preconditions": [], "expected_results": ["报名已通过"]},
+      {"id": "TO-006", "transition_id": "T-REG-03", "entity": "E-LAB", "dimension": "能力状态", "from": null, "to": "待验证", "action": "创建能力记录", "role": "system", "risk_traits": [], "preconditions": [], "expected_results": ["能力记录已创建"]}
+    ],
+    "cross_entity_obligations": [
+      {"id": "CO-001", "causal_type": "constraint", "enabler_entity": "E-PRJ", "enabler_dimension": "项目状态", "enabler_state": "待开始", "enabler_transition_id": "T-PRJ-01", "enabler_role": "PM", "dependent_entity": "E-REG", "dependent_dimension": "报名状态", "dependent_condition": "待审核", "dependent_transition_id": "T-REG-01", "trigger": "项目创建后开放报名", "ref_to": null, "aggregation": null, "risk_traits": []},
+      {"id": "CO-002", "causal_type": "constraint", "enabler_entity": "E-PRJ", "enabler_dimension": "项目状态", "enabler_state": "进行中", "enabler_transition_id": "T-PRJ-02", "enabler_role": "PM", "dependent_entity": "E-LAB", "dependent_dimension": "能力状态", "dependent_condition": "待验证", "dependent_transition_id": "T-LAB-01", "trigger": "项目启动后可进行能力验证", "ref_to": null, "aggregation": null, "risk_traits": []},
+      {"id": "CO-003", "causal_type": "lifecycle", "enabler_entity": "E-PRJ", "enabler_dimension": "项目状态", "enabler_state": "待开始", "dependent_entity": "E-PRJ", "dependent_dimension": "项目状态", "dependent_condition": "待开始"}
+    ],
+    "constraint_obligations": [
+      {"id": "RO-001", "type": "invalid_transition", "entity": "E-PRJ", "from": "已完成", "to": "待开始", "reason": "已完成项目不可回退到待开始"},
+      {"id": "RO-002", "type": "business_rule", "constraint_id": "BR-01", "entities": "E-PRJ,E-REG", "description": "需先审批通过后才可启动项目", "enforcement": "mandatory", "category": "transition_constraint"},
+      {"id": "RO-003", "type": "business_rule", "constraint_id": "BR-02", "entities": "E-PRJ", "description": "待开始状态不可删除项目", "enforcement": "mandatory", "category": "crud_constraint"}
+    ],
+    "_context": {
+      "structural_relations": [
+        {"from": "E-PRJ", "to": "E-REG", "relation_type": "composition", "cardinality": "1:N", "confidence": "high", "desc": "项目包含报名"},
+        {"from": "E-PRJ", "to": "E-LAB", "relation_type": "composition", "cardinality": "1:N", "confidence": "high", "desc": "项目包含能力验证"},
+        {"from": "E-LAB", "to": "E-STD", "relation_type": "reference", "cardinality": "1:1", "confidence": "medium", "desc": "能力验证引用标准"}
+      ],
+      "transition_relations": [
+        {"from": "E-PRJ", "to": "E-REG", "trigger": "项目创建后开放报名", "trigger_source": "E-PRJ", "evidence_transitions": ["T-PRJ-01", "T-REG-01"], "confidence": "high", "desc": "项目创建触发报名开放"}
+      ],
+      "entity_details": [
+        {"id": "E-PRJ", "name": "项目", "type": "managed"},
+        {"id": "E-REG", "name": "报名", "type": "managed"},
+        {"id": "E-LAB", "name": "能力验证", "type": "managed"},
+        {"id": "E-STD", "name": "标准库", "type": "managed"}
+      ],
+      "roles": [
+        {"id": "PM", "name": "项目经理"},
+        {"id": "USER", "name": "用户"}
+      ],
+      "state_info": {},
+      "branch_dimensions": [
+        {"entity": "E-PRJ", "dimension": "项目类型", "branches": [{"value": "标准项目", "desc": "标准流程"}, {"value": "紧急项目", "desc": "紧急流程"}], "business_rules": ["BR-03"]}
+      ]
+    }
+  }
+}

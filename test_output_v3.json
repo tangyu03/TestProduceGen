@@ -1,0 +1,2977 @@
+{
+  "engine_state": {
+    "primary_entity": "E-PRJ",
+    "phase_table": {
+      "primary_entity": "E-PRJ",
+      "primary_dimension": "项目状态",
+      "state_to_phase": {
+        "项目状态": {
+          "待开始": 0,
+          "进行中": 1,
+          "已完成": 2
+        }
+      },
+      "phase_names": [
+        "P0",
+        "P1",
+        "P2"
+      ],
+      "phase_count": 3
+    },
+    "dep_state_phase_map": {
+      "E-REG": {
+        "报名状态": {
+          "已通过": 1,
+          "待审核": 0
+        }
+      },
+      "E-LAB": {
+        "能力状态": {
+          "待验证": 1
+        }
+      }
+    },
+    "contextual_phase_rules": {},
+    "state_type_map": {
+      "E-PRJ": {
+        "项目状态": {
+          "待开始": "driving",
+          "进行中": "driving",
+          "已完成": "driving"
+        }
+      },
+      "E-REG": {
+        "报名状态": {
+          "待审核": "driving",
+          "已通过": "driving"
+        }
+      },
+      "E-LAB": {
+        "能力状态": {
+          "待验证": "driving"
+        }
+      }
+    },
+    "dependent_entities": [
+      "E-REG",
+      "E-LAB"
+    ],
+    "entity_parent": {
+      "E-REG": "E-PRJ",
+      "E-LAB": "E-PRJ"
+    },
+    "dependency_depth": {
+      "E-PRJ": 0,
+      "E-REG": 1,
+      "E-LAB": 1,
+      "E-STD": 0
+    },
+    "topology_levels": {
+      "E-PRJ": 1,
+      "E-REG": 2,
+      "E-LAB": 2,
+      "E-STD": 0
+    },
+    "virtual_entities": {},
+    "transition_upstream_map": {
+      "T-PRJ-02": [
+        "T-PRJ-01"
+      ],
+      "T-PRJ-03": [
+        "T-PRJ-02"
+      ],
+      "T-REG-02": [
+        "T-REG-01"
+      ],
+      "T-REG-01": [
+        "T-PRJ-01"
+      ],
+      "T-LAB-01": [
+        "T-PRJ-02"
+      ],
+      "T-PRJ-01": [],
+      "T-REG-03": []
+    }
+  },
+  "procedures": [
+    {
+      "temp_id": "PROC-001.1",
+      "source_ids": [
+        "TO-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行创建项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待开始"
+        }
+      ],
+      "gen_seq": 1,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "初始状态下，项目经理创建项目，验证状态变更为待开始"
+    },
+    {
+      "temp_id": "PROC-001.2",
+      "source_ids": [
+        "TO-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行创建项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待开始"
+        }
+      ],
+      "gen_seq": 1,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          1
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "初始状态下，项目经理创建项目，验证状态变更为待开始"
+    },
+    {
+      "temp_id": "PROC-002.1",
+      "source_ids": [
+        "EO-CRU-001"
+      ],
+      "entity": "项目",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航至项目页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "执行删除",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目",
+          "input": "查看效果",
+          "expected": "验证: 删除项目"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.",
+          "input": "查看效果",
+          "expected": "[BR-02]验证: 待开始状态不可删除项目"
+        }
+      ],
+      "gen_seq": 15,
+      "post_state": "项目→(删除完成)",
+      "cascade_chain": null,
+      "embedded_brs": [
+        "BR-02"
+      ],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          5,
+          0,
+          1,
+          15
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至项目页面，执行删除操作，验证项目被删除且待开始状态项目不可删除"
+    },
+    {
+      "temp_id": "PROC-002.2",
+      "source_ids": [
+        "EO-CRU-001"
+      ],
+      "entity": "项目",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航至项目页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "执行删除",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目",
+          "input": "查看效果",
+          "expected": "验证: 删除项目"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.",
+          "input": "查看效果",
+          "expected": "[BR-02]验证: 待开始状态不可删除项目"
+        }
+      ],
+      "gen_seq": 15,
+      "post_state": "项目→(删除完成)",
+      "cascade_chain": null,
+      "embedded_brs": [
+        "BR-02"
+      ],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          5,
+          0,
+          1,
+          15
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至项目页面，执行删除操作，验证项目被删除且待开始状态项目不可删除"
+    },
+    {
+      "temp_id": "PROC-003.1",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型为\"标准项目\"",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "[BR-03]验证: 配置项目类型=标准项目的效果"
+        }
+      ],
+      "gen_seq": 9,
+      "post_state": "项目.项目类型→标准项目",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "fallback",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          2,
+          1,
+          0,
+          1,
+          9
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至配置入口，修改项目类型为标准项目，验证配置效果"
+    },
+    {
+      "temp_id": "PROC-003.2",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型为\"标准项目\"",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "[BR-03]验证: 配置项目类型=标准项目的效果"
+        }
+      ],
+      "gen_seq": 9,
+      "post_state": "项目.项目类型→标准项目",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "fallback",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          2,
+          1,
+          0,
+          1,
+          9
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至配置入口，修改项目类型为标准项目，验证配置效果"
+    },
+    {
+      "temp_id": "PROC-004.1",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型为\"紧急项目\"",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "[BR-03]验证: 配置项目类型=紧急项目的效果"
+        }
+      ],
+      "gen_seq": 10,
+      "post_state": "项目.项目类型→紧急项目",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "fallback",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          2,
+          1,
+          0,
+          1,
+          10
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至配置入口，修改项目类型为紧急项目，验证配置效果"
+    },
+    {
+      "temp_id": "PROC-004.2",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型为\"紧急项目\"",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "[BR-03]验证: 配置项目类型=紧急项目的效果"
+        }
+      ],
+      "gen_seq": 10,
+      "post_state": "项目.项目类型→紧急项目",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "fallback",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          2,
+          1,
+          0,
+          1,
+          10
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "导航至配置入口，修改项目类型为紧急项目，验证配置效果"
+    },
+    {
+      "temp_id": "PROC-005.1",
+      "source_ids": [
+        "TO-004"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "用户执行提交报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待审核"
+        }
+      ],
+      "gen_seq": 5,
+      "post_state": "报名.报名状态→待审核",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.待审核",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          5
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 1,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "初始状态下，用户提交报名，验证报名状态变更为待审核"
+    },
+    {
+      "temp_id": "PROC-005.2",
+      "source_ids": [
+        "TO-004"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "用户执行提交报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待审核"
+        }
+      ],
+      "gen_seq": 5,
+      "post_state": "报名.报名状态→待审核",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.待审核",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          5
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 1,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "初始状态下，用户提交报名，验证报名状态变更为待审核"
+    },
+    {
+      "temp_id": "PROC-005.3",
+      "source_ids": [
+        "TO-004"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "用户执行提交报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待审核"
+        }
+      ],
+      "gen_seq": 5,
+      "post_state": "报名.报名状态→待审核",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.待审核",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          5
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 1,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "初始状态下，用户提交报名，验证报名状态变更为待审核"
+    },
+    {
+      "temp_id": "PROC-005.4",
+      "source_ids": [
+        "TO-004"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "用户执行提交报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待审核"
+        }
+      ],
+      "gen_seq": 5,
+      "post_state": "报名.报名状态→待审核",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.待审核",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          5
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 1,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "初始状态下，用户提交报名，验证报名状态变更为待审核"
+    },
+    {
+      "temp_id": "PROC-006.1",
+      "source_ids": [
+        "EO-CRU-002"
+      ],
+      "entity": "报名",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名",
+          "input": "导航至报名页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名",
+          "input": "执行审核",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名",
+          "input": "查看效果",
+          "expected": "验证: 审核报名"
+        }
+      ],
+      "gen_seq": 16,
+      "post_state": "报名→(审核完成)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.min_phase",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          5,
+          0,
+          1,
+          16
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "导航至报名页面，执行审核操作，验证报名审核成功"
+    },
+    {
+      "temp_id": "PROC-006.2",
+      "source_ids": [
+        "EO-CRU-002"
+      ],
+      "entity": "报名",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名",
+          "input": "导航至报名页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名",
+          "input": "执行审核",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名",
+          "input": "查看效果",
+          "expected": "验证: 审核报名"
+        }
+      ],
+      "gen_seq": 16,
+      "post_state": "报名→(审核完成)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.min_phase",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          5,
+          0,
+          1,
+          16
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "导航至报名页面，执行审核操作，验证报名审核成功"
+    },
+    {
+      "temp_id": "PROC-006.3",
+      "source_ids": [
+        "EO-CRU-002"
+      ],
+      "entity": "报名",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名",
+          "input": "导航至报名页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名",
+          "input": "执行审核",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名",
+          "input": "查看效果",
+          "expected": "验证: 审核报名"
+        }
+      ],
+      "gen_seq": 16,
+      "post_state": "报名→(审核完成)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.min_phase",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          5,
+          0,
+          1,
+          16
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "导航至报名页面，执行审核操作，验证报名审核成功"
+    },
+    {
+      "temp_id": "PROC-006.4",
+      "source_ids": [
+        "EO-CRU-002"
+      ],
+      "entity": "报名",
+      "dimension": null,
+      "obligation_type": 6,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名",
+          "input": "导航至报名页面，确认操作入口可用",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名",
+          "input": "执行审核",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名",
+          "input": "查看效果",
+          "expected": "验证: 审核报名"
+        }
+      ],
+      "gen_seq": 16,
+      "post_state": "报名→(审核完成)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "dep_state_phase_map.报名.min_phase",
+        "topology_level": 2,
+        "sort_key": [
+          0,
+          2,
+          1,
+          5,
+          0,
+          1,
+          16
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "crud",
+        "type_priority": 5,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "导航至报名页面，执行审核操作，验证报名审核成功"
+    },
+    {
+      "temp_id": "PROC-007.1",
+      "source_ids": [
+        "TO-002",
+        "TO-005"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "audit_rejection",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 待开始; 已提请审批",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行驳回操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态和驳回原因",
+          "expected": "状态验证: 待开始; 驳回原因已记录"
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态和驳回原因",
+          "expected": "状态验证: 待审核; 驳回原因已记录"
+        }
+      ],
+      "gen_seq": 3,
+      "post_state": "项目.项目状态→待开始(驳回)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中 (rejection variant)",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          4,
+          4,
+          2,
+          0,
+          3
+        ],
+        "operation_lifecycle": 4,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "项目待开始且已提请审批状态下，项目经理驳回，验证状态变更为待开始并记录驳回原因"
+    },
+    {
+      "temp_id": "PROC-007.2",
+      "source_ids": [
+        "TO-002",
+        "TO-005"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "audit_rejection",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 待开始; 已提请审批",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行驳回操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态和驳回原因",
+          "expected": "状态验证: 待开始; 驳回原因已记录"
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态和驳回原因",
+          "expected": "状态验证: 待审核; 驳回原因已记录"
+        }
+      ],
+      "gen_seq": 3,
+      "post_state": "项目.项目状态→待开始(驳回)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中 (rejection variant)",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          4,
+          4,
+          2,
+          0,
+          3
+        ],
+        "operation_lifecycle": 4,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "项目待开始且已提请审批状态下，项目经理驳回，验证状态变更为待开始并记录驳回原因"
+    },
+    {
+      "temp_id": "PROC-008.1",
+      "source_ids": [
+        "CO-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 4,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "前置条件: 项目.项目状态 = 待开始",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行项目创建后开放报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "验证约束效果",
+          "expected": "状态验证: 项目.项目状态 = 待开始"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态 cross_refs=['报名']",
+          "input": "查看效果",
+          "expected": "[BR-01]验证: 需先审批通过后才可启动项目"
+        }
+      ],
+      "gen_seq": 12,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": "项目.项目状态=待开始→报名.报名状态=待审核",
+      "embedded_brs": [
+        "BR-01"
+      ],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          3,
+          3,
+          1,
+          0,
+          12
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 1,
+        "type_label": "constraint",
+        "type_priority": 3,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-007"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "项目待开始状态下，项目经理创建后开放报名，验证需先审批通过后可启动项目"
+    },
+    {
+      "temp_id": "PROC-008.2",
+      "source_ids": [
+        "CO-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 4,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "前置条件: 项目.项目状态 = 待开始",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行项目创建后开放报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "验证约束效果",
+          "expected": "状态验证: 项目.项目状态 = 待开始"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态 cross_refs=['报名']",
+          "input": "查看效果",
+          "expected": "[BR-01]验证: 需先审批通过后才可启动项目"
+        }
+      ],
+      "gen_seq": 12,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": "项目.项目状态=待开始→报名.报名状态=待审核",
+      "embedded_brs": [
+        "BR-01"
+      ],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          3,
+          3,
+          1,
+          0,
+          12
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 1,
+        "type_label": "constraint",
+        "type_priority": 3,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-007"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "项目待开始状态下，项目经理创建后开放报名，验证需先审批通过后可启动项目"
+    },
+    {
+      "temp_id": "PROC-009.1",
+      "source_ids": [
+        "CO-003"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 5,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "触发: 项目.项目状态 = 待开始",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "执行项目生命周期操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "验证同步效果",
+          "expected": "项目.项目状态 = 待开始"
+        }
+      ],
+      "gen_seq": 14,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": "项目.项目状态=待开始→项目.项目状态=待开始",
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          7,
+          0,
+          0,
+          14
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "lifecycle",
+        "type_priority": 7,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-007",
+          "PROC-008"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目待开始状态下，执行生命周期操作，验证项目状态保持待开始"
+    },
+    {
+      "temp_id": "PROC-009.2",
+      "source_ids": [
+        "CO-003"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 5,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "触发: 项目.项目状态 = 待开始",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "执行项目生命周期操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "验证同步效果",
+          "expected": "项目.项目状态 = 待开始"
+        }
+      ],
+      "gen_seq": 14,
+      "post_state": "项目.项目状态→待开始",
+      "cascade_chain": "项目.项目状态=待开始→项目.项目状态=待开始",
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 0,
+        "phase_name": "P0",
+        "phase_basis": "phase_table.项目状态.待开始",
+        "topology_level": 1,
+        "sort_key": [
+          0,
+          1,
+          1,
+          7,
+          0,
+          0,
+          14
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "lifecycle",
+        "type_priority": 7,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-007",
+          "PROC-008"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目待开始状态下，执行生命周期操作，验证项目状态保持待开始"
+    },
+    {
+      "temp_id": "PROC-010.1",
+      "source_ids": [
+        "TO-002"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 待开始; 审批已通过",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行启动项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 进行中"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态 cross_refs=['报名']",
+          "input": "查看效果",
+          "expected": "[BR-01]验证: 需先审批通过后才可启动项目"
+        }
+      ],
+      "gen_seq": 2,
+      "post_state": "项目.项目状态→进行中",
+      "cascade_chain": null,
+      "embedded_brs": [
+        "BR-01"
+      ],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          3,
+          4,
+          1,
+          0,
+          2
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 1,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-008",
+          "PROC-009"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目待开始且审批通过状态下，项目经理启动项目，验证项目状态变更为进行中"
+    },
+    {
+      "temp_id": "PROC-010.2",
+      "source_ids": [
+        "TO-002"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 待开始; 审批已通过",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行启动项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 进行中"
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态 cross_refs=['报名']",
+          "input": "查看效果",
+          "expected": "[BR-01]验证: 需先审批通过后才可启动项目"
+        }
+      ],
+      "gen_seq": 2,
+      "post_state": "项目.项目状态→进行中",
+      "cascade_chain": null,
+      "embedded_brs": [
+        "BR-01"
+      ],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          3,
+          4,
+          1,
+          0,
+          2
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 1,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-008",
+          "PROC-009"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目待开始且审批通过状态下，项目经理启动项目，验证项目状态变更为进行中"
+    },
+    {
+      "temp_id": "PROC-011.1",
+      "source_ids": [
+        "CO-002"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 4,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "前置条件: 项目.项目状态 = 进行中",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行项目启动后可进行能力验证",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "验证约束效果",
+          "expected": "状态验证: 项目.项目状态 = 进行中"
+        }
+      ],
+      "gen_seq": 13,
+      "post_state": "项目.项目状态→进行中",
+      "cascade_chain": "项目.项目状态=进行中→能力验证.能力状态=待验证",
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          3,
+          3,
+          2,
+          0,
+          13
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "constraint",
+        "type_priority": 3,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-010"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目进行中状态下，项目经理执行能力验证，验证项目状态保持进行中"
+    },
+    {
+      "temp_id": "PROC-011.2",
+      "source_ids": [
+        "CO-002"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 4,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "前置条件: 项目.项目状态 = 进行中",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行项目启动后可进行能力验证",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "验证约束效果",
+          "expected": "状态验证: 项目.项目状态 = 进行中"
+        }
+      ],
+      "gen_seq": 13,
+      "post_state": "项目.项目状态→进行中",
+      "cascade_chain": "项目.项目状态=进行中→能力验证.能力状态=待验证",
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "phase_table.项目状态.进行中",
+        "topology_level": 1,
+        "sort_key": [
+          1,
+          1,
+          3,
+          3,
+          2,
+          0,
+          13
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "constraint",
+        "type_priority": 3,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-010"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目进行中状态下，项目经理执行能力验证，验证项目状态保持进行中"
+    },
+    {
+      "temp_id": "PROC-012.1",
+      "source_ids": [
+        "TO-006"
+      ],
+      "entity": "能力验证",
+      "dimension": "能力状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "能力验证.能力状态",
+          "input": "能力验证.能力状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "能力验证.能力状态",
+          "input": "系统执行创建能力记录",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待验证"
+        }
+      ],
+      "gen_seq": 8,
+      "post_state": "能力验证.能力状态→待验证",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.能力验证.能力状态.待验证",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          8
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=能力验证 dim_count=1 instances=4"
+      },
+      "title": "在能力初始状态下，系统创建能力记录，验证状态变更为待验证"
+    },
+    {
+      "temp_id": "PROC-012.2",
+      "source_ids": [
+        "TO-006"
+      ],
+      "entity": "能力验证",
+      "dimension": "能力状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "能力验证.能力状态",
+          "input": "能力验证.能力状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "能力验证.能力状态",
+          "input": "系统执行创建能力记录",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待验证"
+        }
+      ],
+      "gen_seq": 8,
+      "post_state": "能力验证.能力状态→待验证",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.能力验证.能力状态.待验证",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          8
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=能力验证 dim_count=1 instances=4"
+      },
+      "title": "在能力初始状态下，系统创建能力记录，验证状态变更为待验证"
+    },
+    {
+      "temp_id": "PROC-012.3",
+      "source_ids": [
+        "TO-006"
+      ],
+      "entity": "能力验证",
+      "dimension": "能力状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "能力验证.能力状态",
+          "input": "能力验证.能力状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "能力验证.能力状态",
+          "input": "系统执行创建能力记录",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待验证"
+        }
+      ],
+      "gen_seq": 8,
+      "post_state": "能力验证.能力状态→待验证",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.能力验证.能力状态.待验证",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          8
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=能力验证 dim_count=1 instances=4"
+      },
+      "title": "在能力初始状态下，系统创建能力记录，验证状态变更为待验证"
+    },
+    {
+      "temp_id": "PROC-012.4",
+      "source_ids": [
+        "TO-006"
+      ],
+      "entity": "能力验证",
+      "dimension": "能力状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "能力验证.能力状态",
+          "input": "能力验证.能力状态 = (初始)",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "能力验证.能力状态",
+          "input": "系统执行创建能力记录",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "能力验证.能力状态",
+          "input": "查看状态",
+          "expected": "状态验证: 待验证"
+        }
+      ],
+      "gen_seq": 8,
+      "post_state": "能力验证.能力状态→待验证",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.能力验证.能力状态.待验证",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          8
+        ],
+        "operation_lifecycle": 1,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=能力验证 dim_count=1 instances=4"
+      },
+      "title": "在能力初始状态下，系统创建能力记录，验证状态变更为待验证"
+    },
+    {
+      "temp_id": "PROC-013.1",
+      "source_ids": [
+        "TO-005"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = 待审核",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "项目经理执行审核报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已通过"
+        }
+      ],
+      "gen_seq": 6,
+      "post_state": "报名.报名状态→已通过",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.已通过",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          3,
+          4,
+          2,
+          0,
+          6
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "在报名待审核状态下，项目经理审核报名，验证状态变更为已通过"
+    },
+    {
+      "temp_id": "PROC-013.2",
+      "source_ids": [
+        "TO-005"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = 待审核",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "项目经理执行审核报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已通过"
+        }
+      ],
+      "gen_seq": 6,
+      "post_state": "报名.报名状态→已通过",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.已通过",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          3,
+          4,
+          2,
+          0,
+          6
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "在报名待审核状态下，项目经理审核报名，验证状态变更为已通过"
+    },
+    {
+      "temp_id": "PROC-013.3",
+      "source_ids": [
+        "TO-005"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = 待审核",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "项目经理执行审核报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已通过"
+        }
+      ],
+      "gen_seq": 6,
+      "post_state": "报名.报名状态→已通过",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.已通过",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          3,
+          4,
+          2,
+          0,
+          6
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "在报名待审核状态下，项目经理审核报名，验证状态变更为已通过"
+    },
+    {
+      "temp_id": "PROC-013.4",
+      "source_ids": [
+        "TO-005"
+      ],
+      "entity": "报名",
+      "dimension": "报名状态",
+      "obligation_type": 1,
+      "risk_trait": "audit",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "报名.报名状态",
+          "input": "报名.报名状态 = 待审核",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "报名.报名状态",
+          "input": "项目经理执行审核报名",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "报名.报名状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已通过"
+        }
+      ],
+      "gen_seq": 6,
+      "post_state": "报名.报名状态→已通过",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 1,
+        "phase_name": "P1",
+        "phase_basis": "dep_state_phase_map.报名.报名状态.已通过",
+        "topology_level": 2,
+        "sort_key": [
+          1,
+          2,
+          3,
+          4,
+          2,
+          0,
+          6
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "audit",
+        "type_priority": 4,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-005"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 4,
+        "multi_reason": "entity=报名 dim_count=1 instances=4"
+      },
+      "title": "在报名待审核状态下，项目经理审核报名，验证状态变更为已通过"
+    },
+    {
+      "temp_id": "PROC-014.1",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "状态验证: 项目类型显示为修改后值"
+        }
+      ],
+      "gen_seq": 11,
+      "post_state": "项目.项目类型→(已修改)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "primary_entity_max_phase.2",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          2,
+          1,
+          0,
+          1,
+          11
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目类型配置入口，修改项目类型，验证显示为修改后值"
+    },
+    {
+      "temp_id": "PROC-014.2",
+      "source_ids": [
+        "EO-CFG-001"
+      ],
+      "entity": "项目",
+      "dimension": "项目类型",
+      "obligation_type": 3,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "导航配置入口，确认当前项目类型值",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "修改项目类型",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目类型",
+          "input": "查看效果",
+          "expected": "状态验证: 项目类型显示为修改后值"
+        }
+      ],
+      "gen_seq": 11,
+      "post_state": "项目.项目类型→(已修改)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "primary_entity_max_phase.2",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          2,
+          1,
+          0,
+          1,
+          11
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 0,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目类型配置入口，修改项目类型，验证显示为修改后值"
+    },
+    {
+      "temp_id": "PROC-015.1",
+      "source_ids": [
+        "TO-003"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 进行中; 验收通过",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行完成项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已完成"
+        }
+      ],
+      "gen_seq": 4,
+      "post_state": "项目.项目状态→已完成",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "phase_table.项目状态.已完成",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          3,
+          1,
+          2,
+          0,
+          4
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-010",
+          "PROC-011"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目进行中且验收通过状态下，项目经理完成项目，验证状态变更为已完成"
+    },
+    {
+      "temp_id": "PROC-015.2",
+      "source_ids": [
+        "TO-003"
+      ],
+      "entity": "项目",
+      "dimension": "项目状态",
+      "obligation_type": 1,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目.项目状态",
+          "input": "项目.项目状态 = 进行中; 验收通过",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目.项目状态",
+          "input": "项目经理执行完成项目",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目.项目状态",
+          "input": "查看状态",
+          "expected": "状态验证: 已完成"
+        }
+      ],
+      "gen_seq": 4,
+      "post_state": "项目.项目状态→已完成",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "phase_table.项目状态.已完成",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          3,
+          1,
+          2,
+          0,
+          4
+        ],
+        "operation_lifecycle": 3,
+        "chain_depth": 2,
+        "type_label": "happy",
+        "type_priority": 1,
+        "dimension_priority": 0,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-001",
+          "PROC-010",
+          "PROC-011"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目进行中且验收通过状态下，项目经理完成项目，验证状态变更为已完成"
+    },
+    {
+      "temp_id": "PROC-016.1",
+      "source_ids": [
+        "RO-001"
+      ],
+      "entity": "项目",
+      "dimension": null,
+      "obligation_type": 7,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "前置条件: 项目处于\"已完成\"状态",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "尝试执行从\"已完成\"到\"待开始\"的操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目",
+          "input": "验证操作被阻止",
+          "expected": "预期结果: 操作不可执行，已完成项目不可回退到待开始"
+        }
+      ],
+      "gen_seq": 17,
+      "post_state": "项目→(操作被阻止)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "phase_table.项目状态.已完成",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          2,
+          9,
+          2,
+          1,
+          17
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 2,
+        "type_label": "invalid",
+        "type_priority": 9,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-015"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目已完成状态下，尝试回退到待开始，验证操作被阻止"
+    },
+    {
+      "temp_id": "PROC-016.2",
+      "source_ids": [
+        "RO-001"
+      ],
+      "entity": "项目",
+      "dimension": null,
+      "obligation_type": 7,
+      "risk_trait": "",
+      "steps": [
+        {
+          "aaa": "S",
+          "location": "项目",
+          "input": "前置条件: 项目处于\"已完成\"状态",
+          "expected": ""
+        },
+        {
+          "aaa": "A",
+          "location": "项目",
+          "input": "尝试执行从\"已完成\"到\"待开始\"的操作",
+          "expected": ""
+        },
+        {
+          "aaa": "V",
+          "location": "项目",
+          "input": "验证操作被阻止",
+          "expected": "预期结果: 操作不可执行，已完成项目不可回退到待开始"
+        }
+      ],
+      "gen_seq": 17,
+      "post_state": "项目→(操作被阻止)",
+      "cascade_chain": null,
+      "embedded_brs": [],
+      "_S2_fields": {
+        "phase": 2,
+        "phase_name": "P2",
+        "phase_basis": "phase_table.项目状态.已完成",
+        "topology_level": 1,
+        "sort_key": [
+          2,
+          1,
+          2,
+          9,
+          2,
+          1,
+          17
+        ],
+        "operation_lifecycle": 2,
+        "chain_depth": 2,
+        "type_label": "invalid",
+        "type_priority": 9,
+        "dimension_priority": 1,
+        "context": null
+      },
+      "_S3_fields": {
+        "dependencies": [
+          "PROC-015"
+        ],
+        "weak_dependencies": [],
+        "guard1_deps": [],
+        "upstream_deps": []
+      },
+      "_S4_fields": {
+        "multi_instance": true,
+        "multi_count": 2,
+        "multi_reason": "entity=项目 dim_count=1 instances=2"
+      },
+      "title": "在项目已完成状态下，尝试回退到待开始，验证操作被阻止"
+    }
+  ],
+  "br_classifications": [
+    {
+      "category": "transition_constraint",
+      "host_proc_type": 1,
+      "host_to_id": "TO-002",
+      "host_co_id": "CO-001",
+      "priority": 2,
+      "br": {
+        "id": "RO-002",
+        "type": "business_rule",
+        "constraint_id": "BR-01",
+        "entities": "E-PRJ,E-REG",
+        "description": "需先审批通过后才可启动项目",
+        "enforcement": "mandatory",
+        "category": "transition_constraint"
+      }
+    },
+    {
+      "category": "crud_constraint",
+      "host_proc_type": 5,
+      "host_eo_id": "EO-CRU-001",
+      "priority": 3,
+      "br": {
+        "id": "RO-003",
+        "type": "business_rule",
+        "constraint_id": "BR-02",
+        "entities": "E-PRJ",
+        "description": "待开始状态不可删除项目",
+        "enforcement": "mandatory",
+        "category": "crud_constraint"
+      }
+    }
+  ],
+  "type5_filtered": [],
+  "entity_instance_counts": {
+    "E-PRJ": 2,
+    "E-REG": 4,
+    "E-LAB": 4
+  },
+  "warnings": [
+    "S0.2: primary_entity=E-PRJ",
+    "S0.3: primary_dimension=项目状态, phase_count=3",
+    "S0.4: 2 dependent entities: ['E-REG', 'E-LAB']",
+    "S0.5: topology_levels computed for 4 entities",
+    "S0.6: upstream_map with 7 entries",
+    "S0 validation warning: 1 validation error for EngineState\nphase_table\n  Value error, state_to_phase['项目状态'] = {'待开始': 0, '进行中': 1, '已完成': 2} is out of range [0, 3) [type=value_error, input_value={'primary_entity': 'E-PRJ...'P2'], 'phase_count': 3}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "DEDUP: PROC-T1-7 merged into PROC-T1-3 (reason: 因果合并)",
+    "S1 generated 16 procedures (0 validation failures)",
+    "S1 summary: standalone_type7=0, embedded_brs=3, type5_filtered=0",
+    "S2 computed sort_key metadata for 16 procedures (final topological sort + ID assignment deferred to S3)",
+    "Cycle break: removed same-entity strong dependency PROC-T1-2 from PROC-T1-3",
+    "Cycle break: removed same-entity strong dependency PROC-T4a-12 from PROC-T1-3",
+    "Cycle break: removed same-entity strong dependency PROC-T4b-14 from PROC-T1-3",
+    "Cycle break: removed same-entity strong dependency PROC-T4b-14 from PROC-T4a-12",
+    "S3 bound dependencies (9 strong, 0 weak), topological sort complete, 16 procedures re-ID'd",
+    "S4: 40 total instances (40 procedures with multi-instance), entity_instances={'E-PRJ': 2, 'E-REG': 4, 'E-LAB': 4}"
+  ],
+  "errors": [],
+  "statistics": {
+    "total_procedures": 40,
+    "type_counts": {
+      "Type1(Transition)": 20,
+      "Type5(CRUD)": 6,
+      "Type3(Attribute)": 6,
+      "Type4a(Constraint)": 4,
+      "Type4b(Lifecycle)": 2,
+      "Type6(Invalid)": 2
+    },
+    "phase_counts": {
+      "P0": 20,
+      "P1": 14,
+      "P2": 6
+    },
+    "elapsed_seconds": 0.03
+  }
+}
