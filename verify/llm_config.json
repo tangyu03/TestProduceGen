@@ -1,0 +1,18 @@
+{
+  "_comment": "verify/ 目录专用 LLM 配置 — 与主流水线 config.json 完全独立",
+  "_usage": "可指定不同的 API 供应商、密钥和模型。不配置的字段自动回退到项目根 config.json",
+  "_example_claude": {
+    "api_base": "https://api.anthropic.com/v1",
+    "api_key": "sk-ant-...",
+    "model": "claude-sonnet-5",
+    "temperature": 0.2,
+    "max_tokens": 4096,
+    "timeout": 120
+  },
+  "api_base": "https://api.deepseek.com/v1",
+  "api_key": "sk-f44edda9848d4c94a362b02eef01c02a",
+  "model": "deepseek-v4-pro",
+  "temperature": 0.2,
+  "max_tokens": 393216,
+  "timeout": 1200
+}

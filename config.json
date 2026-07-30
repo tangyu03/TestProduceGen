@@ -1,0 +1,25 @@
+{
+  "llm": {
+    "api_base": "https://open.bigmodel.cn/api/paas/v4",
+    "api_key": "197c9a5b0ad94dd9832a5586b26353f0.fUJ1efW817oE3wNx",
+    "title_model": "glm-4-flash",
+    "task_models": {
+      "title_generation": "glm-4-flash",
+      "field_validation": "glm-4-flash",
+      "signal_validation": "glm-4-flash",
+      "s0_fallback": "glm-4-flash",
+      "code_agent": "glm-4-flash",
+      "general": "glm-4-flash"
+    },
+    "cache": {
+      "enabled": true,
+      "dir": "cache",
+      "ttl_days": 7
+    },
+    "retry": {
+      "max_attempts": 3,
+      "backoff_factor": 2.0,
+      "rate_limit_wait": 10
+    }
+  }
+}

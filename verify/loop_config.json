@@ -1,0 +1,15 @@
+{
+  "project_dir": ".",
+  "pipeline_cmd": ["python", "main.py", "coverage_obligations.json", "{run_dir}/output.json"],
+  "validator_spec": "verify/case_spec.json",
+  "smoke_cmd": ["python", "scripts/llm_e2e_check.py"],
+  "agent_cmd": ["python", "verify/code_agent_cli.py"],
+  "max_attempts_per_signature": 3,
+  "token_budget": 2000000,
+  "wall_clock_budget_sec": 14400,
+  "history_path": "verify/quality_history.jsonl",
+  "baseline_path": "verify/golden_baseline.json",
+  "runs_dir": "verify/runs",
+  "regression_metrics": ["dedup_ratio", "coverage_misses", "guard_violations"]
+}
+
