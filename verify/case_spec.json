@@ -564,7 +564,7 @@
           "to": "锁定",
           "actor": "系统",
           "trigger": "普通用户连续密码错误3次",
-          "direction": "forward",
+          "direction": "lateral",
           "guard": "角色不为系统管理员且不为审计管理员",
           "clause": "4.13(8)"
         },
@@ -584,7 +584,7 @@
           "to": "未锁定",
           "actor": "系统管理员",
           "trigger": "解锁",
-          "direction": "backward",
+          "direction": "lateral",
           "note": "合法回退：解锁后恢复登录，SRS 4.11.1(4)",
           "clause": "4.11.1(4)"
         }
