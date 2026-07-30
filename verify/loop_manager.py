@@ -7,8 +7,12 @@ Gate-S 门禁 → 失败签名路由 / 回归门控合并 / 硬停止 / 升级�
 用法：
   python -m verify.loop_manager --config verify/loop_config.json --once
   python -m verify.loop_manager --config verify/loop_config.json --loop
+  python -m verify.loop_manager --config verify/loop_config.json --loop --full
   python -m verify.loop_manager --config verify/loop_config.json --dry-run --once
   python -m verify.loop_manager --config verify/loop_config.json --init-baseline
+
+  --loop        快速模式: 只跑 generate_obligation_model.py (秒级)，适合 P2 迭代
+  --loop --full 完整模式: 跑 main.py 全 LLM 流水线 (分钟级)，适合最终验证
 """
 from __future__ import annotations
 import argparse
@@ -58,9 +62,10 @@ class LoopConfig:
     pipeline_cmd: list = field(default_factory=lambda: ["python", "main.py",
                                                         "test_coverage_model.json",
                                                         "{run_dir}/output.json"])
+    pipeline_cmd_full: list = field(default_factory=list)  # --full 时用的完整流水线
     validator_spec: str = "verify/case_spec.json"
-    smoke_cmd: list = field(default_factory=list)          # 例：["python","scripts/llm_e2e_check.py"]
-    agent_cmd: list = field(default_factory=list)          # 代码 Agent 调用命令（stdin 收 task，stdout 出声明）
+    smoke_cmd: list = field(default_factory=list)
+    agent_cmd: list = field(default_factory=list)
     max_attempts_per_signature: int = 3
     token_budget: int = 2_000_000
     wall_clock_budget_sec: int = 4 * 3600
@@ -230,7 +235,8 @@ def escalate(cfg: LoopConfig, signature: str, history: History, reason: str):
 
 
 # ───────────────────────── 主循环 ─────────────────────────
-def one_attempt(cfg: LoopConfig, history: History, dry_run: bool) -> str:
+def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
+                full_pipeline: bool = False) -> str:
     """返回 done | retry | escalated | budget_exceeded。"""
     run_dir = Path(cfg.runs_dir) / time.strftime("%Y%m%d-%H%M%S")
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -240,19 +246,40 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool) -> str:
     snap = wt.create()
     try:
         verdict_path = run_dir / "verdict.json"
-        cmd = [c.format(run_dir=str(run_dir.resolve())) for c in cfg.pipeline_cmd]
-        r = subprocess.run(cmd, cwd=snap, capture_output=True, text=True, timeout=1800)
-        (run_dir / "pipeline.log").write_text(r.stdout[-8000:] + r.stderr[-8000:],
-                                              encoding="utf-8")
-        if r.returncode != 0:
-            print("[FAIL] pipeline crashed, see pipeline.log")
-            return "retry"
-        out_json = run_dir / "output.json"
-        if not out_json.exists():
-            print(f"[FAIL] pipeline exit 0 but output.json missing: {out_json}")
-            (run_dir / "pipeline_missing_output.log").write_text(
-                r.stdout[-3000:] + r.stderr[-3000:], encoding="utf-8")
-            return "retry"
+        output_json = run_dir / "output.json"
+
+        # ── 管线步骤 ──
+        if full_pipeline and cfg.pipeline_cmd_full:
+            # --full: 跑完整 LLM 流水线 (main.py)
+            pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
+                            for c in cfg.pipeline_cmd_full]
+            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
+                               text=True, timeout=3600)
+            (run_dir / "pipeline.log").write_text(
+                r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
+            if r.returncode != 0:
+                print("[FAIL] full pipeline crashed, see pipeline.log")
+                return "retry"
+        elif cfg.pipeline_cmd:
+            # 默认: 跑快速生成 (generate_obligation_model.py)
+            pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
+                            for c in cfg.pipeline_cmd]
+            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
+                               text=True, timeout=300)
+            (run_dir / "pipeline.log").write_text(
+                r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
+            if r.returncode != 0:
+                print("[FAIL] pipeline crashed, see pipeline.log")
+                return "retry"
+        else:
+            # 无 pipeline: 直接读已有结果文件
+            existing = Path(cfg.project_dir) / "coverage_obligations.json"
+            if not existing.exists():
+                print(f"[FAIL] no existing output found: {existing}")
+                return "escalated"
+            shutil.copy(existing, output_json)
+            (run_dir / "pipeline.log").write_text(
+                f"skipped pipeline, copied from {existing}\n", encoding="utf-8")
 
         v = subprocess.run([sys.executable, "-m", "verify.validators",
                             "-s", cfg.validator_spec,
@@ -365,6 +392,8 @@ def main():
     ap.add_argument("--config", "-c", required=True)
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--loop", action="store_true")
+    ap.add_argument("--full", action="store_true",
+                    help="Run full LLM pipeline (main.py); default: fast P2 generation only")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--init-baseline", action="store_true")
     args = ap.parse_args()
@@ -380,13 +409,20 @@ def main():
         print("baseline initialized (empty); first pass will populate it")
         return
 
+    if args.full:
+        pipeline_mode = "FULL (main.py LLM pipeline)"
+    elif cfg.pipeline_cmd:
+        pipeline_mode = "FAST (generate_obligation_model.py)"
+    else:
+        pipeline_mode = "DIRECT (validate existing output, no regeneration)"
+    print(f"[LOOP] mode={pipeline_mode}, once={args.once}, dry_run={args.dry_run}")
+
     while True:
-        # 硬停止：预算（token 从历史累计，墙钟本次会话）
         tokens_used = sum(r.get("tokens", 0) for r in history.records)
         if tokens_used > cfg.token_budget or time.monotonic() - t0 > cfg.wall_clock_budget_sec:
             print(f"[STOP] budget exceeded (tokens={tokens_used})")
             break
-        status = one_attempt(cfg, history, args.dry_run)
+        status = one_attempt(cfg, history, args.dry_run, full_pipeline=args.full)
         if status in ("done", "escalated") or args.once:
             break
     print("loop finished")

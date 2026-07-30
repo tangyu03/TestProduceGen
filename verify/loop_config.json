@@ -1,6 +1,7 @@
 {
   "project_dir": ".",
-  "pipeline_cmd": ["python", "main.py", "coverage_obligations.json", "{run_dir}/output.json"],
+  "pipeline_cmd": [],
+  "pipeline_cmd_full": ["python", "main.py", "coverage_obligations.json", "{run_dir}/output.json"],
   "validator_spec": "verify/case_spec.json",
   "smoke_cmd": ["python", "scripts/llm_e2e_check.py"],
   "agent_cmd": ["python", "verify/code_agent_cli.py"],

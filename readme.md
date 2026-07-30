@@ -212,12 +212,13 @@ python -m verify.loop_manager --config verify/loop_config.json --once
 python -m verify.loop_manager --config verify/loop_config.json --loop
 ```
 
----
 
-## 依赖
+   
+  # 直接验证已有文件，不重新生成（最快，秒级）
+  python -m verify.loop_manager --config verify/loop_config.json --loop
 
-```bash
-pip install langgraph langchain-core networkx pydantic
-# LLM 调用（可选，标题生成用）
-pip install openai httpx
-```
+  # 每次循环重新生成 P2 再验证（较快，秒级）
+  # 把 pipeline_cmd 改为: ["python", "context/generate_obligation_model.py", ...]
+
+  # 完整 LLM 流水线（慢，分钟级）
+  python -m verify.loop_manager --config verify/loop_config.json --loop --full
