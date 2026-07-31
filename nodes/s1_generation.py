@@ -115,6 +115,16 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
     if role_id and role_id != 'system' and base != '系统':
         return base
 
+    # P1 role=system is authoritative — return '系统' immediately,
+    # regardless of LLM action classification. The LLM may classify
+    # a system-driven action (e.g. '试用机构升为合格') as 'human'
+    # because the action text sounds like a human operation, but
+    # P1's role=system declaration is the ground truth from SRS reading.
+    # Without this early return, the code falls into the has_human_kw
+    # branch below and returns '[待确认角色]', causing V03/V07 fails.
+    if role_id == 'system':
+        return '系统'
+
     # BDD: LLM-based action classification (replaces HUMAN_DECISION_KEYWORDS)
     # Read from state['action_classification'] — a dict {action_text: "human"|"system"}
     # populated once at S1 start by _classify_actions_via_llm.
@@ -1918,6 +1928,10 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
     cfg_eo_to_bd = indices["cfg_eo_to_bd"]
 
     # Fix-6: build (entity, attribute) → is_config map from entity_details
+    # Only is_config=False attributes are non-editable; skip them in Type3.
+    # If P1 incorrectly marks a system-maintained field as is_config=True
+    # (e.g. 机构类型 desc says "不可编辑" but is_config=True), that's a P1
+    # data quality issue — fix it in P1 validation, not in S1 with keywords.
     cm = state["coverage_model"]
     non_editable_attrs: set[tuple[str, str]] = set()
     for ed in cm.get("_context", {}).get("entity_details", []):
@@ -1925,7 +1939,6 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
         for attr in ed.get("attributes", []) or []:
             if isinstance(attr, dict):
                 attr_name = attr.get("name", "")
-                attr_desc = attr.get("desc", "") or ""
                 # is_config=False → not user-editable, skip Type3
                 if attr.get("is_config") is False and ent_id and attr_name:
                     non_editable_attrs.add((ent_id, attr_name))
@@ -2883,9 +2896,38 @@ def _generate_type9_field_validation(
 
     procedures: list[dict] = []
 
+    # Build non_editable_attrs set (same as Type3) to filter out
+    # non-configurable fields from Type9 field_validation procs.
+    # Only uses is_config=False (structural signal, no keyword matching).
+    cm = state.get("coverage_model", {})
+    non_editable_attrs: set[tuple[str, str]] = set()
+    for ed in cm.get("_context", {}).get("entity_details", []):
+        ent_id = ed.get("id", "")
+        for attr in ed.get("attributes", []) or []:
+            if isinstance(attr, dict):
+                attr_name = attr.get("name", "")
+                if attr.get("is_config") is False and ent_id and attr_name:
+                    non_editable_attrs.add((ent_id, attr_name))
+
     for entity_id, field_thens in constraint_steps.items():
         if not field_thens:
             continue
+
+        # Filter out thens that target non-editable (system-maintained) fields
+        filtered_thens = []
+        for t in field_thens:
+            tgt = t.get("target", "") or ""
+            # Check if target matches any non_editable_attr (format: "entity.attr" or "E-XXX.attr")
+            for ent_id, attr_name in non_editable_attrs:
+                # Match both "E-ORG.机构类型" and "机构.机构类型" formats
+                if attr_name in tgt and (ent_id in tgt or ent_id.replace("E-", "") in tgt):
+                    break
+            else:
+                filtered_thens.append(t)
+
+        if not filtered_thens:
+            continue  # All fields were non-editable, skip this entity
+        field_thens = filtered_thens
 
         # Resolve phase for this entity (same logic as Type5)
         tl = topo.get(entity_id, 0)
