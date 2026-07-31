@@ -194,8 +194,7 @@ python context/generate_obligation_model.py context/P1_output.json coverage_obli
 ### 2. 校验P2生成质量
 
 ```bash
-python.exe .\context\verify\validate_p2.py coverage_obligations.json .\context\P1_output.json
-
+python.exe context/verify/validate_p2.py coverage_obligations.json context/P1_output.json
 ```
 ### 3. 运行 P3 流水线
 

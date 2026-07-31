@@ -5799,11 +5799,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划建立后项目状态由已选入变为待评审"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "纳入项目状态由已选入变为待评审"
         }
       ],
       "branch_path": [],
@@ -5853,7 +5848,7 @@
         },
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "项目和专家状态返回到该计划建立前的状态"
         }
       ],
@@ -6010,11 +6005,6 @@
           "target_entity": "E-SCORE",
           "target_dimension": "打分状态",
           "effect_desc": "评审计划启动时为专家项目对生成打分记录"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "项目状态由待评审变为评审中"
         }
       ],
       "branch_path": [],
@@ -6074,11 +6064,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划启动后项目状态由待评审变为评审中"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "项目状态由待评审变为评审中"
         }
       ],
       "branch_path": [],
@@ -6181,7 +6166,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "专家不能对计划中的项目进行评审"
         }
       ],
@@ -6234,7 +6219,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "专家不能对计划中的项目进行评审"
         }
       ],
@@ -6539,7 +6524,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6598,7 +6583,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6657,7 +6642,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6714,11 +6699,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划归档(已完成变为结束或超时结束)后项目按4.5(5)归档"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "对该计划中项目按照4.5(5)归档"
         }
       ],
       "branch_path": [],
@@ -6780,11 +6760,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划归档(已完成变为结束或超时结束)后项目按4.5(5)归档"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "对该计划中项目按照4.5(5)归档"
         }
       ],
       "branch_path": [],
@@ -6922,11 +6897,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审组全部专家提交打分后项目状态由评审中变为待归档"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "已提交的项目不能进行分数修改"
         }
       ],
       "branch_path": [],
@@ -8598,7 +8568,7 @@
         "E-PROJ",
         "E-PROJ"
       ],
-      "category": "validation",
+      "category": "display",
       "signal_type": null,
       "description": "[来源于XC-010] 阶段=验收; 联动: T-006a 执行后 E-PROJ.项目阶段 由 开题 变为 验收(跨维度联动)",
       "enforcement": "mandatory",
@@ -8644,7 +8614,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-07-31T09:24:34.484204+08:00",
+    "generated_at": "2026-07-31T10:31:57.351763+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -9359,8 +9329,8 @@
               "待评审": 2,
               "已完成": 4,
               "评审中": 3,
-              "结束": 5,
               "超时结束": 5,
+              "结束": 5,
               "暂停": 4
             }
           }
@@ -10013,7 +9983,7 @@
       },
       {
         "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
+        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
       },
       {
         "category": "RO-BR LLM category",
