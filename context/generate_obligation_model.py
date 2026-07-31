@@ -664,6 +664,9 @@ for t in p1["state_and_flow"]["transitions"]:
             "branch_path": [],
             "precondition_state_refs": precond_refs
         }
+        # Bug fix: check for duplicate TO ID
+        if t["id"] in to_index:
+            add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
         transition_obligations.append(to)
         to_index[t["id"]] = to
     else:
@@ -726,6 +729,9 @@ for t in p1["state_and_flow"]["transitions"]:
                 "branch_path": [],
                 "precondition_state_refs": precond_refs
             }
+            # Bug fix: check for duplicate TO ID
+            if t["id"] in to_index:
+                add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
             transition_obligations.append(to)
             to_index[t["id"]] = to
         elif len(combos) == 0:
@@ -754,6 +760,9 @@ for t in p1["state_and_flow"]["transitions"]:
                 "branch_path": [],
                 "precondition_state_refs": precond_refs
             }
+            # Bug fix: check for duplicate TO ID
+            if t["id"] in to_index:
+                add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
             transition_obligations.append(to)
             to_index[t["id"]] = to
         else:
@@ -787,6 +796,9 @@ for t in p1["state_and_flow"]["transitions"]:
                     "branch_path": [{"dimension": bd["dimension"], "value": v}],
                     "precondition_state_refs": precond_refs
                 }
+                # Bug fix: check for duplicate TO ID
+                if t["id"] in to_index:
+                    add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
                 transition_obligations.append(to)
                 to_index[t["id"]] = to
             else:
@@ -828,6 +840,9 @@ for t in p1["state_and_flow"]["transitions"]:
                     "branch_path": [],
                     "precondition_state_refs": precond_refs
                 }
+                # Bug fix: check for duplicate TO ID
+                if t["id"] in to_index:
+                    add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
                 transition_obligations.append(main_to)
                 to_index[t["id"]] = main_to
                 add_judgment("branch split keep main", f"{t['id']}: 主TO保留(跨维度联动),同时生成{len(combos)}个分支TO")
@@ -890,6 +905,9 @@ for t in p1["state_and_flow"]["transitions"]:
                         "branch_path": branch_path,
                         "precondition_state_refs": extra_refs
                     }
+                    # Bug fix: check for duplicate TO ID
+                    if new_id in to_index:
+                        add_warning("duplicate_to_id", f"TO {new_id} 重复，后出现的会覆盖前一个")
                     transition_obligations.append(new_to)
                     to_index[new_id] = new_to
 
@@ -1777,8 +1795,71 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
     # 待评审→已完成). This satisfies V08's "forward transition must increase
     # phase" rule for ALL forward edges, including skip-transitions.
     #
-    # Implementation: iterative relaxation until fixpoint (Bellman-Ford style).
-    # Forward edges only (no cycles because rollback/lateral are excluded).
+    # ⚠️ 环检测 ⚠️
+    # 如果 P1 的 direction 判错（把 backward 边标成 forward），forward_adj
+    # 里会出现环（如 已选入→待评审→评审中→待归档→已选入）。longest-path
+    # Bellman-Ford 在环上不收敛，每轮 +1 直到 max_iter，导致 phase 爆炸到
+    # 88-110（用户实测过）。
+    #
+    # 修复：在 BFS 前检测 forward_adj 是否有环。有环时：
+    # 1. 记 warning（说明 P1 direction 有误，需人工复核）
+    # 2. 用 states 列表顺序作为 fallback phase_mapping（不依赖 direction）
+    # 这保证了即使 P1 direction 全错，phase_mapping 也不会爆炸。
+
+    # ── 环检测 ──
+    _has_cycle = False
+    try:
+        import networkx as nx
+        G_forward = nx.DiGraph()
+        for src, targets in forward_adj.items():
+            for tgt in targets:
+                G_forward.add_edge(src, tgt)
+        _has_cycle = not nx.is_directed_acyclic_graph(G_forward)
+    except ImportError:
+        # networkx 不可用时用简易 DFS 环检测
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = {s: WHITE for s in states}
+        def _dfs_cycle(node):
+            color[node] = GRAY
+            for nxt in forward_adj.get(node, ()):
+                if nxt not in color:
+                    continue
+                if color[nxt] == GRAY:
+                    return True
+                if color[nxt] == WHITE and _dfs_cycle(nxt):
+                    return True
+            color[node] = BLACK
+            return False
+        for s in states:
+            if color.get(s) == WHITE:
+                if _dfs_cycle(s):
+                    _has_cycle = True
+                    break
+
+    if _has_cycle:
+        add_warning(
+            "phase_mapping cycle detected",
+            f"{entity_id}.{dim_name}: forward_adj 有环（P1 direction 可能有误，"
+            f"backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+        )
+        # Fallback: 用 states 列表顺序（index 作为 phase）
+        # terminal_states pin 到 max
+        phase_map = {s: i for i, s in enumerate(states)}
+        term_set = {s for s in (terminals or []) if s in states}
+        if term_set:
+            non_term_phases = [p for s, p in phase_map.items() if s not in term_set]
+            if non_term_phases:
+                terminal_phase = max(non_term_phases) + 1
+            else:
+                terminal_phase = max(phase_map.values()) if phase_map else 0
+            for s in term_set:
+                phase_map[s] = terminal_phase
+        # Force-pin initial
+        if initial and initial in states:
+            phase_map[initial] = 0
+        return phase_map
+
+    # 无环时正常跑 longest-path Bellman-Ford
     changed = True
     max_iter = len(states) * 2 + 10
     iters = 0
@@ -2034,13 +2115,11 @@ _context = {
     "structural_relations": p1["domain_model"]["structural_relations"],
     "transition_relations": p1["domain_model"]["transition_relations"],
     "state_info": state_info,
-    # 修复: 透传 P1 的 roles 和 entity_details，S0/S1 依赖这些字段做角色名解析
-    # (e.g. R-REVIEW-ADMIN → "评审管理员") 和实体名/类型查询
     "roles": p1["domain_model"]["roles"],
     "entity_details": [
         {"id": e["id"], "name": e["name"], "type": e.get("type", ""), "desc": e.get("desc", "")}
         for e in p1["domain_model"]["entities"]
-    ],
+    ],  
     "prohibition_config": _prohibition_config,
     "xc_to_br_mapping": xc_to_br_mapping,
     "judgments": judgments,

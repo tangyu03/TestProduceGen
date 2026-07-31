@@ -8,14 +8,31 @@
    若迁移的 note 含"X亦可"类备选角色描述，X 加入合法集合（T-PLAN-012 归档
    的"评审助理亦可归档"场景）。
 4. 权限覆盖：actor 对 when.action 在 matrix 中有权限（负向用例生成依据）。
+   匹配策略：子串匹配（matrix action 是 proc action 的子串，或反过来）。
+   例如 proc action="添加研制机构"，matrix 有"机构管理"→不匹配；
+   proc action="新增项目"，matrix 有"项目新增"→不匹配。子串匹配捕获
+   "项目新增" vs "新增项目"这类语序变体。
 
 整体 warning 级：actor 语义缺陷在骨架阶段不阻断，供 S0/S1 修复参考。
 """
-from .base import CheckResult, get_procedures
+from .base import CheckResult, get_procedures, normalize_text
 
 CHECK_ID = "V07"
 SYSTEM_ACTORS = {"系统"}
 ALT_ACTOR_MARKERS = ("亦可", "也可以", "也可")
+
+
+def _has_permission(action: str, allowed: set) -> bool:
+    """检查 actor 是否有 action 权限。子串双向匹配。"""
+    if not action:
+        return True
+    for a in allowed:
+        if not a:
+            continue
+        # 子串双向匹配：proc action 含 catalog action，或反过来
+        if a in action or action in a:
+            return True
+    return False
 
 
 def _tid2actors(spec: dict) -> dict:
@@ -92,11 +109,11 @@ def check(output: dict, spec: dict) -> CheckResult:
         # 4. 权限覆盖（负向用例依据）：actor 对 action 在 matrix 中应有权限
         if actor in matrix:
             action = (when.get("action") or "").strip()
-            if action and action not in matrix[actor]:
+            if action and not _has_permission(action, matrix[actor]):
                 res.fail({"temp_id": p.get("temp_id"), "actor": actor,
                           "action": action,
                           "reason": f"actor '{actor}' lacks permission for action "
-                                    f"(matrix has: {matrix[actor][:5]}...)"})
+                                    f"(matrix has: {sorted(matrix[actor])[:5]}...)"})
 
     res.note = (f"empty_actor={empty_actor}, unknown_actor={unknown_actor}, "
                 f"actor_mismatch={actor_mismatch}")

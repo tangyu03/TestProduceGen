@@ -1925,6 +1925,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
         for attr in ed.get("attributes", []) or []:
             if isinstance(attr, dict):
                 attr_name = attr.get("name", "")
+                attr_desc = attr.get("desc", "") or ""
                 # is_config=False → not user-editable, skip Type3
                 if attr.get("is_config") is False and ent_id and attr_name:
                     non_editable_attrs.add((ent_id, attr_name))
