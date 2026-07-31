@@ -189,36 +189,37 @@ verdict.json (skeleton_pass: true/false)
 ### 1. 运行 P2（从 P1 产出生成覆盖义务模型）
 
 ```bash
-python context/generate_obligation_model.py context/P1_out.json coverage_obligations.json
+python context/generate_obligation_model.py context/P1_output.json coverage_obligations.json
 ```
+### 2. 校验P2生成质量
 
-### 2. 运行 P3 流水线
+```bash
+python.exe .\context\verify\validate_p2.py coverage_obligations.json .\context\P1_output.json
+
+```
+### 3. 运行 P3 流水线
 
 ```bash
 python main.py coverage_obligations.json output.json
 ```
 
-### 3. 运行 Gate-S 校验
+### 4. 运行 Gate-S 校验
 
 ```bash
 python -m verify.validators -s verify/case_spec.json -o output.json --json verdict.json
 ```
 
-### 4. 运行自优化循环（可选）
+### 5. 运行自优化循环（可选）
 
 ```bash
 python -m verify.loop_manager --config verify/loop_config.json --once
 # 或循环模式
 python -m verify.loop_manager --config verify/loop_config.json --loop
+python -m verify.loop_manager --config verify/loop_config.json --loop --full
+python -m verify.loop_manager --config verify/loop_config.json --dry-run --once
+python -m verify.loop_manager --config verify/loop_config.json --init-baseline
+  --loop        快速模式: 只跑 generate_obligation_model.py (秒级)，适合 P2 迭代
+  --loop --full 完整模式: 跑 main.py 全 LLM 流水线 (分钟级)，适合最终验证
 ```
 
 
-   
-  # 直接验证已有文件，不重新生成（最快，秒级）
-  python -m verify.loop_manager --config verify/loop_config.json --loop
-
-  # 每次循环重新生成 P2 再验证（较快，秒级）
-  # 把 pipeline_cmd 改为: ["python", "context/generate_obligation_model.py", ...]
-
-  # 完整 LLM 流水线（慢，分钟级）
-  python -m verify.loop_manager --config verify/loop_config.json --loop --full

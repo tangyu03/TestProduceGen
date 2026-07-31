@@ -8644,7 +8644,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-07-30T14:18:04.184260+08:00",
+    "generated_at": "2026-07-31T09:24:34.484204+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -9306,11 +9306,11 @@
             ],
             "phase_mapping": {
               "待选入": 0,
-              "已选入": 89,
-              "待评审": 86,
-              "评审中": 87,
-              "待归档": 88,
-              "已归档": 90
+              "已选入": 1,
+              "待评审": 2,
+              "评审中": 3,
+              "待归档": 4,
+              "已归档": 5
             }
           },
           {
@@ -9354,13 +9354,13 @@
             ],
             "phase_mapping": {
               "已建立": 0,
-              "待启动": 1,
               "取消结束": 5,
+              "待启动": 1,
               "待评审": 2,
               "已完成": 4,
               "评审中": 3,
-              "超时结束": 5,
               "结束": 5,
+              "超时结束": 5,
               "暂停": 4
             }
           }
@@ -9402,8 +9402,8 @@
             "terminal": [],
             "phase_mapping": {
               "合格": 0,
-              "不合格": 48,
-              "试用": 47
+              "不合格": 1,
+              "试用": 2
             }
           }
         ]
@@ -10025,7 +10025,7 @@
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-PROJ.项目状态: derived 6 phases, terminals pinned to 90"
+        "desc": "E-PROJ.项目状态: derived 6 phases, terminals pinned to 5"
       },
       {
         "category": "phase_mapping_derived",
@@ -10041,14 +10041,23 @@
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-ORG.机构状态: derived 3 phases, terminals pinned to 48"
+        "desc": "E-ORG.机构状态: derived 3 phases, terminals pinned to 2"
       },
       {
         "category": "phase_mapping_derived",
         "desc": "E-SCORE.打分状态: derived 3 phases, terminals pinned to 2"
       }
     ],
-    "warnings": [],
+    "warnings": [
+      {
+        "category": "phase_mapping cycle detected",
+        "desc": "E-PROJ.项目状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+      },
+      {
+        "category": "phase_mapping cycle detected",
+        "desc": "E-ORG.机构状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+      }
+    ],
     "snapshot": {
       "to_index_size": 88,
       "co_list_size": 6,

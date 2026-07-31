@@ -1,7 +1,7 @@
 {
   "verdict": "fail",
   "skeleton_pass": false,
-  "blocker_failures": 4,
+  "blocker_failures": 3,
   "warning_failures": 2,
   "checks": [
     {
@@ -36,7 +36,7 @@
       "check_id": "V03",
       "result": "fail",
       "severity": "blocker",
-      "fail_count": 72,
+      "fail_count": 28,
       "evidence": [
         {
           "temp_id": "PROC-012.1",
@@ -63,341 +63,137 @@
           ]
         },
         {
-          "temp_id": "PROC-103.1",
-          "entity": "项目",
-          "action": "开题合格及以上项目阶段变为验收",
+          "temp_id": "PROC-099.1",
+          "entity": "机构",
+          "action": "合格机构降为不合格",
           "allowed": [
-            "上传附件",
-            "下载附件",
             "删除",
-            "新增",
-            "查看",
-            "查询",
+            "提为试用",
+            "添加",
             "编辑",
-            "选入",
-            "选出"
+            "项目进入评审"
           ]
         },
         {
-          "temp_id": "PROC-103.2",
-          "entity": "项目",
-          "action": "开题合格及以上项目阶段变为验收",
+          "temp_id": "PROC-099.2",
+          "entity": "机构",
+          "action": "合格机构降为不合格",
           "allowed": [
-            "上传附件",
-            "下载附件",
             "删除",
-            "新增",
-            "查看",
-            "查询",
+            "提为试用",
+            "添加",
             "编辑",
-            "选入",
-            "选出"
+            "项目进入评审"
           ]
         },
         {
-          "temp_id": "PROC-103.3",
-          "entity": "项目",
-          "action": "开题合格及以上项目阶段变为验收",
+          "temp_id": "PROC-100.1",
+          "entity": "机构",
+          "action": "试用机构降为不合格",
           "allowed": [
-            "上传附件",
-            "下载附件",
             "删除",
-            "新增",
-            "查看",
-            "查询",
+            "提为试用",
+            "添加",
             "编辑",
-            "选入",
-            "选出"
+            "项目进入评审"
           ]
         },
         {
-          "temp_id": "PROC-103.4",
-          "entity": "项目",
-          "action": "开题合格及以上项目阶段变为验收",
+          "temp_id": "PROC-100.2",
+          "entity": "机构",
+          "action": "试用机构降为不合格",
           "allowed": [
-            "上传附件",
-            "下载附件",
             "删除",
-            "新增",
-            "查看",
-            "查询",
+            "提为试用",
+            "添加",
             "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-103.5",
-          "entity": "项目",
-          "action": "开题合格及以上项目阶段变为验收",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-114.1",
-          "entity": "评审计划",
-          "action": "评审专家打分保存",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-114.2",
-          "entity": "评审计划",
-          "action": "评审专家打分保存",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-119.1",
-          "entity": "评审计划",
-          "action": "评审计划正常完成",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-119.2",
-          "entity": "评审计划",
-          "action": "评审计划正常完成",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
+            "项目进入评审"
           ]
         },
         {
           "temp_id": "PROC-120.1",
-          "entity": "评审计划",
-          "action": "评审超时-待评审",
+          "entity": "项目",
+          "action": "项目纳入评审计划",
           "allowed": [
-            "下发",
+            "上传附件",
+            "下载附件",
             "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
+            "新增",
             "查看",
             "查询",
             "编辑",
-            "重启"
+            "选入",
+            "选出"
           ]
         },
         {
           "temp_id": "PROC-120.2",
-          "entity": "评审计划",
-          "action": "评审超时-待评审",
+          "entity": "项目",
+          "action": "项目纳入评审计划",
           "allowed": [
-            "下发",
+            "上传附件",
+            "下载附件",
             "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
+            "新增",
             "查看",
             "查询",
             "编辑",
-            "重启"
+            "选入",
+            "选出"
           ]
         },
         {
-          "temp_id": "PROC-122.1",
-          "entity": "评审计划",
-          "action": "评审超时-待评审(边界)",
+          "temp_id": "PROC-120.3",
+          "entity": "项目",
+          "action": "项目纳入评审计划",
           "allowed": [
-            "下发",
+            "上传附件",
+            "下载附件",
             "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
+            "新增",
             "查看",
             "查询",
             "编辑",
-            "重启"
+            "选入",
+            "选出"
           ]
         },
         {
-          "temp_id": "PROC-122.2",
-          "entity": "评审计划",
-          "action": "评审超时-待评审(边界)",
+          "temp_id": "PROC-120.4",
+          "entity": "项目",
+          "action": "项目纳入评审计划",
           "allowed": [
-            "下发",
+            "上传附件",
+            "下载附件",
             "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
+            "新增",
             "查看",
             "查询",
             "编辑",
-            "重启"
+            "选入",
+            "选出"
           ]
         },
         {
-          "temp_id": "PROC-123.1",
-          "entity": "评审计划",
-          "action": "尝试评审超时-待评审(已过期)",
+          "temp_id": "PROC-120.5",
+          "entity": "项目",
+          "action": "项目纳入评审计划",
           "allowed": [
-            "下发",
+            "上传附件",
+            "下载附件",
             "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
+            "新增",
             "查看",
             "查询",
             "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-123.2",
-          "entity": "评审计划",
-          "action": "尝试评审超时-待评审(已过期)",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-124.1",
-          "entity": "评审计划",
-          "action": "评审超时-评审中",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-124.2",
-          "entity": "评审计划",
-          "action": "评审超时-评审中",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-125.1",
-          "entity": "评审计划",
-          "action": "评审超时-评审中(边界)",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
-          ]
-        },
-        {
-          "temp_id": "PROC-125.2",
-          "entity": "评审计划",
-          "action": "评审超时-评审中(边界)",
-          "allowed": [
-            "下发",
-            "删除",
-            "取消",
-            "启动",
-            "建立",
-            "归档",
-            "暂停",
-            "查看",
-            "查询",
-            "编辑",
-            "重启"
+            "选入",
+            "选出"
           ]
         },
         {
           "temp_id": "PROC-126.1",
           "entity": "评审计划",
-          "action": "尝试评审超时-评审中(已过期)",
+          "action": "评审专家打分保存",
           "allowed": [
             "下发",
             "删除",
@@ -415,7 +211,7 @@
         {
           "temp_id": "PROC-126.2",
           "entity": "评审计划",
-          "action": "尝试评审超时-评审中(已过期)",
+          "action": "评审专家打分保存",
           "allowed": [
             "下发",
             "删除",
@@ -431,135 +227,7 @@
           ]
         },
         {
-          "temp_id": "PROC-150.1",
-          "entity": "机构",
-          "action": "合格机构降为不合格",
-          "allowed": [
-            "删除",
-            "提为试用",
-            "添加",
-            "编辑",
-            "项目进入评审"
-          ]
-        },
-        {
-          "temp_id": "PROC-150.2",
-          "entity": "机构",
-          "action": "合格机构降为不合格",
-          "allowed": [
-            "删除",
-            "提为试用",
-            "添加",
-            "编辑",
-            "项目进入评审"
-          ]
-        },
-        {
-          "temp_id": "PROC-151.1",
-          "entity": "机构",
-          "action": "试用机构降为不合格",
-          "allowed": [
-            "删除",
-            "提为试用",
-            "添加",
-            "编辑",
-            "项目进入评审"
-          ]
-        },
-        {
-          "temp_id": "PROC-151.2",
-          "entity": "机构",
-          "action": "试用机构降为不合格",
-          "allowed": [
-            "删除",
-            "提为试用",
-            "添加",
-            "编辑",
-            "项目进入评审"
-          ]
-        },
-        {
-          "temp_id": "PROC-154.1",
-          "entity": "项目",
-          "action": "项目纳入评审计划",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-154.2",
-          "entity": "项目",
-          "action": "项目纳入评审计划",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-154.3",
-          "entity": "项目",
-          "action": "项目纳入评审计划",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-154.4",
-          "entity": "项目",
-          "action": "项目纳入评审计划",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-154.5",
-          "entity": "项目",
-          "action": "项目纳入评审计划",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-156.1",
+          "temp_id": "PROC-128.1",
           "entity": "项目",
           "action": "评审计划启动后项目进入评审中",
           "allowed": [
@@ -575,7 +243,7 @@
           ]
         },
         {
-          "temp_id": "PROC-156.2",
+          "temp_id": "PROC-128.2",
           "entity": "项目",
           "action": "评审计划启动后项目进入评审中",
           "allowed": [
@@ -591,7 +259,7 @@
           ]
         },
         {
-          "temp_id": "PROC-156.3",
+          "temp_id": "PROC-128.3",
           "entity": "项目",
           "action": "评审计划启动后项目进入评审中",
           "allowed": [
@@ -607,7 +275,7 @@
           ]
         },
         {
-          "temp_id": "PROC-156.4",
+          "temp_id": "PROC-128.4",
           "entity": "项目",
           "action": "评审计划启动后项目进入评审中",
           "allowed": [
@@ -623,7 +291,7 @@
           ]
         },
         {
-          "temp_id": "PROC-156.5",
+          "temp_id": "PROC-128.5",
           "entity": "项目",
           "action": "评审计划启动后项目进入评审中",
           "allowed": [
@@ -639,7 +307,7 @@
           ]
         },
         {
-          "temp_id": "PROC-157.1",
+          "temp_id": "PROC-143.1",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -655,7 +323,7 @@
           ]
         },
         {
-          "temp_id": "PROC-157.2",
+          "temp_id": "PROC-143.2",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -671,7 +339,7 @@
           ]
         },
         {
-          "temp_id": "PROC-157.3",
+          "temp_id": "PROC-143.3",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -687,7 +355,7 @@
           ]
         },
         {
-          "temp_id": "PROC-157.4",
+          "temp_id": "PROC-143.4",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -703,7 +371,7 @@
           ]
         },
         {
-          "temp_id": "PROC-157.5",
+          "temp_id": "PROC-143.5",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -719,7 +387,7 @@
           ]
         },
         {
-          "temp_id": "PROC-158.1",
+          "temp_id": "PROC-144.1",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -735,7 +403,7 @@
           ]
         },
         {
-          "temp_id": "PROC-158.2",
+          "temp_id": "PROC-144.2",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -751,7 +419,7 @@
           ]
         },
         {
-          "temp_id": "PROC-158.3",
+          "temp_id": "PROC-144.3",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -767,7 +435,7 @@
           ]
         },
         {
-          "temp_id": "PROC-158.4",
+          "temp_id": "PROC-144.4",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
           "allowed": [
@@ -783,57 +451,9 @@
           ]
         },
         {
-          "temp_id": "PROC-158.5",
+          "temp_id": "PROC-144.5",
           "entity": "项目",
           "action": "评审组全部专家提交打分",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-159.1",
-          "entity": "项目",
-          "action": "归档评级-开题不合格或差",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-159.2",
-          "entity": "项目",
-          "action": "归档评级-开题不合格或差",
-          "allowed": [
-            "上传附件",
-            "下载附件",
-            "删除",
-            "新增",
-            "查看",
-            "查询",
-            "编辑",
-            "选入",
-            "选出"
-          ]
-        },
-        {
-          "temp_id": "PROC-159.3",
-          "entity": "项目",
-          "action": "归档评级-开题不合格或差",
           "allowed": [
             "上传附件",
             "下载附件",
@@ -847,7 +467,7 @@
           ]
         }
       ],
-      "evidence_truncated": 22,
+      "evidence_truncated": 0,
       "suspected_stage": "S0",
       "suspected_files": [
         "nodes/s0_topology.py",
@@ -862,12 +482,12 @@
       "fail_count": 2,
       "evidence": [
         {
-          "temp_id": "PROC-152.1",
+          "temp_id": "PROC-113.1",
           "target": "机构.机构类型",
           "reason": "system-maintained field asserted: 机构.机构类型"
         },
         {
-          "temp_id": "PROC-152.2",
+          "temp_id": "PROC-113.2",
           "target": "机构.机构类型",
           "reason": "system-maintained field asserted: 机构.机构类型"
         }
@@ -938,7 +558,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-164.1",
+          "temp_id": "PROC-109.1",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -948,7 +568,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-164.2",
+          "temp_id": "PROC-109.2",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -958,7 +578,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-164.3",
+          "temp_id": "PROC-109.3",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -968,7 +588,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-164.4",
+          "temp_id": "PROC-109.4",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -978,7 +598,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-164.5",
+          "temp_id": "PROC-109.5",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -988,7 +608,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-165.1",
+          "temp_id": "PROC-110.1",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -998,7 +618,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-165.2",
+          "temp_id": "PROC-110.2",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -1008,7 +628,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-165.3",
+          "temp_id": "PROC-110.3",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -1018,7 +638,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-165.4",
+          "temp_id": "PROC-110.4",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -1028,7 +648,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-165.5",
+          "temp_id": "PROC-110.5",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -1117,60 +737,8 @@
           ]
         },
         {
-          "temp_id": "PROC-100.1",
-          "event": "下发超时（目标状态：待启动）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-100.2",
-          "event": "下发超时（目标状态：待启动）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-101.1",
-          "event": "下发超时(时间边界)（目标状态：待启动）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-101.2",
-          "event": "下发超时(时间边界)（目标状态：待启动）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
           "temp_id": "PROC-102.1",
-          "event": "尝试下发超时事件(已过期)",
+          "event": "下发超时（目标状态：待启动）",
           "hit_by": [
             "event_keyword"
           ],
@@ -1183,6 +751,45 @@
         },
         {
           "temp_id": "PROC-102.2",
+          "event": "下发超时（目标状态：待启动）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-103.1",
+          "event": "下发超时(时间边界)（目标状态：待启动）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-103.2",
+          "event": "下发超时(时间边界)（目标状态：待启动）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-104.1",
           "event": "尝试下发超时事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1195,7 +802,20 @@
           ]
         },
         {
-          "temp_id": "PROC-106.1",
+          "temp_id": "PROC-104.2",
+          "event": "尝试下发超时事件(已过期)",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-116.1",
           "event": "启动超时（目标状态：待评审）",
           "hit_by": [
             "event_keyword"
@@ -1208,7 +828,7 @@
           ]
         },
         {
-          "temp_id": "PROC-106.2",
+          "temp_id": "PROC-116.2",
           "event": "启动超时（目标状态：待评审）",
           "hit_by": [
             "event_keyword"
@@ -1221,7 +841,7 @@
           ]
         },
         {
-          "temp_id": "PROC-107.1",
+          "temp_id": "PROC-117.1",
           "event": "启动超时(时间边界)（目标状态：待评审）",
           "hit_by": [
             "event_keyword"
@@ -1234,7 +854,7 @@
           ]
         },
         {
-          "temp_id": "PROC-107.2",
+          "temp_id": "PROC-117.2",
           "event": "启动超时(时间边界)（目标状态：待评审）",
           "hit_by": [
             "event_keyword"
@@ -1247,7 +867,7 @@
           ]
         },
         {
-          "temp_id": "PROC-108.1",
+          "temp_id": "PROC-118.1",
           "event": "尝试启动超时事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1260,7 +880,7 @@
           ]
         },
         {
-          "temp_id": "PROC-108.2",
+          "temp_id": "PROC-118.2",
           "event": "尝试启动超时事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1273,7 +893,7 @@
           ]
         },
         {
-          "temp_id": "PROC-120.1",
+          "temp_id": "PROC-133.1",
           "event": "评审超时-待评审（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
@@ -1286,7 +906,7 @@
           ]
         },
         {
-          "temp_id": "PROC-120.2",
+          "temp_id": "PROC-133.2",
           "event": "评审超时-待评审（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
@@ -1299,7 +919,7 @@
           ]
         },
         {
-          "temp_id": "PROC-122.1",
+          "temp_id": "PROC-135.1",
           "event": "评审超时-待评审(时间边界)（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
@@ -1312,7 +932,7 @@
           ]
         },
         {
-          "temp_id": "PROC-122.2",
+          "temp_id": "PROC-135.2",
           "event": "评审超时-待评审(时间边界)（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
@@ -1325,7 +945,7 @@
           ]
         },
         {
-          "temp_id": "PROC-123.1",
+          "temp_id": "PROC-136.1",
           "event": "尝试评审超时-待评审事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1338,7 +958,7 @@
           ]
         },
         {
-          "temp_id": "PROC-123.2",
+          "temp_id": "PROC-136.2",
           "event": "尝试评审超时-待评审事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1351,7 +971,7 @@
           ]
         },
         {
-          "temp_id": "PROC-124.1",
+          "temp_id": "PROC-137.1",
           "event": "评审超时-评审中（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
@@ -1364,138 +984,8 @@
           ]
         },
         {
-          "temp_id": "PROC-124.2",
+          "temp_id": "PROC-137.2",
           "event": "评审超时-评审中（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-125.1",
-          "event": "评审超时-评审中(时间边界)（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-125.2",
-          "event": "评审超时-评审中(时间边界)（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-126.1",
-          "event": "尝试评审超时-评审中事件(已过期)",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-126.2",
-          "event": "尝试评审超时-评审中事件(已过期)",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-127.1",
-          "event": "评审超时-暂停（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-127.2",
-          "event": "评审超时-暂停（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-128.1",
-          "event": "评审超时-暂停(时间边界)（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-128.2",
-          "event": "评审超时-暂停(时间边界)（目标状态：已完成）",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-129.1",
-          "event": "尝试评审超时-暂停事件(已过期)",
-          "hit_by": [
-            "event_keyword"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-129.2",
-          "event": "尝试评审超时-暂停事件(已过期)",
           "hit_by": [
             "event_keyword"
           ],
@@ -1508,7 +998,7 @@
         },
         {
           "temp_id": "PROC-138.1",
-          "event": "归档超时（目标状态：超时结束）",
+          "event": "评审超时-评审中(时间边界)（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
           ],
@@ -1521,7 +1011,7 @@
         },
         {
           "temp_id": "PROC-138.2",
-          "event": "归档超时（目标状态：超时结束）",
+          "event": "评审超时-评审中(时间边界)（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
           ],
@@ -1534,7 +1024,7 @@
         },
         {
           "temp_id": "PROC-139.1",
-          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "event": "尝试评审超时-评审中事件(已过期)",
           "hit_by": [
             "event_keyword"
           ],
@@ -1547,7 +1037,7 @@
         },
         {
           "temp_id": "PROC-139.2",
-          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "event": "尝试评审超时-评审中事件(已过期)",
           "hit_by": [
             "event_keyword"
           ],
@@ -1560,7 +1050,7 @@
         },
         {
           "temp_id": "PROC-140.1",
-          "event": "尝试归档超时事件(已过期)",
+          "event": "评审超时-暂停（目标状态：已完成）",
           "hit_by": [
             "event_keyword"
           ],
@@ -1573,6 +1063,136 @@
         },
         {
           "temp_id": "PROC-140.2",
+          "event": "评审超时-暂停（目标状态：已完成）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-141.1",
+          "event": "评审超时-暂停(时间边界)（目标状态：已完成）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-141.2",
+          "event": "评审超时-暂停(时间边界)（目标状态：已完成）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-142.1",
+          "event": "尝试评审超时-暂停事件(已过期)",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-142.2",
+          "event": "尝试评审超时-暂停事件(已过期)",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-154.1",
+          "event": "归档超时（目标状态：超时结束）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-154.2",
+          "event": "归档超时（目标状态：超时结束）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-155.1",
+          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-155.2",
+          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-156.1",
+          "event": "尝试归档超时事件(已过期)",
+          "hit_by": [
+            "event_keyword"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-156.2",
           "event": "尝试归档超时事件(已过期)",
           "hit_by": [
             "event_keyword"
@@ -1597,19 +1217,19 @@
       "check_id": "V07",
       "result": "fail",
       "severity": "warning",
-      "fail_count": 81,
+      "fail_count": 60,
       "evidence": [
         {
           "temp_id": "PROC-011.1",
           "actor": "系统管理员",
           "action": "添加研制机构",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-011.2",
           "actor": "系统管理员",
           "action": "添加研制机构",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-012.1",
@@ -1625,79 +1245,79 @@
           "temp_id": "PROC-033.1",
           "actor": "系统管理员",
           "action": "新增用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-033.2",
           "actor": "系统管理员",
           "action": "新增用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-034.1",
           "actor": "系统管理员",
           "action": "解锁用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-034.2",
           "actor": "系统管理员",
           "action": "解锁用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-035.1",
           "actor": "系统管理员",
           "action": "锁定用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-035.2",
           "actor": "系统管理员",
           "action": "锁定用户",
-          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['超时设置', '用户管理', '角色查看', '机构管理', '机构提为试用']...)"
+          "reason": "actor '系统管理员' lacks permission for action (matrix has: ['机构提为试用', '机构管理', '用户管理', '用户解锁', '角色查看']...)"
         },
         {
           "temp_id": "PROC-064.1",
           "actor": "评审管理员",
           "action": "建立评审计划",
-          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['项目选入', '项目选出', '计划建立', '计划编辑', '计划取消']...)"
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
         },
         {
           "temp_id": "PROC-064.2",
           "actor": "评审管理员",
           "action": "建立评审计划",
-          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['项目选入', '项目选出', '计划建立', '计划编辑', '计划取消']...)"
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
         },
         {
           "temp_id": "PROC-076.1",
           "actor": "机构管理员",
           "action": "新增项目",
-          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['项目新增', '项目编辑', '项目删除', '项目查看', '项目查询']...)"
+          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['本机构附件查看', '项目删除', '项目新增', '项目查看', '项目查询']...)"
         },
         {
           "temp_id": "PROC-076.2",
           "actor": "机构管理员",
           "action": "新增项目",
-          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['项目新增', '项目编辑', '项目删除', '项目查看', '项目查询']...)"
+          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['本机构附件查看', '项目删除', '项目新增', '项目查看', '项目查询']...)"
         },
         {
           "temp_id": "PROC-076.3",
           "actor": "机构管理员",
           "action": "新增项目",
-          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['项目新增', '项目编辑', '项目删除', '项目查看', '项目查询']...)"
+          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['本机构附件查看', '项目删除', '项目新增', '项目查看', '项目查询']...)"
         },
         {
           "temp_id": "PROC-076.4",
           "actor": "机构管理员",
           "action": "新增项目",
-          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['项目新增', '项目编辑', '项目删除', '项目查看', '项目查询']...)"
+          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['本机构附件查看', '项目删除', '项目新增', '项目查看', '项目查询']...)"
         },
         {
           "temp_id": "PROC-076.5",
           "actor": "机构管理员",
           "action": "新增项目",
-          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['项目新增', '项目编辑', '项目删除', '项目查看', '项目查询']...)"
+          "reason": "actor '机构管理员' lacks permission for action (matrix has: ['本机构附件查看', '项目删除', '项目新增', '项目查看', '项目查询']...)"
         },
         {
           "temp_id": "PROC-093.1",
@@ -1721,180 +1341,172 @@
         },
         {
           "temp_id": "PROC-099.1",
-          "actor": "评审管理员",
-          "action": "下发评审计划",
-          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['项目选入', '项目选出', '计划建立', '计划编辑', '计划取消']...)"
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
         },
         {
           "temp_id": "PROC-099.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-100.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-100.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-101.1",
           "actor": "评审管理员",
           "action": "下发评审计划",
-          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['项目选入', '项目选出', '计划建立', '计划编辑', '计划取消']...)"
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
         },
         {
-          "temp_id": "PROC-104.1",
-          "actor": "评审专家",
-          "action": "打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-104.2",
-          "actor": "评审专家",
-          "action": "打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-104.3",
-          "actor": "评审专家",
-          "action": "打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-104.4",
-          "actor": "评审专家",
-          "action": "打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-105.1",
-          "actor": "评审助理",
-          "action": "启动评审计划",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
-        },
-        {
-          "temp_id": "PROC-105.2",
-          "actor": "评审助理",
-          "action": "启动评审计划",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
-        },
-        {
-          "temp_id": "PROC-109.1",
-          "actor": "评审助理",
-          "action": "重启-返回待评审",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
-        },
-        {
-          "temp_id": "PROC-109.2",
-          "actor": "评审助理",
-          "action": "重启-返回待评审",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
-        },
-        {
-          "temp_id": "PROC-110.1",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-110.2",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-110.3",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-110.4",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-111.1",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-111.2",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-111.3",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-111.4",
-          "actor": "评审专家",
-          "action": "提交打分",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-114.1",
-          "actor": "评审专家",
-          "action": "评审专家打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
-        },
-        {
-          "temp_id": "PROC-114.2",
-          "actor": "评审专家",
-          "action": "评审专家打分保存",
-          "reason": "actor '评审专家' lacks permission for action (matrix has: ['打分', '保存', '提交', '首页打分']...)"
+          "temp_id": "PROC-101.2",
+          "actor": "评审管理员",
+          "action": "下发评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
         },
         {
           "temp_id": "PROC-115.1",
           "actor": "评审助理",
-          "action": "重启-返回评审中",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "action": "启动评审计划",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
           "temp_id": "PROC-115.2",
           "actor": "评审助理",
+          "action": "启动评审计划",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-119.1",
+          "actor": "评审助理",
+          "action": "重启-返回待评审",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-119.2",
+          "actor": "评审助理",
+          "action": "重启-返回待评审",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-120.1",
+          "actor": "评审管理员",
+          "action": "项目纳入评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
+        },
+        {
+          "temp_id": "PROC-120.2",
+          "actor": "评审管理员",
+          "action": "项目纳入评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
+        },
+        {
+          "temp_id": "PROC-120.3",
+          "actor": "评审管理员",
+          "action": "项目纳入评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
+        },
+        {
+          "temp_id": "PROC-120.4",
+          "actor": "评审管理员",
+          "action": "项目纳入评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
+        },
+        {
+          "temp_id": "PROC-120.5",
+          "actor": "评审管理员",
+          "action": "项目纳入评审计划",
+          "reason": "actor '评审管理员' lacks permission for action (matrix has: ['专家管理', '分数限值编辑', '实施情况查看', '结果汇总查看', '计划下发']...)"
+        },
+        {
+          "temp_id": "PROC-127.1",
+          "actor": "评审助理",
           "action": "重启-返回评审中",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-116.1",
+          "temp_id": "PROC-127.2",
+          "actor": "评审助理",
+          "action": "重启-返回评审中",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-129.1",
           "actor": "评审助理",
           "action": "暂停-待评审",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-116.2",
+          "temp_id": "PROC-129.2",
           "actor": "评审助理",
           "action": "暂停-待评审",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-117.1",
+          "temp_id": "PROC-130.1",
           "actor": "评审助理",
           "action": "暂停-评审中",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-117.2",
+          "temp_id": "PROC-130.2",
           "actor": "评审助理",
           "action": "暂停-评审中",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-118.1",
+          "temp_id": "PROC-131.1",
           "actor": "评审助理",
           "action": "重启-返回已完成",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-118.2",
+          "temp_id": "PROC-131.2",
           "actor": "评审助理",
           "action": "重启-返回已完成",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
         },
         {
-          "temp_id": "PROC-121.1",
+          "temp_id": "PROC-134.1",
           "actor": "评审助理",
           "action": "暂停-已完成",
-          "reason": "actor '评审助理' lacks permission for action (matrix has: ['计划启动', '计划暂停', '计划重启', '计划归档', '计划删除']...)"
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-134.2",
+          "actor": "评审助理",
+          "action": "暂停-已完成",
+          "reason": "actor '评审助理' lacks permission for action (matrix has: ['实施情况查看', '计划删除', '计划启动', '计划归档', '计划暂停']...)"
+        },
+        {
+          "temp_id": "PROC-143.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-143.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-143.3",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
+        },
+        {
+          "temp_id": "PROC-143.4",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix or system set (known: ['审计管理员', '机构管理员', '系统', '系统管理员', '评审专家', '评审助理', '评审管理员'])"
         }
       ],
-      "evidence_truncated": 31,
+      "evidence_truncated": 10,
       "suspected_stage": "S0",
       "suspected_files": [
         "prompts/s0_prompt.py",
@@ -1904,21 +1516,10 @@
     },
     {
       "check_id": "V08",
-      "result": "fail",
+      "result": "pass",
       "severity": "blocker",
-      "fail_count": 1,
-      "evidence": [
-        {
-          "machine": "项目",
-          "transition": "T-PROJ-004",
-          "from": "已选入",
-          "to": "待评审",
-          "direction": "forward",
-          "phase_from": 89,
-          "phase_to": 86,
-          "reason": "forward transition must increase phase"
-        }
-      ],
+      "fail_count": 0,
+      "evidence": [],
       "evidence_truncated": 0,
       "suspected_stage": "S0",
       "suspected_files": [
@@ -2065,6 +1666,7 @@
           "topic": "专家管理",
           "required_type": "field_validation",
           "hit_types": [
+            1,
             6,
             8
           ],
@@ -2190,7 +1792,7 @@
     }
   ],
   "metrics": {
-    "case_total": 447,
+    "case_total": 445,
     "dedup_ratio": 1.0,
     "guard_violations": 0,
     "dangling_deps": 0,
@@ -2198,5 +1800,5 @@
     "builtin_misuse": 2,
     "coverage_misses": 25
   },
-  "signature": "3d6abbe99bcc"
+  "signature": "08620e8aa6e7"
 }
