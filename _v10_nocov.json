@@ -1305,6 +1305,7 @@
           "hit_types": [
             1,
             6,
+            7,
             8
           ],
           "reason": "text mentions found but no case of required obligation_type"

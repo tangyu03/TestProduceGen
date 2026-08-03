@@ -232,18 +232,6 @@ def _make_then(target: str, expectation: str,
     }
 
 
-def _is_coverage_noise(expectation: str) -> bool:
-    """Whether a Then expectation asserts coverage rather than an observable.
-
-    P1 实体操作描述形如 "覆盖{实体}的{操作}操作"(如 "覆盖专家的新增专家
-    操作")——它只陈述"这个用例覆盖了某操作",不产生可观察结果,渲染层应
-    省略。真正的可观察结果在 expected_results 中(生成器已单独追加)。
-    """
-    if not expectation:
-        return False
-    return "覆盖" in expectation and expectation.endswith("操作")
-
-
 # ── Procedure skeleton factories ─────────────────────────────────────────
 # Every generator (Type1/3/5/6/7/9) builds the same _S2/_S3/_S4 field shape.
 # These factories centralize the defaults so a schema change is one edit.
@@ -2252,7 +2240,6 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                     target=ve_name,
                     expectation=op_desc or f"{op_name}完成",
                     kind="behavior",
-                    dedup_group=("coverage_noise" if _is_coverage_noise(op_desc) else None),
                 )]
                 # V10 fix: append each expected_result as a separate Then.
                 # P1 already extracted observable result keywords (e.g.
@@ -2314,7 +2301,6 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                 target=entity,
                 expectation=op_desc or f"{op_name}完成",
                 kind="behavior",
-                dedup_group=("coverage_noise" if _is_coverage_noise(op_desc) else None),
             )]
             # V10 fix: append each expected_result as a separate Then.
             # P1 already extracted observable result keywords (e.g.

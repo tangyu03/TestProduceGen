@@ -48,6 +48,10 @@ class DomainModel:
         self.transitions = []
         self.invalid_transitions, self.cross_entity, self.business_rules = [], [], []
         self.branch_dimensions = []
+        # 项目操作词汇(prohibition_config)由数据模块声明 —— 领域词汇的唯一
+        # 真相源在 P1 数据层,而非 P2/S1 引擎硬编码。P2 读取 p1._context.
+        # prohibition_config,缺省时用 P2 的通用兜底。
+        self.prohibition_config: dict = {}
         self._check_hooks = []          # 扩展点：项目自定义校验
         self._before_assemble = []      # 扩展点：组装前钩子
         # ---- P1.5 挂载点 ----
@@ -175,6 +179,22 @@ class DomainModel:
         return self
 
     # ---------- 扩展点 ----------
+    def set_prohibition_config(self, config: dict):
+        """声明项目操作词汇(prohibition_config)。
+
+        领域动词/禁止短语的唯一真相源在 P1 数据层 —— P2 读取
+        p1._context.prohibition_config,缺省时回退到 P2 的通用兜底。
+        数据模块在 build() 中调用,示例:
+            m.set_prohibition_config({
+                "negation_prefixes": [...],
+                "action_verbs": ["选入", "归档", ...],   # 项目业务操作
+                "prohibit_keywords": [...],
+                "success_hints": [...],
+            })
+        """
+        self.prohibition_config = dict(config or {})
+        return self
+
     def add_check(self, fn):
         """注册项目自定义校验，签名 fn(validator, report)。"""
         self._check_hooks.append(fn)
@@ -235,6 +255,7 @@ class DomainModel:
     def _build_output(self):
         self.meta["pipeline_trace"] = self._build_trace()
         return {"_meta": self.meta,
+                "_context": {"prohibition_config": self.prohibition_config},
                 "domain_model": {
                     "entities": self.entities, "roles": self.roles,
                     "structural_relations": self.structural_relations,

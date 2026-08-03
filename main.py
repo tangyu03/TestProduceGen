@@ -491,13 +491,14 @@ def _translate_procedures(procedures: list[dict], id_to_name: dict[str, str]) ->
 
 
 def _dedup_thens(thens: list[dict]) -> list[dict]:
-    """Render-layer Then dedup: drop redundant / non-observable assertions.
+    """Render-layer Then dedup: drop redundant assertions.
 
     Data-driven: the S1 layer marks Thens with ``dedup_group`` (see
     _make_then) so the renderer does NOT match data-layer text conventions:
       - "transition_target" (状态转换为X) is implied by "transition_flow"
         (状态流转：from→to), so it is omitted when a flow is present.
-      - "coverage_noise" (覆盖X的Y操作) asserts coverage, not an observable.
+      ("coverage_noise" 已随 P2 治本修复移除——op_desc 现用可观察结果,
+      不再产生"覆盖X操作"噪声,此分支不再需要。)
     Exact duplicates (normalized whitespace) are also dropped.
     """
     out: list[dict] = []
@@ -507,10 +508,7 @@ def _dedup_thens(thens: list[dict]) -> list[dict]:
         exp = (t.get("expectation", "") or "").strip()
         if not exp:
             continue
-        dg = t.get("dedup_group")
-        if dg == "coverage_noise":
-            continue
-        if dg == "transition_target" and has_flow:
+        if t.get("dedup_group") == "transition_target" and has_flow:
             continue
         norm = "".join(exp.split())
         if norm in seen:

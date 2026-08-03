@@ -247,7 +247,7 @@
       "entity_name": "项目",
       "operation_name": "新增项目",
       "operation_category": "crud",
-      "description": "覆盖项目的新增项目操作",
+      "description": "项目状态初始化为待选入，处于开题阶段",
       "expected_results": [
         "项目状态初始化为待选入，处于开题阶段"
       ],
@@ -262,7 +262,7 @@
       "entity_name": "项目",
       "operation_name": "删除项目",
       "operation_category": "crud",
-      "description": "覆盖项目的删除项目操作",
+      "description": "只能删除待选入且未评价过的项目",
       "expected_results": [
         "只能删除待选入且未评价过的项目"
       ],
@@ -277,7 +277,7 @@
       "entity_name": "项目",
       "operation_name": "编辑项目",
       "operation_category": "crud",
-      "description": "覆盖项目的编辑项目操作",
+      "description": "只可编辑待选入的项目信息，对评价过的项目编辑附件",
       "expected_results": [
         "只可编辑待选入的项目信息，对评价过的项目编辑附件"
       ],
@@ -292,7 +292,7 @@
       "entity_name": "项目",
       "operation_name": "查看项目",
       "operation_category": "query",
-      "description": "覆盖项目的查看项目操作",
+      "description": "可查看项目的详细信息",
       "expected_results": [
         "可查看项目的详细信息"
       ],
@@ -307,7 +307,7 @@
       "entity_name": "项目",
       "operation_name": "查询项目",
       "operation_category": "query",
-      "description": "覆盖项目的查询项目操作",
+      "description": "依据项目名称和技术领域条件进行查询",
       "expected_results": [
         "依据项目名称和技术领域条件进行查询"
       ],
@@ -322,7 +322,7 @@
       "entity_name": "项目",
       "operation_name": "查看项目附件",
       "operation_category": "query",
-      "description": "覆盖项目的查看项目附件操作",
+      "description": "评审管理员和评审助理查看项目附件，机构管理员只可查看本机构的项目附件",
       "expected_results": [
         "评审管理员和评审助理查看项目附件，机构管理员只可查看本机构的项目附件"
       ],
@@ -337,7 +337,7 @@
       "entity_name": "项目",
       "operation_name": "项目选入",
       "operation_category": "crud",
-      "description": "覆盖项目的项目选入操作",
+      "description": "选入后项目状态变为已选入",
       "expected_results": [
         "选入后项目状态变为已选入"
       ],
@@ -352,7 +352,7 @@
       "entity_name": "项目",
       "operation_name": "项目选出",
       "operation_category": "crud",
-      "description": "覆盖项目的项目选出操作",
+      "description": "项目状态由已选入变为待选入",
       "expected_results": [
         "项目状态由已选入变为待选入"
       ],
@@ -367,7 +367,7 @@
       "entity_name": "项目",
       "operation_name": "排序",
       "operation_category": "ui",
-      "description": "覆盖项目的排序操作",
+      "description": "按照相应列的升序或者降序来显示列表数据",
       "expected_results": [
         "按照相应列的升序或者降序来显示列表数据"
       ],
@@ -382,7 +382,7 @@
       "entity_name": "项目",
       "operation_name": "分页工具条",
       "operation_category": "ui",
-      "description": "覆盖项目的分页工具条操作",
+      "description": "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数",
       "expected_results": [
         "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数"
       ],
@@ -397,7 +397,7 @@
       "entity_name": "项目",
       "operation_name": "重置",
       "operation_category": "ui",
-      "description": "覆盖项目的重置操作",
+      "description": "清除输入的查询条件，刷新页面",
       "expected_results": [
         "清除输入的查询条件，刷新页面"
       ],
@@ -412,7 +412,7 @@
       "entity_name": "项目",
       "operation_name": "取消/关闭",
       "operation_category": "ui",
-      "description": "覆盖项目的取消/关闭操作",
+      "description": "放弃本次新增、编辑操作或关闭弹窗",
       "expected_results": [
         "放弃本次新增、编辑操作或关闭弹窗"
       ],
@@ -427,7 +427,7 @@
       "entity_name": "项目",
       "operation_name": "上传附件",
       "operation_category": "file",
-      "description": "覆盖项目的上传附件操作",
+      "description": "将选中的附件从本地上传到数据库",
       "expected_results": [
         "将选中的附件从本地上传到数据库"
       ],
@@ -442,7 +442,7 @@
       "entity_name": "项目",
       "operation_name": "下载附件",
       "operation_category": "file",
-      "description": "覆盖项目的下载附件操作",
+      "description": "将选中的附件从数据库下载到本地",
       "expected_results": [
         "将选中的附件从数据库下载到本地"
       ],
@@ -457,7 +457,7 @@
       "entity_name": "项目",
       "operation_name": "保存",
       "operation_category": "crud",
-      "description": "覆盖项目的保存操作",
+      "description": "实现对数据库中的数据更新",
       "expected_results": [
         "实现对数据库中的数据更新"
       ],
@@ -472,7 +472,7 @@
       "entity_name": "评审计划",
       "operation_name": "建立评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的建立评审计划操作",
+      "description": "保存后评审计划状态为已建立",
       "expected_results": [
         "保存后评审计划状态为已建立"
       ],
@@ -487,7 +487,7 @@
       "entity_name": "评审计划",
       "operation_name": "取消评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的取消评审计划操作",
+      "description": "评审计划状态由已建立变为取消结束",
       "expected_results": [
         "评审计划状态由已建立变为取消结束",
         "项目和专家状态返回到该计划建立前的状态"
@@ -503,7 +503,7 @@
       "entity_name": "评审计划",
       "operation_name": "下发评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的下发评审计划操作",
+      "description": "评审计划状态由已建立变为待启动",
       "expected_results": [
         "评审计划状态由已建立变为待启动"
       ],
@@ -518,7 +518,7 @@
       "entity_name": "评审计划",
       "operation_name": "启动评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的启动评审计划操作",
+      "description": "评审计划状态由待启动变为待评审",
       "expected_results": [
         "评审计划状态由待启动变为待评审"
       ],
@@ -533,7 +533,7 @@
       "entity_name": "评审计划",
       "operation_name": "暂停评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的暂停评审计划操作",
+      "description": "计划状态变为暂停",
       "expected_results": [
         "计划状态变为暂停",
         "专家不能对计划中的项目进行评审",
@@ -551,7 +551,7 @@
       "entity_name": "评审计划",
       "operation_name": "重启评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的重启评审计划操作",
+      "description": "启动后，状态返回到暂停前的状态",
       "expected_results": [
         "启动后，状态返回到暂停前的状态"
       ],
@@ -566,7 +566,7 @@
       "entity_name": "评审计划",
       "operation_name": "归档评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的归档评审计划操作",
+      "description": "评审计划状态由已完成为结束",
       "expected_results": [
         "评审计划状态由已完成为结束",
         "对该计划中项目按照4.5(5)归档",
@@ -583,7 +583,7 @@
       "entity_name": "评审计划",
       "operation_name": "删除评审计划",
       "operation_category": "crud",
-      "description": "覆盖评审计划的删除评审计划操作",
+      "description": "可删除处于已建立状态和取消结束状态的计划",
       "expected_results": [
         "可删除处于已建立状态和取消结束状态的计划"
       ],
@@ -598,7 +598,7 @@
       "entity_name": "评审计划",
       "operation_name": "查看评审计划",
       "operation_category": "query",
-      "description": "覆盖评审计划的查看评审计划操作",
+      "description": "对评审计划的状态、评审组的组成和计划的执行信息等进行查看",
       "expected_results": [
         "对评审计划的状态、评审组的组成和计划的执行信息等进行查看"
       ],
@@ -613,7 +613,7 @@
       "entity_name": "评审计划",
       "operation_name": "查询评审计划",
       "operation_category": "query",
-      "description": "覆盖评审计划的查询评审计划操作",
+      "description": "根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划",
       "expected_results": [
         "根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划"
       ],
@@ -628,7 +628,7 @@
       "entity_name": "评审计划",
       "operation_name": "组建评审组",
       "operation_category": "crud",
-      "description": "覆盖评审计划的组建评审组操作",
+      "description": "根据项目领域和回避规则显示匹配的评审专家",
       "expected_results": [
         "根据项目领域和回避规则显示匹配的评审专家"
       ],
@@ -643,7 +643,7 @@
       "entity_name": "专家",
       "operation_name": "新增专家",
       "operation_category": "crud",
-      "description": "覆盖专家的新增专家操作",
+      "description": "手机号作为账号",
       "expected_results": [
         "手机号作为账号",
         "密码默认为手机号后六位"
@@ -659,7 +659,7 @@
       "entity_name": "专家",
       "operation_name": "编辑专家",
       "operation_category": "crud",
-      "description": "覆盖专家的编辑专家操作",
+      "description": "不能编辑技术领域、机构、评审身份和手机号",
       "expected_results": [
         "不能编辑技术领域、机构、评审身份和手机号"
       ],
@@ -674,7 +674,7 @@
       "entity_name": "专家",
       "operation_name": "删除专家",
       "operation_category": "crud",
-      "description": "覆盖专家的删除专家操作",
+      "description": "专家有待评审或者评审中的项目时不可以删除，并提示",
       "expected_results": [
         "专家有待评审或者评审中的项目时不可以删除，并提示",
         "如删除后同一技术领域的专家不足5人时需进行确认",
@@ -691,7 +691,7 @@
       "entity_name": "专家",
       "operation_name": "查询专家",
       "operation_category": "query",
-      "description": "覆盖专家的查询专家操作",
+      "description": "根据姓名、手机号和技术领域进行查询",
       "expected_results": [
         "根据姓名、手机号和技术领域进行查询"
       ],
@@ -706,7 +706,7 @@
       "entity_name": "专家",
       "operation_name": "打分项目查看",
       "operation_category": "query",
-      "description": "覆盖专家的打分项目查看操作",
+      "description": "查看该专家参评的项目的打分信息与意见",
       "expected_results": [
         "查看该专家参评的项目的打分信息与意见"
       ],
@@ -721,7 +721,7 @@
       "entity_name": "专家",
       "operation_name": "回避项目设置",
       "operation_category": "crud",
-      "description": "覆盖专家的回避项目设置操作",
+      "description": "在已选入的项目中进行专家回避项目设置",
       "expected_results": [
         "在已选入的项目中进行专家回避项目设置",
         "只对回避项目设置后建立的评审计划有效"
@@ -737,7 +737,7 @@
       "entity_name": "用户",
       "operation_name": "登录",
       "operation_category": "session",
-      "description": "覆盖用户的登录操作",
+      "description": "输入正确的用户账号与相应的密码后可进入本系统",
       "expected_results": [
         "输入正确的用户账号与相应的密码后可进入本系统",
         "如输入的用户账号或密码错误，则系统给出提示"
@@ -753,7 +753,7 @@
       "entity_name": "用户",
       "operation_name": "注销",
       "operation_category": "session",
-      "description": "覆盖用户的注销操作",
+      "description": "确认退出后，系统将返回登录界面",
       "expected_results": [
         "确认退出后，系统将返回登录界面"
       ],
@@ -768,7 +768,7 @@
       "entity_name": "用户",
       "operation_name": "修改密码",
       "operation_category": "session",
-      "description": "覆盖用户的修改密码操作",
+      "description": "需要输入原密码，如果输入的原密码不对，则给出提示",
       "expected_results": [
         "需要输入原密码，如果输入的原密码不对，则给出提示",
         "新密码与原密码应不同，否则系统给出提示",
@@ -785,7 +785,7 @@
       "entity_name": "用户",
       "operation_name": "菜单收起和展开",
       "operation_category": "ui",
-      "description": "覆盖用户的菜单收起和展开操作",
+      "description": "支持菜单收起和展开功能",
       "expected_results": [
         "支持菜单收起和展开功能"
       ],
@@ -800,7 +800,7 @@
       "entity_name": "用户",
       "operation_name": "新增用户",
       "operation_category": "crud",
-      "description": "覆盖用户的新增用户操作",
+      "description": "实现用户新增的功能",
       "expected_results": [
         "实现用户新增的功能"
       ],
@@ -815,7 +815,7 @@
       "entity_name": "用户",
       "operation_name": "编辑用户",
       "operation_category": "crud",
-      "description": "覆盖用户的编辑用户操作",
+      "description": "不可编辑用户账号、手机号、技术领域、所属机构和角色",
       "expected_results": [
         "不可编辑用户账号、手机号、技术领域、所属机构和角色"
       ],
@@ -830,7 +830,7 @@
       "entity_name": "用户",
       "operation_name": "锁定用户",
       "operation_category": "crud",
-      "description": "覆盖用户的锁定用户操作",
+      "description": "锁定后不得登录此系统",
       "expected_results": [
         "锁定后不得登录此系统"
       ],
@@ -845,7 +845,7 @@
       "entity_name": "用户",
       "operation_name": "解锁用户",
       "operation_category": "crud",
-      "description": "覆盖用户的解锁用户操作",
+      "description": "解锁后可以登录此系统",
       "expected_results": [
         "解锁后可以登录此系统"
       ],
@@ -860,7 +860,7 @@
       "entity_name": "用户",
       "operation_name": "重置密码",
       "operation_category": "crud",
-      "description": "覆盖用户的重置密码操作",
+      "description": "实现用户密码的重置",
       "expected_results": [
         "实现用户密码的重置"
       ],
@@ -875,7 +875,7 @@
       "entity_name": "用户",
       "operation_name": "删除用户",
       "operation_category": "crud",
-      "description": "覆盖用户的删除用户操作",
+      "description": "如有未完成的任务，不能删除",
       "expected_results": [
         "如有未完成的任务，不能删除"
       ],
@@ -890,7 +890,7 @@
       "entity_name": "用户",
       "operation_name": "查询用户",
       "operation_category": "query",
-      "description": "覆盖用户的查询用户操作",
+      "description": "根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询",
       "expected_results": [
         "根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询"
       ],
@@ -905,7 +905,7 @@
       "entity_name": "机构",
       "operation_name": "添加研制机构",
       "operation_category": "crud",
-      "description": "覆盖机构的添加研制机构操作",
+      "description": "机构建立后默认为合格状态",
       "expected_results": [
         "机构建立后默认为合格状态"
       ],
@@ -920,7 +920,7 @@
       "entity_name": "机构",
       "operation_name": "编辑研制机构",
       "operation_category": "crud",
-      "description": "覆盖机构的编辑研制机构操作",
+      "description": "不可编辑上级机构、机构编码、不合格次数和机构状态",
       "expected_results": [
         "不可编辑上级机构、机构编码、不合格次数和机构状态"
       ],
@@ -935,7 +935,7 @@
       "entity_name": "机构",
       "operation_name": "删除研制机构",
       "operation_category": "crud",
-      "description": "覆盖机构的删除研制机构操作",
+      "description": "机构下无项目、无用户、无子机构时，才可删除",
       "expected_results": [
         "机构下无项目、无用户、无子机构时，才可删除",
         "根机构不可删除"
@@ -951,7 +951,7 @@
       "entity_name": "角色",
       "operation_name": "查看角色",
       "operation_category": "query",
-      "description": "覆盖角色的查看角色操作",
+      "description": "查看各角色及其对应的用户信息",
       "expected_results": [
         "查看各角色及其对应的用户信息"
       ],
@@ -966,7 +966,7 @@
       "entity_name": "角色",
       "operation_name": "关联用户查看",
       "operation_category": "query",
-      "description": "覆盖角色的关联用户查看操作",
+      "description": "查看相应角色下的关联用户",
       "expected_results": [
         "查看相应角色下的关联用户"
       ],
@@ -981,7 +981,7 @@
       "entity_name": "角色",
       "operation_name": "查询角色",
       "operation_category": "query",
-      "description": "覆盖角色的查询角色操作",
+      "description": "根据角色名称查询",
       "expected_results": [
         "根据角色名称查询"
       ],
@@ -996,7 +996,7 @@
       "entity_name": "系统日志",
       "operation_name": "查看日志",
       "operation_category": "query",
-      "description": "覆盖系统日志的查看日志操作",
+      "description": "审计管理员可查看、查询日志信息",
       "expected_results": [
         "审计管理员可查看、查询日志信息"
       ],
@@ -1011,7 +1011,7 @@
       "entity_name": "系统日志",
       "operation_name": "查询日志",
       "operation_category": "query",
-      "description": "覆盖系统日志的查询日志操作",
+      "description": "根据日志内容、创建时间进行组合查询",
       "expected_results": [
         "根据日志内容、创建时间进行组合查询"
       ],
@@ -1026,7 +1026,7 @@
       "entity_name": "专家打分",
       "operation_name": "打分",
       "operation_category": "crud",
-      "description": "覆盖专家打分的打分操作",
+      "description": "专家依据打分规则对项目进行评审打分",
       "expected_results": [
         "专家依据打分规则对项目进行评审打分",
         "显示内置的评分细则为专家打分提供参考"
@@ -1042,7 +1042,7 @@
       "entity_name": "专家打分",
       "operation_name": "保存打分",
       "operation_category": "crud",
-      "description": "覆盖专家打分的保存打分操作",
+      "description": "打分状态变为已保存",
       "expected_results": [
         "打分状态变为已保存"
       ],
@@ -1057,7 +1057,7 @@
       "entity_name": "专家打分",
       "operation_name": "提交打分",
       "operation_category": "crud",
-      "description": "覆盖专家打分的提交打分操作",
+      "description": "打分状态变为已提交",
       "expected_results": [
         "打分状态变为已提交",
         "已提交的项目不能进行分数修改",
@@ -1074,7 +1074,7 @@
       "entity_name": "专家打分",
       "operation_name": "查看打分进度",
       "operation_category": "query",
-      "description": "覆盖专家打分的查看打分进度操作",
+      "description": "打分已提交专家人数占评审专家总人数的比例",
       "expected_results": [
         "打分已提交专家人数占评审专家总人数的比例"
       ],
@@ -1089,7 +1089,7 @@
       "entity_name": "专家打分",
       "operation_name": "查看打分情况",
       "operation_category": "query",
-      "description": "覆盖专家打分的查看打分情况操作",
+      "description": "展示评审组各专家对具体项目各打分项的打分记录及该项目的得分统计及评价结果",
       "expected_results": [
         "展示评审组各专家对具体项目各打分项的打分记录及该项目的得分统计及评价结果"
       ],
@@ -1104,7 +1104,7 @@
       "entity_name": "分数限值",
       "operation_name": "设置分数限值",
       "operation_category": "config",
-      "description": "覆盖分数限值的设置分数限值操作",
+      "description": "对未产生评价结果的项目立即生效",
       "expected_results": [
         "对未产生评价结果的项目立即生效",
         "对已经汇总的项目无影响"
@@ -1120,7 +1120,7 @@
       "entity_name": "分数限值",
       "operation_name": "编辑分数限值",
       "operation_category": "config",
-      "description": "覆盖分数限值的编辑分数限值操作",
+      "description": "评审管理员可对分数限值进行编辑",
       "expected_results": [
         "评审管理员可对分数限值进行编辑"
       ],
@@ -1135,7 +1135,7 @@
       "entity_name": "分数限值",
       "operation_name": "查看结果汇总",
       "operation_category": "query",
-      "description": "覆盖分数限值的查看结果汇总操作",
+      "description": "查看评价分数大于等于分数限值的项目信息",
       "expected_results": [
         "查看评价分数大于等于分数限值的项目信息"
       ],
@@ -1150,7 +1150,7 @@
       "entity_name": "超时设置",
       "operation_name": "设置超时",
       "operation_category": "config",
-      "description": "覆盖超时设置的设置超时操作",
+      "description": "对评审计划的活动进行超时设置",
       "expected_results": [
         "对评审计划的活动进行超时设置"
       ],
@@ -1165,7 +1165,7 @@
       "entity_name": "超时设置",
       "operation_name": "编辑超时",
       "operation_category": "config",
-      "description": "覆盖超时设置的编辑超时操作",
+      "description": "可对评审计划进行超时时间进行编辑",
       "expected_results": [
         "可对评审计划进行超时时间进行编辑",
         "超时设置完成后，对所有计划立即生效"
@@ -5799,6 +5799,11 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划建立后项目状态由已选入变为待评审"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "纳入项目状态由已选入变为待评审"
         }
       ],
       "branch_path": [],
@@ -5848,7 +5853,7 @@
         },
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "项目和专家状态返回到该计划建立前的状态"
         }
       ],
@@ -6005,6 +6010,11 @@
           "target_entity": "E-SCORE",
           "target_dimension": "打分状态",
           "effect_desc": "评审计划启动时为专家项目对生成打分记录"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "项目状态由待评审变为评审中"
         }
       ],
       "branch_path": [],
@@ -6064,6 +6074,11 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划启动后项目状态由待评审变为评审中"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "项目状态由待评审变为评审中"
         }
       ],
       "branch_path": [],
@@ -6166,7 +6181,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "专家不能对计划中的项目进行评审"
         }
       ],
@@ -6219,7 +6234,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "专家不能对计划中的项目进行评审"
         }
       ],
@@ -6524,7 +6539,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6583,7 +6598,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6642,7 +6657,7 @@
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目状态",
+          "target_dimension": "项目阶段",
           "effect_desc": "计划中项目状态不变"
         }
       ],
@@ -6699,6 +6714,11 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划归档(已完成变为结束或超时结束)后项目按4.5(5)归档"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "对该计划中项目按照4.5(5)归档"
         }
       ],
       "branch_path": [],
@@ -6760,6 +6780,11 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审计划归档(已完成变为结束或超时结束)后项目按4.5(5)归档"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "对该计划中项目按照4.5(5)归档"
         }
       ],
       "branch_path": [],
@@ -6897,6 +6922,11 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审组全部专家提交打分后项目状态由评审中变为待归档"
+        },
+        {
+          "target_entity": "E-PROJ",
+          "target_dimension": "项目阶段",
+          "effect_desc": "已提交的项目不能进行分数修改"
         }
       ],
       "branch_path": [],
@@ -8614,7 +8644,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-07-31T10:31:57.351763+08:00",
+    "generated_at": "2026-08-03T19:19:29.242913+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -9324,11 +9354,11 @@
             ],
             "phase_mapping": {
               "已建立": 0,
-              "取消结束": 5,
               "待启动": 1,
+              "取消结束": 5,
               "待评审": 2,
-              "已完成": 4,
               "评审中": 3,
+              "已完成": 4,
               "超时结束": 5,
               "结束": 5,
               "暂停": 4
@@ -9558,6 +9588,12 @@
         "禁止",
         "不得",
         "仅限",
+        "不允许",
+        "无法",
+        "无权",
+        "只能",
+        "才可",
+        "只有",
         "不可选入",
         "不可删除",
         "不可分配",

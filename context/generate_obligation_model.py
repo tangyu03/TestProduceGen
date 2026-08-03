@@ -304,7 +304,12 @@ for e in p1["domain_model"]["entities"]:
             "entity_name": e["name"],
             "operation_name": op_name,
             "operation_category": op_cat,
-            "description": f"覆盖{e['name']}的{op_name}操作",
+            # 治本: description 用操作的可观察结果(expected_results 首条)而非
+            # "覆盖X操作"噪声。expected_results 由 P1 逐字转录原文可观察结果
+            # (如"可查看项目的详细信息"),S1 Type5 将其作为 Then 断言。
+            # 旧硬编码"覆盖{e['name']}的{op_name}操作"不断言任何可观察结果,
+            # 迫使 S1 用 _is_coverage_noise 标记+渲染层过滤兜底 —— 从源头消除。
+            "description": op_er[0] if op_er else f"{op_name}完成",
             "expected_results": op_er,
             "suggested_action": f"对{e['name']}执行{op_name}",
             "coverage_priority": "medium",
@@ -2085,17 +2090,18 @@ if unresolved_list:
 # Build _context
 # prohibition_config: keywords for detecting restrictive/negative-branch
 # preconditions. S1 reads these from _context instead of hardcoding them.
-# Default values cover common Chinese prohibition patterns; projects can
-# override by setting _context.prohibition_config in P1 input.
+# 领域无关原则: 默认值只保留通用中文否定词/系统操作动词——领域特定操作词汇
+# (如 选入/归档/发放/入选/选为/提为试用/连续3天)必须由 P1 输入在
+# _context.prohibition_config 中声明(数据模块是项目词汇的单一真相源),
+# P2 不硬编码业务词汇。
 _prohibition_config = p1.get("_context", {}).get("prohibition_config", {
     "negation_prefixes": ["不可", "不能", "不得", "禁止", "不允许", "无法", "无权", "未被", "未"],
-    "action_verbs": ["选入", "纳入", "启动", "提交", "保存", "删除", "修改", "新增",
-                     "审批", "批准", "通过", "归档", "重启", "暂停", "结束", "发放",
-                     "退出", "登录", "操作", "编辑", "查看", "分配", "入选", "进入",
-                     "选为", "选择", "执行"],
-    "prohibit_keywords": ["不可", "不能", "禁止", "不得", "仅限",
-                          "不可选入", "不可删除", "不可分配", "不可提交",
-                          "不能提为试用", "不能连续3天"],
+    "action_verbs": ["启动", "提交", "保存", "删除", "修改", "新增",
+                     "审批", "批准", "通过", "重启", "暂停", "结束",
+                     "退出", "登录", "操作", "编辑", "查看", "进入",
+                     "选择", "执行", "上传", "下载", "锁定", "重置"],
+    "prohibit_keywords": ["不可", "不能", "禁止", "不得", "不允许",
+                          "无法", "无权", "只能", "仅限", "才可", "只有"],
     "success_hints": ["状态转换为", "状态变更为"],
 })
 
