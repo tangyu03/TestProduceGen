@@ -171,6 +171,10 @@ class ThenClause(BaseModel):
     kind: Literal["state", "behavior", "prompt"] = "state"
     br_refs: list[str] = []           # embedded BR IDs (e.g. ["BR-03"])
     cross_refs: list[str] = []        # other entities involved in this observation
+    dedup_group: str | None = None    # 渲染层去重标记(数据驱动,而非渲染层匹配文本):
+                                      #   "transition_flow"   状态流转:from→to(保留)
+                                      #   "transition_target" 状态转换为X(有 flow 时省略)
+                                      #   "coverage_noise"    覆盖X的Y操作(无可观察结果)
 
 
 class BRClassification(BaseModel):
@@ -291,6 +295,7 @@ class S2Fields(BaseModel):
     phase: int
     phase_name: str
     phase_basis: str
+    phase_basis_debug: bool = False  # fallback/内部推导依据,渲染层应省略
     topology_level: int
     sort_key: list
     operation_lifecycle: int

@@ -1,0 +1,87 @@
+C:\Users\15831\AppData\Roaming\Python\Python314\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+C:\Users\15831\AppData\Roaming\Python\Python314\site-packages\langgraph\cache\base\__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+============================================================
+P3 Agent Engine — Test Procedure Orchestration
+============================================================
+
+[1/5] Compiling LangGraph pipeline...
+      [OK] Graph compiled: S0 → S1 → S2 → S3 → S4 → Done
+
+[2/5] Running pipeline...
+      [OK] S0 - Topology Discovery (0 procedures, 7 warnings, 0 errors)
+      [ACTION-CLS] Classified 100/100 actions
+      [OK] S1 - Procedure Generation (182 procedures, 57 warnings, 0 errors)
+      [OK] S2 - Sorting & Ordering (182 procedures, 58 warnings, 0 errors)
+      [OK] S3 - Dependency Binding (182 procedures, 63 warnings, 0 errors)
+      [OK] S4 - Multi-instance Expansion (467 procedures, 64 warnings, 0 errors)
+      [OK] Pipeline completed in 114.36s
+
+[3/5] Results Summary:
+      Final stage: s4
+      Total procedures: 467
+      Warnings: 64
+      Errors: 0
+
+      By Type:
+        Type1(Transition): 166
+        Type3(Attribute): 30
+        Type5(CRUD): 161
+        Type6(Invalid): 10
+        Type7(BR): 100
+
+      By Phase:
+        P0: 240
+        P1: 46
+        P2: 48
+        P3: 9
+        P4: 48
+        P5: 76
+
+[4/5] Multi-instance: 434 procedures with multiple instances, 1559 total instances
+      [SKIP] Title generation: LLM_API_KEY not set
+
+[5/5] Saving output to: _new_output.json
+
+      Clause Coverage Index:
+        total_clauses: 32
+        covered_clauses: 32
+        uncovered_clauses: 0
+
+      Transition Phase Metadata:
+        total_transitions: 88
+        forward: 64
+        side_effect/rollback/branch: 24
+
+      Time-Sensitive Metadata:
+        total_time_sensitive_procs: 42
+        with_trigger_method: 42
+
+      Fallback Report:
+        total_events: 108
+        is_clean_run: False
+        degraded_sites: ['s0.causal_pairs.index_pairing_fallback', 's1.is_approve.derived_fallback', 's1.type5_special_ops.generic_fallback', 's3.guard6.regex_fallback']
+        (Hint: update P1 prompt to emit structured fields so
+         these sites no longer fall back to keyword logic.)
+
+      Engine State:
+        primary_entity: E-PLAN
+        phase_table: {"primary_entity": "E-PLAN", "primary_dimension": "计划状态", "state_to_phase": {"计划状态": {"已建立": 0, "取消结束": 5, "待启动": 1, "待评审": 2, "已完成": 4, "评审中": 3, "超时结束": 5, "结束": 5, "暂停": 4}}, "phase_names": ["P0", "P1", "P2", "P3", "P4", "P5"], "phase_count": 6}
+        dep_state_phase_map: {"E-LOG": {}, "E-SCORE": {"打分状态": {"未打分": 0, "已保存": 1, "已提交": 2}}, "E-PROJ": {"项目状态": {"待选入": 0, "已选入": 1, "待评审": 2, "评审中": 3, "待归档": 4, "已归档": 5}, "项目阶段": {"开题": 0, "验收": 1}}, "E-ORG": {"机构状态": {"合格": 0, "不合格": 1, "试用": 2}}, "E-USER": {"用户状态": {"未锁定": 0, "锁定": 0}}}
+        contextual_phase_rules: {}
+        state_type_map: {"E-PLAN": {"计划状态": {"已建立": "driving", "取消结束": "driving", "待启动": "driving", "待评审": "driving", "评审中": "driving", "暂停": "driving", "已完成": "driving", "结束": "driving", "超时结束": "driving"}}, "E-PROJ": {"项目状态": {"待选入": "driving", "已选入": "driving", "待评审": "driving", "评审中": "driving", "待归档": "driving", "已归档": "driving"}, "项目阶段": {"验收": "driving"}}, "E-SCORE": {"打分状态": {"未打分": "driving", "已保存": "driving", "已提交": "driving"}}, "E-ORG": {"机构状态": {"合格": "driving", "不合格": "driving", "试用": "driving"}}, "E-USER": {"用户状态": {"未锁定": "driving", "锁定": "driving"}}}
+        dependent_entities: ["E-PROJ", "E-SCORE", "E-LOG"]
+        entity_parent: {"E-PROJ": "E-PLAN", "E-SCORE": "E-PLAN", "E-LOG": "E-PLAN"}
+        dependency_depth: {"E-PLAN": 0, "E-PROJ": 1, "E-SCORE": 1, "E-LOG": 1, "E-THR": 0, "E-ORG": 0, "E-USER": 0, "E-ROLE": 0, "E-TIMEOUT": 0, "E-EXP": 0}
+        topology_levels: {"E-PLAN": 1, "E-PROJ": 1, "E-SCORE": 1, "E-LOG": 1, "E-TIMEOUT": 0, "E-ORG": 0, "E-EXP": 0, "E-USER": 0, "E-THR": 0, "E-ROLE": 0}
+        virtual_entities: {}
+        transition_upstream_map: {"T-003": ["T-101"], "T-004": ["T-105"], "T-005": ["T-203"], "T-107": ["T-202"], "T-006a": ["T-116"], "T-201": ["T-105"]}
+      [OK] Saved 1364774 bytes
+      [OK] Markdown saved to: _new_output.md
+      [POLISH] Stage 1 (regex): 5 polished, 0 need LLM
+      [OK] Readable markdown saved to: _new_output_readable.md
+
+============================================================
+P3 Agent Engine — Complete
+============================================================

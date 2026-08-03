@@ -484,6 +484,42 @@ def _translate_procedures(procedures: list[dict], id_to_name: dict[str, str]) ->
     return procedures
 
 
+# 渲染层去重/过滤（只影响呈现，不动 JSON 数据 —— validator 依赖的关键词在数据层）。
+# 判断逻辑(debug basis、Then 冗余)由引擎层在数据中打标记
+# (_S2_fields.phase_basis_debug / Then.dedup_group),渲染层只消费标记,
+# 不匹配引擎内部字符串,避免渲染层耦合数据层文本约定。
+
+
+def _dedup_thens(thens: list[dict]) -> list[dict]:
+    """Render-layer Then dedup: drop redundant / non-observable assertions.
+
+    Data-driven: the S1 layer marks Thens with ``dedup_group`` (see
+    _make_then) so the renderer does NOT match data-layer text conventions:
+      - "transition_target" (状态转换为X) is implied by "transition_flow"
+        (状态流转：from→to), so it is omitted when a flow is present.
+      - "coverage_noise" (覆盖X的Y操作) asserts coverage, not an observable.
+    Exact duplicates (normalized whitespace) are also dropped.
+    """
+    out: list[dict] = []
+    seen: set[str] = set()
+    has_flow = any(t.get("dedup_group") == "transition_flow" for t in thens)
+    for t in thens:
+        exp = (t.get("expectation", "") or "").strip()
+        if not exp:
+            continue
+        dg = t.get("dedup_group")
+        if dg == "coverage_noise":
+            continue
+        if dg == "transition_target" and has_flow:
+            continue
+        norm = "".join(exp.split())
+        if norm in seen:
+            continue
+        seen.add(norm)
+        out.append(t)
+    return out
+
+
 def _generate_markdown(procedures: list[dict], md_path: str):
     """Generate human-readable markdown from procedures.
 
@@ -526,7 +562,7 @@ def _generate_markdown(procedures: list[dict], md_path: str):
         source_ids = _safe_join(proc.get("source_ids"))
         lines.append(f"**业务定位**：{phase_name} ｜ {type_label} ｜ 溯源: `{source_ids}`")
 
-        if s2.get("phase_basis"):
+        if s2.get("phase_basis") and not s2.get("phase_basis_debug"):
             lines.append(f"**阶段依据**：{s2.get('phase_basis')}")
         if s2.get("context"):
             lines.append(f"**场景**：{s2.get('context')}")
@@ -558,11 +594,11 @@ def _generate_markdown(procedures: list[dict], md_path: str):
                 action_str = f" [{w.get('action')}]" if w.get("action") else ""
                 lines.append(f"- {w.get('target', '')} {w.get('event', '')}{actor_str}{action_str}")
 
-            # Then clauses
+            # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:
                 lines.append("")
                 lines.append("**Then**")
-                for t in thens:
+                for t in _dedup_thens(thens):
                     br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
                     xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
                     lines.append(f"- {t.get('target', '')} {t.get('expectation', '')} ({t.get('kind', 'state')}){br_str}{xref_str}")
@@ -595,7 +631,8 @@ def _generate_markdown(procedures: list[dict], md_path: str):
         if s4.get("multi_instance"):
             mc = s4.get("multi_count", "?")
             mr = s4.get("multi_reason", "")
-            lines.append(f"**多实例**：{mc} × {mr}")
+            lines.append(
+                f"**多实例**：{mc} 个实例（{mr}），每个实例需使用独立测试数据")
 
         lines.append("")
 
@@ -1426,6 +1463,11 @@ def _generate_readable_markdown(
 
         lines.append(f"> **{phase_name}** | {type_cn} | 需求: {req_ref_str}\n")
 
+        # 多实例提示：所有实例 Given/When/Then 相同，需分别使用独立测试数据
+        if instance_count > 1:
+            lines.append(
+                f"> ⚠ **{instance_count} 个实例**：内容一致，每个实例需使用独立测试数据\n")
+
         # ── 1. 对应需求内容 ──
         req_texts: list[str] = []
         for sid in source_ids:
@@ -1465,7 +1507,8 @@ def _generate_readable_markdown(
             lines.append(f"| **When（业务事件）** | （未指定业务事件） |")
 
         # ── 4. BDD Then（可观察结果）──
-        thens = proc.get("thens", [])
+        # 渲染层去重（_dedup_thens 只影响呈现，JSON 数据不动）
+        thens = _dedup_thens(proc.get("thens", []))
         if thens:
             expectations: list[str] = []
             for i, t in enumerate(thens, 1):

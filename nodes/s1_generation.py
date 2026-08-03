@@ -210,12 +210,17 @@ def _make_when(target: str, event: str, actor: str = "", action: str = "") -> di
 def _make_then(target: str, expectation: str,
                kind: str = "state",
                br_refs: list[str] | None = None,
-               cross_refs: list[str] | None = None) -> dict:
+               cross_refs: list[str] | None = None,
+               dedup_group: str | None = None) -> dict:
     """Build a BDD Then clause (observable business outcome).
 
     ``expectation`` must be a concrete, non-tautological observable
     (I19: forbidden values include "查看效果", "验证差异").
     ``kind`` ∈ {"state", "behavior", "prompt"}.
+    ``dedup_group`` marks redundant assertions for the RENDERING layer
+    (e.g. "transition_target" is implied by "transition_flow"; coverage
+    statements assert no observable result). It drives display dedup in
+    the renderer instead of the renderer text-matching data-layer strings.
     """
     return {
         "target": target,
@@ -223,7 +228,71 @@ def _make_then(target: str, expectation: str,
         "kind": kind,
         "br_refs": br_refs or [],
         "cross_refs": cross_refs or [],
+        "dedup_group": dedup_group,
     }
+
+
+def _is_coverage_noise(expectation: str) -> bool:
+    """Whether a Then expectation asserts coverage rather than an observable.
+
+    P1 实体操作描述形如 "覆盖{实体}的{操作}操作"(如 "覆盖专家的新增专家
+    操作")——它只陈述"这个用例覆盖了某操作",不产生可观察结果,渲染层应
+    省略。真正的可观察结果在 expected_results 中(生成器已单独追加)。
+    """
+    if not expectation:
+        return False
+    return "覆盖" in expectation and expectation.endswith("操作")
+
+
+# ── Procedure skeleton factories ─────────────────────────────────────────
+# Every generator (Type1/3/5/6/7/9) builds the same _S2/_S3/_S4 field shape.
+# These factories centralize the defaults so a schema change is one edit.
+
+# 调试/内部推导的 phase_basis 值(引擎 traceability,对测试执行者是噪声)。
+# 分类在引擎层完成并写入 _S2_fields.phase_basis_debug,渲染层只读标记,
+# 不匹配具体 basis 字符串(避免渲染层耦合引擎内部命名)。
+_DEBUG_BASIS_PATTERNS = [
+    "fallback_default", "dep_state_phase_map.", ".min_phase",
+    "primary_entity_max_phase", "primary_entity_default",
+    "dep_map_max_phase", "config_entity.", "parent_phase.",
+    "parent_primary_phase", "VE.", "topology_level L0",
+]
+
+
+def _is_debug_phase_basis(basis: str) -> bool:
+    return any(p in basis for p in _DEBUG_BASIS_PATTERNS)
+
+
+def _make_S2_fields(phase: int, phase_name: str, phase_basis: str,
+                    topology_level: int, operation_lifecycle: int,
+                    chain_depth: int, type_label: str, type_priority: int,
+                    dimension_priority: int, context) -> dict:
+    """S2-sortable fields. Callers pass computed values; defaults live here."""
+    return {
+        "phase": phase,
+        "phase_name": phase_name,
+        "phase_basis": phase_basis,
+        "phase_basis_debug": _is_debug_phase_basis(phase_basis),
+        "topology_level": topology_level,
+        "sort_key": [],
+        "operation_lifecycle": operation_lifecycle,
+        "chain_depth": chain_depth,
+        "type_label": type_label,
+        "type_priority": type_priority,
+        "dimension_priority": dimension_priority,
+        "context": context,
+    }
+
+
+def _make_S3_fields(dependencies=None, weak_dependencies=None) -> dict:
+    return {
+        "dependencies": list(dependencies or []),
+        "weak_dependencies": list(weak_dependencies or []),
+    }
+
+
+def _make_S4_fields() -> dict:
+    return {"multi_instance": False, "multi_count": 1, "multi_reason": ""}
 
 
 # ── Business event derivation ────────────────────────────────────────────
@@ -309,27 +378,6 @@ def _build_timeout_hints(action_text: str) -> list[str]:
     return [_TRIGGER_HINT_TEMPLATES[m] for m in ordered]
 
 
-def _derive_rejection_action(original_action: str) -> str:
-    """Derive the rejection-variant action from the original TO action.
-
-    Generic — no hardcoded "驳回" verb.  Strategy:
-      1. If action contains "通过" → replace with "驳回" (审核通过 → 审核驳回)
-      2. If action contains "批准" → replace with "驳回" (立项批准 → 立项驳回)
-      3. If action contains "同意" → replace with "驳回"
-      4. Otherwise → append "（驳回）" to the original action
-
-    This keeps the rejection action semantically aligned with the original
-    business operation rather than a generic "驳回".
-    """
-    if not original_action:
-        return "驳回"
-    cleaned = _strip_branch_suffix(original_action)
-    for approve_kw in ("通过", "批准", "同意", "确认"):
-        if approve_kw in cleaned:
-            return cleaned.replace(approve_kw, "驳回")
-    return f"{cleaned}（驳回）"
-
-
 def _find_reviewer_role_for_dim(
     current_to: dict,
     cm: dict,
@@ -400,11 +448,7 @@ def _derive_rejection_action_v29(
 ) -> str:
     """v29 #13: Build a rejection action that names the reviewer explicitly.
 
-    Old behavior (v28 _derive_rejection_action):
-      - "机构新增/修改实验室信息" → "机构新增/修改实验室信息（驳回）"
-        (actor implicit, often wrong — inherited from original TO)
-
-    New behavior (v29):
+    Strategy:
       1. If action contains approve keyword (通过/批准/同意/确认) AS A VERB
          (not as a preposition like "通过表单"):
          - Replace approve_kw with "驳回"
@@ -822,6 +866,14 @@ def _resolve_phase_for_non_transition(state: dict, entity: str) -> dict:
     dep_map = state.get("dep_state_phase_map", {})
     phase_table = state.get("phase_table", {})
 
+    # Virtual entity: inherit its resolved_phase (set during S0 VE discovery).
+    # Must be checked before dep_map so VE names never fall through to the
+    # parent-chain / fallback branches (which would assign a wrong phase).
+    ves = state.get("virtual_entities", {})
+    if entity in ves:
+        vp = ves[entity].get("resolved_phase", 0)
+        return {"phase": vp, "basis": f"VE.{entity}.resolved_phase"}
+
     if entity == primary:
         all_p = [p for dm in phase_table.get("state_to_phase", {}).values() for p in dm.values()]
         if all_p:
@@ -1104,7 +1156,8 @@ def _get_type_priority(risk_trait: str, obligation_type: int) -> int:
 # Type1 — Transition Obligation procedures
 # ---------------------------------------------------------------------------
 
-def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list[dict]:
+def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
+                    br_list: list[dict] | None = None) -> list[dict]:
     """Generate Type1 (transition_obligation) procedures — BDD style.
 
     For each TO:
@@ -1112,6 +1165,11 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
     - Build Given/When/Then clauses with side-effects as additional Thens
     - Add audit_rejection variant if risk_traits contains 'audit'
     - Add time_sensitive boundary + expired variants if risk_traits contains 'time_sensitive'
+    - br_list (business_rule ROs) is used for guard-polarity detection:
+      a restrictive BR whose description appears in the givens and whose
+      restricted operation matches the TO action marks the TO as a
+      negative branch (rejected), replacing the old post-hoc
+      _enforce_guard_polarity patch.
 
     BDD mapping (from AAA):
       Old S step → Given(target=entity.dim, state=from_state)
@@ -1329,13 +1387,70 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                 if is_negative_branch:
                     break
 
+            # ── Guard polarity (V02) ──
+            # v29 修复: 原 post-hoc `_enforce_guard_polarity` 只改写 thens[0],
+            # 遗留 thens[1:] 的成功断言造成自相矛盾(状态流转 / expected_results /
+            # side-effect 仍声称迁移成功,而 thens[0] 却声称被拒绝)。此处把同一
+            # 判定前移到 Then 构建之前,并入 is_negative_branch 单一入口:
+            # 命中 restrictive BR 描述片段(givens 中出现) + action 匹配被限制
+            # 操作 → 该 TO 是负向用例,只生成拒绝断言,不生成成功态 Then。
+            # 检测逻辑与原 post-processor 一致(见 _enforce_guard_polarity 历史版),
+            # 额外要求 BR 实体命中当前 entity,避免纯文本巧合误判。
+            _guard_br_id = ""
+            if not is_negative_branch and br_list:
+                _ctx_g = cm.get("_context", {}) or {}
+                _pc_g = _ctx_g.get("prohibition_config", {}) or {}
+                # 通用禁止词兜底。领域特定短语(如"不能提为试用""连续3天")
+                # 由 P2 的 prohibition_config.prohibit_keywords 提供(本数据集
+                # 已配置);此处默认值只保留领域无关的通用否定词,避免领域词汇
+                # 泄漏进通用引擎(违反 "NO hardcoded business keywords" 原则)。
+                _prohibit_kw = tuple(_pc_g.get("prohibit_keywords",
+                    ["不可", "不能", "禁止", "不得", "不允许", "无法", "无权",
+                     "只能", "仅限", "才可", "只有"]))
+                _givens_text = " ".join(
+                    str(g.get("state", "")) + str(g.get("description", ""))
+                    for g in givens or []
+                )
+                for br in br_list:
+                    _br_desc = ((br.get("description") or "")
+                                + " " + (br.get("suggested_action") or ""))
+                    _br_signal = br.get("signal_type") or ""
+                    # v29 修复: 要求 BR 描述含显式禁止词(不可/不能/禁止/只能/
+                    # 才可/只有等)。signal_type=restrictive 的"规则定义型"BR
+                    # (如 "从已选入状态的项目中选取1-5个项目纳入评审计划")描述
+                    # 的是合法操作而非禁止——把它们当负向会误伤正常流程(T-003
+                    # 项目纳入评审计划被误判为拒绝)。只有显式禁止的 BR 才阻断
+                    # 该操作。
+                    if (_br_signal != "restrictive"
+                            or not any(kw in _br_desc for kw in _prohibit_kw)):
+                        continue
+                    if entity not in (br.get("entities_involved") or []):
+                        continue
+                    _br_ops = [m.group(1) for m in re.finditer(
+                        r"(?:不可|不能|禁止|不得)([一-龥]{2,6})", _br_desc)]
+                    # 8-char sliding chunks (同原 post-processor) 匹配 givens
+                    _chunks = [_br_desc[i:i+8]
+                               for i in range(0, max(0, len(_br_desc)-8), 4)]
+                    _chunks = [c for c in _chunks if len(c) >= 6 and not c.isspace()]
+                    if not any(c and c in _givens_text for c in _chunks):
+                        continue
+                    if (_br_ops and any(op in action_core_clean for op in _br_ops)) or \
+                       (action_core_clean[:2] and action_core_clean[:2] in _br_desc):
+                        is_negative_branch = True
+                        _guard_br_id = br.get("constraint_id") or br.get("id", "")
+                        break
+
             if is_negative_branch:
                 # Negative test: operation is rejected, state preserved.
                 # Override the success Then entirely — do NOT add "状态转换为{to_state}".
+                # br_refs carries the restrictive BR that blocks this operation
+                # (set by the guard-polarity detection above; empty for
+                # precondition-based negative branches).
                 thens.append(_make_then(
                     target=loc,
                     expectation=f"操作被拒绝，状态保持为{from_state}并给出禁止提示",
                     kind="state",
+                    br_refs=[_guard_br_id] if _guard_br_id else None,
                 ))
                 _negative_branch_flag = True
                 # post_state uses from_state (no transition occurs)
@@ -1350,8 +1465,12 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                         target=loc, expectation=er, kind="behavior"
                     ))
                 else:
+                    # dedup_group="transition_target": 渲染层在存在
+                    # "transition_flow"(状态流转:from→to)时省略本断言——
+                    # from→to 已隐含目标状态,保留信息最全的一条。
                     thens.append(_make_then(
-                        target=loc, expectation=f"状态转换为{to_state}", kind="state"
+                        target=loc, expectation=f"状态转换为{to_state}", kind="state",
+                        dedup_group="transition_target",
                     ))
                     # V10 fix (S1-side, transition coverage): append a Then
                     # containing the literal "{from}→{to}" form so that
@@ -1366,6 +1485,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                             target=loc,
                             expectation=f"状态流转：{from_state}→{to_state}",
                             kind="state",
+                            dedup_group="transition_flow",
                         ))
                     # V10 required_type fix: append TO's expected_results as
                     # additional Thens. P1 extracted observable result keywords
@@ -1497,21 +1617,15 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                 "post_state": f"{te['entity']}.{dimension}→{to_state_for_post}",
                 "cascade_chain": None,
                 "embedded_brs": [],
-                "_S2_fields": {
-                    "phase": phase_val,
-                    "phase_name": phase_name,
-                    "phase_basis": phase_info.get("basis", ""),
-                    "topology_level": topo.get(te["entity"], 0),
-                    "sort_key": [],
-                    "operation_lifecycle": op_lifecycle,
-                    "chain_depth": chain_depth,
-                    "type_label": ("negative" if _negative_branch_flag else proc_type_label),
-                    "type_priority": (9 if _negative_branch_flag else proc_type_priority),
-                    "dimension_priority": dim_priority,
-                    "context": te["context"],
-                },
-                "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                "_S2_fields": _make_S2_fields(
+                    phase_val, phase_name, phase_info.get("basis", ""),
+                    topo.get(te["entity"], 0), op_lifecycle, chain_depth,
+                    ("negative" if _negative_branch_flag else proc_type_label),
+                    (9 if _negative_branch_flag else proc_type_priority),
+                    dim_priority, te["context"],
+                ),
+                "_S3_fields": _make_S3_fields(),
+                "_S4_fields": _make_S4_fields(),
             }
             procedures.append(base_proc)
 
@@ -1535,6 +1649,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     target=loc,
                     expectation=f"状态转换为{to_state}",
                     kind="state",
+                    dedup_group="transition_target",
                 )]
                 # Also append the from→to literal for V10 transition coverage
                 if from_state != "(初始)":
@@ -1542,6 +1657,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                         target=loc,
                         expectation=f"状态流转：{from_state}→{to_state}",
                         kind="state",
+                        dedup_group="transition_flow",
                     ))
                 # Positive-path givens: strip restrictive precondition clauses
                 # (the ones that triggered is_negative_branch). The positive
@@ -1555,11 +1671,21 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                 # single given's description field. We split on ; and remove
                 # any clause that matches the prohibition regex, keeping the
                 # rest (e.g. "项目处于待选入状态" stays, "差不可选入" goes).
-                # Uses the same prohibition_config from _context as above.
+                #
+                # The regex here is intentionally BROADER than the detection
+                # regex above: the strip must remove ANY restrictive clause
+                # (neg-prefix + any short verb), including verbs not in the
+                # configured action_verbs list. With the strict known-verb
+                # regex, clauses like "研制机构累计3次评级为不合格，则不能
+                # 提为试用机构" survive the strip because "提为/试用" are not
+                # in action_verbs — the positive-path givens then retain the
+                # prohibition and V02 falsely flags the success assertion.
+                # (The is_negative_branch DETECTION keeps the strict regex so
+                # it doesn't over-trigger; only the strip is broadened.)
                 _PROHIBIT_RE = re.compile(
                     r'(' + '|'.join(_neg_prefixes) + r')'
                     r'[^，,。.；;]{0,15}?'
-                    r'(' + '|'.join(_action_verbs) + r')'
+                    r'([一-龥]{2,4})'
                 )
                 pos_givens = []
                 for g in givens:
@@ -1580,10 +1706,10 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "obligation_type": 1,
                     "risk_trait": proc_risk_trait,
                     # Marker: this is the positive-path sibling of a negative_test
-                    # procedure. _enforce_guard_polarity must NOT rewrite its
-                    # thens to rejection — the givens contain restrictive BR
-                    # text (inherited from the same TO), but this procedure
-                    # represents the acceptance path, not the rejection path.
+                    # procedure. Its givens contain restrictive BR text
+                    # (inherited from the same TO), but this procedure
+                    # represents the acceptance path, not the rejection path —
+                    # so it must never be reclassified as a negative branch.
                     "_positive_path_variant": True,
                     "givens": pos_givens,
                     "when": when,
@@ -1595,21 +1721,14 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "post_state": f"{te['entity']}.{dimension}→{to_state}",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": phase_val,
-                        "phase_name": phase_name,
-                        "phase_basis": phase_info.get("basis", ""),
-                        "topology_level": topo.get(te["entity"], 0),
-                        "sort_key": [],
-                        "operation_lifecycle": 3,  # 流转 (forward)
-                        "chain_depth": chain_depth,
-                        "type_label": proc_type_label,
-                        "type_priority": proc_type_priority,
-                        "dimension_priority": dim_priority,
-                        "context": te["context"],
-                    },
-                    "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase_val, phase_name, phase_info.get("basis", ""),
+                        topo.get(te["entity"], 0), 3,  # 3=流转 (forward)
+                        chain_depth, proc_type_label, proc_type_priority,
+                        dim_priority, te["context"],
+                    ),
+                    "_S3_fields": _make_S3_fields(),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 procedures.append(pos_proc)
 
@@ -1756,21 +1875,14 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "post_state": f"{te['entity']}.{dimension}→{from_state}(驳回)",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": phase_val,
-                        "phase_name": phase_name,
-                        "phase_basis": phase_info.get("basis", "") + " (rejection variant)",
-                        "topology_level": topo.get(te["entity"], 0),
-                        "sort_key": [],
-                        "operation_lifecycle": 4,  # 4=终止 (rejection)
-                        "chain_depth": chain_depth + 1,
-                        "type_label": "audit",
-                        "type_priority": 4,
-                        "dimension_priority": dim_priority,
-                        "context": te["context"],
-                    },
-                    "_S3_fields": {"dependencies": [base_proc["temp_id"]], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase_val, phase_name,
+                        phase_info.get("basis", "") + " (rejection variant)",
+                        topo.get(te["entity"], 0), 4,  # 4=终止 (rejection)
+                        chain_depth + 1, "audit", 4, dim_priority, te["context"],
+                    ),
+                    "_S3_fields": _make_S3_fields(dependencies=[base_proc["temp_id"]]),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 procedures.append(reject_proc)
 
@@ -1809,21 +1921,14 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "post_state": f"{te['entity']}.{dimension}→{to_state}(时间边界)",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": phase_val,
-                        "phase_name": phase_name,
-                        "phase_basis": phase_info.get("basis", "") + " (time_boundary)",
-                        "topology_level": topo.get(te["entity"], 0),
-                        "sort_key": [],
-                        "operation_lifecycle": op_lifecycle,
-                        "chain_depth": chain_depth,
-                        "type_label": "time_sensitive",
-                        "type_priority": 3,
-                        "dimension_priority": dim_priority,
-                        "context": te["context"],
-                    },
-                    "_S3_fields": {"dependencies": [base_proc["temp_id"]], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase_val, phase_name,
+                        phase_info.get("basis", "") + " (time_boundary)",
+                        topo.get(te["entity"], 0), op_lifecycle, chain_depth,
+                        "time_sensitive", 3, dim_priority, te["context"],
+                    ),
+                    "_S3_fields": _make_S3_fields(dependencies=[base_proc["temp_id"]]),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 procedures.append(boundary_proc)
 
@@ -1857,21 +1962,14 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "post_state": f"{te['entity']}.{dimension}→(过期未执行)",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": phase_val,
-                        "phase_name": phase_name,
-                        "phase_basis": phase_info.get("basis", "") + " (time_expired)",
-                        "topology_level": topo.get(te["entity"], 0),
-                        "sort_key": [],
-                        "operation_lifecycle": op_lifecycle,
-                        "chain_depth": chain_depth,
-                        "type_label": "time_sensitive",
-                        "type_priority": 3,
-                        "dimension_priority": dim_priority,
-                        "context": te["context"],
-                    },
-                    "_S3_fields": {"dependencies": [base_proc["temp_id"]], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase_val, phase_name,
+                        phase_info.get("basis", "") + " (time_expired)",
+                        topo.get(te["entity"], 0), op_lifecycle, chain_depth,
+                        "time_sensitive", 3, dim_priority, te["context"],
+                    ),
+                    "_S3_fields": _make_S3_fields(dependencies=[base_proc["temp_id"]]),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 procedures.append(expired_proc)
 
@@ -2000,21 +2098,13 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "post_state": f"{eo['entity']}.{attr}→{val}",
                     "cascade_chain": None,
                     "embedded_brs": list(br_refs),
-                    "_S2_fields": {
-                        "phase": phase_val,
-                        "phase_name": phase_name,
-                        "phase_basis": phase_info.get("basis", ""),
-                        "topology_level": topo.get(eo["entity"], 0),
-                        "sort_key": [],
-                        "operation_lifecycle": 2,
-                        "chain_depth": chain_depth,
-                        "type_label": "happy",
-                        "type_priority": 1,
-                        "dimension_priority": dim_priority,
-                        "context": None,
-                    },
-                    "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase_val, phase_name, phase_info.get("basis", ""),
+                        topo.get(eo["entity"], 0), 2, chain_depth,
+                        "happy", 1, dim_priority, None,
+                    ),
+                    "_S3_fields": _make_S3_fields(),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 # BDD: field_validation moved to independent Type9 procedures
                 # (was: _enrich_thens(eo["entity"], ..., proc["thens"], ...))
@@ -2061,21 +2151,12 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                 "post_state": f"{eo['entity']}.{attr}→(已修改)",
                 "cascade_chain": None,
                 "embedded_brs": [],
-                "_S2_fields": {
-                    "phase": phase,
-                    "phase_name": phase_name,
-                    "phase_basis": phase_basis,
-                    "topology_level": tl,
-                    "sort_key": [],
-                    "operation_lifecycle": 2,
-                    "chain_depth": 0,
-                    "type_label": "happy",
-                    "type_priority": 1,
-                    "dimension_priority": dim_priority,
-                    "context": None,
-                },
-                "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                "_S2_fields": _make_S2_fields(
+                    phase, phase_name, phase_basis, tl, 2, 0,
+                    "happy", 1, dim_priority, None,
+                ),
+                "_S3_fields": _make_S3_fields(),
+                "_S4_fields": _make_S4_fields(),
             }
             # BDD: field_validation moved to independent Type9 procedures
             # (was: _enrich_thens(eo["entity"], ..., proc["thens"], ...))
@@ -2171,6 +2252,7 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                     target=ve_name,
                     expectation=op_desc or f"{op_name}完成",
                     kind="behavior",
+                    dedup_group=("coverage_noise" if _is_coverage_noise(op_desc) else None),
                 )]
                 # V10 fix: append each expected_result as a separate Then.
                 # P1 already extracted observable result keywords (e.g.
@@ -2205,21 +2287,13 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                     "post_state": f"{ve_name}→({op_name}完成)",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": ve_phase,
-                        "phase_name": ve_phase_name,
-                        "phase_basis": f"VE.{ve_name}.resolved_phase",
-                        "topology_level": topo.get(ve_name, 0),
-                        "sort_key": [],
-                        "operation_lifecycle": 1,
-                        "chain_depth": 0,
-                        "type_label": "crud",
-                        "type_priority": 5,
-                        "dimension_priority": 1,
-                        "context": ve.get("context"),
-                    },
-                    "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        ve_phase, ve_phase_name, f"VE.{ve_name}.resolved_phase",
+                        topo.get(ve_name, 0), 1, 0, "crud", 5, 1,
+                        ve.get("context"),
+                    ),
+                    "_S3_fields": _make_S3_fields(),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 # BDD: field_validation moved to independent Type9 procedures
                 procedures.append(proc)
@@ -2240,6 +2314,7 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                 target=entity,
                 expectation=op_desc or f"{op_name}完成",
                 kind="behavior",
+                dedup_group=("coverage_noise" if _is_coverage_noise(op_desc) else None),
             )]
             # V10 fix: append each expected_result as a separate Then.
             # P1 already extracted observable result keywords (e.g.
@@ -2276,21 +2351,12 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                 "post_state": f"{entity}→({op_name}完成)",
                 "cascade_chain": None,
                 "embedded_brs": [],
-                "_S2_fields": {
-                    "phase": phase,
-                    "phase_name": phase_name,
-                    "phase_basis": phase_basis,
-                    "topology_level": tl,
-                    "sort_key": [],
-                    "operation_lifecycle": 1,
-                    "chain_depth": 0,
-                    "type_label": "crud",
-                    "type_priority": 5,
-                    "dimension_priority": 1,
-                    "context": None,
-                },
-                "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                "_S2_fields": _make_S2_fields(
+                    phase, phase_name, phase_basis, tl, 1, 0,
+                    "crud", 5, 1, None,
+                ),
+                "_S3_fields": _make_S3_fields(),
+                "_S4_fields": _make_S4_fields(),
             }
             # BDD: field_validation moved to independent Type9 procedures
             procedures.append(proc)
@@ -2385,21 +2451,14 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
             "post_state": f"{entity}→(操作被阻止)",
             "cascade_chain": None,
             "embedded_brs": [],
-            "_S2_fields": {
-                "phase": phase,
-                "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
-                "phase_basis": phase_basis,
-                "topology_level": tl,
-                "sort_key": [],
-                "operation_lifecycle": 2,
-                "chain_depth": chain_depth,
-                "type_label": "invalid",
-                "type_priority": 9,
-                "dimension_priority": 1,
-                "context": None,
-            },
-            "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-            "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+            "_S2_fields": _make_S2_fields(
+                phase,
+                phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
+                phase_basis, tl, 2, chain_depth,
+                "invalid", 9, 1, None,
+            ),
+            "_S3_fields": _make_S3_fields(),
+            "_S4_fields": _make_S4_fields(),
         }
         procedures.append(proc)
 
@@ -2409,6 +2468,78 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
 # ---------------------------------------------------------------------------
 # BR Classification (S1.8)
 # ---------------------------------------------------------------------------
+
+# 通用 CRUD 操作动词(领域无关,引擎词汇)。业务特定操作动词由
+# prohibition_config.action_verbs 提供;此处仅作 object-verb 形态的兜底。
+_GENERIC_CRUD_VERBS = (
+    "删除", "修改", "编辑", "新增", "创建", "查看", "查询", "锁定", "重置",
+)
+
+
+def _extract_constrained_ops(desc: str, crud_verbs: tuple | None = None) -> set:
+    """Extract operation verbs constrained by a BR description.
+
+    Used for operation-level CRUD host matching: a BR may only embed into a
+    CRUD EO whose operation_name overlaps the verb it actually constrains —
+    not merely any CRUD EO on the same entity.
+
+    Patterns covered:
+      1. Prohibition/requirement prefix + verb, e.g. "不可选入", "才能删除",
+         "只有1次选入机会" → verb 选入 / 删除.
+      2. "进行<verb>" construction, e.g. "不能进行分数修改" → 修改.
+      3. "<noun><verb>" object-verb form, e.g. "专家删除" → 删除.
+
+    ``crud_verbs`` comes from prohibition_config.action_verbs (see
+    _get_action_verbs); falls back to the generic CRUD set.
+
+    Returns a set of candidate verbs (includes noise — matching against CRUD
+    operation_names is what filters).
+    """
+    verbs: set[str] = set()
+    # 1. prefix + verb (lazy gap ≤8 non-punct chars to reach the verb)
+    for m in re.finditer(
+        r'(?:不可|不能|禁止|不得|不允许|只能|仅限|才可|只有)'
+        r'[^，,。.；;：:]{0,8}?([一-龥]{2,6})', desc):
+        verbs.add(m.group(1))
+    # 2. "进行<verb>"
+    for m in re.finditer(r'进行([一-龥]{2,6})', desc):
+        verbs.add(m.group(1))
+    # 3. object-verb form: <noun><verb> (verb set from config, generic fallback)
+    _ov = crud_verbs or _GENERIC_CRUD_VERBS
+    for m in re.finditer(r'[一-龥]{2,6}(' + '|'.join(_ov) + r')', desc):
+        verbs.add(m.group(1))
+    return verbs
+
+
+def _verb_matches_op(verb: str, op_name: str) -> bool:
+    """Whether a constrained BR verb matches a CRUD operation name.
+
+    Matches if the verb's first 2 chars equal the op's first 2 chars
+    (verb-object form, e.g. 删除↔删除专家) OR the verb's last 2 chars equal
+    the op's last 2 chars (object-verb form, e.g. 选入↔项目选入).
+    This deliberately avoids substring coincidences such as 评审 matching
+    建立评审计划 — 评审 is a noun inside the object there, not the verb.
+    """
+    if not verb or not op_name:
+        return False
+    v = verb.strip()
+    op = op_name.strip()
+    if len(v) >= 2 and len(op) >= 2:
+        # verb-object form (删除↔删除专家): verb at the start.
+        if v[:2] == op[:2]:
+            return True
+        # object-verb form (选入↔项目选入): short verb at the end.
+        # Requiring len(v) <= 4 avoids phrase coincidences such as
+        # "提为试用机构" ending in the object noun "机构" matching
+        # "添加研制机构".
+        if len(v) <= 4 and v[-2:] == op[-2:]:
+            return True
+        # No substring fallback: 评审 is a substring of 建立评审计划
+        # but is NOT the operation's verb — that would wrongly embed a
+        # 评审 rule into every X评审计划 CRUD op.
+        return False
+    return v in op
+
 
 def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
     """S1.8.1: Classify BRs with full degradation chain.
@@ -2465,24 +2596,34 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
                     "priority": 2
                 })
 
-        # 3. crud_constraint
+        # 3. crud_constraint — operation-level matching (v29 fix)
         # BDD: crud_ops read from coverage_model._context (configurable)
         cm_ctx = cm.get("_context", {})
         crud_ops = set(cm_ctx.get("crud_ops", []))
-        if not crud_ops:
-            # Fallback: detect CRUD from BR description via LLM classification
-            # For now, use a generic heuristic: any EO of type crud_operation
-            # whose entity matches br_entities is a candidate
-            crud_ops = set()
-        has_crud = any(op in desc for op in crud_ops) if crud_ops else bool(
-            eo_by_type.get("crud_operation") and
-            any(eo["entity"] in br_entities for eo in eo_by_type.get("crud_operation", []))
-        )
+        # Operation-level matching: the BR's constrained verb must overlap a
+        # CRUD EO's operation_name. The old heuristic only checked that SOME
+        # CRUD EO existed on the entity, so every "实体+状态" BR got embedded
+        # into that entity's first CRUD op (e.g. 时限/选入 rules onto 新增项目
+        # or 建立评审计划) even when unrelated. Non-CRUD BRs now fall through
+        # to standalone / negative_test instead of attaching to a wrong host.
+        br_verbs = _extract_constrained_ops(desc, _get_action_verbs(cm))
+        crud_eos = [eo for eo in eo_by_type.get("crud_operation", [])
+                    if eo["entity"] in br_entities]
+        if crud_ops:
+            has_crud = any(op in desc for op in crud_ops)
+        else:
+            has_crud = (bool(br_verbs) and any(
+                any(_verb_matches_op(v, eo.get("operation_name", "")) for v in br_verbs)
+                for eo in crud_eos))
         has_state = bool(re.search(r'状态|才可|不可|不允许|不能|只有|需先', desc))
         if has_crud and has_state:
-            matching_eo = next((eo for eo in eo_by_type.get("crud_operation", [])
-                                if eo["entity"] in br_entities and (
-                                    not crud_ops or any(op in eo["operation_name"] for op in crud_ops))), None)
+            # Prefer the CRUD EO whose operation verb matches the BR's verbs.
+            matching_eo = next((eo for eo in crud_eos
+                                if any(_verb_matches_op(v, eo.get("operation_name", ""))
+                                       for v in br_verbs)), None)
+            if matching_eo is None and crud_ops:
+                matching_eo = next((eo for eo in crud_eos
+                                    if any(op in eo.get("operation_name", "") for op in crud_ops)), None)
             if matching_eo and _is_type5_retained(matching_eo, state):
                 candidates.append({
                     "category": "crud_constraint", "host_proc_type": 5,
@@ -2711,6 +2852,96 @@ def _decompose_br_desc(br_id: str, br_desc: str,
     return [(br_id, br_desc)]
 
 
+_NEG_PREFIXES = ("不可", "不能", "不得", "禁止", "不允许", "无法", "无权")
+
+# 领域无关的通用动作动词兜底。业务特定动词(选入/归档/发放/打分 等)由 P2 的
+# prohibition_config.action_verbs 提供(见 _get_action_verbs);默认值只保留
+# 通用系统/CRUD 动词,避免业务词汇泄漏进通用引擎
+# (违反 "NO hardcoded business verbs" 原则)。
+_DEFAULT_ACTION_VERBS = (
+    "启动", "提交", "保存", "删除", "修改", "新增", "审批", "批准", "通过",
+    "重启", "暂停", "结束", "退出", "登录", "操作", "编辑", "查看", "进入",
+    "选择", "执行", "上传", "下载", "锁定", "重置",
+)
+
+
+def _get_action_verbs(cm: dict) -> tuple:
+    """Read the project's action verbs from prohibition_config.
+
+    Falls back to the domain-agnostic generic set when the project doesn't
+    configure one (or config is absent). This is the single source of action
+    verbs — Type7's negative-op extraction should never hardcode a business
+    verb list of its own.
+    """
+    _ctx = (cm or {}).get("_context", {}) or {}
+    _pc = _ctx.get("prohibition_config", {}) or {}
+    verbs = _pc.get("action_verbs")
+    return tuple(verbs) if verbs else _DEFAULT_ACTION_VERBS
+
+
+def _extract_negative_op(br_desc: str, action_verbs: tuple | None = None) -> str:
+    """Extract the operation prohibited by a restrictive BR, if any.
+
+    Matches 不可/不能/禁止/不得/不允许 + a known action verb within a
+    short gap (e.g. "不能进行分数修改" → "修改", "不可选入评审组" → "选入").
+    ``action_verbs`` comes from prohibition_config (see _get_action_verbs).
+    Returns "" when no clean verb is found (pure computation/display rules,
+    or prohibitions without a known verb) — callers then keep the
+    description-based template instead of emitting a garbled rejection text.
+    """
+    if not (br_desc or '').strip():
+        return ""
+    verbs = action_verbs or _DEFAULT_ACTION_VERBS
+    _re = re.compile(
+        r'(' + '|'.join(_NEG_PREFIXES) + r')'
+        r'[^，,。.；;]{0,15}?'
+        r'(' + '|'.join(verbs) + r')'
+    )
+    m = _re.search(br_desc)
+    return m.group(2) if m else ""
+
+
+def _extract_condition_text(br_desc: str) -> str:
+    """Extract the triggering condition preceding the prohibition clause.
+
+    For "对于本阶段评价结果为差的项目，不可选入" returns
+    "对于本阶段评价结果为差的项目". Empty when the prohibition opens the desc.
+    """
+    parts = re.split(r'[，,；;]', br_desc or '')
+    cond = []
+    for part in parts:
+        if any(kw in part for kw in ("不可", "不能", "禁止", "不得", "不允许")):
+            break
+        cond.append(part)
+    return "，".join(cond) if cond else ""
+
+
+def _build_negative_test_thens(br_id: str, br_desc: str,
+                               entity: str,
+                               action_verbs: tuple | None = None) -> list[dict]:
+    """Deterministic fallback for restrictive BRs: 违规场景 → 拦截断言.
+
+    Replaces the tautological "When: 按规则X执行操作 / Then: [BR] X" form
+    (When and Then were the same text, unexecutable) with an executable
+    rejection scenario: assert the prohibited operation is rejected and the
+    system state is preserved. No LLM dependency.
+    """
+    neg_op = _extract_negative_op(br_desc, action_verbs)
+    condition_text = _extract_condition_text(br_desc)
+    if neg_op:
+        rejection = f"操作被拒绝：{neg_op}操作不可执行"
+    else:
+        rejection = "操作被拒绝并给出禁止提示"
+    if condition_text:
+        rejection += f"（条件：{condition_text}）"
+    return [
+        _make_then(target=entity, expectation=rejection,
+                   kind="prompt", br_refs=[br_id]),
+        _make_then(target=entity, expectation="系统状态保持不变",
+                   kind="state", br_refs=[br_id]),
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Type7 — Standalone BR procedures (only for standalone-classified BRs)
 # ---------------------------------------------------------------------------
@@ -2768,21 +2999,53 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         br_id = br.get('constraint_id', '')
         br_signal_type = br.get('signal_type', '')
 
-        givens = [_make_given(
-            target=primary_br_entity,
-            state="规则适用前提满足",
-            description=f"{', '.join(br_entities)}相关数据已准备",
-        )]
-        when = _make_when(
-            target=primary_br_entity,
-            event=f"按规则\"{br_desc}\"执行操作事件",
-            action=f"按规则\"{br_desc}\"执行操作",
-        )
-        thens: list[dict] = []
+        # v29 修复 (Type7 同义反复): restrictive BR 且能抽取出被禁止操作时,
+        # 用确定性负向模板(违规场景 → 拦截断言),不再产出 When/Then 同文
+        # 的"按规则X执行操作 / Then: [BR] X"。非 restrictive 或无法抽取
+        # 禁止操作的 BR 保持描述性 fallback。
+        # 动作动词从 prohibition_config 读取(领域无关兜底),不在此处硬编码
+        # 业务动词列表。
+        _type7_action_verbs = _get_action_verbs(cm)
+        neg_op = (_extract_negative_op(br_desc, _type7_action_verbs)
+                  if br_signal_type == "restrictive" else "")
 
-        # Priority 1: LLM-generated signal-aware Thens
+        if neg_op:
+            # 负向模板: Given=规则原文(作为被测规则上下文), When=尝试违规
+            # 操作, Then=拒绝+状态保持。
+            # 注意: 规则原文只放在 Given 做上下文,不放进 When/Then —— 避免
+            # 审查指出的 When/Then 同义反复。同时保留原文可让 V10 coverage
+            # 的 missing_keyword probe(按需求原文匹配)继续命中,而不是因为
+            # 负向模板改写而丢失规则关键词。
+            givens = [_make_given(
+                target=primary_br_entity,
+                state="规则适用前提满足",
+                description=f"规则：{br_desc}",
+            )]
+            when = _make_when(
+                target=primary_br_entity,
+                event=f"尝试执行被规则禁止的{neg_op}操作",
+                action=f"尝试执行{neg_op}操作",
+            )
+            thens = _build_negative_test_thens(
+                br_id, br_desc, primary_br_entity, _type7_action_verbs)
+        else:
+            givens = [_make_given(
+                target=primary_br_entity,
+                state="规则适用前提满足",
+                description=f"{', '.join(br_entities)}相关数据已准备",
+            )]
+            when = _make_when(
+                target=primary_br_entity,
+                event=f"按规则\"{br_desc}\"执行操作事件",
+                action=f"按规则\"{br_desc}\"执行操作",
+            )
+            thens: list[dict] = []
+
+        # Priority 1: LLM-generated signal-aware Thens (override the
+        # deterministic template when available).
         llm_v_steps = signal_v_steps.get(br_id) if signal_v_steps else None
         if llm_v_steps:
+            thens = []
             for vs in llm_v_steps:
                 # BDD: vs is now a ThenClause dict (target/expectation/kind/br_refs/cross_refs)
                 loc = vs.get("target", primary_br_entity)
@@ -2795,8 +3058,11 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
                     kind=vs.get("kind", "behavior"),
                     br_refs=[br_id] + vs.get("br_refs", []),
                 ))
-        else:
-            # Priority 2 fallback: deterministic decomposition (方案A)
+        elif not neg_op:
+            # Priority 2 fallback: deterministic decomposition (方案A).
+            # Skipped when neg_op already built the negative-template thens
+            # above — appending the description-based atoms would re-introduce
+            # the When/Then tautology this fix removes.
             atoms = _decompose_br_desc(br_id, br_desc, state.get('br_decomposition', {}))
             if enforcement == "conditional":
                 focus_hint = f" ({category_focus})" if category_focus else ""
@@ -2844,21 +3110,14 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             "post_state": f"{primary_br_entity}→(规则验证完成)",
             "cascade_chain": None,
             "embedded_brs": [],
-            "_S2_fields": {
-                "phase": phase,
-                "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
-                "phase_basis": phase_basis,
-                "topology_level": tl,
-                "sort_key": [],
-                "operation_lifecycle": 1,
-                "chain_depth": chain_depth,
-                "type_label": "rule",
-                "type_priority": 6,
-                "dimension_priority": 1,
-                "context": None,
-            },
-            "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-            "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+            "_S2_fields": _make_S2_fields(
+                phase,
+                phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
+                phase_basis, tl, 1, chain_depth,
+                "rule", 6, 1, None,
+            ),
+            "_S3_fields": _make_S3_fields(),
+            "_S4_fields": _make_S4_fields(),
         }
         procedures.append(proc)
 
@@ -3040,21 +3299,12 @@ def _generate_type9_field_validation(
             "post_state": f"{entity_id}→(校验失败，表单未提交)",
             "cascade_chain": None,
             "embedded_brs": [],
-            "_S2_fields": {
-                "phase": phase,
-                "phase_name": phase_name,
-                "phase_basis": phase_basis or f"field_validation.{entity_id}",
-                "topology_level": tl,
-                "sort_key": [],
-                "operation_lifecycle": 2,  # 2=修改 (edit-form validation)
-                "chain_depth": 0,
-                "type_label": "field_validation",
-                "type_priority": 5,  # same as crud
-                "dimension_priority": 1,
-                "context": None,
-            },
-            "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-            "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+            "_S2_fields": _make_S2_fields(
+                phase, phase_name, phase_basis or f"field_validation.{entity_id}",
+                tl, 2, 0, "field_validation", 5, 1, None,
+            ),
+            "_S3_fields": _make_S3_fields(),
+            "_S4_fields": _make_S4_fields(),
         }
         procedures.append(proc)
 
@@ -3183,21 +3433,13 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                     "post_state": f"{primary_br_entity}→(操作被阻止)",
                     "cascade_chain": None,
                     "embedded_brs": [],
-                    "_S2_fields": {
-                        "phase": phase,
-                        "phase_name": phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
-                        "phase_basis": phase_basis,
-                        "topology_level": tl,
-                        "sort_key": [],
-                        "operation_lifecycle": 2,
-                        "chain_depth": 0,
-                        "type_label": "invalid",
-                        "type_priority": 9,
-                        "dimension_priority": 1,
-                        "context": None,
-                    },
-                    "_S3_fields": {"dependencies": [], "weak_dependencies": []},
-                    "_S4_fields": {"multi_instance": False, "multi_count": 1, "multi_reason": ""},
+                    "_S2_fields": _make_S2_fields(
+                        phase,
+                        phase_table["phase_names"][phase] if phase < len(phase_table["phase_names"]) else f"P{phase}",
+                        phase_basis, tl, 2, 0, "invalid", 9, 1, None,
+                    ),
+                    "_S3_fields": _make_S3_fields(),
+                    "_S4_fields": _make_S4_fields(),
                 }
                 procedures.append(new_proc)
                 host_procs = [new_proc]
@@ -3513,130 +3755,6 @@ def _classify_actions_via_llm(actions: list[str]) -> dict[str, str]:
 # Main node function
 # ---------------------------------------------------------------------------
 
-def _enforce_guard_polarity(procedures: list[dict], br_list: list[dict],
-                            warnings: list[str], cm: dict = None) -> list[dict]:
-    """V02 fix: rewrite thens for procedures that violate guard polarity.
-
-    Uses ONLY P2 BR data (signal_type=restrictive + description keywords)
-    to detect forbidden conditions. Does NOT read verify/case_spec.json.
-
-    When a procedure's givens text contains a restrictive BR description
-    AND the procedure's action matches the restricted operation, rewrite
-    thens[0].expectation to assert rejection instead of "状态转换为 X".
-    """
-    if not br_list or not procedures:
-        return procedures
-
-    # Build a list of restrictive BRs with their keyword signatures.
-    # A restrictive BR has signal_type == "restrictive" OR description
-    # contains explicit prohibition keywords.
-    # Read prohibition keywords from coverage_model._context.prohibition_config
-    # (emitted by P2). Falls back to built-in defaults.
-    _ctx = (cm or {}).get("_context", {}) or {}
-    _pc = _ctx.get("prohibition_config", {}) or {}
-    PROHIBIT_KEYWORDS = tuple(_pc.get("prohibit_keywords",
-        ["不可", "不能", "禁止", "不得", "仅限", "不可选入",
-         "不可删除", "不可分配", "不可提交", "不能提为试用", "不能连续3天"]))
-    SUCCESS_HINTS = tuple(_pc.get("success_hints", ["状态转换为", "状态变更为"]))
-    restrictive_brs = []
-    for br in br_list:
-        desc = (br.get("description") or "") + " " + (br.get("suggested_action") or "")
-        signal = br.get("signal_type") or ""
-        if signal == "restrictive" or any(kw in desc for kw in PROHIBIT_KEYWORDS):
-            # Extract the operation that's being restricted (heuristic:
-            # the noun immediately after 不可/不能/禁止).
-            import re
-            ops = []
-            for m in re.finditer(r"(?:不可|不能|禁止|不得)([\u4e00-\u9fa5]{2,6})", desc):
-                ops.append(m.group(1))
-            restrictive_brs.append({
-                "br_id": br.get("constraint_id") or br.get("id", ""),
-                "desc": desc,
-                "restricted_ops": ops,
-                "entities": br.get("entities_involved", []) or [],
-            })
-
-    if not restrictive_brs:
-        return procedures
-
-    # SUCCESS_HINTS already loaded from _context.prohibition_config above
-    patched = 0
-
-    for p in procedures:
-        # Skip positive-path variants — these are the acceptance-path siblings
-        # of negative_test procedures. Their givens contain the same restrictive
-        # BR text, but they intentionally assert the successful transition.
-        # Rewriting them to rejection would destroy the positive-path coverage.
-        if p.get("_positive_path_variant"):
-            continue
-        givens_text = " ".join(
-            str(g.get("state", "")) + str(g.get("description", ""))
-            for g in p.get("givens", []) or []
-        )
-        action = (p.get("when") or {}).get("action", "") or ""
-        thens = p.get("thens", []) or []
-        if not thens:
-            continue
-
-        joined = " ".join(t.get("expectation", "") for t in thens)
-        # If thens already asserts rejection, skip.
-        if any(kw in joined for kw in ("拒绝", "不可", "不能", "禁止", "保持不变")):
-            continue
-        # If thens doesn't claim success migration, nothing to fix.
-        if not any(h in joined for h in SUCCESS_HINTS):
-            continue
-
-        # Check if givens reference any restrictive BR.
-        matched_br = None
-        for rb in restrictive_brs:
-            # Match if the BR description (or a 6+ char substring of it)
-            # appears in givens text, AND the action matches a restricted op.
-            desc = rb["desc"]
-            # Use a sliding window of 8 chars from desc to match givens.
-            # Full desc match is too strict (givens may paraphrase).
-            desc_chunks = [desc[i:i+8] for i in range(0, max(0, len(desc)-8), 4)]
-            desc_chunks = [c for c in desc_chunks if len(c) >= 6 and not c.isspace()]
-            if any(chunk and chunk in givens_text for chunk in desc_chunks):
-                # Check action match: action contains a restricted op keyword
-                # OR action is a substring of the BR description.
-                if rb["restricted_ops"] and any(op in action for op in rb["restricted_ops"]):
-                    matched_br = rb
-                    break
-                # Fallback: action verb appears in BR desc
-                action_verb = action[:2] if len(action) >= 2 else action
-                if action_verb and action_verb in desc:
-                    matched_br = rb
-                    break
-
-        if not matched_br:
-            continue
-
-        # Rewrite thens[0].expectation to assert rejection.
-        from_state = ""
-        for g in p.get("givens", []) or []:
-            s = g.get("state", "")
-            if s and s != "(初始)":
-                from_state = s
-                break
-        state_phrase = f"{from_state}状态保持不变" if from_state else "状态保持不变"
-        br_id = matched_br["br_id"]
-        new_exp = f"操作被拒绝，{state_phrase}并给出禁止提示（{br_id}）"
-        original = thens[0].get("expectation", "")
-        if original != new_exp:
-            thens[0]["expectation"] = new_exp
-            thens[0]["kind"] = "prompt"
-            br_refs = thens[0].get("br_refs", []) or []
-            if br_id not in br_refs:
-                br_refs.append(br_id)
-            thens[0]["br_refs"] = br_refs
-            patched += 1
-
-    if patched:
-        warnings.append(f"S1 V02-fix: patched {patched} procedures for guard polarity (P2 BR signal)")
-    return procedures
-
-
-
 def s1_generation_node(state: AgentState) -> dict:
     """S1 Procedure Generation node — deterministic, V2-equivalent."""
     global _gen_seq_counter
@@ -3744,8 +3862,12 @@ def s1_generation_node(state: AgentState) -> dict:
     # are already covered by Type1 procedures.  Type4a/4b were redundant —
     # their own Then said "此条件已在T-XXX前置条件中体现".
     # CO is now used ONLY for dependency ordering in S3 (not for generation).
+    # br_list (business_rule ROs) is needed by Type1 for guard-polarity
+    # detection, so compute it here before any generation.
+    br_list = ro_by_type.get("business_rule", [])
+
     procedures: list[dict] = []
-    procedures.extend(_generate_type1(state, indices, depth_cache))
+    procedures.extend(_generate_type1(state, indices, depth_cache, br_list))
     procedures.extend(_generate_type3(state, indices, depth_cache))
     procedures.extend(_generate_type5(state, indices))
     procedures.extend(_generate_type6(state, indices, depth_cache))
@@ -3758,7 +3880,6 @@ def s1_generation_node(state: AgentState) -> dict:
     # ── LLM-based BR decomposition (replaces _BR_PREDICATE_MARKERS) ──
     # Decompose all business_rule ROs into atomic assertions once, cache
     # the result for Type7 generation and BR embedding.
-    br_list = ro_by_type.get("business_rule", [])
     if 'br_decomposition' not in state:
         # TEMP: skip BR decomposition (LLM call too slow for 63 BRs)
         # br_decomp = _decompose_brs_via_llm(br_list)
@@ -3782,9 +3903,11 @@ def s1_generation_node(state: AgentState) -> dict:
     # BR embedding (non-standalone → V steps in host procedures)
     procedures = _embed_brs(procedures, br_classifications, state, entity_name_map, signal_v_steps)
 
-    # V02 fix: enforce guard polarity based on P2 BR signal_type=restrictive.
-    # Deterministic post-processor — does NOT read verify/case_spec.json.
-    procedures = _enforce_guard_polarity(procedures, br_list, warnings, cm)
+    # V02 guard polarity is now enforced inside _generate_type1 at build time
+    # (restrictive BR matching merged into is_negative_branch detection),
+    # replacing the old post-hoc _enforce_guard_polarity patch. This avoids
+    # the cascade pollution where thens[0] asserted rejection while thens[1:]
+    # still claimed successful state migration.
 
     # S1.10 Dedup (I24)
     procedures = _dedup_procedures(procedures, cos, warnings)

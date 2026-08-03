@@ -100,8 +100,6 @@ SRS 文档
 | `P2_Prompt.md` | P2 覆盖义务建模的 prompt——P1 产出 → entity_obligations + transition_obligations + cross_entity_obligations + constraint_obligations |
 | `generate_obligation_model.py` | P2 确定性脚本实现。V08 修复：`_derive_phase_mapping` 从 transitions 推导相位映射写入 state_info；state_info 扁平化布局；分支拆分逻辑 |
 | `generate_json.py` | P1 抽取的辅助脚本 |
-| `P1output.json` | P1 产出（示例：航天能力验证项目评审系统） |
-| `航天能力验证项目评审系统_结构化.json` | 早期 P1 产出（勿用，branch_dimensions 为空） |
 
 ### `verify/` — Gate-S 骨架门禁
 
