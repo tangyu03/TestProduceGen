@@ -221,6 +221,8 @@ TO = P1 transition 全字段透传 + 本节新增/覆盖字段。遍历 transiti
 - **branch_dimensions**：补 entity 和 affected_obligations
 - **structural_relations / transition_relations**：关键字段透传
 - **state_info**：汇总各实体状态维度信息
+- **prohibition_config**：**透传 P1 的 _context.prohibition_config（领域操作词汇的唯一真相源在 P1 数据层）**；P1 未声明时用框架通用默认（不可/不能/禁止/不得/不允许/无法/无权 + 通用 CRUD 动词），**禁硬编码领域动词**（选入/归档/发放等业务词只来自 P1）。
+- **permissions**：**透传 P1 的 _context.permissions（角色→可执行操作，V07 校验器据此推导矩阵）**；P1 未声明时为空 list。
 - **xc_to_br_mapping**：xc_status=="br" 的条目
 - **judgments**：语义过滤、XC 分类、三元组验证、去重、refs 回填、operations 兼容处理等关键决策
 - **warnings**：所有跳过项，含 precondition_state_refs_unresolved 列表（TO id+文本）、precondition_state_refs_coverage 统计（每条 TO 的 preconditions 总数与解析成功数）

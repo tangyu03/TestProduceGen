@@ -17,7 +17,7 @@ BR_SEVERITIES = ("mandatory", "conditional")
 ENTITY_TYPES = ("core", "managed")
 TAGS = ("approvable", "multi-state", "expirable", "collaborative", "configurable")
 CONFIDENCE = ("high", "medium", "low")
-RESERVED_ROLES = ("system",)                               # 4.3：保留角色，引用校验豁免
+RESERVED_ROLES = ("system", "系统")                        # 4.3：保留角色(英/中)，引用校验豁免
 
 # 铁律8：trigger_source 优先级（索引小者优先级高，去重仅升级不降级）
 TRIGGER_PRIORITY = {name: i for i, name in enumerate(TRIGGER_SOURCES)}

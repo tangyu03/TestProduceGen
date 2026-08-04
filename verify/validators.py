@@ -3,8 +3,13 @@
 
 用法：
   python verify/validators.py --spec verify/case_spec.json --output test_output.json
-  python verify/validators.py -s case_spec.json -o out.json --json verdict.json
+  python verify/validators.py -s case_spec.json -o out.json --model coverage_obligations.json --json verdict.json
 退出码：skeleton_pass=True → 0，否则 1。
+
+--model 传入 coverage_obligations.json(结构化模型)：
+  第一性原理——校验器的期望(动作目录/角色权限/覆盖义务)应从模型推导,
+  而非 case_spec.json 这个 AI 生成的二手代理。需要模型的校验器(V03/V07/V10)
+  通过 output["_model"] 读取;不需要的忽略。
 """
 import argparse
 import importlib
@@ -29,7 +34,10 @@ def load_json(p):
         return json.load(f)
 
 
-def run_all(output: dict, spec: dict) -> list:
+def run_all(output: dict, spec: dict, model: dict | None = None) -> list:
+    # 模型注入 output["_model"]：需要模型推导期望的校验器读取,其余忽略。
+    if model is not None:
+        output = {**output, "_model": model}
     results = []
     for name in CHECK_MODULES:
         mod = importlib.import_module(f"verify.checks.{name}")
@@ -84,10 +92,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", "-s", required=True)
     ap.add_argument("--output", "-o", required=True)
+    ap.add_argument("--model", "-m", default=None,
+                    help="coverage_obligations.json 结构化模型(校验器从模型推导期望)")
     ap.add_argument("--json", "-j", default=None)
     args = ap.parse_args()
     spec, output = load_json(args.spec), load_json(args.output)
-    verdict = aggregate(output, run_all(output, spec))
+    model = load_json(args.model) if args.model else None
+    verdict = aggregate(output, run_all(output, spec, model))
     text = json.dumps(verdict, ensure_ascii=False, indent=2)
     if args.json:
         Path(args.json).write_text(text, encoding="utf-8")

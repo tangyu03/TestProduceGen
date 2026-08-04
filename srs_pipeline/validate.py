@@ -2,6 +2,7 @@
 修复不了的报 error → 由 model.assemble 按 critical 中断（校验修复失败 → critical）。"""
 from __future__ import annotations
 import json
+import re
 from dataclasses import dataclass, field
 
 from .constants import (DIRECTIONS, OP_CATEGORIES, OWNERSHIP_BY_RELATION,
@@ -54,7 +55,11 @@ class Validator:
         self.report = Report()
         self._extra = []
         self.entities = {e["id"]: e for e in model.entities}
-        self.role_ids = {r["id"] for r in model.roles} | set(RESERVED_ROLES)
+        # role 引用键: 转换的 role 用角色名(与 Step 4.3 的 name 逐字对齐, prompt
+        # Step 0.5/4.1),C01 同时接受角色 ID 与角色名;system 为保留角色。
+        self.role_ids = ({r["id"] for r in model.roles}
+                         | {r["name"] for r in model.roles}
+                         | set(RESERVED_ROLES))
         self.trans = {t["id"]: t for t in model.transitions}
         self.dims = {(e["id"], d["dimension_name"]): d
                      for e in model.entities for d in e["state_dimensions"]}
@@ -219,7 +224,10 @@ class Validator:
             if rel["trigger_source"] not in TRIGGER_SOURCES:
                 r.error("C07", f"因果 {key[0]}→{key[1]} trigger_source 非法")
             ev = rel["evidence_transitions"]
-            if rel["trigger_source"] in ("desc", "business_rule"):
+            # bidi_coupling 同 desc/business_rule: 双向同步可无单一转换证据
+            # (如 E-EXP↔E-USER 操作级同步,实体无状态机),note.comment 注明
+            # 证据位置即可(4.5);否则按证据必填处理。
+            if rel["trigger_source"] in ("desc", "business_rule", "bidi_coupling"):
                 if not ev and not rel["note"].get("comment"):
                     r.warn("C07", f"{key[0]}→{key[1]} 证据为空且未注明证据位置（4.5）")
             elif not ev:
@@ -327,8 +335,16 @@ class Validator:
                 seen.add(o["name"])
                 if o["category"] in nonstate and o["name"] in actions:
                     r.warn("C12", "无状态操作疑似误入 transitions（铁律13）", ref)
-                if o["category"] == "crud" and "T-" not in o["note"].get("comment", ""):
-                    r.warn("C12", "crud 操作未回填 T-xxx 关联（4.4⑤）", ref)
+                if o["category"] == "crud":
+                    # 4.4⑤ 回填两种合法形态: ①局部标签引用(如 "对应转换 t01;tp01",
+                    # 铁律14 编号一律局部标签, 或框架改写后的 T-xxx); ②显式注明
+                    # "无对应转换"及理由。二者皆满足即视为已回填。
+                    comment = o["note"].get("comment", "")
+                    _has_trans_ref = bool(
+                        re.search(r"\bT-\d+\b|\b[tpou][a-z]*\d+\b", comment))
+                    _has_explicit_none = "无对应转换" in comment
+                    if not _has_trans_ref and not _has_explicit_none:
+                        r.warn("C12", "crud 操作未回填 T-xxx 关联（4.4⑤）", ref)
 
     # 13. direction 完整性
     def c13_direction(self):

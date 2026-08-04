@@ -217,6 +217,12 @@ class Procedure(BaseModel):
     # needs but that is NOT part of the business specification.
     operation_hints: list[str] = Field(default_factory=list)
 
+    # ── 时间控制声明 (V06) ──
+    # 时间触发型用例须声明 mechanism ∈ {clock_injection, db_time_update,
+    # scheduler_manual_trigger},骨架阶段 status 可为 "planned"。
+    # S1 从时效语义推导,见 _build_timeout_hints 的主触发机制。
+    time_control: Optional[dict] = None
+
     gen_seq: int
     post_state: str
     cascade_chain: Optional[str] = None

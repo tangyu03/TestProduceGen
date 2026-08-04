@@ -13,6 +13,11 @@ from .escape import esc
 
 SCHEMA_VERSION = "19.2"
 
+# 局部标签(铁律14: 编号一律局部标签, 框架统一改写为正式编号)。
+# 匹配形如 t01 / t07a / tp01 / p04 / u01 / o01 / s01 / x01 / b01 / i01 的
+# 交叉引用 token。中文需求文本中"小写字母+数字"几乎必是标签, 误伤可忽略。
+_LOCAL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
+
 def _now() -> str:
     return datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds")
 
@@ -52,6 +57,11 @@ class DomainModel:
         # 真相源在 P1 数据层,而非 P2/S1 引擎硬编码。P2 读取 p1._context.
         # prohibition_config,缺省时用 P2 的通用兜底。
         self.prohibition_config: dict = {}
+        # 角色→可执行操作权限。第一性原理:权限矩阵的单一真相源在 P1 数据层
+        # (而非 case_spec 手写矩阵)——由授权类 BR(如"机构管理员对本机构的项目
+        # 进行管理")与各操作的角色归属汇总。V07 校验器从 _context.permissions
+        # + transition_obligations.role 推导矩阵。
+        self.permissions: list[dict] = []
         self._check_hooks = []          # 扩展点：项目自定义校验
         self._before_assemble = []      # 扩展点：组装前钩子
         # ---- P1.5 挂载点 ----
@@ -179,6 +189,17 @@ class DomainModel:
         return self
 
     # ---------- 扩展点 ----------
+    def add_permission(self, role: str, operations: list):
+        """声明角色可执行的操作(role→operations)。
+
+        权限矩阵的单一真相源在 P1 数据层——V07 校验器据此推导矩阵,不再依赖
+        case_spec 手写矩阵。role 用角色名(与用例 actor 一致,如"评审管理员")。
+        例:
+            m.add_permission("评审管理员", ["建立评审计划", "下发评审计划", ...])
+        """
+        self.permissions.append({"role": role, "operations": list(operations)})
+        return self
+
     def set_prohibition_config(self, config: dict):
         """声明项目操作词汇(prohibition_config)。
 
@@ -216,8 +237,11 @@ class DomainModel:
     # ---------- Step 6 ----------
     def assemble(self):
         from .validate import Validator
+        # 编号移交(铁律14): 局部标签 → 正式编号, 无条件执行。
+        # 此前误放 _before_assemble 钩子循环内 —— 无钩子时编号移交失效,
+        # 输出残留局部标签(t01/t07a), 下游 P2/S1 无法按 T-xxx 关联。
+        self._assign_ids()
         for fn in self._before_assemble:
-            self._assign_ids() 
             fn(self)
         self._backfill_branch_coverage()
         self.meta["branch_dimensions"] = self.branch_dimensions
@@ -255,7 +279,8 @@ class DomainModel:
     def _build_output(self):
         self.meta["pipeline_trace"] = self._build_trace()
         return {"_meta": self.meta,
-                "_context": {"prohibition_config": self.prohibition_config},
+                "_context": {"prohibition_config": self.prohibition_config,
+                            "permissions": self.permissions},
                 "domain_model": {
                     "entities": self.entities, "roles": self.roles,
                     "structural_relations": self.structural_relations,

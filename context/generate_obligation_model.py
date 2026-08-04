@@ -2123,10 +2123,18 @@ _context = {
     "state_info": state_info,
     "roles": p1["domain_model"]["roles"],
     "entity_details": [
-        {"id": e["id"], "name": e["name"], "type": e.get("type", ""), "desc": e.get("desc", "")}
+        {"id": e["id"], "name": e["name"], "type": e.get("type", ""), "desc": e.get("desc", ""),
+         # 属性及其约束 desc 透传 —— V04 校验器据此推导系统维护字段
+         # (单一真相源在 P1 数据层,非 case_spec 手写清单)
+         "attributes": [{"name": a.get("name", ""), "desc": a.get("desc", ""),
+                         "is_config": bool(a.get("is_config"))}
+                        for a in (e.get("attributes") or [])]}
         for e in p1["domain_model"]["entities"]
-    ],  
+    ],
     "prohibition_config": _prohibition_config,
+    # 角色→可执行操作权限,由 P1 数据层声明(单一真相源)。V07 校验器据此推导
+    # 权限矩阵,不再依赖 case_spec 手写矩阵。P1 未声明时为空 list。
+    "permissions": (p1.get("_context") or {}).get("permissions", []),
     "xc_to_br_mapping": xc_to_br_mapping,
     "judgments": judgments,
     "warnings": warnings,

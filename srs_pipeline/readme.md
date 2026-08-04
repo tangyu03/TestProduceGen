@@ -10,8 +10,7 @@ requirements/              # 数据层：每个需求一份
 main.py                    # 入口：装配 → 输出 → 校验
 
 
-python -m srs_pipeline.cli requirements_data.review_system -o review_system_structured.json
-python -m srs_pipeline.cli requirements_data.xxx_system  -o xxx.json --strict   # 接 CI
+  python -m srs_pipeline.cli srs_data.struct_srs -o review_structured.json
 
 
 扩展留给三个口子：新需求只需在 requirements_data/ 加一个数据文件；项目特有校验用 m.add_check(fn) 注册；prompt 本身升级（新枚举、新铁律）只改 constants.py 和 validate.py，不动任何数据文件。P2 阶段建议做的是把 C12 的 T-xxx 回填、C05 的穿透缺口提示做成自动修复，P3 再接 LLM 做文档解析与断点续传，需要时我可以继续往下写。

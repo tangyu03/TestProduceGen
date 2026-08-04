@@ -27,7 +27,16 @@ def main(argv=None) -> int:
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump(interrupt_schema(model.meta["source"], ca.items),
                       f, ensure_ascii=False, indent=2)
-        print(f"critical 歧义，已输出中断 Schema: {args.output}")
+        print(f"critical 歧义（{len(ca.items)} 项），已输出中断 Schema: {args.output}")
+        for i, item in enumerate(ca.items, 1):
+            aid = item.get('amb_id', '?')
+            sev = item.get('severity', '')
+            conc = item.get('concept', '')
+            print(f"  [{i}] {aid} [{conc}] {item.get('description', '')}")
+            if item.get('assumption'):
+                print(f"      assumption: {item['assumption']}")
+            if item.get('suggestion'):
+                print(f"      suggestion: {item['suggestion']}")
         return 2
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)

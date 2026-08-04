@@ -346,22 +346,29 @@ _TRIGGER_HINT_TEMPLATES = {
 }
 
 
-def _build_timeout_hints(action_text: str) -> list[str]:
-    """根据 action 语义动态构建触发方式 hints。
+def _derive_time_mechanism(action_text: str) -> str:
+    """从 action 语义推导主触发机制(V06 time_control.mechanism)。
 
     判定规则：
     - action 含"边界"/"接近" → clock_injection（时钟注入到边界）
     - action 含"过期"/"已过期" → db_time_update（数据库时间更新）
     - 其他（含"超时"/"自动"）→ scheduler_manual_trigger（调度器触发）
 
-    所有 time_sensitive 用例都列出 3 种触发方式，主触发方式排第一。
+    触发方式标识符是 validator 协议约定的枚举,不算业务硬编码。
     """
     if any(kw in action_text for kw in ["边界", "接近"]):
-        primary = "clock_injection"
-    elif any(kw in action_text for kw in ["过期", "已过期"]):
-        primary = "db_time_update"
-    else:
-        primary = "scheduler_manual_trigger"
+        return "clock_injection"
+    if any(kw in action_text for kw in ["过期", "已过期"]):
+        return "db_time_update"
+    return "scheduler_manual_trigger"
+
+
+def _build_timeout_hints(action_text: str) -> list[str]:
+    """根据 action 语义动态构建触发方式 hints。
+
+    所有 time_sensitive 用例都列出 3 种触发方式，主触发方式排第一。
+    """
+    primary = _derive_time_mechanism(action_text)
     ordered = [primary] + [m for m in _ALLOWED_TRIGGER_METHODS if m != primary]
     return [_TRIGGER_HINT_TEMPLATES[m] for m in ordered]
 
@@ -1601,6 +1608,11 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 "operation_hints": (
                     _build_timeout_hints(action) if "time_sensitive" in risk_traits else []
                 ),
+                # V06: 声明 time_control.mechanism(从时效语义推导);非时效为 None
+                "time_control": (
+                    {"mechanism": _derive_time_mechanism(action), "status": "planned"}
+                    if "time_sensitive" in risk_traits else None
+                ),
                 "gen_seq": _gen_seq_counter,
                 "post_state": f"{te['entity']}.{dimension}→{to_state_for_post}",
                 "cascade_chain": None,
@@ -1704,6 +1716,10 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "thens": pos_thens,
                     "operation_hints": (
                         _build_timeout_hints(action) if "time_sensitive" in risk_traits else []
+                    ),
+                    "time_control": (
+                        {"mechanism": _derive_time_mechanism(action), "status": "planned"}
+                        if "time_sensitive" in risk_traits else None
                     ),
                     "gen_seq": pos_gen_seq,
                     "post_state": f"{te['entity']}.{dimension}→{to_state}",
@@ -1905,6 +1921,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "thens": boundary_thens,
                     # V06: 注入触发方式 hints（动态推导，boundary 主触发为 clock_injection）
                     "operation_hints": _build_timeout_hints(action + "(时间边界)"),
+                    "time_control": {"mechanism": "clock_injection", "status": "planned"},
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→{to_state}(时间边界)",
                     "cascade_chain": None,
@@ -1946,6 +1963,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "thens": expired_thens,
                     # V06: 注入触发方式 hints（动态推导，expired 主触发为 db_time_update）
                     "operation_hints": _build_timeout_hints(action + "(已过期)"),
+                    "time_control": {"mechanism": "db_time_update", "status": "planned"},
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→(过期未执行)",
                     "cascade_chain": None,
@@ -3078,6 +3096,11 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
                 t_depth = depth_cache.get(to.get("transition_id", ""), 0) if depth_cache else 0
                 chain_depth = max(chain_depth, t_depth)
 
+        # V06: 时限/超时/timing BR 注入触发方式 hints + time_control
+        # 条件与 V06 模型信号一致: category=timing 或 desc 含"超时/时限"
+        _is_timing_br = (br.get("category") == "timing"
+                         or "超时" in br_desc or "时限" in br_desc)
+
         proc = {
             "temp_id": f"PROC-T7-{_next_gen_seq()}",
             "source_ids": [br.get("id", br.get("constraint_id", ""))],
@@ -3088,9 +3111,13 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             "givens": givens,
             "when": when,
             "thens": thens,
-            # V06: BR desc 含"超时"时注入触发方式 hints（动态推导）
             "operation_hints": (
-                _build_timeout_hints(br_desc) if "超时" in br_desc else []
+                _build_timeout_hints(br_desc) if _is_timing_br else []
+            ),
+            # V06: 时限/超时 BR 用例声明 time_control(调度器触发)
+            "time_control": (
+                {"mechanism": "scheduler_manual_trigger", "status": "planned"}
+                if _is_timing_br else None
             ),
             "gen_seq": _gen_seq_counter,
             "post_state": f"{primary_br_entity}→(规则验证完成)",

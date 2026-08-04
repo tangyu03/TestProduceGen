@@ -1,261 +1,154 @@
-"""V10 覆盖矩阵（重构版）：coverage_matrix 条目探测 + 状态机状态覆盖核查。
+"""V10 覆盖校验(模型推导版)：每个模型化义务必须有用例覆盖 + 状态机状态全覆盖。
 
-骨架层只做机械匹配，但旧版"整词子串匹配"对长描述型 probe
-（如 "开题合格及以上→已选入且阶段变验收"）永不命中。本版分级匹配：
-- 短 probe（≤6 字符）：精确子串匹配
-- 长 probe：bigram 包含率 ≥ 0.6 视为命中（容忍措辞变体，不引入语义模型）
-- 可选 spec 扩展 entry.probe_aliases = {probe: [alias...]}：probe 或其任一变体命中即算
+第一性原理：覆盖是可追溯性(结构化引用)问题,不是文本关键词匹配问题。
+procedure 的 source_ids 引用义务 id(T-*/EO-*/RO-*),embedded_brs 引用嵌入的
+BR。V10 据此验证——不再用 case_spec.coverage_matrix 的需求关键词做子串匹配
+(那是 AI 生成的二手代理,且措辞差异产生大量伪影)。
 
-required_types 检查为 warning 级：条目声明需要的用例类型（如 transition），
-若全部命中 probe 的用例中没有该类型，记入 evidence(level=warning) 提示
-"有文本提及但无对应类型用例"，不阻断 skeleton_pass——类型级判定留给 Gate-E。
+覆盖检查(每个义务 ≥1 用例引用)：
+  - transition_obligations → Type1 用例的 source_ids
+  - entity_obligations     → Type3/5/9 用例的 source_ids
+  - business_rule ROs      → Type7 source_ids 或 embedded_brs(映射 BR→RO-BR)
+                             或 XC-* 因果约束(设计上无独立用例,豁免)
+  - invalid_transition ROs → Type6 用例的 source_ids
+  - cross_entity           → 结构义务(无独立用例),豁免
 
-状态覆盖核查：按 machine.dimension / 实体别名分组，状态必须在该组用例的
-post_state（解析箭头后精确等值）或 givens.state（精确等值）中出现。
-不用子串匹配（"合格"子串会到处误命中）；组内无用例时回退全局检查并记 hygiene。
+状态覆盖：model._context.state_info 的每个状态,须出现在某用例的
+post_state 或 givens.state(精确等值,不用子串)。
 
-boundary 无 boundary_probe_template 时不探测（记 hygiene，数值边界归 Gate-E）。
+真实覆盖缺口(需求未建模为义务,如"计划编号自动生成唯一")不属于 V10——
+那是 P1 模型对 SRS 的忠实度问题,由 P1 校验层(C1-C16/原文对账)负责。
+
+缺 --model 时跳过(无法推导期望,不退回 case_spec 关键词代理)。
 """
-import re
+from collections import defaultdict
 
-from .base import CheckResult, entity_alias, get_procedures, normalize_text
+from .base import CheckResult, get_procedures
 
 CHECK_ID = "V10"
 
-BIGRAM_HIT_RATIO = 0.6
-# Probes with length <= SHORT_PROBE_LEN use exact-substring matching (too
-# short for stable bigram statistics). The threshold is inclusive: a 6-char
-# probe like "归档转为结束" has only 5 bigrams, and one missing bigram (e.g.
-# "档转" missing because text says "状态转换为") drops the ratio to 0.6,
-# which IS the threshold — but substring match fails because the literal
-# 6-char sequence isn't contiguous in text. So 6-char probes should go
-# through the bigram path, not the substring path. Use < (strict).
-SHORT_PROBE_LEN = 5
 
-# required_types 文本 → obligation_type 集合（display 无专属类型，按 rule/config 宽匹配）
-_TYPE_MAP = {
-    "transition": {1},
-    "rule": {8, 6},
-    "display": {8, 3},
-    "field_validation": {9},
-}
-
-
-def _proc_text(p) -> str:
-    parts = [p.get("title", ""), p.get("entity", ""),
-             (p.get("when") or {}).get("event", ""),
-             (p.get("when") or {}).get("action", "")]
-    parts += [t.get("expectation", "") for t in p.get("thens", []) or []]
-    parts += [str(g.get("state", "")) + str(g.get("description", ""))
-              for g in p.get("givens", []) or []]
-    parts += [str(x) for x in (p.get("source_ids", []) or [])]
-    return normalize_text(" ".join(str(x) for x in parts))
-
-
-def _bigrams(s: str) -> set:
-    return {s[i:i + 2] for i in range(len(s) - 1)} if len(s) >= 2 else ({s} if s else set())
-
-
-# Character-set Jaccard threshold for the order-independent fallback.
-# Catches cases where the probe and text share most characters but in
-# different word order (e.g. probe "已提交不可修改" vs text
-# "已提交的项目不能进行分数修改" — bigram overlap is only 0.5 because
-# "交不" doesn't appear in text, but character overlap is high).
-CHAR_JACCARD_THRESHOLD = 0.7
-
-
-def _char_jaccard(probe: str, text: str) -> float:
-    """Character-set Jaccard similarity (order-independent).
-
-    Only meaningful for non-trivial probes (>= 4 chars); below that the
-    bigram path already handles short probes via exact substring match.
-    """
-    if not probe or not text:
-        return 0.0
-    ps, ts = set(probe), set(text)
-    if not ps or not ts:
-        return 0.0
-    return len(ps & ts) / len(ps | ts)
-
-
-def _probe_hit(probe: str, texts: list) -> bool:
-    """texts: 已归一化的用例文本列表。
-
-    五级匹配：
-    1. 短 probe (≤5 字符)：精确子串匹配。
-    2. 短 probe 兜底：probe 的所有字符均在文本中出现（字符子集），
-       捕获"5人组" vs "评审组由5、7或9个专家组成"这类同义表述。
-    3. 长 probe：bigram 包含率 ≥ 0.6 视为命中。
-    4. 长 probe 兜底 A：字符集 Jaccard ≥ 0.7（捕获短文本场景）。
-    5. 长 probe 兜底 B：probe 是 text 字符子集 AND 至少 1 个 bigram 命中。
-    """
-    p = normalize_text(probe)
-    if not p:
-        return True
-    if len(p) <= SHORT_PROBE_LEN:
-        # Pass 1: exact substring
-        if any(p in t for t in texts):
-            return True
-        # Pass 2: character-subset (all probe chars present in text)
-        ps = set(p)
-        for t in texts:
-            if ps and ps.issubset(set(t)):
-                return True
-        return False
-    pb = _bigrams(p)
-    if not pb:
-        return False
-    # Pass 3: bigram containment (strict)
-    for t in texts:
-        tb = _bigrams(t)
-        if tb and len(pb & tb) / len(pb) >= BIGRAM_HIT_RATIO:
-            return True
-    # Pass 4: character-set Jaccard (order-independent, works for short texts)
-    for t in texts:
-        if _char_jaccard(p, t) >= CHAR_JACCARD_THRESHOLD:
-            return True
-    # Pass 5: probe is a character-subset of text AND at least one bigram
-    # matches. Catches "全零不可提交" vs "项目各项打分全部为零的不能提交"
-    # — all 6 probe chars present in text, but only 1 bigram matches
-    # (提交); the strict bigram ratio (0.2) is too low for Pass 3, but
-    # the character-subset property confirms semantic overlap.
-    ps = set(p)
-    for t in texts:
-        if ps and ps.issubset(set(t)):
-            tb = _bigrams(t)
-            if tb and (pb & tb):
-                return True
-    return False
-
-
-def _probe_hit_types(probe: str, procs: list, texts: list) -> set:
-    """返回命中该 probe 的用例 obligation_type 集合。"""
-    p = normalize_text(probe)
-    if not p:
-        return set()
-    hit = set()
-    if len(p) <= SHORT_PROBE_LEN:
-        ps = set(p)
-        for proc, t in zip(procs, texts):
-            if p in t:
-                hit.add(proc.get("obligation_type"))
-                continue
-            # Character-subset fallback for short probes
-            if ps and ps.issubset(set(t)):
-                hit.add(proc.get("obligation_type"))
-        return hit
-    pb = _bigrams(p)
-    ps = set(p)
-    for proc, t in zip(procs, texts):
-        tb = _bigrams(t)
-        if tb and len(pb & tb) / len(pb) >= BIGRAM_HIT_RATIO:
-            hit.add(proc.get("obligation_type"))
-            continue
-        # Character-set Jaccard fallback
-        if _char_jaccard(p, t) >= CHAR_JACCARD_THRESHOLD:
-            hit.add(proc.get("obligation_type"))
-            continue
-        # Subset + at-least-one-bigram fallback
-        if ps and ps.issubset(set(t)) and tb and (pb & tb):
-            hit.add(proc.get("obligation_type"))
-    return hit
-
-
-def _post_states(p) -> set:
-    out = set()
+def _post_state(p) -> str:
     raw = (p.get("post_state") or "").strip()
-    if raw:
-        for sep in ("→", "->"):
-            if sep in raw:
-                raw = raw.split(sep)[-1]
-                break
-        out.add(raw.strip().strip("()"))
-    return out
+    if not raw:
+        return ""
+    for sep in ("→", "->"):
+        if sep in raw:
+            return raw.split(sep)[-1].strip().strip("()")
+    return raw.strip().strip("()")
 
 
-def _given_states(p) -> set:
-    return {str(g.get("state", "")).strip() for g in p.get("givens", []) or []
-            if str(g.get("state", "")).strip()}
+def _reached_states_by_dim(procs: list, name_to_id: dict) -> dict:
+    """(entity_id, dimension) → set(reached states from post_state + givens.state)。
+
+    output.json 的 procedure.entity 是中文名(经 _translate_procedures 翻译),
+    model._context.state_info 用实体 ID(E-PROJ)。这里把中文名归一为 ID。
+    """
+    reached: dict[tuple, set] = defaultdict(set)
+    for p in procs:
+        ent = name_to_id.get(p.get("entity", ""), p.get("entity", ""))
+        dim = p.get("dimension", "")
+        key = (ent, dim)
+        ps = _post_state(p)
+        if ps:
+            reached[key].add(ps)
+        for g in p.get("givens", []) or []:
+            s = str(g.get("state", "")).strip()
+            if s:
+                reached[key].add(s)
+    return reached
+
+
+def _obligation_coverage(model: dict, procs: list) -> tuple[list, list]:
+    """返回 (未覆盖义务列表, note 片段列表)。"""
+    missing = []
+    notes = []
+
+    to_ids = {t["id"] for t in model.get("transition_obligations", []) or []}
+    eo_ids = {e["id"] for e in model.get("entity_obligations", []) or []}
+    ros = model.get("constraint_obligations", []) or []
+    br_ids = {r["id"] for r in ros if r.get("type") == "business_rule"}
+    it_ids = {r["id"] for r in ros if r.get("type") == "invalid_transition"}
+    # BR-xxx → RO-BR-xxx 映射(embedded_brs 用 constraint_id)
+    br_by_cid = {r.get("constraint_id"): r["id"] for r in ros if r.get("constraint_id")}
+    # XC-* 因果约束 BR: 设计上无独立用例,豁免
+    xc_causal_ids = {r["id"] for r in ros
+                     if str(r.get("constraint_id") or "").startswith("XC-")
+                     or r.get("source_xc")}
+
+    src_covered: set = set()
+    embedded_covered: set = set()
+    for p in procs:
+        src_covered.update(set(p.get("source_ids", []) or []))
+        for cid in p.get("embedded_brs", []) or []:
+            if cid in br_by_cid:
+                embedded_covered.add(br_by_cid[cid])
+
+    # TO 覆盖
+    miss_to = sorted(to_ids - src_covered)
+    if miss_to:
+        missing.append({"kind": "transition", "missing": miss_to})
+    notes.append(f"TO {len(to_ids) - len(miss_to)}/{len(to_ids)}")
+
+    # EO 覆盖
+    miss_eo = sorted(eo_ids - src_covered)
+    if miss_eo:
+        missing.append({"kind": "entity", "missing": miss_eo})
+    notes.append(f"EO {len(eo_ids) - len(miss_eo)}/{len(eo_ids)}")
+
+    # BR 覆盖(source_ids + embedded_brs; XC 豁免)
+    covered_br = (src_covered & br_ids) | embedded_covered | xc_causal_ids
+    miss_br = sorted(br_ids - covered_br)
+    if miss_br:
+        missing.append({"kind": "business_rule", "missing": miss_br})
+    notes.append(f"BR {len(br_ids) - len(miss_br)}/{len(br_ids)}"
+                 f"(embedded {len(embedded_covered & br_ids)}, "
+                 f"xc_causal {len(xc_causal_ids)})")
+
+    # IT 覆盖
+    miss_it = sorted(it_ids - src_covered)
+    if miss_it:
+        missing.append({"kind": "invalid_transition", "missing": miss_it})
+    notes.append(f"IT {len(it_ids) - len(miss_it)}/{len(it_ids)}")
+
+    return missing, notes
+
+
+def _state_coverage(model: dict, procs: list) -> list:
+    """从 state_info 校验每个状态被覆盖。"""
+    state_info = (model.get("_context") or {}).get("state_info", {}) or {}
+    name_to_id = {info.get("entity_name"): ent for ent, info in state_info.items()}
+    reached = _reached_states_by_dim(procs, name_to_id)
+    missing = []
+    for ent, info in state_info.items():
+        for dim in info.get("dimensions", []) or []:
+            dim_name = dim.get("dimension_name", "")
+            rs = reached.get((ent, dim_name), set())
+            for st in dim.get("states", []) or []:
+                if st and st not in rs:
+                    missing.append({"machine": f"{ent}.{dim_name}",
+                                    "missing_state": st})
+    return missing
 
 
 def check(output: dict, spec: dict) -> CheckResult:
     res = CheckResult(check_id=CHECK_ID, severity="blocker", suspected_stage="P2",
-                      suspected_files=["build_obligations.py", "prompts/s0_prompt.py"])
-    procs = get_procedures(output)
-    texts = [_proc_text(p) for p in procs]
-    hygiene, type_warns = [], 0
-
-    # ── 覆盖矩阵探测 ──
-    matrix = (spec or {}).get("coverage_matrix") or []
-    if not matrix:
-        res.skip("case_spec.coverage_matrix missing")
+                      suspected_files=["build_obligations.py", "nodes/s1_generation.py"])
+    model = output.get("_model")
+    if not model:
+        res.skip("no coverage model passed (--model); skipping model-derived V10")
         return res
-    total_probes = 0
-    for entry in matrix:
-        clause, topic = entry.get("clause", "?"), entry.get("topic", "")
-        aliases = entry.get("probe_aliases") or {}
-        probes = list(entry.get("must_include") or []) + list(entry.get("branches") or [])
-        hit_types = set()
-        for kw in probes:
-            total_probes += 1
-            variants = [kw] + list(aliases.get(kw, []) or [])
-            if any(_probe_hit(v, texts) for v in variants):
-                for v in variants:
-                    hit_types |= _probe_hit_types(v, procs, texts)
-                continue
-            res.fail({"clause": clause, "topic": topic, "missing_keyword": kw})
-        # required_types 覆盖（warning 级）
-        for rt in entry.get("required_types", []) or []:
-            want = _TYPE_MAP.get(rt, set())
-            if want and hit_types and not (hit_types & want):
-                type_warns += 1
-                res.evidence.append({
-                    "level": "warning", "clause": clause, "topic": topic,
-                    "required_type": rt, "hit_types": sorted(t for t in hit_types if t),
-                    "reason": "text mentions found but no case of required obligation_type"})
-        # boundary
-        tpl = entry.get("boundary_probe_template")
-        for b in entry.get("boundary") or []:
-            if tpl:
-                probe = normalize_text(tpl.format(n=b))
-                if not _probe_hit(probe, texts):
-                    total_probes += 1
-                    res.fail({"clause": clause, "topic": topic, "missing_boundary": b})
-            else:
-                hygiene.append(f"{clause}({topic}): boundary {b} has no probe template, skipped")
 
-    # ── 状态机状态覆盖（精确字段等值，不用子串） ──
-    machines = (spec or {}).get("state_machines") or {}
-    known_entities = set(machines.keys())
-    for name, m in machines.items():
-        dim = m.get("dimension")
-        group = [p for p in procs
-                 if (dim and p.get("dimension") == dim)
-                 or entity_alias(p.get("entity", ""), known_entities) == name]
-        if group:
-            reached = set()
-            for p in group:
-                reached |= _post_states(p)
-                reached |= _given_states(p)
-            scope = "dimension/entity group"
-        else:
-            reached = set()
-            for p in procs:
-                reached |= _post_states(p)
-                reached |= _given_states(p)
-            scope = "global fallback (no grouped cases)"
-            hygiene.append(f"{name}: no cases matched dimension/entity, state check fell back to global")
-        for st in m.get("states", []) or []:
-            if st and st not in reached:
-                res.fail({"machine": name, "missing_state_coverage": st, "scope": scope})
+    procs = get_procedures(output)
+    ob_missing, notes = _obligation_coverage(model, procs)
+    for m in ob_missing:
+        res.fail({"obligation_kind": m["kind"],
+                  "missing_obligation_ids": m["missing"][:10],
+                  "count": len(m["missing"])})
 
-    # ── 汇总 ──
-    misses = res.fail_count
-    hit_ratio = round((total_probes - misses) / total_probes, 4) if total_probes else 1.0
-    notes = [f"probe hit ratio={hit_ratio} ({total_probes - misses}/{total_probes})"]
-    if type_warns:
-        notes.append(f"required_type warnings={type_warns} (not blocking)")
-    if hygiene:
-        notes.append("spec hygiene: " + "; ".join(hygiene[:5]))
-    res.note = " | ".join(notes)
+    st_missing = _state_coverage(model, procs)
+    for m in st_missing:
+        res.fail({"machine": m["machine"], "missing_state": m["missing_state"]})
+
+    res.note = " | ".join(notes + [f"state_misses={len(st_missing)}"])
     return res

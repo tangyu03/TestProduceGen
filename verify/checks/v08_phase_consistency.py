@@ -187,12 +187,43 @@ def _phase_map(output: dict, m: dict, name: str) -> dict:
     return best if states and best_hit >= max(1, len(states) // 2) else {}
 
 
+def _machines_from_model(model: dict) -> dict:
+    """从模型 state_info + transition_obligations 推导状态机定义。
+
+    第一性原理: 状态机的 states/terminal/transitions 是模型的结构知识
+    (state_info + TO),不必由 case_spec.state_machines 重复编码。
+    返回 {实体名: {dimension, states, terminal_states, transitions}}。
+    """
+    si = (model.get("_context") or {}).get("state_info", {}) or {}
+    tos = model.get("transition_obligations", []) or []
+    machines = {}
+    for ent, info in si.items():
+        name = info.get("entity_name") or ent
+        for dim in info.get("dimensions", []) or []:
+            dim_name = dim.get("dimension_name", "")
+            trans = [t for t in tos
+                     if t.get("entity") == ent and t.get("dimension") == dim_name]
+            machines[name] = {
+                "dimension": dim_name,
+                "states": dim.get("states", []) or [],
+                "terminal_states": dim.get("terminal", []) or [],
+                "transitions": [
+                    {"id": t["id"],
+                     "from": t.get("from") or "(初始)",
+                     "to": t.get("to", ""),
+                     "direction": t.get("direction") or "forward"}
+                    for t in trans],
+            }
+    return machines
+
+
 def check(output: dict, spec: dict) -> CheckResult:
     res = CheckResult(check_id=CHECK_ID, severity="blocker", suspected_stage="S0",
                       suspected_files=["nodes/s0_topology.py", "nodes/s2_sorting.py"])
-    machines = (spec or {}).get("state_machines") or {}
+    model = output.get("_model")
+    machines = _machines_from_model(model) if model else {}
     if not machines:
-        res.skip("case_spec.state_machines missing")
+        res.skip("no coverage model passed (--model) or no state_info; skipping V08")
         return res
     hygiene = []  # spec 卫生观察（不阻断，汇总进 res.note，正式检查归 spec_lint）
 

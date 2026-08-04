@@ -1,64 +1,65 @@
-"""V06 超时机制声明（重构版）：双向核对，事件命中与 spec 标记的迁移都必须声明 time_control。
+"""V06 超时机制声明(模型推导版)：时间触发型义务的用例必须声明 time_control。
 
-两个检查方向：
-1. 事件文本命中（原有）：when.event 含 spec.time_control.events_requiring 关键词
-   （如"超时""时限到达""30分钟无操作""密码有效期7天"）→ 用例必须声明 time_control。
-2. spec 迁移表核对（新增）：transitions 中 time_control_required=true 的迁移，
-   其 source_ids 引用的用例必须声明 time_control——即使事件文本没写"超时"二字
-   （比如用例标题只写"系统自动转换"）。
+第一性原理："哪些用例需要 time_control"从模型推导(单一真相源),而非
+case_spec.time_control.events_requiring 关键词(那会误伤"设置超时"配置操作、
+"待办任务说明"等仅提及"超时"字样的非时间触发用例)：
+  - transition_obligations 中 risk_traits 含 time_sensitive 的 TO
+  - constraint_obligations 中 category==timing(或 desc 含超时/时限)的 BR
 
-判定：
-- time_control.mechanism ∈ allowed_mechanisms → 合法
-- time_control.status == "planned" → 骨架阶段豁免（详细化阶段应被 Gate-E 拒绝）
-- 两者都不满足 → fail（warning 级，不阻断 skeleton_pass）
+这些义务被引用(source_ids)的用例必须声明 time_control.mechanism ∈
+allowed_mechanisms(测试策略,来自 case_spec.time_control)或 status=="planned"。
 
-统计：note 报告 (事件命中数, spec迁移标记命中数, 未声明数) 便于校准误报。
+S1 生成器已从时效语义填充 time_control(见 _derive_time_mechanism)。
 """
 from .base import CheckResult, get_procedures
 
 CHECK_ID = "V06"
 
 
+def _needs_time_control(model: dict) -> set:
+    """返回需要 time_control 的义务 id 集合。"""
+    needs: set = set()
+    for to in model.get("transition_obligations", []) or []:
+        if "time_sensitive" in (to.get("risk_traits") or []):
+            if to.get("id"):
+                needs.add(to["id"])
+    for r in model.get("constraint_obligations", []) or []:
+        desc = r.get("description") or ""
+        if (r.get("type") == "business_rule"
+                and (r.get("category") == "timing"
+                     or "超时" in desc or "时限" in desc)):
+            if r.get("id"):
+                needs.add(r["id"])
+    return needs
+
+
 def check(output: dict, spec: dict) -> CheckResult:
     res = CheckResult(check_id=CHECK_ID, severity="warning", suspected_stage="S1",
-                      suspected_files=["prompts/s1_prompt.py", "nodes/s1_generation.py"])
-    tc = (spec or {}).get("time_control") or {}
-    kws = tc.get("events_requiring") or []
-    allowed = set(tc.get("allowed_mechanisms") or [])
-    if not kws or not allowed:
-        res.skip("case_spec.time_control missing")
+                      suspected_files=["nodes/s1_generation.py"])
+    model = output.get("_model")
+    if not model:
+        res.skip("no coverage model passed (--model); skipping model-derived V06")
         return res
 
-    # spec 迁移表：time_control_required=true 的迁移 id 集合
-    tc_tids = set()
-    for m in ((spec or {}).get("state_machines") or {}).values():
-        for t in m.get("transitions", []) or []:
-            if t.get("time_control_required") and t.get("id"):
-                tc_tids.add(t["id"])
+    allowed = set((spec or {}).get("time_control", {}).get("allowed_mechanisms", []))
+    needs = _needs_time_control(model)
+    if not needs:
+        res.skip("model has no time-sensitive obligations")
+        return res
 
-    event_hits = spec_tid_hits = missing = 0
+    missing = 0
     for p in get_procedures(output):
-        event = (p.get("when") or {}).get("event", "") or ""
         srcs = set(p.get("source_ids", []) or [])
-        event_hit = any(k in event for k in kws)
-        tid_hit = bool(srcs & tc_tids)
-        if not (event_hit or tid_hit):
+        if not (srcs & needs):
             continue
-        if event_hit:
-            event_hits += 1
-        if tid_hit:
-            spec_tid_hits += 1
         decl = p.get("time_control") or {}
         ok = decl.get("mechanism") in allowed or decl.get("status") == "planned"
         if not ok:
             missing += 1
             res.fail({"temp_id": p.get("temp_id"),
-                      "event": event[:80],
-                      "hit_by": (["event_keyword"] if event_hit else [])
-                                + (["spec_transition"] if tid_hit else []),
+                      "source_ids": sorted(srcs & needs)[:5],
                       "declared": decl or None,
                       "allowed": sorted(allowed)})
 
-    res.note = (f"event_keyword hits={event_hits}, spec_transition hits={spec_tid_hits}, "
-                f"missing time_control={missing}")
+    res.note = f"time obligations={len(needs)}, missing time_control={missing}"
     return res
