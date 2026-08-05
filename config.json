@@ -1,7 +1,7 @@
 {
   "llm": {
     "api_base": "https://open.bigmodel.cn/api/paas/v4",
-    "api_key": "197c9a5b0ad94dd9832a5586b26353f0.fUJ1efW817oE3wNx",
+    "api_key": "1d85da2cdbeb4c238c9d9d8d195e0ba2.YeNE2TIBy0G0L75s",
     "title_model": "glm-4-flash",
     "task_models": {
       "title_generation": "glm-4-flash",
