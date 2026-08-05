@@ -13,6 +13,62 @@ from typing import Any
 from models.state import AgentState
 
 
+def _entity_order_rank(cm: dict, topology_levels: dict, dependency_depth: dict) -> dict:
+    """Entity ordering rank: 基础数据 → 主业务流 → 系统配置(尾部).
+
+    Robust, domain-agnostic (C1):
+      - 系统配置 tail: entities with NO state machine, NO transitions, and NOT
+        composed into a core entity → 角色/日志/超时/分数限值 sort LAST.
+      - Everything else orders by S0's topology_level (base data L0 before flow
+        L1/L2), then dependency_depth (upstream before downstream).
+
+    Returns a dict keyed by entity id AND Chinese name → rank.
+    """
+    ctx = cm.get("_context", {})
+    details = ctx.get("entity_details", []) or []
+    relations = ctx.get("structural_relations", []) or []
+    state_info = ctx.get("state_info", {}) or {}
+    to_entities = {t.get("entity") for t in cm.get("transition_obligations", []) or []}
+
+    # config/audit tail: no state machine + no transitions + NO incoming
+    # structural reference (provides configuration outward; never referenced as
+    # a flow subject — unlike base reference data like 专家, which the flow
+    # references via E-ORG→E-EXP / E-PLAN→E-EXP).
+    incoming = {r.get("to") for r in relations if r.get("to")}
+    config_ids = set()
+    for ed in details:
+        eid = ed.get("id", "")
+        ndim = len(state_info.get(eid, {}).get("dimensions", []) or [])
+        if ndim == 0 and eid not in to_entities and eid not in incoming:
+            config_ids.add(eid)
+
+    rank = {}
+    # Non-config: topology_level first, then a multi-dimensional state machine
+    # leads its level (the entity with the richest lifecycle is the flow lead —
+    # e.g. 项目 has 项目状态+项目阶段, so it leads 评审计划), then dependency_depth.
+    non_config = [ed.get("id") for ed in details if ed.get("id") and ed.get("id") not in config_ids]
+    scored = []
+    for eid in non_config:
+        tl = topology_levels.get(eid, 9)
+        ndim = len(state_info.get(eid, {}).get("dimensions", []) or [])
+        dims_lead = 0 if ndim >= 2 else 100  # multi-dim entity leads its level
+        dd = dependency_depth.get(eid, 9)
+        scored.append((tl, dims_lead, dd, eid))
+    scored.sort()
+    for i, (_, _, _, eid) in enumerate(scored):
+        rank[eid] = i
+    # config tail after all flow entities
+    off = len(scored)
+    for i, eid in enumerate([ed.get("id") for ed in details if ed.get("id") in config_ids]):
+        rank[eid] = off + 10 + i
+
+    # procedures may reference entities by Chinese name — map both
+    for ed in details:
+        if ed.get("name"):
+            rank[ed["name"]] = rank.get(ed.get("id"), 900)
+    return rank
+
+
 def s2_sorting_node(state: AgentState) -> dict:
     """S2: Assign phases and compute sort_key metadata.
 
@@ -125,6 +181,7 @@ def s2_sorting_node(state: AgentState) -> dict:
     # are tested BEFORE project-creation procedures, matching the business
     # intuition that base data must exist before projects can reference it.
     topology_levels = state.get("topology_levels", {})
+    dependency_depth = state.get("dependency_depth", {})
 
     # Build reverse map: entity_id → entity name (as appears in proc.entity)
     # S1 may translate entity IDs to Chinese names; we need both forms.
@@ -136,6 +193,12 @@ def s2_sorting_node(state: AgentState) -> dict:
         if eid and ename:
             entity_name_map[eid] = ename
             entity_name_map[ename] = eid  # bidirectional
+
+    # Fix B/C1: entity dependency order (基础数据 → 主业务流 → 系统配置尾部).
+    # Replaces the old string/topology-level entity tiebreak: entities order by
+    # S0 topology_level + dependency_depth (upstream before downstream), with
+    # pure config/audit entities (分数限值/日志/角色/超时) sorted last.
+    entity_order_rank = _entity_order_rank(cm, topology_levels, dependency_depth)
 
     def _topo_level_for_entity(ent_name_or_id: str) -> int:
         """Look up topology_level by entity name or ID."""
@@ -200,9 +263,9 @@ def s2_sorting_node(state: AgentState) -> dict:
         ot = proc.get("obligation_type", 0)
 
         proc_entity = proc.get("entity", "") or ""
-        ent_entry = entity_entry_phases.get(proc_entity, 0)
-        # v29 #16: look up topology_level (try proc_entity as both name and ID)
-        ent_topo = _topo_level_for_entity(proc_entity)
+        # Fix B/C1: entity dependency order (基础数据 → 主业务流 → 系统配置尾部).
+        # Replaces topology_level + entity_entry_phase + entity-string keys.
+        ent_rank = entity_order_rank.get(proc_entity, 900)
 
         # Dimension: empty dimension (T6 invalid / T7 rule / T9 field-validation)
         # sorts AFTER all real dimensions within the same entity+phase, so
@@ -214,9 +277,7 @@ def s2_sorting_node(state: AgentState) -> dict:
 
         s2["sort_key"] = [
             s2.get("phase", 0),
-            ent_topo,  # v29 #16: L0 base-data before L1 main-entity
-            ent_entry,
-            proc_entity,
+            ent_rank,  # entity dependency order (base data → main flow → config tail)
             dim_sort,
             ot,  # obligation_type: 1-7 primary, 8-9 auxiliary
             s2.get("dimension_priority", 1),

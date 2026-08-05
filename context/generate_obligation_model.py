@@ -213,6 +213,11 @@ entity_dims = {e["id"]: {d["dimension_name"] for d in e.get("state_dimensions", 
 
 # Build to_index: tid -> TO ref (after split, updated)
 to_index = {}  # tid -> TO object
+# Option C: abstract transition id -> concrete variant TO ids, for transitions
+# that were branch-split. CO enabler/dependent_transition_id reference the
+# abstract (P1) transition id; downstream (S0/S1) resolves it to its variants
+# via this map. Unsplit transitions are NOT listed (trivially map to themselves).
+transition_splits = {}  # base_tid -> [variant_to_ids]
 
 # Helper: terminal check
 def is_terminal(entity_id, dimension, state):
@@ -741,7 +746,7 @@ for t in p1["state_and_flow"]["transitions"]:
             to_index[t["id"]] = to
         elif len(combos) == 0:
             # All combos filtered - keep original with judgment
-            add_judgment("branch split all filtered", f"{t['id']}: 所有 {len(combos_all)} 组合被 R5 过滤，保留原 TO")
+            add_judgment("branch split all filtered", f"{t['id']}: 所有 {len(combos_all)} 组合被 R5 过滤，降级保留原 TO")
             to = {
                 "id": t["id"],
                 "entity": t["entity"],
@@ -808,20 +813,20 @@ for t in p1["state_and_flow"]["transitions"]:
                 to_index[t["id"]] = to
             else:
                 # Multi-combo: split into [a], [b], ...
-                # Per P2 Prompt Step 2.4 rule 6: "删除原 TO，同步更新 to_index"
+                # Option C: follow P2 Prompt Step 2.4 rule 6 — DELETE the original TO.
+                # The branch variants carry the full from/to/action/preconditions/
+                # expected_results/role/side_effects/note, so no scenario coverage
+                # is lost. A generic base TO (branch_path=[]) would otherwise emit
+                # an unconditional procedure downstream that duplicates the branch
+                # procedures and can over-generalize (e.g. a transition that only
+                # fires for 差/不合格 would be stated unconditionally).
                 #
-                # BUT: T-006 is a cross-dimension transition — its main TO
-                # covers 项目状态 (待归档→已选入) while branch TOs T-006-P[a~e]
-                # cover 项目阶段 (开题→验收). Deleting the main TO would lose
-                # the 项目状态 dimension migration.
-                #
-                # Decision: KEEP the main TO (with direction + branch_path=[])
-                # alongside the branch TOs. The main TO represents the
-                # cross-dimension link; branch TOs represent the per-branch
-                # dimension split. They cover DIFFERENT dimensions, so they
-                # are NOT duplicates.
-                #
-                # Add the main TO first (with direction), then split branches.
+                # The abstract (P1) transition id is STILL referenced by COs
+                # (enabler/dependent_transition_id) and by internal lookups, so we
+                # keep a synthetic ref in to_index ONLY (never emitted into
+                # transition_obligations) and record the split in
+                # _context.transition_splits so downstream (S0/S1) can resolve the
+                # abstract id to its concrete variant TOs.
                 main_to = {
                     "id": t["id"],
                     "entity": t["entity"],
@@ -848,9 +853,10 @@ for t in p1["state_and_flow"]["transitions"]:
                 # Bug fix: check for duplicate TO ID
                 if t["id"] in to_index:
                     add_warning("duplicate_to_id", f"TO {t['id']} 重复，后出现的会覆盖前一个")
-                transition_obligations.append(main_to)
+                # Internal synthetic ref only — NOT appended to transition_obligations.
                 to_index[t["id"]] = main_to
-                add_judgment("branch split keep main", f"{t['id']}: 主TO保留(跨维度联动),同时生成{len(combos)}个分支TO")
+                add_judgment("branch split delete base", f"{t['id']}: 删除原TO(主TO不再输出),生成{len(combos)}个分支TO")
+                split_ids = []
 
                 suffixes = "abcdefghijklmnop"
                 for i, combo in enumerate(combos):
@@ -915,6 +921,9 @@ for t in p1["state_and_flow"]["transitions"]:
                         add_warning("duplicate_to_id", f"TO {new_id} 重复，后出现的会覆盖前一个")
                     transition_obligations.append(new_to)
                     to_index[new_id] = new_to
+                    split_ids.append(new_id)
+                # Record the split: abstract transition id -> concrete variant TO ids.
+                transition_splits[t["id"]] = split_ids
 
 # ============ Step 3: cross_entity_obligations ============
 cross_entity_obligations = []
@@ -2001,16 +2010,35 @@ all_xc_have_status = all(xc["id"] in xc_status for xc in p1_xc)
 all_skipped_xc_have_br = all(xc_status.get(xc["id"]) == "br" for xc in p1_xc if xc["id"] in xc_status and xc_status[xc["id"]] == "br")
 
 # Check: no_branch_scenarios
+# A branch-affected TO (BD.coverage hit or note.branch_dimension non-empty) must
+# either (a) carry a concrete branch_path, (b) be split into branch variants
+# ([a][b]... — the base is a retained "main TO" for cross-dimension linkage and
+# the branch scenarios ARE covered, so it is NOT a missing scenario), or
+# (c) be covered by an explicit degradation judgment (组合>16 / 无实质差异).
+# Judgment lookup uses the TO id prefix (judgments are formatted "TOID: ...")
+# so a branch-variant id ("T-X[a]") never satisfies a base TO ("T-X").
 no_branch_scenarios = True
+branch_scenario_offenders = []
 for to in transition_obligations:
     # Check if this TO was supposed to be split (matched in BD.coverage.transitions or had note.branch_dimension)
     p1_t = p1_transitions_by_id.get(to["id"].split("[")[0])
     if p1_t:
         matched = get_matched_dims(p1_t)
         if matched and not to.get("branch_path"):
-            # Was supposed to be split but has empty branch_path -> check judgment
-            if not any("降级" in j["desc"] or "无实质差异" in j["desc"] for j in judgments if to["id"] in j["desc"]):
+            has_branch_variants = any(
+                t2["id"].startswith(to["id"] + "[") for t2 in transition_obligations
+            )
+            has_degradation = any(
+                ("降级" in j["desc"] or "无实质差异" in j["desc"])
+                and j["desc"].split(":", 1)[0].strip() == to["id"]
+                for j in judgments
+            )
+            if not has_branch_variants and not has_degradation:
                 no_branch_scenarios = False
+                branch_scenario_offenders.append(to["id"])
+if branch_scenario_offenders:
+    add_warning("no_branch_scenarios",
+                f"以下TO命中分支维度但未拆分且无降级judgment: {branch_scenario_offenders}")
 
 # Check: enabler_state_valid_or_judgment
 enabler_state_valid_or_judgment = True
@@ -2118,6 +2146,7 @@ _context = {
         "pipeline_trace": p1["_meta"].get("pipeline_trace", {})
     },
     "branch_dimensions": bd_enriched,
+    "transition_splits": transition_splits,
     "structural_relations": p1["domain_model"]["structural_relations"],
     "transition_relations": p1["domain_model"]["transition_relations"],
     "state_info": state_info,

@@ -16,6 +16,7 @@ p1_path = sys.argv[2] if len(sys.argv) >= 3 else None
 
 errors = []
 warnings = []
+infos = []
 
 # Check top-level keys
 expected_top = ['entity_obligations', 'transition_obligations', 'cross_entity_obligations', 'constraint_obligations', '_context']
@@ -138,11 +139,47 @@ if len(all_ids) != len(set(all_ids)):
     dupes = [k for k, v in Counter(all_ids).items() if v > 1]
     errors.append(f"Duplicate IDs: {dupes}")
 
+# no_branch_scenarios recompute (same rule as the P2 generator):
+# a branch-affected TO with an empty branch_path is a MISSING scenario ONLY if
+# it was not split into branch variants and has no degradation judgment.
+# A base TO retained alongside its [a][b]... variants ("main TO" for
+# cross-dimension linkage) is a split scenario -> excluded.
+def _no_branch_offenders(d):
+    ctx = d['_context']
+    bds = ctx.get('branch_dimensions', []) or []
+    tos = d['transition_obligations']
+    judgments = ctx.get('judgments', []) or []
+    offenders = []
+    for to in tos:
+        base = to['id'].split('[')[0]
+        matched = [bd for bd in bds if base in (bd.get('coverage') or {}).get('transitions', [])]
+        bn = ''
+        if isinstance(to.get('note'), dict):
+            bn = to['note'].get('branch_dimension', '') or ''
+        if not matched and bn:
+            matched = [bd for bd in bds if bd.get('dimension') in bn]
+        if matched and not to.get('branch_path'):
+            has_variants = any(t2['id'].startswith(to['id'] + '[') for t2 in tos)
+            has_deg = any(
+                ('降级' in j['desc'] or '无实质差异' in j['desc'])
+                and j['desc'].split(':', 1)[0].strip() == to['id']
+                for j in judgments
+            )
+            if not has_variants and not has_deg:
+                offenders.append(to['id'])
+    return offenders
+
 # Check self_check all true (except allowed false)
 sc = ctx['self_check']
 for k, v in sc.items():
     if v is False and k in ['id_globally_unique', 'p1_root_nodes_complete']:
         errors.append(f"self_check {k} is false (fatal)")
+    elif k == 'no_branch_scenarios' and v is False:
+        offenders = _no_branch_offenders(d)
+        if offenders:
+            warnings.append(f"self_check no_branch_scenarios is false; branch-affected TOs not split & no degradation judgment: {offenders}")
+        else:
+            infos.append("self_check no_branch_scenarios stored false, but recomputed ok: all branch-affected TOs are split (incl. retained main TOs) - excluded")
     elif v is False:
         warnings.append(f"self_check {k} is false")
 
@@ -165,12 +202,29 @@ ro_br_xc_ids = {ro['constraint_id'] for ro in d['constraint_obligations'] if ro[
 if xc_as_br != ro_br_xc_ids:
     errors.append(f"XC->BR mismatch: xc_as_br={xc_as_br}, ro_br_xc_ids={ro_br_xc_ids}")
 
+# Check CO transition refs resolve (Option C): a CO references the abstract (P1)
+# transition id; it must be an emitted TO id, a split base in
+# _context.transition_splits, or have emitted [a][b]... variants.
+to_ids = {t['id'] for t in d['transition_obligations']}
+splits = ctx.get('transition_splits', {}) or {}
+for co in d['cross_entity_obligations']:
+    for fld in ('enabler_transition_id', 'dependent_transition_id'):
+        tid = co.get(fld)
+        if tid:
+            resolves = (tid in to_ids) or (tid in splits) or any(k.startswith(tid + '[') for k in to_ids)
+            if not resolves:
+                errors.append(f"CO {co['id']}: {fld} {tid} 不指向任何TO/拆分基 (dangling)")
+
 print(f"Errors: {len(errors)}")
 for e in errors[:20]:
     print(f"  ERROR: {e}")
 print(f"\nWarnings: {len(warnings)}")
 for w in warnings[:10]:
     print(f"  WARN: {w}")
+if infos:
+    print(f"Infos: {len(infos)}")
+    for i in infos[:10]:
+        print(f"  INFO: {i}")
 
 print(f"\n=== Summary ===")
 print(f"EO-ATC: {len([e for e in d['entity_obligations'] if e['type']=='attribute_config'])}")

@@ -2567,10 +2567,66 @@ def _compute_topology_levels(
 # S0.6: Upstream map rebuilding
 # ---------------------------------------------------------------------------
 
+def _tid_to_concrete_ids(tid: str, to_by_tid: dict) -> list[str]:
+    """Resolve an abstract transition id to its concrete TO ids.
+
+    Option C: a branch-split transition no longer emits a base TO, so its
+    abstract id (referenced by CO enabler/dependent_transition_id) resolves to
+    the [a][b]... variant TO ids. Unsplit transitions resolve to themselves.
+    Fallback: if the id is not found AND no variants exist (e.g. to_by_tid is
+    empty because the model's TOs carry `id` rather than `transition_id`),
+    keep the abstract id as-is to preserve pre-Option-C behavior.
+    """
+    if tid in to_by_tid:
+        return [tid]
+    variants = sorted(k for k in to_by_tid if k.startswith(tid + "["))
+    if variants:
+        return variants
+    return [tid]
+
+
+def _build_state_pos(state_info: dict) -> dict:
+    """Build {(entity_id, dim_name): {state: position}} from _context.state_info.
+
+    Position = phase_mapping value (fallback: index in the states list). A
+    transition whose `to` position is <= its `from` position is a loop/back edge.
+    """
+    pos: dict[tuple, dict] = {}
+    for ent, info in (state_info or {}).items():
+        for dim in info.get("dimensions", []) or []:
+            dim_name = dim.get("dimension_name", "")
+            pm = dim.get("phase_mapping") or {}
+            states = dim.get("states") or []
+            d = {}
+            for i, st in enumerate(states):
+                d[st] = pm.get(st, i)
+            pos[(ent, dim_name)] = d
+    return pos
+
+
+def _is_back_edge(t: dict, state_pos: dict) -> bool:
+    """True if transition t (from->to) goes to an EARLIER state (loop back).
+
+    Back edges (e.g. 归档评级 待归档->已选入 in a cyclic state machine) must
+    not become hard prerequisites — they would reverse lifecycle order in the
+    final topological sort. Creation (from=None) / terminal (to=None) are not
+    back edges; states without lifecycle info are treated as forward.
+    """
+    frm, to = t.get("from"), t.get("to")
+    if frm is None or to is None:
+        return False
+    d = state_pos.get((t.get("entity"), t.get("dimension")), {})
+    pf, pt = d.get(frm), d.get(to)
+    if pf is None or pt is None:
+        return False
+    return pt <= pf
+
+
 def _rebuild_upstream_map(
     tos: list[dict],
     transition: list[dict],
     cos: list[dict],
+    state_pos: dict | None = None,
 ) -> dict[str, list[str]]:
     """S0.6: Rebuild transition_upstream_map from three sources."""
     upstream_map: dict[str, list[str]] = defaultdict(list)
@@ -2583,6 +2639,10 @@ def _rebuild_upstream_map(
         entity_dim_tos[key].append(to)
 
     # Source 1: Same-entity same-dimension chain ordering
+    # Back-edge fix: a loop-back transition (to-state earlier than from-state,
+    # e.g. 归档评级 待归档->已选入 in a cyclic machine) must NOT become a hard
+    # prerequisite — it would put the archive/rating step before selection in
+    # the final topological sort. Only forward chain edges build prerequisites.
     for (entity, dim), dim_tos in entity_dim_tos.items():
         for t1 in dim_tos:
             t1_from = t1.get('from')
@@ -2593,6 +2653,10 @@ def _rebuild_upstream_map(
                 if t2.get('transition_id') == t1_tid:
                     continue
                 if t2.get('to') == t1_from and t2.get('transition_id'):
+                    if state_pos is not None and (
+                        _is_back_edge(t1, state_pos) or _is_back_edge(t2, state_pos)
+                    ):
+                        continue
                     upstream_map[t1_tid].append(t2['transition_id'])
 
     # Source 2: transition_relations evidence
@@ -2629,11 +2693,16 @@ def _rebuild_upstream_map(
             upstream_map[to_tids[i]].append(from_tids[i])
 
     # Source 3: CO enabler → dependent transition
+    # Option C: CO refs use the abstract (base) transition id, which for a
+    # branch-split transition resolves to its [a][b]... variants. Fan the edge
+    # out so every concrete variant is wired (branch-agnostic causal link).
     for co in cos:
         et = co.get('enabler_transition_id')
         dt = co.get('dependent_transition_id')
         if et and dt:
-            upstream_map[dt].append(et)
+            for dv in _tid_to_concrete_ids(dt, to_by_tid):
+                for ev in _tid_to_concrete_ids(et, to_by_tid):
+                    upstream_map[dv].append(ev)
 
     # Deduplicate
     for tid in upstream_map:
@@ -3267,8 +3336,10 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     )
     warnings.append(f"S0.5: topology_levels computed for {len(topology_levels)} entities")
 
-    # S0.6: Upstream map
-    transition_upstream_map = _rebuild_upstream_map(tos, transition, cos)
+    # S0.6: Upstream map (state_pos enables back-edge exclusion so cyclic
+    # state machines don't reverse lifecycle order in the dependency DAG)
+    state_pos = _build_state_pos(state_info)
+    transition_upstream_map = _rebuild_upstream_map(tos, transition, cos, state_pos)
     warnings.append(f"S0.6: upstream_map with {len(transition_upstream_map)} entries")
 
     # State type map

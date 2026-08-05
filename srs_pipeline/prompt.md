@@ -1,3 +1,5 @@
+# 需求文档 → Python DSL 转换 Prompt
+
 ## 目标
 
 将需求文档转化为结构化 Python DSL，框架组装校验后产出 JSON。Step 1→6 顺序执行，不可跳步；仅 4.4 可回修前序产物（含通用回写协议覆盖的 `action_verbs` 与 `permission`）。
@@ -44,7 +46,7 @@
 - **3 结构行为解耦**：`structural_relations` 无因果语义。
 - **6 组织维度≠业务归属**（按 Step 2 判定）。
 - **8 trigger_source 优先级**：`cross_entity > action > expected_results > desc > business_rule > bidi_coupling`；同 `(frm,to)` 写入前去重仅升级，`desc/trigger` 以 `;` 合并，`evidence` 并集，`rollback` 取或。
-- **11 结构关系三元分类**（Step 2）。
+- **11 结构关系四元分类**（Step 2）。
 - **12 preconditions 结构化**（`precond`/`state_ref`），禁止纯字符串。
 - **13 操作归位**：无状态操作只入 `operations`；改状态操作必入 `transitions`（`operations` 记 crud 作索引不重复）；必须/不得类只入 BR。
 - **14 编号移交+状态值原文**：编号一律局部标签；状态维度名与状态值逐字取自原文，禁止改写/概括/近义替换。
@@ -169,15 +171,18 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 - `frm` = 父/拥有方；`cardinality` 父→子视角，永不 N:1。
 - M:N 无方向动词按叙述顺序并注明。
 
-**三元分类（按序首条命中）**：
+**四元分类（按序首条命中：a→b→c→d）**：
 
 | 判定条件 | `relation_type` | `ownership_dimension` | 备注 |
 |---|---|---|---|
 | (a) A 为 B 提供配置/模板/分类，B 独立创建 | reference | configuration_source | |
 | (b) B 无独立创建，A 创建时 B 自动入 initial，每条 A 必有 B | composition | business_ownership | |
-| (c) B 有独立创建流程/前置条件/可能永不创建 | reference | configuration_source | |
+| (c) B 有独立创建流程，但 B 是 **core 流程实体**（`type=core` 且自身有 dependent），A 为其业务归属容器 | composition | business_ownership | dependent 拓扑需沿 composition 链传递；不可降为 (d) |
+| (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c)（B 非 core 流程实体，或 A 非其业务归属容器） | reference | configuration_source | |
 | B 核心产出属第三方 C | — | — | 改 C→B（以 C 为 frm） |
-| 判 (b) 且 1:1 | — | — | 复核"每条 A 必有 B"，可能无 B→归 (c) |
+| 判 (b) 且 1:1 | — | — | 复核"每条 A 必有 B"，可能无 B→归 (d) |
+
+(c) 与 (d) 前提相同（B 有独立创建流程），只是分支不同：(c) core 流程实体 → 保持 composition，(d) 非 core → reference。故 (c) 必须先于 (d) 判定，编号也按此顺序。判定依据不引入新判断：`type=core` 在 Step 1 已定；"有无自身 dependent"在写完所有 structural 后可查（B 是否为某 composition 的 frm 且被其他实体挂靠）。
 
 联动约束：`composition ↔ business_ownership`、`reference ↔ configuration_source`；`management_dimension` 必须复核并在 `comment` 写结论。
 

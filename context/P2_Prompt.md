@@ -219,6 +219,7 @@ TO = P1 transition 全字段透传 + 本节新增/覆盖字段。遍历 transiti
 
 透传 P1 元数据并补足：
 - **branch_dimensions**：补 entity 和 affected_obligations
+- **transition_splits**：`{base_tid: [variant_to_ids]}`，记录被分支拆分的转换（Option C：原 TO 删除，只输出变体 TO）。CO 的 enabler/dependent_transition_id 引用抽象转换 id，下游（S0/S1）据此解析到具体变体；未拆分转换不列入（自身即解析结果）。
 - **structural_relations / transition_relations**：关键字段透传
 - **state_info**：汇总各实体状态维度信息
 - **prohibition_config**：**透传 P1 的 _context.prohibition_config（领域操作词汇的唯一真相源在 P1 数据层）**；P1 未声明时用框架通用默认（不可/不能/禁止/不得/不允许/无法/无权 + 通用 CRUD 动词），**禁硬编码领域动词**（选入/归档/发放等业务词只来自 P1）。
@@ -249,7 +250,7 @@ TO = P1 transition 全字段透传 + 本节新增/覆盖字段。遍历 transiti
 }
 ```
 
-- `no_branch_scenarios`：所有受分支影响的 TO（BD.coverage 命中或 note.branch_dimension 非空）均已拆分，或已记降级 judgment（组合>16 / 无实质差异）。
+- `no_branch_scenarios`：所有受分支影响的 TO（BD.coverage 命中或 note.branch_dimension 非空）均已拆分，或已记降级 judgment（组合>16 / 无实质差异），或为主TO保留（已生成 [a][b]... 分支TO，主TO仅承载跨维度联动，分支场景已覆盖）。判断降级 judgment 时按 TO id 前缀精确匹配（judgment 格式 `TOID: ...`），避免分支变体 id（如 `T-X[a]`）误命中基础 TO（`T-X`）。
 - `precondition_state_refs_complete`：所有 type=state_ref 项均解析出 ref 并进入 precondition_state_refs；unresolved 非空则为 false 并在 judgments 说明降级理由。
 
 ---

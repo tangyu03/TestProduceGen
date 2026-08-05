@@ -571,65 +571,50 @@ def _strip_branch_suffix(action: str) -> str:
 def _is_state_derived_branch_dimension(
     bd: dict, tos: list[dict]
 ) -> bool:
-    """Fix-3: detect branch dimensions whose values coincide with the
-    from_state or to_state set of the affected transitions, marking them
-    as state-derived rather than genuinely orthogonal.
+    """Fix-3: detect branch dimensions whose values are a restatement of the
+    affected transitions' OWN state (from_state or to_state).
 
-    Such dimensions produce meaningless cartesian explosions. Example:
-      T-PLAN-008 (暂停) has from=待评审, branch_path=[暂停前状态=待评审]
-      T-PLAN-009 (暂停) has from=评审中, branch_path=[暂停前状态=评审中]
-      T-PLAN-010 (暂停) has from=已完成, branch_path=[暂停前状态=已完成]
-      branch_dimensions[暂停前状态].values = [待评审, 评审中, 已完成]
-      → equals the set of from_states across T-PLAN-008/009/010 (the
-        causally-related transitions that lead INTO 暂停).
-      The "暂停前状态" branch is thus just a re-statement of the from_state,
-      not an independent dimension. Generating 3×3=9 procedures (each
-      (from_state, pre_pause_state) pair) is wrong — only the 3 diagonal
-      pairs (from=pre_pause) are semantically reachable.
+    Genuine state-derived example (暂停前状态):
+      T-PLAN-008 (暂停) from=待评审, branch=[暂停前状态=待评审]
+      T-PLAN-009 (暂停) from=评审中, branch=[暂停前状态=评审中]
+      T-PLAN-010 (暂停) from=已完成, branch=[暂停前状态=已完成]
+      Every variant's branch value equals its OWN from_state → the dimension
+      merely restates the state machine; splitting produces only diagonal
+      (from=pre_pause) reachable pairs, not 3×3 combos.
 
-    Detection (generic, no hardcoded dimension names):
-      1. Collect ALL transitions listed in bd.affected_obligations (or, as
-         fallback, those whose transition_id is in branch.target_transition).
-      2. Compute the union of their from_states AND to_states.
-      3. Compare against bd.values.
-      4. If bd.values ⊆ (from_states ∪ to_states) AND |bd.values|≥2 AND
-         |bd.values| ≥ |from_states| (i.e. bd covers most of the state
-         variety), declare the dimension state-derived.
+    NOT state-derived (项目阶段, e.g. 新增项目):
+      T-013[a] branch=[项目阶段=开题] to=开题
+      T-013[b] branch=[项目阶段=验收] to=开题   ← 验收 ≠ its own to=开题
+      The branch value is ORTHOGONAL to the transition's own state, so it is a
+      genuine branch and MUST be preserved (else the variants merge and the
+      开题/验收 scenarios are lost).
+
+    Detection (generic): a dimension is state-derived iff EVERY affected TO's
+    branch value for that dimension equals its OWN from_state or to_state.
     """
-    bd_values = set(bd.get("values", []) or [])
-    if len(bd_values) < 2:
+    bd_dim = bd.get("dimension", "")
+    if len(set(bd.get("values", []) or [])) < 2:
         return False
 
-    # Collect affected TOs (preferred: from affected_obligations field;
-    # fallback: from branch.target_transition)
-    affected_ids = set(bd.get("affected_obligations", []) or [])
-    target_tids = set()
-    for branch in bd.get("branches", []):
-        t = branch.get("target_transition", "")
-        if t:
-            target_tids.add(t)
-
-    related_states: set[str] = set()
+    # Collect TOs whose branch_path includes this dimension
+    affected: list[dict] = []
     for to in tos:
-        to_id = to.get("id", "")
-        tid = to.get("transition_id", "")
-        matched = False
-        if affected_ids and to_id in affected_ids:
-            matched = True
-        if not matched and tid in target_tids:
-            matched = True
-        if not matched:
-            continue
-        for s in (to.get("from"), to.get("to")):
-            if isinstance(s, str) and s.strip():
-                related_states.add(s.strip())
-
-    if not related_states:
+        if any(bp.get("dimension") == bd_dim for bp in (to.get("branch_path", []) or [])):
+            affected.append(to)
+    if len(affected) < 2:
         return False
-    # State-derived if bd_values is a subset of (or equal to) the related
-    # states, with at least 2 elements overlapping.
-    overlap = bd_values & related_states
-    return len(overlap) >= 2 and overlap == bd_values
+
+    for to in affected:
+        val = next(
+            (bp.get("value") for bp in (to.get("branch_path", []) or [])
+             if bp.get("dimension") == bd_dim),
+            None,
+        )
+        if val is None:
+            return False
+        if val not in (to.get("from"), to.get("to")):
+            return False  # orthogonal branch value → genuine branch
+    return True
 
 
 def _extract_branch_givens(
@@ -637,17 +622,16 @@ def _extract_branch_givens(
 ) -> list[dict]:
     """Extract branch-dimension Given clauses for a TO.
 
-    Two sources (merged, deduped):
-      1. coverage_model._context.branch_dimensions — canonical, matched by
-         target_transition prefix (e.g. target=T-001, to_id=T-001a → match).
-         Entity filter is NOT applied because branch_dimensions may record
-         only the primary entity (E-PROJ) while branch TOs exist on other
-         entities (E-REG, E-ARC).
-      2. TO.action text "[维度=值]" suffix — fallback when branch_dimensions
-         is incomplete.  P2 appends this marker to branched TOs.
+    Canonical source: the TO's branch_path — it carries the EXACT
+    {dimension, value} pairs for THIS variant (e.g. T-007[b] → [{项目评级, 良好}]).
+    Deriving givens from branch_path is precise; the previous approach matched
+    the FIRST branch of the branch_dimension by base-transition prefix, so every
+    variant of a transition got the SAME (first) value → their procedures were
+    deduped as "complete duplicates" and the distinct branches were lost.
 
-    This is GENERIC: works for any branch dimension (项目类型, 评分方式,
-    评价人员角色, 消息发送接收人范围, etc.), no hardcoded dimension names.
+    Fallback: TO.action "[维度=值]" suffix (for TOs without branch_path).
+
+    This is GENERIC: works for any branch dimension, no hardcoded names.
 
     Fix-3: state-derived branch dimensions (e.g. 暂停前状态 whose values
     equal the from_states of the same transitions) are skipped — they are
@@ -656,10 +640,8 @@ def _extract_branch_givens(
     """
     if not to:
         return []
-    to_id = to.get("id", "") or to.get("transition_id", "")
     to_entity = to.get("entity", "")
-    to_action = to.get("action", "")
-    to_tid = to.get("transition_id", "")
+    to_action = to.get("action", "") or ""
     givens: list[dict] = []
     seen_dims: set[str] = set()
 
@@ -670,29 +652,21 @@ def _extract_branch_givens(
         if _is_state_derived_branch_dimension(bd, tos_all):
             state_derived_dims.add(bd.get("dimension", ""))
 
-    # ── Source 1: branch_dimensions (canonical) ──
-    bds = coverage_model.get("_context", {}).get("branch_dimensions", [])
-    for bd in bds:
-        bd_entity = bd.get("entity", "")
-        bd_dim = bd.get("dimension", "")
-        # Fix-3: skip state-derived branch dimensions
-        if bd_dim in state_derived_dims:
+    # ── Source 1 (canonical): branch_path — exact {dimension, value} per variant ──
+    for bp in to.get("branch_path", []) or []:
+        dim = bp.get("dimension", "")
+        val = bp.get("value", "")
+        if dim in state_derived_dims:
             continue
-        # Match by target_transition prefix (no entity filter — branch may
-        # apply to dependent entities too, e.g. E-REG.报名记录样品状态)
-        for branch in bd.get("branches", []):
-            target_tid = branch.get("target_transition", "")
-            branch_value = branch.get("value", "")
-            if target_tid and to_id.startswith(target_tid) and to_id != target_tid:
-                givens.append(_make_given(
-                    target=f"{bd_entity}.{bd_dim}",
-                    state=branch_value,
-                    description=f"分支条件: {bd_dim}={branch_value}",
-                ))
-                seen_dims.add(bd_dim)
-                break
+        if dim and val and dim not in seen_dims:
+            givens.append(_make_given(
+                target=f"{to_entity}.{dim}",
+                state=val,
+                description=f"分支条件: {dim}={val}",
+            ))
+            seen_dims.add(dim)
 
-    # ── Source 2: action "[维度=值]" suffix (fallback) ──
+    # ── Source 2: action "[维度=值]" suffix (fallback, deduped by dim) ──
     # Pattern: [项目类型=能力验证] or [评分方式=分值, 评价人员角色=评价成员]
     for m in re.finditer(r'\[([^\]]+)\]', to_action):
         content = m.group(1)
@@ -849,17 +823,43 @@ def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentSt
     return {"phase": 0, "basis": "fallback_default"}
 
 
-def _resolve_phase_for_non_transition(state: dict, entity: str) -> dict:
-    """Derive a sensible phase for non-transition procedures (Type3, Type7, etc.)
+# Non-transition obligation types that are DATA MAINTENANCE (setup semantics):
+# EO-ATC(3), EO-CRU(5/6), FIELD-VAL(9). RO-IT(7)/RO-BR(8) are rules (constraints).
+_NON_TRANSITION_SETUP_TYPES = (3, 5, 6, 9)
 
-    Uses the entity's dep_state_phase_map maximum non-zero phase so rules,
-    attribute configs, and other non-transition procedures sort near the
-    entity's later business stage. Using max ensures the system state
-    prerequisites exist before the rule is tested (better too late than too early).
+
+def _resolve_phase_for_non_transition(state: dict, entity: str, obligation_type: int = 7) -> dict:
+    """Derive a phase for non-transition procedures (Type3/5/6/7/8/9).
+
+    Behavior decided at the OBLIGATION-TYPE layer (domain-agnostic, NOT entity
+    names), using S0 topology_level:
+      - Data maintenance (EO, obligation_type in {3,5,6,9}):
+          base data (topology_level 0, e.g. 机构/分数限值/角色/日志/超时) → P0;
+          flow entities (topology_level >= 1) → entity's ENTRY phase (min);
+          a stateless flow entity (empty lifecycle) inherits the parent's flow
+          phase — NOT forced to P0 (it is flow data, e.g. 附件).
+      - Rules (RO, obligation_type in {7,8}): the entity's LATER stage (max,
+        "too late is safer").
     """
+    is_setup = obligation_type in _NON_TRANSITION_SETUP_TYPES
     primary = state["primary_entity"]
     dep_map = state.get("dep_state_phase_map", {})
     phase_table = state.get("phase_table", {})
+
+    def _phases_of(dim_maps: dict) -> list:
+        return [p for dm in dim_maps.values() for p in dm.values()] if dim_maps else []
+
+    def _pick(phases: list) -> int:
+        if is_setup:
+            return min(phases)
+        non_zero = [p for p in phases if p > 0]
+        return max(non_zero) if non_zero else max(phases)
+
+    topo = state.get("topology_levels", {}) or {}
+    # Base data (topology_level 0, e.g. 机构/分数限值/角色/日志/超时): data
+    # maintenance precedes the flow → P0.
+    if is_setup and topo.get(entity, 9) == 0:
+        return {"phase": 0, "basis": f"base_data_setup_phase.{entity}.0"}
 
     # Virtual entity: inherit its resolved_phase (set during S0 VE discovery).
     # Must be checked before dep_map so VE names never fall through to the
@@ -870,22 +870,21 @@ def _resolve_phase_for_non_transition(state: dict, entity: str) -> dict:
         return {"phase": vp, "basis": f"VE.{entity}.resolved_phase"}
 
     if entity == primary:
-        all_p = [p for dm in phase_table.get("state_to_phase", {}).values() for p in dm.values()]
-        if all_p:
-            non_zero = [p for p in all_p if p > 0]
-            p = max(non_zero) if non_zero else max(all_p)
-            return {"phase": p, "basis": f"primary_entity_max_phase.{p}"}
-        return {"phase": 0, "basis": "primary_entity_default"}
+        all_p = _phases_of(phase_table.get("state_to_phase", {}))
+        if not all_p:
+            return {"phase": 0, "basis": "primary_entity_default"}
+        p = _pick(all_p)
+        kind = "entry" if is_setup else "max"
+        return {"phase": p, "basis": f"primary_entity_{kind}_phase.{p}"}
 
-    if entity in dep_map:
-        all_p = [p for dm in dep_map[entity].values() for p in dm.values()]
+    if entity in dep_map and dep_map[entity]:
+        all_p = _phases_of(dep_map[entity])
         if all_p:
-            non_zero = [p for p in all_p if p > 0]
-            p = max(non_zero) if non_zero else max(all_p)
-            return {"phase": p, "basis": f"dep_map_max_phase.{entity}.{p}"}
-        # Empty dep_map — fall through to parent-chain logic below
+            p = _pick(all_p)
+            kind = "entry" if is_setup else "max"
+            return {"phase": p, "basis": f"dep_map_{kind}_phase.{entity}.{p}"}
 
-    # Entity absent from dep_map (or has empty dep_map):
+    # Entity absent from dep_map (or empty dep_map):
     # Config entities (tagged "configurable" without multi-state) are
     # foundational setup like E-TESTITEM — they should stay at P0 rather
     # than being pushed to the parent's late lifecycle phase.
@@ -902,26 +901,24 @@ def _resolve_phase_for_non_transition(state: dict, entity: str) -> dict:
     if is_config_only:
         return {"phase": 0, "basis": f"config_entity.{entity}"}
 
-    # Follow entity_parent chain to find a parent with phase info.
+    # Stateless flow entity (empty lifecycle, topology_level >= 1): both setup
+    # and rules inherit the parent's flow phase — NOT forced to P0. (Reference
+    # dependents like 专家/用户 hit the topology_level L0 branch above → P0;
+    # composition dependents like 附件 are flow data → parent-chain flow phase.)
     parent_map = state.get("entity_parent", {})
     parent = entity
     while parent:
         parent = parent_map.get(parent)
         if not parent:
             break
-        if parent in dep_map:
-            all_p = [p for dm in dep_map[parent].values() for p in dm.values()]
+        if parent in dep_map and dep_map[parent]:
+            all_p = _phases_of(dep_map[parent])
             if all_p:
-                non_zero = [p for p in all_p if p > 0]
-                p = max(non_zero) if non_zero else max(all_p)
-                return {"phase": p, "basis": f"parent_phase.{parent}.{p} (via chain from {entity})"}
+                return {"phase": max(all_p), "basis": f"parent_phase.{parent}.{max(all_p)} (via chain from {entity})"}
         if parent == primary:
-            all_p = [p for dm in phase_table.get("state_to_phase", {}).values() for p in dm.values()]
+            all_p = _phases_of(phase_table.get("state_to_phase", {}))
             if all_p:
-                non_zero = [p for p in all_p if p > 0]
-                p = max(non_zero) if non_zero else max(all_p)
-                return {"phase": p, "basis": f"parent_primary_phase.{parent}.{p} (via chain from {entity})"}
-        # Continue walking up the chain
+                return {"phase": max(all_p), "basis": f"parent_primary_phase.{parent}.{max(all_p)} (via chain from {entity})"}
 
     return {"phase": 0, "basis": f"fallback_default.{entity}"}
 
@@ -2117,7 +2114,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                 procedures.append(proc)
         else:
             tl = topo.get(eo["entity"], 0)
-            phase_res = _resolve_phase_for_non_transition(state, eo["entity"])
+            phase_res = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=3)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
             dim_priority = _get_dimension_priority(eo["entity"], attr, state)
@@ -2224,15 +2221,15 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                 phase = min(first_dim.values())
                 phase_basis = f"dep_state_phase_map.{entity}.min_phase"
             else:
-                # Empty dep_map — use parent chain
-                phase_res = _resolve_phase_for_non_transition(state, entity)
+                # Empty dep_map (stateless) — setup precedes the flow → P0
+                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=5)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity in ves:
             phase = ves[entity].get("resolved_phase", 0)
             phase_basis = f"VE.{entity}.resolved_phase"
         else:
-            phase_res = _resolve_phase_for_non_transition(state, entity)
+            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=5)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -2407,12 +2404,12 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
                     break
             # If dep_map exists but is empty or state not found, fall through
             if phase == 0 and not phase_basis:
-                phase_res = _resolve_phase_for_non_transition(state, entity)
+                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=7)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity not in dep_map:
             # Entity absent from dep_map — try parent chain via helper
-            phase_res = _resolve_phase_for_non_transition(state, entity)
+            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=7)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -2981,7 +2978,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         primary_br_entity = br_entities[0] if br_entities else state.get("primary_entity", "")
 
         tl = topo.get(primary_br_entity, 0)
-        phase_res = _resolve_phase_for_non_transition(state, primary_br_entity)
+        phase_res = _resolve_phase_for_non_transition(state, primary_br_entity, obligation_type=8)
         phase = phase_res["phase"]
         phase_basis = phase_res["basis"]
 
@@ -3219,14 +3216,14 @@ def _generate_type9_field_validation(
                 phase = min(first_dim.values())
                 phase_basis = f"dep_state_phase_map.{entity_id}.min_phase"
             else:
-                phase_res = _resolve_phase_for_non_transition(state, entity_id)
+                phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=9)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity_id in ves:
             phase = ves[entity_id].get("resolved_phase", 0)
             phase_basis = f"VE.{entity_id}.resolved_phase"
         else:
-            phase_res = _resolve_phase_for_non_transition(state, entity_id)
+            phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=9)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -3549,12 +3546,32 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
         return cleaned.lower()
 
     def _branch_givens(p: dict) -> set[tuple]:
-        """Extract branch-condition Givens as a comparable set."""
-        return {
+        """Extract branch-condition Givens + the from-state as a comparable set.
+
+        Includes the first (from-state) Given so procedures that differ only by
+        their source state (e.g. 暂停 from=待评审 vs from=评审中 — a state-derived
+        branch whose branch givens are skipped) are NOT merged as duplicates.
+        """
+        result = {
             (g.get("target", ""), g.get("state", ""))
             for g in p.get("givens", [])
             if "分支条件" in g.get("description", "")
         }
+        fs = (p.get("givens") or [{}])[0].get("state", "")
+        if fs:
+            result.add(("from_state", fs))
+        return result
+
+    def _co_tid_matches(sid: str, tid: str) -> bool:
+        """True if a procedure source_id references a CO transition id.
+
+        Option C: branch-split variants carry "T-x[a]" as source_ids while the
+        CO references the abstract "T-x". Match either the exact id or a
+        variant suffix of it.
+        """
+        if not tid:
+            return False
+        return sid == tid or sid.startswith(tid + "[")
 
     for i, p1 in enumerate(procedures):
         if p1["temp_id"] in to_remove:
@@ -3613,12 +3630,14 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                     continue
 
                 p1_co_linked = any(
-                    any(sid == co.get('enabler_transition_id') or sid == co.get('dependent_transition_id')
+                    any(_co_tid_matches(sid, co.get('enabler_transition_id'))
+                        or _co_tid_matches(sid, co.get('dependent_transition_id'))
                         for co in cos if co.get('enabler_entity') == p1['entity'] or co.get('dependent_entity') == p1['entity'])
                     for sid in p1.get('source_ids', [])
                 )
                 p2_co_linked = any(
-                    any(sid == co.get('enabler_transition_id') or sid == co.get('dependent_transition_id')
+                    any(_co_tid_matches(sid, co.get('enabler_transition_id'))
+                        or _co_tid_matches(sid, co.get('dependent_transition_id'))
                         for co in cos if co.get('enabler_entity') == p2['entity'] or co.get('dependent_entity') == p2['entity'])
                     for sid in p2.get('source_ids', [])
                 )

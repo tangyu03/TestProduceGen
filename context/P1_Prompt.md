@@ -18,7 +18,7 @@ AI 仅执行：理解文档→按步骤产出结构化数据→自检校验。�
 |P8|结构行为解耦|实体不含行为逻辑，structural 无因果语义|
 |P9|组织维度≠业务归属|按 Step2 判|
 |P10|trigger_source 优先级|cross_entity>action>expected_results>desc>business_rule>bidi_coupling，去重仅升级|
-|P11|结构三元分类|按 Step2|
+|P11|结构四元分类|按 Step2|
 |P12|preconditions 结构化|对象数组，见 4.2.1|
 |P13|无状态操作归位|不改状态维度→只入 operations；改状态→入 transitions(crud 作索引)；必须/不得→只入 BR|
 
@@ -86,15 +86,19 @@ step5_business_rules
 ### Step 2 结构关系 → structural_relations
 from=父/拥有方,to=子；cardinality 父→子视角永不 N:1，M:N 无方向先出现者 from 并注明。relation_type：拥有/包含/组成→composition；关联/引用/属于→reference；上下级→hierarchy；递归→self_reference。desc 翻转为父侧视角。
 
-**三元分类判定**：
+**四元分类判定**：
 ```
 判定1(业务归属)：B核心产出属第三方C→改C→B；A仅提供参数/模板→(a)；属于A→判定2
 判定2(创建同步性)：
   (a)配置来源[A提供配置/规则模板/分类数据,B生命周期独立]→reference/configuration_source
   (b)生命周期同步[B无独立创建,A创建时B自动进initial,无独立审批/触发,每条A必有B]
-     判定3(1:1验证):若1:1且可能存在无B→归(c)
+     判定3(1:1验证):若1:1且可能存在无B→归(d)
      否则→composition/business_ownership
-  (c)事件触发[B有独立多步创建/前置条件/可能永不创建/独立创建时点]→reference/configuration_source(折中取值勿按语义改)
+  (c)事件触发+B为core流程实体[B有独立多步创建/前置条件/可能永不创建；B是core且自身有
+     dependent，A为其业务归属容器]→composition/business_ownership(dependent拓扑需沿
+     composition链传递,不可降为(d))
+  (d)事件触发且非(c)[B有独立多步创建/前置条件/可能永不创建/独立创建时点；其余情况]
+     →reference/configuration_source(折中取值勿按语义改)
 联动约束：composition↔business_ownership，reference↔configuration_source
 management_dimension 必复核，纯管理归属可保留注复核结论否则改业务归属
 ```

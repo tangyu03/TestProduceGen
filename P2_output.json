@@ -7983,7 +7983,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-05T17:30:20.591377+08:00",
+    "generated_at": "2026-08-05T12:18:13.782108+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -8429,7 +8429,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (c)：项目有独立创建流程，但属 core 流程实体且有 dependent（附件/打分），A 为其业务归属容器，保持 composition+business_ownership（按文档'本机构的项目'表述）"
+          "comment": "判定 (b)：项目有独立创建流程，但机构创建时项目不自动入 initial；每条机构不必有项目；归为业务归属的 composition（按文档'本机构的项目'表述）"
         }
       },
       {
@@ -8455,7 +8455,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：项目有独立创建流程，A 非其业务归属容器（容器是机构），评审计划建立时引用已有项目；M:N 无方向按叙述顺序"
+          "comment": "判定 (c)：项目有独立创建流程，评审计划建立时引用已有项目；M:N 无方向按叙述顺序"
         }
       },
       {
@@ -8468,33 +8468,33 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"
+          "comment": "判定 (c)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"
         }
       },
       {
         "from": "E-ORG",
         "to": "E-EXP",
-        "relation_type": "reference",
+        "relation_type": "composition",
         "cardinality": "1:N",
-        "ownership_dimension": "configuration_source",
+        "ownership_dimension": "business_ownership",
         "desc": "研制机构拥有其下专家；专家.机构从已有研制机构中选择",
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：专家有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"
+          "comment": "判定 (b)：专家有独立创建流程，但机构创建时专家不自动入 initial；归为业务归属的 composition"
         }
       },
       {
         "from": "E-ORG",
         "to": "E-USER",
-        "relation_type": "reference",
+        "relation_type": "composition",
         "cardinality": "1:N",
-        "ownership_dimension": "configuration_source",
+        "ownership_dimension": "business_ownership",
         "desc": "研制机构拥有其下用户；用户.所属机构从已有研制机构中选择",
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：用户有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"
+          "comment": "判定 (b)：用户有独立创建流程，但机构创建时用户不自动入 initial；归为业务归属的 composition"
         }
       },
       {
@@ -8559,7 +8559,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：打分记录引用已有项目"
+          "comment": "判定 (c)：打分记录引用已有项目"
         }
       },
       {
@@ -8572,7 +8572,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (d)：打分记录引用已有专家"
+          "comment": "判定 (c)：打分记录引用已有专家"
         }
       },
       {
@@ -8782,8 +8782,8 @@
             ],
             "phase_mapping": {
               "已建立": 0,
-              "待启动": 1,
               "取消结束": 5,
+              "待启动": 1,
               "待评审": 2,
               "评审中": 3,
               "已完成": 4,

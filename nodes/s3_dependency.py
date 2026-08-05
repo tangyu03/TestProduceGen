@@ -15,6 +15,31 @@ from tools.graph_algo import break_cycles, topological_sort_procedures
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
+from nodes.s0_topology import _build_state_pos
+
+
+def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
+    """True if a procedure's transition is a loop back-edge (post_state earlier
+    than from_state in the lifecycle).
+
+    Such procedures (e.g. 归档评级 待归档→已选入 in a cyclic machine) must not be
+    treated as state-machine predecessors — Guard 1 would otherwise order the
+    archive/rating step BEFORE the earlier lifecycle steps that share the same
+    post_state, reversing the business flow.
+    """
+    from_state = p.get('givens', [{}])[0].get('state', '') if p.get('givens') else ''
+    post = p.get('post_state', '') or ''
+    if '→' in post:
+        post_state = post.split('→')[-1].strip().strip('()')
+    else:
+        post_state = post.strip().strip('()')
+    if not from_state or not post_state or from_state in ('(初始)', '(None)', 'None'):
+        return False
+    d = state_pos.get((p.get('entity'), p.get('dimension')), {})
+    pf, pt = d.get(from_state), d.get(post_state)
+    if pf is None or pt is None:
+        return False
+    return pt <= pf
 
 
 # ── v29 #3: Causal confidence ranking for cycle breaking ──────────────────
@@ -126,6 +151,8 @@ def s3_dependency_node(state: AgentState) -> dict:
     # Also index by transition_id — source_ids may use either convention
     to_by_tid = {to["transition_id"]: to for to in tos if to.get("transition_id")}
     co_by_id = {co["id"]: co for co in cos}
+    # State lifecycle positions for back-edge detection (Guard 1 / chain)
+    state_pos = _build_state_pos(cm.get("_context", {}).get("state_info", {}))
 
     def _resolve_to(sid: str) -> dict | None:
         """Resolve a source_id to its transition obligation.
@@ -169,7 +196,8 @@ def s3_dependency_node(state: AgentState) -> dict:
 
     # ── I23: Business temporal guards (run FIRST — state-machine deps take priority) ──
     _apply_temporal_guards(procedures, proc_by_id, proc_by_entity, co_by_id, cm,
-                           phase_table=state.get("phase_table"))
+                           phase_table=state.get("phase_table"),
+                           state_pos=state_pos)
 
     # ── Strong dependencies ──
     for proc in procedures:
@@ -547,6 +575,7 @@ def _apply_temporal_guards(
     co_by_id: dict,
     cm: dict,
     phase_table: dict | None = None,
+    state_pos: dict | None = None,
 ):
     """I23: Apply 5 business temporal guard rules as implicit strong dependencies.
 
@@ -613,6 +642,11 @@ def _apply_temporal_guards(
                     continue
                 # Exclude rejection variants
                 if other.get("risk_trait") == "audit_rejection":
+                    continue
+                # Back-edge fix: a procedure whose transition loops back to an
+                # EARLIER state (e.g. 归档评级 待归档→已选入) must not be a
+                # predecessor — it would reverse lifecycle order.
+                if _proc_is_back_edge(other, state_pos):
                     continue
                 post = other.get("post_state", "")
                 if "→" in post:

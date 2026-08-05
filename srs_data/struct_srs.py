@@ -563,12 +563,14 @@ def build() -> DomainModel:
     # ============================================================
     # 机构到项目：机构拥有项目（机构管理员对本机构项目进行管理），
     # 项目有独立创建流程（机构管理员新增），属于业务归属的 composition。
+    # 命中 (d)：项目是 core 流程实体且有自身 dependent（附件/打分挂靠），
+    # dependent 拓扑需沿 composition 链传递，不可降为 (c) reference。
     m.add_structural(
         "E-ORG", "E-PROJ", "composition", "1:N",
         "business_ownership",
         "研制机构拥有其下项目；机构管理员对本机构项目进行管理；项目.机构自动继承机构管理员所属机构",
         confidence="high",
-        note=N(comment="判定 (b)：项目有独立创建流程，但机构创建时项目不自动入 initial；每条机构不必有项目；归为业务归属的 composition（按文档'本机构的项目'表述）"),
+        note=N(comment="判定 (c)：项目有独立创建流程，但属 core 流程实体且有 dependent（附件/打分），A 为其业务归属容器，保持 composition+business_ownership（按文档'本机构的项目'表述）"),
     )
     # 项目到附件：项目拥有多个附件（建议书/评审推荐书/研制总结），是项目的组成部分。
     m.add_structural(
@@ -584,7 +586,7 @@ def build() -> DomainModel:
         "configuration_source",
         "评审计划引用 1-5 个已选入项目；项目可被多个计划引用（开题/验收）",
         confidence="high",
-        note=N(comment="判定 (c)：项目有独立创建流程，评审计划建立时引用已有项目；M:N 无方向按叙述顺序"),
+        note=N(comment="判定 (d)：项目有独立创建流程，A 非其业务归属容器（容器是机构），评审计划建立时引用已有项目；M:N 无方向按叙述顺序"),
     )
     # 评审计划到专家：计划引用评审组专家（5/7/9 个，有且只能有一个组长）。
     m.add_structural(
@@ -592,23 +594,27 @@ def build() -> DomainModel:
         "configuration_source",
         "评审计划引用评审组专家（5/7/9 个，有且只能有一个组长专家）",
         confidence="high",
-        note=N(comment="判定 (c)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"),
+        note=N(comment="判定 (d)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"),
     )
     # 机构到专家：机构拥有专家（专家.机构从已有研制机构中选择）。
+    # 命中 (c)：专家有独立创建流程、非 core 流程实体（无 dependent），结构上
+    # 专家引用机构（专家.机构="从已有研制机构中选择"）→ reference。业务上
+    # 机构拥有专家由 desc/permission/BR 承载（铁律 6：组织维度≠业务归属）。
     m.add_structural(
-        "E-ORG", "E-EXP", "composition", "1:N",
-        "business_ownership",
+        "E-ORG", "E-EXP", "reference", "1:N",
+        "configuration_source",
         "研制机构拥有其下专家；专家.机构从已有研制机构中选择",
         confidence="high",
-        note=N(comment="判定 (b)：专家有独立创建流程，但机构创建时专家不自动入 initial；归为业务归属的 composition"),
+        note=N(comment="判定 (d)：专家有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"),
     )
     # 机构到用户：机构拥有用户（用户.所属机构从已有研制机构中选择）。
+    # 命中 (c)：用户有独立创建流程、非 core 流程实体，结构上引用机构。
     m.add_structural(
-        "E-ORG", "E-USER", "composition", "1:N",
-        "business_ownership",
+        "E-ORG", "E-USER", "reference", "1:N",
+        "configuration_source",
         "研制机构拥有其下用户；用户.所属机构从已有研制机构中选择",
         confidence="high",
-        note=N(comment="判定 (b)：用户有独立创建流程，但机构创建时用户不自动入 initial；归为业务归属的 composition"),
+        note=N(comment="判定 (d)：用户有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"),
     )
     # 机构到机构：上下级包含（机构.上级机构，根机构不可删除）。
     m.add_structural(
@@ -635,6 +641,7 @@ def build() -> DomainModel:
         note=N(comment="判定 (a)：双向耦合（bidi_coupling），选角色为评审专家时在专家管理处默认为普通专家；1:1 关联"),
     )
     # 评审计划到打分：计划产生打分记录（每对 项目×专家 一条打分）。
+    # 命中 (b)：打分无独立创建流程，计划启动时初始化——流程产物，composition。
     m.add_structural(
         "E-PLAN", "E-SCORE", "composition", "1:N",
         "business_ownership",
@@ -648,7 +655,7 @@ def build() -> DomainModel:
         "configuration_source",
         "项目被多个专家打分；打分记录引用项目",
         confidence="high",
-        note=N(comment="判定 (c)：打分记录引用已有项目"),
+        note=N(comment="判定 (d)：打分记录引用已有项目"),
     )
     # 专家到打分：专家对项目打分（引用）。
     m.add_structural(
@@ -656,7 +663,7 @@ def build() -> DomainModel:
         "configuration_source",
         "专家对项目打分；打分记录引用专家",
         confidence="high",
-        note=N(comment="判定 (c)：打分记录引用已有专家"),
+        note=N(comment="判定 (d)：打分记录引用已有专家"),
     )
     # 超时设置到评审计划：超时配置适用于评审计划。
     m.add_structural(
