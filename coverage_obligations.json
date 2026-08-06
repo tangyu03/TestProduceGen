@@ -1147,12 +1147,14 @@
       "source_ref": "4.6 项目管理（1）a",
       "note": {
         "inferred": false
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": null
     },
     {
       "id": "T-002",
@@ -1195,7 +1197,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1208,7 +1211,41 @@
           "raw_text": "项目处于待选入状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "negation",
+            "operand": {
+              "type": "field_equals",
+              "field": {
+                "entity": "E-PROJ",
+                "name": "评级"
+              },
+              "value": "差"
+            }
+          },
+          {
+            "type": "occurrence_limit",
+            "on": {
+              "entity": "E-PROJ",
+              "dimension": "项目状态",
+              "from": "待选入",
+              "to": "已选入"
+            },
+            "limit": 1,
+            "when": {
+              "type": "field_equals",
+              "field": {
+                "entity": "E-PROJ",
+                "name": "评级"
+              },
+              "value": "不合格"
+            }
+          }
+        ]
+      }
     },
     {
       "id": "T-003",
@@ -1242,7 +1279,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定①文档含'选出'方向词到backward；traits 含 rollback"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1255,7 +1293,8 @@
           "raw_text": "项目处于已选入状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-004",
@@ -1293,7 +1332,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-015 建立评审计划"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1306,7 +1346,17 @@
           "raw_text": "项目处于已选入状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "selection_range",
+        "source_state": {
+          "entity": "E-PROJ",
+          "dimension": "项目状态",
+          "state": "已选入"
+        },
+        "min": 1,
+        "max": 5
+      }
     },
     {
       "id": "T-005",
@@ -1339,7 +1389,8 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-019：评审计划启动后项目状态由待评审变为评审中（4.5（3））；direction 判定③状态先后到forward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1352,7 +1403,8 @@
           "raw_text": "评审计划状态由待启动变为待评审",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-006",
@@ -1381,12 +1433,21 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；precondition 跨实体涉及 E-SCORE 由 XC 镜像"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "completion",
+        "target": {
+          "entity": "E-SCORE",
+          "dimension": "打分状态",
+          "state": "已提交"
+        }
+      }
     },
     {
       "id": "T-007[a]",
@@ -1449,7 +1510,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1481,7 +1543,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "优秀"
+          }
+        ]
+      }
     },
     {
       "id": "T-007[b]",
@@ -1544,7 +1628,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1576,7 +1661,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "良好"
+          }
+        ]
+      }
     },
     {
       "id": "T-007[c]",
@@ -1639,7 +1746,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1671,7 +1779,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-008[a]",
@@ -1735,7 +1865,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1767,7 +1898,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "不合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-008[b]",
@@ -1831,7 +1986,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1863,7 +2019,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "差"
+          }
+        ]
+      }
     },
     {
       "id": "T-009[a]",
@@ -1926,7 +2106,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1958,7 +2139,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "优秀"
+          }
+        ]
+      }
     },
     {
       "id": "T-009[b]",
@@ -2021,7 +2224,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2053,7 +2257,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "良好"
+          }
+        ]
+      }
     },
     {
       "id": "T-009[c]",
@@ -2116,7 +2342,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2148,7 +2375,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-009[d]",
@@ -2211,7 +2460,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2243,7 +2493,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "不合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-009[e]",
@@ -2306,7 +2578,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2338,7 +2611,29 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_range",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格",
+            "op": ">="
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "差"
+          }
+        ]
+      }
     },
     {
       "id": "T-010[a]",
@@ -2402,7 +2697,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2434,7 +2730,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "优秀"
+          }
+        ]
+      }
     },
     {
       "id": "T-010[b]",
@@ -2498,7 +2818,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2530,7 +2851,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "良好"
+          }
+        ]
+      }
     },
     {
       "id": "T-010[c]",
@@ -2594,7 +2939,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2626,7 +2972,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-010[d]",
@@ -2690,7 +3060,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2722,7 +3093,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "不合格"
+          }
+        ]
+      }
     },
     {
       "id": "T-010[e]",
@@ -2786,7 +3181,8 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2818,7 +3214,31 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "values": [
+              "不合格",
+              "差"
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PROJ",
+              "name": "评级"
+            },
+            "value": "差"
+          }
+        ]
+      }
     },
     {
       "id": "T-011",
@@ -2861,7 +3281,8 @@
       "note": {
         "inferred": true,
         "comment": "4.5（5）e：对已完成计划中包含的处于评审中状态的项目，项目状态回到该计划建立前（已选入）；direction 判定①'回到'到backward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2881,7 +3302,8 @@
           "raw_text": "评审计划状态由已完成变为结束或超时结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-012",
@@ -2915,7 +3337,8 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-016：取消计划后项目状态返回到该计划建立前的状态（4.8.3（2））；direction 判定①'返回'到backward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2928,7 +3351,8 @@
           "raw_text": "评审计划状态由已建立变为取消结束",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-013[a]",
@@ -2962,7 +3386,8 @@
         "inferred": true,
         "comment": "跨维度初始化联动 T-001：新增项目时项目阶段初始化为开题",
         "branch_dimension": "项目阶段"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2980,7 +3405,8 @@
           "raw_text": "项目阶段=开题",
           "pattern": "branch_injected"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-013[b]",
@@ -3014,7 +3440,8 @@
         "inferred": true,
         "comment": "跨维度初始化联动 T-001：新增项目时项目阶段初始化为开题",
         "branch_dimension": "项目阶段"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3032,7 +3459,8 @@
           "raw_text": "项目阶段=验收",
           "pattern": "branch_injected"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-014",
@@ -3076,7 +3504,8 @@
         "inferred": true,
         "comment": "联动 T-007：开题阶段+评级合格及以上归档时项目阶段由开题变为验收; 分支无实质差异(单组合)",
         "branch_dimension": "项目阶段"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3101,7 +3530,8 @@
           "raw_text": "项目阶段为开题",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-015[a]",
@@ -3142,7 +3572,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3158,7 +3589,50 @@
           "value": "5"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "selection_range",
+            "source_state": {
+              "entity": "E-PROJ",
+              "dimension": "项目状态",
+              "state": "已选入"
+            },
+            "min": 1,
+            "max": 5
+          },
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "values": [
+              5,
+              7,
+              9
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "组长专家数"
+            },
+            "value": 1
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "value": 5
+          }
+        ]
+      }
     },
     {
       "id": "T-015[b]",
@@ -3199,7 +3673,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3215,7 +3690,50 @@
           "value": "7"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "selection_range",
+            "source_state": {
+              "entity": "E-PROJ",
+              "dimension": "项目状态",
+              "state": "已选入"
+            },
+            "min": 1,
+            "max": 5
+          },
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "values": [
+              5,
+              7,
+              9
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "组长专家数"
+            },
+            "value": 1
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "value": 7
+          }
+        ]
+      }
     },
     {
       "id": "T-015[c]",
@@ -3256,7 +3774,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3272,7 +3791,50 @@
           "value": "9"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "selection_range",
+            "source_state": {
+              "entity": "E-PROJ",
+              "dimension": "项目状态",
+              "state": "已选入"
+            },
+            "min": 1,
+            "max": 5
+          },
+          {
+            "type": "field_in",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "values": [
+              5,
+              7,
+              9
+            ]
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "组长专家数"
+            },
+            "value": 1
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审组人数"
+            },
+            "value": 9
+          }
+        ]
+      }
     },
     {
       "id": "T-016",
@@ -3306,7 +3868,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；取消结束为终态；联动 T-012 项目回退"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3325,7 +3888,8 @@
           "raw_text": "评审计划处于已建立状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-017",
@@ -3358,7 +3922,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3371,7 +3936,8 @@
           "raw_text": "评审计划处于已建立状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-018",
@@ -3403,7 +3969,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）a 下发时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3413,7 +3980,19 @@
           "value": "下发超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "time_limit",
+        "kind": "下发",
+        "start_state": {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "已建立"
+        },
+        "days_min": 1,
+        "days_max": 2,
+        "default_days": 1
+      }
     },
     {
       "id": "T-019",
@@ -3446,7 +4025,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-005 项目进入评审中、T-034 打分初始化"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3465,7 +4045,8 @@
           "raw_text": "评审计划处于待启动状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-020",
@@ -3497,7 +4078,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）b 启动时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3507,7 +4089,19 @@
           "value": "启动超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "time_limit",
+        "kind": "启动",
+        "start_state": {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "待启动"
+        },
+        "days_min": 1,
+        "days_max": 5,
+        "default_days": 2
+      }
     },
     {
       "id": "T-021",
@@ -3549,7 +4143,8 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-035：评审专家打分保存后计划状态变化；direction 判定③状态先后到forward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3569,7 +4164,8 @@
           "raw_text": "评审专家对该计划的项目进行打分保存",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-022[a]",
@@ -3609,7 +4205,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3633,7 +4230,16 @@
           "raw_text": "评审计划处于待评审状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "待评审",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-022[b]",
@@ -3673,7 +4279,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3697,7 +4304,16 @@
           "raw_text": "评审计划处于待评审状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "评审中",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-022[c]",
@@ -3737,7 +4353,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3761,7 +4378,16 @@
           "raw_text": "评审计划处于待评审状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "已完成",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-023[a]",
@@ -3801,7 +4427,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3825,7 +4452,16 @@
           "raw_text": "评审计划处于评审中状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "待评审",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-023[b]",
@@ -3865,7 +4501,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3889,7 +4526,16 @@
           "raw_text": "评审计划处于评审中状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "评审中",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-023[c]",
@@ -3929,7 +4575,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3953,7 +4600,16 @@
           "raw_text": "评审计划处于评审中状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "已完成",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-024[a]",
@@ -3993,7 +4649,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4017,7 +4674,16 @@
           "raw_text": "评审计划处于已完成状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "待评审",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-024[b]",
@@ -4057,7 +4723,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4081,7 +4748,16 @@
           "raw_text": "评审计划处于已完成状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "评审中",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-024[c]",
@@ -4121,7 +4797,8 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4145,7 +4822,16 @@
           "raw_text": "评审计划处于已完成状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "field_equals",
+        "field": {
+          "entity": "E-PLAN",
+          "name": "暂停前计划状态"
+        },
+        "value": "已完成",
+        "ref_state_dimension": "E-PLAN.计划状态"
+      }
     },
     {
       "id": "T-025",
@@ -4180,7 +4866,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=待评审; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4198,7 +4885,8 @@
           "raw_text": "评审计划处于暂停状态且暂停前为待评审",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-026",
@@ -4233,7 +4921,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=评审中; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4251,7 +4940,8 @@
           "raw_text": "评审计划处于暂停状态且暂停前为评审中",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-027",
@@ -4286,7 +4976,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=已完成; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4304,7 +4995,8 @@
           "raw_text": "评审计划处于暂停状态且暂停前为已完成",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-028",
@@ -4337,7 +5029,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-006 全部专家提交打分"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4350,7 +5043,8 @@
           "raw_text": "评审计划中所有项目在评审时限内变为待归档状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-029",
@@ -4382,7 +5076,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4398,7 +5093,19 @@
           "value": "评审超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "time_limit",
+        "kind": "评审",
+        "start_state": {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "待评审"
+        },
+        "days_min": 1,
+        "days_max": 5,
+        "default_days": 2
+      }
     },
     {
       "id": "T-030[a]",
@@ -4435,7 +5142,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4451,7 +5159,32 @@
           "value": "下发超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "评审中"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "下发"
+          }
+        ]
+      }
     },
     {
       "id": "T-030[b]",
@@ -4488,7 +5221,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4504,7 +5238,32 @@
           "value": "启动超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "评审中"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "启动"
+          }
+        ]
+      }
     },
     {
       "id": "T-030[c]",
@@ -4541,7 +5300,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4557,7 +5317,32 @@
           "value": "评审超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "评审中"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "评审"
+          }
+        ]
+      }
     },
     {
       "id": "T-030[d]",
@@ -4594,7 +5379,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4610,7 +5396,32 @@
           "value": "归档超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "评审中"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "归档"
+          }
+        ]
+      }
     },
     {
       "id": "T-031[a]",
@@ -4647,7 +5458,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4663,7 +5475,32 @@
           "value": "下发超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "暂停"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "下发"
+          }
+        ]
+      }
     },
     {
       "id": "T-031[b]",
@@ -4700,7 +5537,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4716,7 +5554,32 @@
           "value": "启动超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "暂停"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "启动"
+          }
+        ]
+      }
     },
     {
       "id": "T-031[c]",
@@ -4753,7 +5616,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4769,7 +5633,32 @@
           "value": "评审超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "暂停"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "评审"
+          }
+        ]
+      }
     },
     {
       "id": "T-031[d]",
@@ -4806,7 +5695,8 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4822,7 +5712,32 @@
           "value": "归档超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "time_limit",
+            "kind": "评审",
+            "start_state": {
+              "entity": "E-PLAN",
+              "dimension": "计划状态",
+              "state": "暂停"
+            },
+            "days_min": 1,
+            "days_max": 5,
+            "default_days": 2
+          },
+          {
+            "type": "field_equals",
+            "field": {
+              "entity": "E-PLAN",
+              "name": "评审计划超时类型"
+            },
+            "value": "归档"
+          }
+        ]
+      }
     },
     {
       "id": "T-032",
@@ -4855,7 +5770,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；评审助理亦可执行；结束为终态；联动 T-007-d/T-011 项目归档、T-042/T-044/T-045 机构评价"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4879,7 +5795,8 @@
           "raw_text": "评审计划处于已完成状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-033",
@@ -4911,7 +5828,8 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；超时结束为终态；4.8.1（5）d 归档时限；联动 T-007-d/T-011 项目归档、T-042/T-044/T-045 机构评价; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4932,7 +5850,19 @@
           "value": "归档超时"
         }
       ],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "time_limit",
+        "kind": "归档",
+        "start_state": {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "已完成"
+        },
+        "days_min": 1,
+        "days_max": 3,
+        "default_days": 2
+      }
     },
     {
       "id": "T-034",
@@ -4965,7 +5895,8 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-019：评审计划启动后系统为每对（项目×专家）初始化打分记录；direction 判定③状态先后到forward"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4978,7 +5909,8 @@
           "raw_text": "评审计划状态由待启动变为待评审",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-035",
@@ -5007,7 +5939,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-021 计划状态变为评审中"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -5018,7 +5951,10 @@
         }
       ],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "always_true"
+      }
     },
     {
       "id": "T-036",
@@ -5056,7 +5992,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；已提交为终态；联动 T-006 全部专家提交后项目进入待归档；已保存状态可重复打分保存（T-035 可重入），已提交后不可修改"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -5075,7 +6012,18 @@
           "raw_text": "打分状态为已保存",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "negation",
+        "operand": {
+          "type": "field_equals",
+          "field": {
+            "entity": "E-SCORE",
+            "name": "各项打分"
+          },
+          "value": 0
+        }
+      }
     },
     {
       "id": "T-037",
@@ -5098,12 +6046,14 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；未锁定为隐式初态"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": null
     },
     {
       "id": "T-038",
@@ -5136,7 +6086,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态锁定到lateral；锁定不推进主链相位"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5149,7 +6100,8 @@
           "raw_text": "用户处于未锁定状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-039",
@@ -5179,12 +6131,28 @@
       "note": {
         "inferred": false,
         "comment": "4.13（8）：普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误 3 次时锁定该账户；direction 判定②to 为侧挂状态锁定到lateral"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "aggregate_count",
+        "subject": {
+          "entity": "E-USER",
+          "state": "未锁定",
+          "count_scope": "subject_instance"
+        },
+        "counter": {
+          "entity": "E-USER",
+          "name": "连续密码错误次数"
+        },
+        "threshold": 3,
+        "consecutive": true,
+        "window": "all_time"
+      }
     },
     {
       "id": "T-040",
@@ -5217,7 +6185,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态锁定到resume；4.13（8）'锁定后可由系统管理员解锁'"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5230,7 +6199,8 @@
           "raw_text": "用户处于锁定状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": null
     },
     {
       "id": "T-041",
@@ -5253,12 +6223,14 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；合格为初态"
-      },      "coverage_priority": "critical",
+      },
+      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": null
     },
     {
       "id": "T-042",
@@ -5287,12 +6259,18 @@
       "note": {
         "inferred": false,
         "comment": "4.9.7（1）a/b/c：所有项目阶段评价为差的次数累计 3 次及以上；或差 1 次及以上且不合格 3 次及以上；或不合格 5 次及以上；direction 判定③状态先后到forward；联动 T-032 归档时累计更新"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "disjunction_ref",
+        "ref": "评价结果满足下面任一条",
+        "resolved": false
+      }
     },
     {
       "id": "T-043",
@@ -5330,7 +6308,8 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.9.7（2）a 不能对不合格研制机构所属项目进行评审；4.9.7（2）d 限制条件由 BR 承载"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5343,7 +6322,23 @@
           "raw_text": "机构处于不合格状态",
           "pattern": "p1_inherited"
         }
-      ]
+      ],
+      "constraint_predicate": {
+        "type": "aggregate_count",
+        "subject": {
+          "entity": "E-ORG",
+          "state": "不合格",
+          "count_scope": "subject_instance"
+        },
+        "counter": {
+          "entity": "E-PROJ",
+          "name": "评级",
+          "counted_value": "不合格"
+        },
+        "threshold": 3,
+        "consecutive": false,
+        "window": "all_time"
+      }
     },
     {
       "id": "T-044",
@@ -5372,12 +6367,29 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.9.7（3）e 同时满足升或降时降为不合格"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "aggregate_count",
+        "subject": {
+          "entity": "E-ORG",
+          "state": "试用",
+          "count_scope": "subject_instance"
+        },
+        "counter": {
+          "entity": "E-PROJ",
+          "name": "评级",
+          "counted_value": "优秀"
+        },
+        "threshold": 10,
+        "consecutive": false,
+        "window": "all_time"
+      }
     },
     {
       "id": "T-045",
@@ -5407,12 +6419,18 @@
       "note": {
         "inferred": false,
         "comment": "4.9.7（3）b/c/d/e：累计 2 次差；或 1 次差且 2 次及以上不合格；或 4 次不合格；或同时可满足升或降时降；direction 判定③状态先后到forward"
-      },      "coverage_priority": "high",
+      },
+      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": []
+      "precondition_state_refs": [],
+      "constraint_predicate": {
+        "type": "disjunction_ref",
+        "ref": "试用机构评价结果满足降级规则任一条",
+        "resolved": false
+      }
     }
   ],
   "cross_entity_obligations": [
@@ -7771,7 +8789,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-06T16:27:51.094156+08:00",
+    "generated_at": "2026-08-06T21:51:54.997734+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -8570,13 +9588,13 @@
             ],
             "phase_mapping": {
               "已建立": 0,
-              "待启动": 1,
               "取消结束": 5,
+              "待启动": 1,
               "待评审": 2,
-              "评审中": 3,
               "已完成": 4,
-              "超时结束": 5,
+              "评审中": 3,
               "结束": 5,
+              "超时结束": 5,
               "暂停": 4
             }
           }

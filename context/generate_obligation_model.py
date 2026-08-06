@@ -45,27 +45,39 @@ try:
 except ImportError:
     from context import co_derivation  # package-relative (python -m context.generate_obligation_model)
 
+# Step 3 constraint-predicate field registry + phase rules (Step 3 structured
+# predicate layer). Pure data + phase pure functions, shared with downstream
+# consumers (Guard 6 / Step 4). See context/constraint_fields.py.
+try:
+    import constraint_fields as _cf  # script-dir import
+except ImportError:
+    from context import constraint_fields as _cf  # package-relative
+
 # ============ Configurable paths ============
-_DEFAULT_P1 = os.environ.get(
-    "P1_PATH",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                 "context", "P1_out.json"),
-)
+# P1 输入**必传**（argv[1] 或环境变量 P1_PATH），不设旧默认路径
+# （context/P1_out.json 已弃用——P1 真源现为仓库根 review_structured.json）。
+# 输出默认仓库根 coverage_obligations.json，可用 argv[2] 或 P2_OUT_PATH 覆盖。
+_REPO_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DEFAULT_OUT = os.environ.get(
     "P2_OUT_PATH",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                 "coverage_obligations.json"),
+    os.path.join(_REPO_ROOT_DIR, "coverage_obligations.json"),
 )
 
-# Allow CLI override: python generate_obligation_model.py <p1> <out>
 if len(sys.argv) >= 2:
     P1_PATH = sys.argv[1]
+elif os.environ.get("P1_PATH"):
+    P1_PATH = os.environ["P1_PATH"]
 else:
-    P1_PATH = _DEFAULT_P1
+    raise SystemExit(
+        "用法: python context/generate_obligation_model.py <P1.json> [out.json]\n"
+        "P1 输入必传（当前真源: review_structured.json）。")
 if len(sys.argv) >= 3:
     OUT_PATH = sys.argv[2]
 else:
     OUT_PATH = _DEFAULT_OUT
+
+if not os.path.exists(P1_PATH):
+    raise SystemExit(f"P1 输入不存在: {P1_PATH}")
 
 with open(P1_PATH, "r", encoding="utf-8") as f:
     p1 = json.load(f)
@@ -485,8 +497,9 @@ def derive_side_effects(t):
             if other_e["id"] == t["entity"]:
                 continue
             if other_e["name"] in er or other_e["id"] in er:
-                # Try to find dimension (any dim of that entity)
-                dims = list(entity_dims.get(other_e["id"], set()))
+                # Try to find dimension (any dim of that entity)。
+                # set 推导 → 迭代序非确定；按名排序保证 P2 输出可复现。
+                dims = sorted(entity_dims.get(other_e["id"], set()))
                 target_dim = dims[0] if dims else None
                 key = (other_e["id"], target_dim)
                 if key not in se:
@@ -512,7 +525,7 @@ def derive_precondition_refs(preconds, current_entity):
             # Try explicit: text contains "entity.dimension=state" or "entity.state"
             # Try implicit: only state value, matches current entity's same dimension
             for dim_name, states in state_lookup.get(current_entity, {}).items():
-                for s in states:
+                for s in sorted(states):  # set 迭代序非确定 → 首匹配需确定序
                     if s in text:
                         new_p["ref"] = {"entity": current_entity, "dimension": dim_name, "state": s}
                         out_refs.append({
@@ -531,7 +544,7 @@ def derive_precondition_refs(preconds, current_entity):
                         continue
                     if other_e["name"] in text or other_e["id"] in text:
                         for dim_name, states in state_lookup.get(other_e["id"], {}).items():
-                            for s in states:
+                            for s in sorted(states):  # set 迭代序非确定 → 首匹配需确定序
                                 if s in text:
                                     new_p["ref"] = {"entity": other_e["id"], "dimension": dim_name, "state": s}
                                     out_refs.append({
@@ -555,6 +568,432 @@ def derive_precondition_refs(preconds, current_entity):
             })
         out_preconds.append(new_p)
     return out_preconds, out_refs
+
+# ============ Step 3 (constraint predicate structuring) ============
+# Constraint preconditions ({text, type:"constraint", ref:null}) are parsed
+# into a structured predicate tree emitted as TO.constraint_predicate.
+# Schema v1: field_equals implemented; other predicate shapes return an
+# "unparsed" node so nothing is silently dropped during incremental build-out.
+# Phase lower bounds are NOT baked here — consumers derive them via
+# constraint_fields.predicate_phase_lower_bound() against the current maps.
+
+# ── 跨类型复用的表层数据：连接词 / 算子 ───────────────────────────────
+#   阈值连接词：FIELD <conn> VALUE <op>，如 评级 在 合格 及以上
+_RANGE_CONNECTORS = ("在", "为")
+#   阈值算子：表层 → 语义（>= / <=）
+_RANGE_OPERATORS = {
+    "及以上": ">=", "不低于": ">=",
+    "及以下": "<=", "不高于": "<=",
+}
+#   集合连接词：FIELD <conn> V1 或 V2 [或 V3 ...]，如 评级 为 不合格 或 差
+_FIELD_IN_CONNECTORS = ("为", "在")
+
+_RANGE_CONN_ALT = "|".join(_RANGE_CONNECTORS)
+_RANGE_OP_ALT = "|".join(sorted(_RANGE_OPERATORS, key=len, reverse=True))
+_FIELD_IN_CONN_ALT = "|".join(_FIELD_IN_CONNECTORS)
+
+
+def _field_pred_node(ptype, field_str, ctx, value=None, op=None, values=None):
+    """field 三型（equals/range/in）统一构建：解析字段 → 归一值 →
+    标注 ref_state_dimension/闭集告警。字段未注册 → unparsed 占位。"""
+    text = ctx.get("_text", "")
+    rec = _resolve_field_from_text(field_str, ctx.get("entity"))
+    if rec is None:
+        return {"type": "unparsed", "text": text,
+                "reason": f"field 未注册: {field_str}"}
+    node = {"type": ptype, "field": {"entity": rec["entity"], "name": rec["name"]}}
+    if values is not None:
+        node["values"] = [_normalize_constraint_value(rec, v.strip())
+                          for v in values if v.strip()]
+    else:
+        node["value"] = _normalize_constraint_value(rec, value)
+        if op is not None:
+            node["op"] = op
+    # 暂停前计划状态 这类 state_snapshot：值本身就是状态机态名，标注来源维度，
+    # 让下游（Strategy 0 / Guard 6）能把值当状态引用消费（锚 TO 态而非 FROM 态）
+    if rec.get("ref_state_dimension"):
+        node["ref_state_dimension"] = rec["ref_state_dimension"]
+    check = node.get("value")
+    if rec.get("value_closed_set") and check is not None \
+            and check not in rec["value_closed_set"]:
+        node["warning"] = f"值 {check} 不在闭集 {rec['value_closed_set']}"
+    return node
+
+
+def _time_limit_node(m, ctx):
+    """time_limit：<kind>时限超时（min-max 天，默认 d）。
+
+    起算状态 = 触发该超时的 transition 自身的 from 态（T-018 已建立→待启动=下发、
+    T-020 待启动→待评审=启动、T-029 待评审→已完成=评审、T-030 评审中→已完成、
+    T-031 暂停→已完成、T-033 已完成→超时结束=归档——数据里就是这么编码的）。
+    不设 kind→起算态常量表；from 缺失 → start_state=None（下游保守 P0）。
+    """
+    frm = ctx.get("from")
+    return {
+        "type": "time_limit",
+        "kind": m["kind"],
+        "start_state": ({"entity": ctx.get("entity"),
+                         "dimension": ctx.get("dimension"),
+                         "state": frm} if frm else None),
+        "days_min": int(m["dmin"]), "days_max": int(m["dmax"]),
+        "default_days": int(m["ddef"]),
+    }
+
+
+def _selection_node(m, ctx):
+    """selection_range：从处于<state>状态的项目中选取 min-max 个。
+    <state> 经 state_lookup 解析到所属实体（跨实体：T-015 的 E-PLAN TO 选 E-PROJ 项目）。"""
+    src = _resolve_state_from_text(m["state"], ctx)
+    if src is None:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": f"状态未解析: {m['state']}"}
+    return {"type": "selection_range", "source_state": src,
+            "min": int(m["smin"]), "max": int(m["smax"])}
+
+
+# ── 跨类型表层数据表 ─────────────────────────────────────────────────────
+#   计数模式：连续 → consecutive=True（被打断归零），累计 → False（all_time 累计）
+_COUNT_MODE_KEYWORDS = {"连续": True, "累计": False}
+#   否定标记：<operand>的<标记>（如 评价结果为差的项目不可选入）
+_NEGATION_MARKERS = ("不可选入", "不能提交")
+_NEGATION_ALT = "|".join(sorted(_NEGATION_MARKERS, key=len, reverse=True))
+#   完成态表层：提交了 → 完成态 已提交（经 state_lookup 解析到 E-SCORE.打分状态.已提交）
+_COMPLETION_STATE_SURFACES = {"提交了": "已提交"}
+#   数字字面量：为零 → 0（field_zero 聚合全零判定）
+_ZERO_WORDS = {"零": "0", "0": "0"}
+
+
+def _resolve_counter_from_text(text, ctx):
+    """aggregate_count：从计数对象短语解析 counter 字段（数据驱动，经字段记录
+    count_aliases）。同实体优先、跨实体兜底（T-044 的 E-ORG 主语计 E-PROJ.评级）。
+    counted_value 在 alias 后取"为<grade>"，按字段 value_normalization 归一、
+    对照 values 校验；无 为 前缀（如 密码错误）→ 不带 counted_value。"""
+    own = ctx.get("entity")
+    cands = []
+    for r in _cf.FIELD_REGISTRY.values():
+        for alias in r.get("count_aliases") or []:
+            if alias in text:
+                cands.append((len(alias), 0 if r.get("entity") == own else 1,
+                              r, alias))
+    if not cands:
+        return None
+    cands.sort(key=lambda c: (-c[0], c[1]))
+    _, _, rec, alias = cands[0]
+    # 键名统一为 name（与 field_equals 等的 field ref 及 resolve_field 一致）：
+    # 原 field 键使 constraint_fields.resolve_field 查不到 name → 相位下界落空。
+    counter = {"entity": rec["entity"], "name": rec["name"]}
+    after = text[text.index(alias) + len(alias):]
+    # counted_value：alias 后"为<grade>"。边界字 的/，。； 截断（评级为不合格的…→不合格），
+    # 再对照字段 values 校验；粘连情形（值后跟其他词）按 values 前缀回退。
+    gm = re.match(r"^为\s*([^，。；;的\s]{1,6})", after)
+    if gm:
+        tok = gm.group(1)
+        g = _normalize_constraint_value(rec, tok)
+        vals = rec.get("values") or []
+        if vals and isinstance(g, str) and g not in vals:
+            pre = sorted((v for v in vals if isinstance(v, str) and tok.startswith(v)),
+                         key=len, reverse=True)
+            if pre:
+                g = pre[0]
+        if not vals or g in vals:
+            counter["counted_value"] = g
+    return counter
+
+
+def _aggregate_node(m, ctx):
+    """aggregate_count：<主语><连续|累计> <N> 次<计数对象>。
+    subject = 触发 transition 自身的 from 态 + count_scope=subject_instance
+    （计数范围 = 主语实例；count_scope 是 Step 4 的输入，v1 标注）。
+    window 表层未声明 → all_time。"""
+    counting_text = (m["object"] or "") + (m["tail"] or "")
+    counter = _resolve_counter_from_text(counting_text, ctx)
+    if counter is None:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": f"计数对象未解析: {counting_text}"}
+    return {
+        "type": "aggregate_count",
+        "subject": {"entity": ctx.get("entity"), "state": ctx.get("from"),
+                    "count_scope": "subject_instance"},
+        "counter": counter,
+        "threshold": int(m["th"]),
+        "consecutive": _COUNT_MODE_KEYWORDS.get(m["mode"], False),
+        "window": "all_time",
+    }
+
+
+def _config_node(m, ctx):
+    """config：<f1>由 V1、V2 或 V3 个专家组成，有且只能有 N 个<f2>。
+    分解为 field_in(<f1>∈values) ∧ field_equals(<f2>, N)；字段名/值全部从表层
+    文本取，经注册表别名解析（评审组→评审组人数、组长专家→组长专家数），
+    不写字段名字面量。"""
+    vals = [t.strip() for t in re.split(r"[、或]", m["vals"]) if t.strip()]
+    f1 = _field_pred_node("field_in", m["f1"], ctx, values=vals)
+    f2 = _field_pred_node("field_equals", m["f2"], ctx, value=m["n1"])
+    parts = [p for p in (f1, f2) if p and p.get("type") != "unparsed"]
+    if len(parts) < 2:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": "config 字段解析失败"}
+    return {"type": "conjunction", "parts": parts}
+
+
+def _disjunction_ref_node(m, ctx):
+    """disjunction_ref：…满足<ref>任一条。引用未展开的规则列表；v1 记录原文为
+    引用、resolved=False（下游不得当硬约束，见 PREDICATE_RULES）。"""
+    return {"type": "disjunction_ref", "ref": ctx.get("_text", ""),
+            "resolved": False}
+
+
+def _negation_node(m, ctx):
+    """negation：<operand>的<subj?><否定标记>（如 评价结果为差的项目不可选入、
+    项目各项打分全部为零的不能提交）。operand 递归经表层表解析
+    （全部为零 → field_zero 行），无特殊分支。"""
+    operand_text = m["operand"].strip()
+    operand = _parse_constraint_text(operand_text, ctx)
+    if operand is None or (isinstance(operand, dict)
+                           and operand.get("type") == "unparsed"):
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": f"negation operand 未解析: {operand_text}"}
+    return {"type": "negation", "operand": operand}
+
+
+def _completion_node(m, ctx):
+    """completion：…全部专家提交了…打分。完成态经 _COMPLETION_STATE_SURFACES +
+    state_lookup 解析（提交了 → E-SCORE.打分状态.已提交）。"""
+    st = _resolve_state_from_text(_COMPLETION_STATE_SURFACES["提交了"], ctx)
+    if st is None:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": "完成态未解析: 已提交"}
+    return {"type": "completion", "target": st}
+
+
+def _parse_occurrence_when(when, ctx):
+    """occurrence_limit 的 when 条件：<前缀><值><字段名> 反序表层
+    （如 本阶段不合格评价结果 → 评级=不合格）。值从字段记录 values 子串最长匹配
+    （不合格 优先于 合格）。"""
+    for r in _cf.FIELD_REGISTRY.values():
+        if r.get("kind") == "alias" or r.get("entity") != ctx.get("entity"):
+            continue
+        for nm in [r["name"]] + (r.get("aliases") or []):
+            if nm in when:
+                pre = when[:when.index(nm)]
+                vals = r.get("values") or []
+                hit = sorted((v for v in vals if v in pre), key=len, reverse=True)
+                if hit:
+                    return {"type": "field_equals",
+                            "field": {"entity": r["entity"], "name": r["name"]},
+                            "value": _normalize_constraint_value(r, hit[0])}
+    return None
+
+
+def _occurrence_node(m, ctx):
+    """occurrence_limit：对于<when>的项目，只有 N 次<动作>。
+    on = 被限 transition 的语义特征 {entity, dimension, from, to}（本 TO 自身），
+    不硬编码 transition ID（见 PREDICATE_RULES.occurrence_limit_on_ref）。"""
+    node = {"type": "occurrence_limit",
+            "on": {"entity": ctx.get("entity"), "dimension": ctx.get("dimension"),
+                   "from": ctx.get("from"), "to": ctx.get("to")},
+            "limit": int(m["limit"])}
+    when = m["when"]
+    if when:
+        wp = _parse_occurrence_when(when, ctx)
+        if wp is not None:
+            node["when"] = wp
+    return node
+
+
+def _always_true_node(m, ctx):
+    """always_true：规则描述句（依据…对…进行…），非实质约束。"""
+    return {"type": "always_true"}
+
+
+# ── 表层语法表：每行 = {type, pattern(命名槽位正则), build(match, ctx) -> 节点|None} ──
+# 所有自然语言表层集中在此；解析逻辑是 _parse_constraint_text 里唯一的遍历循环。
+# 新增形态 = 加一行（措辞变体 = 改槽位正则）；领域推导从 transition 数据现取。
+_PREDICATE_SURFACES = [
+    # field_equals：FIELD = VALUE（如 评级=优秀）
+    {"type": "field_equals",
+     "pattern": re.compile(r"^\s*(?P<field>.{1,24}?)\s*=\s*(?P<value>.{1,24}?)\s*$"),
+     "build": lambda m, ctx: _field_pred_node("field_equals", m["field"], ctx,
+                                              value=m["value"])},
+    # field_range：FIELD <在|为> VALUE <及以上|及以下|不低于|不高于>（阈值比较）
+    {"type": "field_range",
+     "pattern": re.compile(
+         rf"^\s*(?P<field>.{{1,24}}?)\s*(?:{_RANGE_CONN_ALT})\s*"
+         rf"(?P<value>.{{1,12}}?)\s*(?P<op>{_RANGE_OP_ALT})\s*$"),
+     "build": lambda m, ctx: _field_pred_node("field_range", m["field"], ctx,
+                                              value=m["value"],
+                                              op=_RANGE_OPERATORS[m["op"]])},
+    # field_in：FIELD <为|在> V1 或 V2 [或 V3 ...]（同字段取值集合，如 评级为不合格或差）
+    {"type": "field_in",
+     "pattern": re.compile(
+         rf"^\s*(?P<field>.{{1,24}}?)\s*(?:{_FIELD_IN_CONN_ALT})\s*(?P<values>.{{1,30}}?)\s*$"),
+     "build": lambda m, ctx: (_field_pred_node("field_in", m["field"], ctx,
+                                               values=m["values"].split("或"))
+                              if "或" in m["values"] else None)},
+    # time_limit：<kind>时限超时（min-max 天，默认 d）。kind 任意捕获（数据驱动），
+    # 模板字（时限超时/（/天/默认/））是 DSL 措辞本身，集中在本行。
+    {"type": "time_limit",
+     "pattern": re.compile(
+         r"^\s*(?P<kind>.{1,8}?)时限超时（\s*(?P<dmin>\d+)\s*-\s*(?P<dmax>\d+)\s*天，"
+         r"默认\s*(?P<ddef>\d+)\s*）\s*$"),
+     "build": _time_limit_node},
+    # selection_range：<role?>从处于<state>状态的项目中选取 min-max 个项目。
+    # 前导 <lead> 是角色前缀（评审管理员 等）；<state> 经 state_lookup 解析。
+    {"type": "selection_range",
+     "pattern": re.compile(
+         r"^\s*(?P<lead>.{0,20}?)从处于(?P<state>.{1,12}?)状态的项目中选取\s*"
+         r"(?P<smin>\d+)\s*-\s*(?P<smax>\d+)\s*个项目"),
+     "build": _selection_node},
+    # aggregate_count：<主语><连续|累计> <N> 次<计数对象>（如 普通用户连续密码错误 3 次）
+    {"type": "aggregate_count",
+     "pattern": re.compile(
+         r"^\s*(?P<lead>.{0,24}?)(?P<mode>连续|累计)\s*(?P<object>.{0,12}?)\s*"
+         r"(?P<th>\d+)\s*次(?P<tail>.{0,24}?)\s*$"),
+     "build": _aggregate_node},
+    # config：<f1>由 V1、V2 或 V3 个专家组成，有且只能有 N 个<f2>
+    {"type": "config",
+     "pattern": re.compile(
+         r"^\s*评审计划的(?P<f1>.{1,8}?)由(?P<vals>.{1,20}?)个专家组成，有且只能有"
+         r"(?P<n1>.{1,4}?)个(?P<f2>.{1,8}?)\s*$"),
+     "build": _config_node},
+    # disjunction_ref：…满足<ref>任一条（引用未展开规则列表）
+    {"type": "disjunction_ref",
+     "pattern": re.compile(r"^\s*(?P<lead>.{1,24}?)满足(?P<ref>.{1,16}?)任一条\s*$"),
+     "build": _disjunction_ref_node},
+    # negation：<operand>的<subj?><否定标记>（subj 如 项目）
+    {"type": "negation",
+     "pattern": re.compile(
+         rf"^\s*(?P<operand>.{{1,24}}?)的(?P<subj>.{{1,4}}?)?(?:{_NEGATION_ALT})\s*$"),
+     "build": _negation_node},
+    # occurrence_limit：对于<when>的项目，只有 N 次<动作>
+    {"type": "occurrence_limit",
+     "pattern": re.compile(
+         r"^\s*对于(?P<when>.{1,24}?)的项目，只有\s*(?P<limit>\d+)\s*次"
+         r"(?P<what>.{1,12}?)\s*$"),
+     "build": _occurrence_node},
+    # completion：…全部专家提交了…打分（完成态）
+    {"type": "completion",
+     "pattern": re.compile(r"^\s*.{0,12}?全部专家提交了.{1,10}打分\s*$"),
+     "build": _completion_node},
+    # always_true：规则描述句（依据…对…进行…），非实质约束
+    {"type": "always_true",
+     "pattern": re.compile(r"^\s*.{1,24}?依据.{1,24}?对.{1,24}?进行.{1,24}\s*$"),
+     "build": _always_true_node},
+    # field_zero：FIELD 全部为零（各项打分全部为零 → field_equals(field, 0)，
+    # 聚合全零语义；0 取数字字面量词典）。须在 field_value 之前——后者会经
+    # "为零" 里的 为 错配成 field_equals(field, "零")。
+    {"type": "field_zero",
+     "pattern": re.compile(r"^\s*(?P<field>.{1,16}?)全部为(?P<zero>零|0)\s*$"),
+     "build": lambda m, ctx: _field_pred_node("field_equals", m["field"], ctx,
+                                              value=_ZERO_WORDS[m["zero"]])},
+    # field_value：FIELD 为 VALUE（单值 为 连接 → field_equals；如 评价结果为差）。
+    # 通用兜底行，置末位——凡被前面行吞掉的形态它不会再碰。
+    {"type": "field_value",
+     "pattern": re.compile(r"^\s*(?P<field>.{1,24}?)\s*为\s*(?P<value>.{1,24}?)\s*$"),
+     "build": lambda m, ctx: _field_pred_node("field_equals", m["field"], ctx,
+                                              value=m["value"])},
+]
+
+
+def _resolve_field_from_text(field_str, entity):
+    """Longest-name substring match against the registry on `entity`.
+
+    Matches canonical names AND their aliases (评价结果→评级、专家人数→评审组人数),
+    returning the canonical record. Returns None when unregistered.
+    """
+    cands = []
+    for r in _cf.FIELD_REGISTRY.values():
+        if r.get("kind") == "alias" or r.get("entity") != entity:
+            continue
+        cands.append((r["name"], r))
+        for a in r.get("aliases") or []:
+            cands.append((a, r))
+    cands.sort(key=lambda t: len(t[0]), reverse=True)
+    for name, r in cands:
+        if name in field_str:
+            return r
+    return None
+
+
+def _normalize_constraint_value(rec, value_str):
+    """Value normalization per field: alias spelling (优→优秀), int cast for
+    value_type=="int" fields（声明于注册表，不再按 kind/config 判断）,
+    超时-type suffix strip (评审超时→评审)."""
+    norm = rec.get("value_normalization") or {}
+    v = value_str.strip()
+    v = norm.get(v, v)
+    if rec.get("value_type") == "int":
+        try:
+            v = int(v)
+        except (TypeError, ValueError):
+            pass
+    suffix = rec.get("strip_suffix")
+    if suffix and isinstance(v, str) and v.endswith(suffix) and len(v) > len(suffix):
+        v = v[:-len(suffix)]
+    return v
+
+
+def _resolve_state_from_text(state, ctx):
+    """把状态名解析为 {entity, dimension, state}（对照 state_lookup）。
+
+    selection_range 的 source_state 可能是跨实体状态：T-015（E-PLAN TO）选取
+    "已选入"状态的项目，而 已选入 属于 E-PROJ.项目状态。先试 transition 自身实体，
+    再跨实体扫描。
+    """
+    sl = ctx.get("_state_lookup") or {}
+    if not state:
+        return None
+    own = ctx.get("entity")
+    order = [own] if own in sl else []
+    order += [e for e in sl if e != own]
+    for ent_id in order:
+        for dim, states in sl[ent_id].items():
+            if state in states:
+                return {"entity": ent_id, "dimension": dim, "state": state}
+    return None
+
+
+def _parse_constraint_text(text, ctx):
+    """Parse one constraint precondition text into a predicate node.
+
+    遍历表层语法表：本行匹配但 build 返回 None 或 unparsed（表层形状吻合但
+    内容不可解析，如 跨实体字段在本实体未注册）→ 交给后续行；全部落空 →
+    unparsed 占位，避免静默丢失。"""
+    ctx = {**ctx, "_text": text}
+    for row in _PREDICATE_SURFACES:
+        m = row["pattern"].match(text)
+        if not m:
+            continue
+        node = row["build"](m, ctx)
+        if node is None:
+            continue
+        if isinstance(node, dict) and node.get("type") == "unparsed":
+            continue
+        return node
+    return {"type": "unparsed", "text": text, "reason": "type 未实现(v1)"}
+
+
+def build_constraint_predicate(preconds, ctx):
+    """Build the predicate tree for a transition's constraint preconditions.
+
+    Single constraint → the node itself; ≥2 → conjunction (transition 级隐式
+    AND，下界 max)。嵌套 conjunction（如 config 展开成 field_in ∧ field_equals）
+    拍平进外层，保持树浅平。No constraint precondition → None。
+    """
+    cps = [p for p in (preconds or []) if p.get("type") == "constraint"]
+    if not cps:
+        return None
+    parts = []
+    for p in cps:
+        node = _parse_constraint_text(p.get("text", ""), ctx)
+        if isinstance(node, dict) and node.get("type") == "conjunction":
+            parts.extend(node.get("parts") or [])
+        else:
+            parts.append(node)
+    if len(parts) == 1:
+        return parts[0]
+    return {"type": "conjunction", "parts": parts}
+
 
 def has_real_difference(combos):
     """R5: filter invalid combos; check if {from,to,action,preconditions,expected_results} differ."""
@@ -919,6 +1358,16 @@ for t in p1["state_and_flow"]["transitions"]:
                     split_ids.append(new_id)
                 # Record the split: abstract transition id -> concrete variant TO ids.
                 transition_splits[t["id"]] = split_ids
+
+# ============ Step 3a: constraint predicate structuring (post-pass) ============
+# Derive TO.constraint_predicate uniformly for ALL emitted transitions
+# (base / downgrade / branch variants). Re-deriving from each TO's own
+# preconditions means branch-injected constraints (评级=优秀 等) are included
+# automatically without touching the 6 inline build sites.
+for _to in transition_obligations:
+    # _state_lookup 供 selection_range 的跨实体状态解析（T-015 选 E-PROJ 项目）
+    _to["constraint_predicate"] = build_constraint_predicate(
+        _to.get("preconditions", []), {**_to, "_state_lookup": state_lookup})
 
 # ============ Step 3: cross_entity_obligations ============
 cross_entity_obligations = []
@@ -1815,7 +2264,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
     if initial and initial in states:
         phase_map[initial] = 0
         queue.append(initial)
-    for tgt in initial_targets:
+    for tgt in sorted(initial_targets):  # set 迭代序非确定 → BFS 种子序需确定
         if tgt in states and tgt not in phase_map:
             phase_map[tgt] = 0
             queue.append(tgt)
@@ -1847,7 +2296,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
         import networkx as nx
         G_forward = nx.DiGraph()
         for src, targets in forward_adj.items():
-            for tgt in targets:
+            for tgt in sorted(targets):
                 G_forward.add_edge(src, tgt)
         _has_cycle = not nx.is_directed_acyclic_graph(G_forward)
     except ImportError:
@@ -1856,7 +2305,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
         color = {s: WHITE for s in states}
         def _dfs_cycle(node):
             color[node] = GRAY
-            for nxt in forward_adj.get(node, ()):
+            for nxt in sorted(forward_adj.get(node, ())):
                 if nxt not in color:
                     continue
                 if color[nxt] == GRAY:
@@ -1887,7 +2336,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
                 terminal_phase = max(non_term_phases) + 1
             else:
                 terminal_phase = max(phase_map.values()) if phase_map else 0
-            for s in term_set:
+            for s in sorted(term_set):  # 等值赋值，但 phase_map 插入序随迭代序漂移
                 phase_map[s] = terminal_phase
         # Force-pin initial
         if initial and initial in states:
@@ -1905,7 +2354,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
             src_phase = phase_map.get(src)
             if src_phase is None:
                 continue
-            for tgt in targets:
+            for tgt in sorted(targets):
                 cand = src_phase + 1
                 if tgt in states and phase_map.get(tgt, -1) < cand:
                     phase_map[tgt] = cand
@@ -1921,7 +2370,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
     # edge from 待归档.)
     forward_reached = set()
     for src, targets in forward_adj.items():
-        for tgt in targets:
+        for tgt in sorted(targets):
             forward_reached.add(tgt)
 
     changed = True
@@ -1966,7 +2415,7 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
             terminal_phase = max(non_terminal_phases) + 1
         else:
             terminal_phase = max(phase_map.values()) if phase_map else 0
-        for s in term_set:
+        for s in sorted(term_set):  # 同上：插入序确定化
             phase_map[s] = terminal_phase
 
     return phase_map

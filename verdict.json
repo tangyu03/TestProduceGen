@@ -2,7 +2,7 @@
   "verdict": "pass",
   "skeleton_pass": true,
   "blocker_failures": 0,
-  "warning_failures": 1,
+  "warning_failures": 0,
   "checks": [
     {
       "check_id": "V01",
@@ -68,7 +68,7 @@
       "evidence": [
         {
           "level": "warning",
-          "temp_id": "PROC-082.1",
+          "temp_id": "PROC-081.1",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -78,7 +78,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-082.2",
+          "temp_id": "PROC-081.2",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -88,7 +88,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-082.3",
+          "temp_id": "PROC-081.3",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -98,7 +98,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-082.4",
+          "temp_id": "PROC-081.4",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -108,7 +108,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-082.5",
+          "temp_id": "PROC-081.5",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -118,7 +118,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-117.1",
+          "temp_id": "PROC-147.1",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -128,7 +128,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-117.2",
+          "temp_id": "PROC-147.2",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -138,7 +138,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-117.3",
+          "temp_id": "PROC-147.3",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -148,7 +148,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-117.4",
+          "temp_id": "PROC-147.4",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -158,7 +158,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-117.5",
+          "temp_id": "PROC-147.5",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -168,7 +168,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-118.1",
+          "temp_id": "PROC-148.1",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -178,7 +178,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-118.2",
+          "temp_id": "PROC-148.2",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -188,7 +188,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-118.3",
+          "temp_id": "PROC-148.3",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -198,7 +198,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-118.4",
+          "temp_id": "PROC-148.4",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -208,7 +208,7 @@
         },
         {
           "level": "warning",
-          "temp_id": "PROC-118.5",
+          "temp_id": "PROC-148.5",
           "constraint": "项目评级",
           "combo": {
             "current": "待选入",
@@ -227,65 +227,16 @@
     },
     {
       "check_id": "V06",
-      "result": "fail",
+      "result": "pass",
       "severity": "warning",
-      "fail_count": 4,
-      "evidence": [
-        {
-          "temp_id": "PROC-025.1",
-          "source_ids": [
-            "T-039"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-025.2",
-          "source_ids": [
-            "T-039"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-026.1",
-          "source_ids": [
-            "T-039"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        },
-        {
-          "temp_id": "PROC-026.2",
-          "source_ids": [
-            "T-039"
-          ],
-          "declared": null,
-          "allowed": [
-            "clock_injection",
-            "db_time_update",
-            "scheduler_manual_trigger"
-          ]
-        }
-      ],
+      "fail_count": 0,
+      "evidence": [],
       "evidence_truncated": 0,
       "suspected_stage": "S1",
       "suspected_files": [
         "nodes/s1_generation.py"
       ],
-      "note": "time obligations=26, missing time_control=4"
+      "note": "time obligations=26, missing time_control=0"
     },
     {
       "check_id": "V07",

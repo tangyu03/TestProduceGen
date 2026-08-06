@@ -1,214 +1,630 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Constraint-referenced semantic field registry (Step 3).
+"""Constraint-referenced semantic field registry (Step 3) — **全量派生层**。
 
-P2 的 79 条 constraint 前提引用了 9 个领域字段，而实体表单属性模型并未携带它们
-（E-PROJ 属性只有 技术领域/项目类型；被引用的概念是评价产物、计数、状态快照，
-不是表单字段）。本模块是这些字段的单一事实源。
+P2 的 constraint 前提引用若干领域字段（评级/评审组人数/组长专家数/暂停前计划
+状态/评审计划超时类型/各项打分/选入次数/连续密码错误次数）。本模块是这些字段的
+唯一注册表，且**不手抄任何领域数据**——字段集合、值域、kind、value_type、
+strip_suffix、aliases、count_aliases、value_normalization、anchors、
+ref_state_dimension 全部从结构化 SRS（`srs_data/struct_srs.py` 的 DomainModel）
+**派生**。
 
-消费方：
-  - P2 constraint 谓词解析器（context/generate_obligation_model.py）把谓词里的
-    `field` 引用 {entity, name} 对照本表解析，归一化别名（优→优秀、评价结果→评级）。
-  - phase 下界从不硬编码进字段记录。由 field_phase_lower_bound() 在运行时对照
-    **当前** dep_state_phase_map（Step 1 shift 之后）推导——见 completion / E-SCORE.
-    已提交：P2 局部相位是 2，Step 1 锚定后 shift 到 4；硬编码 2 是错的，所以字段
-    存"被填充的状态锚点"，不存相位数字。
+旧架构是 `srs_data/constraint_field_overlay.py` 手写 8 条语义增量 + 本模块派生
+值域。用户裁定：overlay 是第二份手抄源，删掉，全部改从真源推导（决策 A/B 见
+context/DECISIONS.md）。
 
-三个裁定/补充（schema 审查结论）在此落地：
-  - D1 统一：评级 与 评价结果 合并为一个逻辑字段（scope=per_phase 保留阶段语义）。
-  - 暂停前计划状态 显式标注值域闭集 {待评审, 评审中, 已完成}（业务可暂停来源，
-    不是 E-PLAN.计划状态 全量态名）。
-  - occurrence_limit 的 on 引用改为语义特征 {entity, dimension, from, to}，
-    不硬编码 transition ID（解析器侧约定，见模块尾 PREDICATE_RULES）。
-  - disjunction_ref 未展开引用的下界 = P0 保守值，resolved=False（见 PREDICATE_RULES）。
+派生规则（每一条都是单一定式，不是脆弱 NLP）：
+
+**1. 字段集合**（`_discover_fields`）
+  a) 分支维度（`branch_dimensions`）里**非本实体态维度**者 → 字段：
+     `项目评级`/`评审组人数`/`暂停前计划状态`/`评审计划超时类型`；
+     `项目阶段` 是 E-PROJ 自己的态维度 → 排除。
+  b) transition constraint 前提**表层语法**发现的无分支字段：
+     `只有N次…机会` → 选入次数；`只能有一个…` → 组长专家数；
+     `…全部为零` → 各项打分；`连续…N次` → 连续密码错误次数。
+
+**2. canonical 名字**（`_canonical_name`）
+  剥实体名前缀；**若剥后短名仍被约束语料引用则用短名**（项目评级→评级，因为
+  约束表层写"评级"），否则保留全名（评审计划超时类型，"超时类型"单独从未在
+  语料出现）。
+
+**3. kind / value_type**（`_derive_kind_value_type`）
+  分支维度全为（数字）字符串且可转 int → config/int；表层 occurrence/consecutive
+  → counter/int；numeric_zero → attribute/int；singleton → config/int；闭集 ⊆
+  某实体态维度态名 → state_snapshot/str（ref_state_dimension = 该态维度）；
+  其余 attribute/str。
+
+**4. strip_suffix**（`_build_record`）
+  分支值集的最长公共后缀（下发超时/启动超时/… → "超时"）。
+
+**5. aliases**（`_derive_aliases`）
+  config 表层"…由<名词>…组成"主语（评审组）；singleton 表层名词（组长专家）；
+  同实体属性 desc 值域与字段值集相等 → 其名的最长公共后缀（开题/验收评价结果
+  → "评价结果"→评级）。
+
+**6. count_aliases**（`_derive_count_aliases`）
+  聚合表层 `(累计|连续)N次<对象>` / `连续<对象>N次` 的计数对象，若命中某字段
+  名/别名则记为该字段 count_alias（o03"累计3次评级"→评级、o04"累计10次项目
+  阶段评价结果"→评级、u03"连续密码错误3次"→连续密码错误次数）。
+
+**7. value_normalization**（`_derive_normalization`）
+  值域元素互不冲突的前缀 → 前缀归一（优→优秀/良→良好；超时型前缀+strip_suffix
+  往返恒等，不改变值）；singleton 表层的中文数字 → 阿拉伯（"有且只能有一个…"
+  → {"一":"1"}）。
+
+**8. anchors**（`_derive_anchors`）
+  写点 transition 的 from/to 态：
+  - config → 配置表层的 to 态（p01→已建立）；
+  - counter/numeric → 表层 transition 的 from 态（选入次数→待选入、连续密码
+    错误次数→未锁定、各项打分→已保存）；
+  - 超时型 attribute（带 strip_suffix）→ 所有 `剥后缀值+时限超时` 触发 transition
+    的 from 态（**6 态** {已建立,待启动,待评审,评审中,暂停,已完成}，决策 A；
+    p15/p16/p17 的 评审中/暂停 写点必须在内）；
+  - 其他 attribute（评级）→ 引用其 canonical 名（不含别名/值 → 不误收读点）的
+    transition 的 from 态（t07a-d → 待归档；t02 只写别名"评价结果"不写"评级"→
+    不引入 待选入）；
+  - state_snapshot → 闭集（ref_state_dimension 态集）。
+
+加载时对照模型 fail-fast（源分支维度/实体/维度必须存在、anchor 状态可解析、
+闭集 ⊆ 维度态名、config 值为 int、value_type 仅 str|int、别名键无冲突）。模型
+一改，这里当场报错，不再静默漂移。锚点由写点扫描**全量派生**，故"引用写点 ⊆
+锚点"按构造成立，无需单独校验（决策 A 原 fail-fast 因此移除——见 DECISIONS.md）。
+
+消费方（不变）：
+  - P2 constraint 谓词解析器（context/generate_obligation_model.py）三处迭代
+    FIELD_REGISTRY：_resolve_field_from_text（name+aliases 最长子串）、
+    _parse_occurrence_when（值在名前的反序表层）、_resolve_counter_from_text
+    （count_aliases）；_normalize_constraint_value 读 value_normalization/
+    value_type/strip_suffix。
+  - S1（nodes/s1_generation.py）predicate_phase_lower_bound() 算谓词相位下界。
+  - phase 下界从不硬编码进字段记录，由 field_phase_lower_bound() 运行时对照
+    **当前** dep_state_phase_map 推导。
 """
 
 from __future__ import annotations
 
-# ── 字段记录 ────────────────────────────────────────────────────────────
-# 结构：
-#   entity / name            引用键（谓词 field 引用按 "entity.name" 解析）
-#   aliases                  同义拼写/别名，全部归一化到本条
-#   kind                     attribute | state_snapshot | counter | config
-#   values                   取值域；None = 无约束（数值/计数）
-#   value_normalization      拼写归一映射（优→优秀 等）
-#   scope                    per_phase（每阶段评价）| once | accumulating
-#   populated_anchors        字段被写入的状态锚点列表；下界 = min(各锚点 phase)
-#   ref_state_dimension      仅 state_snapshot：取值域来源的状态维度
-#   value_closed_set         仅 state_snapshot：显式闭集（业务可取值，非全量态名）
-#   desc                     语义说明
-#   maps_to                  对应的既有表单属性/配置项（若有）
+import re
+import sys
+from pathlib import Path
 
-FIELD_REGISTRY: dict[str, dict] = {
-    # D1 统一：评级 == 评价结果（同一评审产物，5 级量表，拼写不一致）
-    "E-PROJ.评级": {
-        "entity": "E-PROJ",
-        "name": "评级",
-        "aliases": ["评价结果"],
-        "kind": "attribute",
-        "values": ["优秀", "良好", "合格", "不合格", "差"],
-        "value_normalization": {"优": "优秀", "良": "良好"},
-        "scope": "per_phase",
-        "populated_anchors": [
-            {"entity": "E-PROJ", "dimension": "项目状态", "state": "待归档",
-             "reason": "评审定级——每个项目阶段的评价产物（评价结果/评级同一字段）"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "项目每阶段评审定级；T-044 计数锚点（评价结果为优累计10次）与 T-007 门控（评级=优秀）指向同一字段。",
-    },
-    # 别名键：评价结果 → 评级（不重复存记录，只做解析路径）
-    "E-PROJ.评价结果": {
-        "entity": "E-PROJ",
-        "name": "评价结果",
-        "aliases": [],
-        "kind": "alias",
-        "canonical": "E-PROJ.评级",
-        "values": None,
-        "value_normalization": {},
-        "scope": "per_phase",
-        "populated_anchors": [],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": "E-PROJ.评级",
-        "desc": "评价结果 的别名注册键，解析时归一到 E-PROJ.评级。",
-    },
-    "E-PROJ.选入次数": {
-        "entity": "E-PROJ",
-        "name": "选入次数",
-        "aliases": [],
-        "kind": "counter",
-        "values": None,
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-PROJ", "dimension": "项目状态", "state": "待选入",
-             "reason": "每次 待选入→已选入 递增（occurrence_limit：不合格评价结果仅1次选入机会）"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "项目被选入评审计划的累计次数，occurrence_limit 计数对象。",
-    },
-    "E-PLAN.评审组人数": {
-        "entity": "E-PLAN",
-        "name": "评审组人数",
-        "aliases": ["专家人数"],
-        "kind": "config",
-        "values": [5, 7, 9],
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "已建立",
-             "reason": "评审计划建立时配置评审组规模"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": "E-PLAN.专家人数",  # 既有 attribute_config 配置项
-        "desc": "评审组专家规模，5/7/9；对应既有 E-PLAN.专家人数 配置属性。",
-    },
-    "E-PLAN.组长专家数": {
-        "entity": "E-PLAN",
-        "name": "组长专家数",
-        "aliases": [],
-        "kind": "config",
-        "values": [1],
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "已建立",
-             "reason": "计划建立时指定唯一组长"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "组长专家数量，恒为 1（有且只能有一个组长）。",
-    },
-    "E-PLAN.暂停前计划状态": {
-        "entity": "E-PLAN",
-        "name": "暂停前计划状态",
-        "aliases": [],
-        "kind": "state_snapshot",
-        "values": None,
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "待评审",
-             "reason": "暂停发生时快照；可暂停来源态的最早者（待评审）"},
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "评审中",
-             "reason": "暂停来源态之二"},
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "已完成",
-             "reason": "暂停来源态之三"},
-        ],
-        "ref_state_dimension": "E-PLAN.计划状态",
-        # 显式闭集：业务上只有这三个状态可暂停，不是 E-PLAN.计划状态 全量态名
-        "value_closed_set": ["待评审", "评审中", "已完成"],
-        "maps_to": None,
-        "desc": "暂停时刻记录的前一状态，恢复时据此回跳；值域闭集 = 可暂停来源态。",
-    },
-    "E-PLAN.评审计划超时类型": {
-        "entity": "E-PLAN",
-        "name": "评审计划超时类型",
-        "aliases": [],
-        "kind": "attribute",
-        "values": ["下发", "启动", "评审", "归档"],
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "已建立",
-             "reason": "下发超时触发点（T-018 已建立→待启动）——超时类型最早写入点"},
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "待启动",
-             "reason": "启动超时触发点（T-020）"},
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "待评审",
-             "reason": "评审超时触发点（T-029）"},
-            {"entity": "E-PLAN", "dimension": "计划状态", "state": "已完成",
-             "reason": "归档超时触发点（T-033）"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "超时发生时记录的时段类型；字段级下界 = min 触发点 = 已建立(0)（值级细化可后置）。",
-    },
-    "E-SCORE.各项打分": {
-        "entity": "E-SCORE",
-        "name": "各项打分",
-        "aliases": [],
-        "kind": "attribute",
-        "values": None,  # 数值
-        "value_normalization": {},
-        "scope": "once",
-        "populated_anchors": [
-            {"entity": "E-SCORE", "dimension": "打分状态", "state": "已保存",
-             "reason": "专家打分落库（未打分→已保存）"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "专家对项目的各项打分；completion/聚合判定（各项全为零不可提交、全部专家提交）的数值来源。",
-    },
-    "E-USER.连续密码错误次数": {
-        "entity": "E-USER",
-        "name": "连续密码错误次数",
-        "aliases": [],
-        "kind": "counter",
-        "values": None,
-        "value_normalization": {},
-        "scope": "accumulating",
-        "populated_anchors": [
-            {"entity": "E-USER", "dimension": "锁定状态", "state": "未锁定",
-             "reason": "登录失败在未锁定侧累积；达到 3 次 → 锁定"},
-        ],
-        "ref_state_dimension": None,
-        "value_closed_set": None,
-        "maps_to": None,
-        "desc": "普通用户连续密码错误计数（连续 3 次 → 锁定）；aggregate_count 的 consecutive 变体。",
-    },
-}
+# repo root 显式入 sys.path：兼容 `python context/generate_obligation_model.py`
+# （script-dir 模式，sys.path[0]=context/）与 `python -m ...` 两种调用。
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
+# ── 表层语法（跨类型数据表；字段发现 / 锚点 / 别名 / 计数 / 归一共用） ────────
+# 每一型一行，机制层只遍历；新增形态在此加行，不写散落 if。
+_OCCURRENCE_RE = re.compile(r"只有\s*\d+\s*次\s*([^，。]+?)机会")          # t02: 只有 1 次选入机会
+_SINGLETON_RE = re.compile(r"(?:有且只能|只能)有一个\s*([^，。]+)")         # p01: 有且只能有一个组长专家
+_SINGLETON_NUM_RE = re.compile(r"有且只能有\s*([一壹二两三四五六七八九十\d]+)\s*个")  # 中文数字 → 阿拉伯
+_NUMERIC_ZERO_RE = re.compile(r"([^，。]+?)全部为零")                       # s03: 项目各项打分全部为零
+_CONSECUTIVE_RE = re.compile(r"连续\s*([^，。\s\d]+?)\s*(\d+)\s*次")        # u03: 连续密码错误 3 次
+_CONFIG_CHOICE_RE = re.compile(r"([^，。]+?)由\s*([^，。]+?)\s*(?:组成|构成)")  # p01: 评审组由 5、7 或 9 个专家组成
+_AGGREGATE_RE = re.compile(r"(?:累计|连续)\s*\d+\s*次\s*([^为\s，。；]+)")   # o03/o04: 累计 N 次<对象>
+
+# 中文数字 → 阿拉伯（通用跨字段映射，非领域数据）。
+_CN_NUM = {"一": "1", "壹": "1", "二": "2", "两": "2", "贰": "2", "三": "3",
+           "叁": "3", "四": "4", "肆": "4", "五": "5", "伍": "5", "六": "6",
+           "陆": "6", "七": "7", "柒": "7", "八": "8", "捌": "8", "九": "9", "玖": "9"}
+
+
+def _is_int_str(v):
+    return isinstance(v, str) and v.strip().isdigit()
+
+
+# ── 结构化 SRS：唯一机器可读事实源 ─────────────────────────────────────
+def _load_domain_model():
+    """加载 `struct_srs.build()` 的 DomainModel（值域/存在性的唯一事实源）。"""
+    try:
+        from srs_data.struct_srs import build
+    except ImportError as e:
+        raise ImportError(
+            "constraint_fields 无法导入 srs_data.struct_srs（字段注册表的事实源）。"
+            "请从仓库根目录运行：python -m context.generate_obligation_model"
+        ) from e
+    return build()
+
+
+def _entity(model, eid):
+    return next((e for e in model.entities if e["id"] == eid), None)
+
+
+def _entity_name(model, eid):
+    e = _entity(model, eid)
+    return (e or {}).get("name") or eid
+
+
+def _dim_states(model, eid, dim):
+    """实体维度 → 态名列表；实体/维度任一缺失 → None。"""
+    e = _entity(model, eid)
+    if e is None:
+        return None
+    for d in e.get("state_dimensions", []):
+        if d["dimension_name"] == dim:
+            return list(d["states"])
+    return None
+
+
+def _state_dims(model, eid):
+    """实体自身的态维度名集合（字段发现时据此排除状态维度）。"""
+    e = _entity(model, eid)
+    return {d["dimension_name"] for d in (e or {}).get("state_dimensions", [])}
+
+
+def _state_dim_containing(model, eid, vals):
+    """值集 ⊆ 的态维度（state_snapshot 判定）：值全是某态维度态名 → 该维度名。"""
+    for d in (_entity(model, eid) or {}).get("state_dimensions", []):
+        if all(v in d["states"] for v in vals):
+            return d["dimension_name"]
+    return None
+
+
+def _branch_values(model, ent, dim):
+    """分支维度取值 → 列表；缺失/为空 → raise（fail-fast）。"""
+    for d in model.branch_dimensions:
+        if d.get("entity") == ent and d.get("dimension") == dim:
+            vals = list(d.get("values") or [])
+            if not vals:
+                raise ValueError(
+                    f"分支维度 {ent}.{dim} 存在但 values 为空（struct_srs.py 数据源）")
+            return vals
+    raise ValueError(
+        f"分支维度 {ent}.{dim} 不在 struct_srs.py（检查名称或删除/改源对应字段）")
+
+
+def _precondition_texts(transition):
+    """transition 的 constraint 前提文本列表（跨类型数据表，供表层扫描）。"""
+    out = []
+    for p in transition.get("preconditions") or []:
+        txt = (p.get("text") or "").strip()
+        if txt and p.get("type") in ("constraint", "when"):
+            out.append(txt)
+    return out
+
+
+def _common_suffix(strings):
+    """最长公共后缀；空或等于某整个元素 → 不返回（避免把单元素当后缀）。"""
+    if not strings:
+        return ""
+    s = strings[0]
+    for x in strings[1:]:
+        while s and not x.endswith(s):
+            s = s[1:]
+        if not s:
+            break
+    if not s or any(x == s for x in strings if x != s):
+        return ""
+    return s
+
+
+# ── 字段发现 ────────────────────────────────────────────────────────────
+def _corpus_refers(model, name):
+    """短名是否被约束语料引用（canonical 名剥离判定）。只扫 transition
+    constraint 前提（字段引用出现处），不扫 BR/prohibit（避免子串误判）。"""
+    for t in model.transitions:
+        for txt in _precondition_texts(t):
+            if name in txt:
+                return True
+    return False
+
+
+def _canonical_name(model, entity, dim):
+    """剥实体名前缀；剥后短名仍被语料引用 → 用短名，否则保留全名。"""
+    ent_name = _entity_name(model, entity)
+    name = dim
+    if dim.startswith(ent_name) and len(dim) > len(ent_name):
+        short = dim[len(ent_name):]
+        if _corpus_refers(model, short):
+            name = short
+    return name
+
+
+def _strip_entity_prefix(model, text):
+    """剥任意实体名前缀（"项目各项打分"→剥 E-PROJ 名"项目"→"各项打分"）。
+    只剥一次；剥后不得为空。"""
+    for e in model.entities:
+        n = e["name"]
+        if text.startswith(n) and len(text) > len(n):
+            return text[len(n):]
+    return text
+
+
+def _noun_to_field_name(model, surface, noun):
+    """表层名词 → 字段名定式（跨类型数据表驱动的单一定式）。"""
+    noun = _strip_entity_prefix(model, noun)
+    if surface == "occurrence":
+        return noun[:-len("机会")] + "次数" if noun.endswith("机会") else noun + "次数"
+    if surface == "singleton":
+        return noun + "数"
+    if surface == "consecutive":
+        return "连续" + noun + "次数"
+    return noun  # numeric_zero：各项打分
+
+
+def _scan_surfaces(t):
+    """在一条 transition 的 constraint 前提上扫全部表层，返回发现列表。
+    每条 = {surface, entity, noun}。"""
+    out = []
+    ent = t.get("entity")
+    for txt in _precondition_texts(t):
+        m = _OCCURRENCE_RE.search(txt)
+        if m:
+            out.append({"surface": "occurrence", "entity": ent, "noun": m.group(1)})
+        m = _SINGLETON_RE.search(txt)
+        if m:
+            out.append({"surface": "singleton", "entity": ent, "noun": m.group(1)})
+        m = _NUMERIC_ZERO_RE.search(txt)
+        if m:
+            out.append({"surface": "numeric_zero", "entity": ent, "noun": m.group(1)})
+        m = _CONSECUTIVE_RE.search(txt)
+        if m:
+            out.append({"surface": "consecutive", "entity": ent, "noun": m.group(1)})
+    return out
+
+
+def _discover_fields(model):
+    """字段集合 = 非本实体态维度的分支维度 + 表层发现的无分支字段。
+    返回 {canonical_key: {entity, name, dimension, surface}}。"""
+    fields: dict[str, dict] = {}
+    # a) 分支维度（排除实体自身态维度）
+    for d in model.branch_dimensions:
+        ent, dim = d["entity"], d["dimension"]
+        if dim in _state_dims(model, ent):
+            continue
+        name = _canonical_name(model, ent, dim)
+        fields.setdefault(f"{ent}.{name}", {"entity": ent, "dimension": dim,
+                                            "surface": None})
+    # b) 表层发现（去重：已存在键 → 仅补 surface 标注）
+    for t in model.transitions:
+        for hit in _scan_surfaces(t):
+            ent = hit["entity"]
+            name = _noun_to_field_name(model, hit["surface"], hit["noun"])
+            key = f"{ent}.{name}"
+            if key not in fields:
+                fields[key] = {"entity": ent, "dimension": None, "surface": None,
+                               "noun": None}
+            fields[key]["surface"] = hit["surface"]
+            fields[key]["noun"] = hit["noun"]
+    return fields
+
+
+# ── 记录派生 ────────────────────────────────────────────────────────────
+def _attr_values(attr):
+    """属性 desc 的"取值范围：X/Y/Z" → 值列表；无 → None。按 ；分段。"""
+    for seg in (attr.get("desc") or "").split("；"):
+        if "取值范围" in seg and "：" in seg:
+            vals = [x.strip() for x in seg.split("：", 1)[1].split("/") if x.strip()]
+            if vals:
+                return vals
+    return None
+
+
+def _attrs_sharing_values(model, eid, vals):
+    """同实体属性中 desc 值域 == 字段值集的属性名（共享值域 → 别名来源）。"""
+    e = _entity(model, eid)
+    if e is None:
+        return []
+    target = set(vals)
+    names = []
+    for a in e.get("attributes", []):
+        av = _attr_values(a)
+        if av and set(av) == target:
+            names.append(a["name"])
+    return names
+
+
+def _config_choice_ints(txt):
+    """config 表层 '…由<vals>个专家组成/构成' 的取值 int 集；无 → None。"""
+    m = _CONFIG_CHOICE_RE.search(txt)
+    if not m:
+        return None
+    ints = re.findall(r"\d+", m.group(2))
+    return {int(x) for x in ints} if ints else None
+
+
+def _config_subject(txt):
+    """config 表层主语（"评审计划的评审组由…" → "评审组"，剥"…的"前缀）。"""
+    m = _CONFIG_CHOICE_RE.search(txt)
+    if not m:
+        return None
+    subj = m.group(1)
+    if "的" in subj:
+        subj = subj[subj.rfind("的") + 1:]
+    return subj or None
+
+
+def _derive_aliases(model, spec):
+    """别名来源（每条都有结构化出处）：
+    - config 表层主语（评审组由…组成 → 评审组）；
+    - singleton 表层名词（组长专家）；
+    - 分支字段共享值域属性名的公共后缀（开题/验收评价结果 → 评价结果 → 评级）。"""
+    ent = spec["entity"]
+    aliases = []
+    if spec.get("surface") == "singleton":
+        aliases.append(spec.get("noun"))
+    if spec.get("surface") is None and spec.get("dimension"):
+        try:
+            vals = _branch_values(model, ent, spec["dimension"])
+        except ValueError:
+            vals = []
+        if vals and all(isinstance(v, int) or _is_int_str(v) for v in vals):
+            # config：取值集合匹配 config 表层 → 主语即别名
+            target = {int(v) for v in vals}
+            for t in model.transitions:
+                if t.get("entity") != ent:
+                    continue
+                for txt in _precondition_texts(t):
+                    if _config_choice_ints(txt) == target:
+                        subj = _config_subject(txt)
+                        if subj:
+                            aliases.append(subj)
+        elif vals and all(isinstance(v, str) for v in vals):
+            # attribute/state_snapshot：共享值域属性 → 公共后缀
+            shares = _attrs_sharing_values(model, ent, vals)
+            suffix = _common_suffix(shares)
+            if suffix:
+                aliases.append(suffix)
+    # 去重，且别名不得与 canonical 名同
+    out = []
+    for a in aliases:
+        if a not in out and a != spec["name"]:
+            out.append(a)
+    return out
+
+
+def _derive_count_aliases(model, spec, aliases):
+    """聚合表层计数对象 → count_alias（对象含字段名/别名则归属该字段）。
+    `累计N次<对象>`（o03/o04）与 `连续<对象>N次`（u03）两种词序都扫。"""
+    names = [spec["name"]] + list(aliases)
+    if spec.get("dimension"):
+        names.append(spec["dimension"])
+    found = []
+    for t in model.transitions:
+        for txt in _precondition_texts(t):
+            objs = [m.group(1) for m in _AGGREGATE_RE.finditer(txt)]
+            objs += [m.group(1) for m in _CONSECUTIVE_RE.finditer(txt)]
+            for obj in objs:
+                for nm in names:
+                    if nm in obj or obj in nm:
+                        if obj not in found:
+                            found.append(obj)
+                        break
+    return found
+
+
+def _derive_normalization(model, spec):
+    """值域元素互不冲突的前缀 → 前缀归一（优→优秀/良→良好；超时型前缀经
+    strip_suffix 往返恒等）；singleton 中文数字 → 阿拉伯（{"一":"1"}）。"""
+    norm = {}
+    if spec.get("surface") == "singleton":
+        for tr in model.transitions:
+            for txt in _precondition_texts(tr):
+                m = _SINGLETON_NUM_RE.search(txt)
+                if m and m.group(1) in _CN_NUM:
+                    norm[m.group(1)] = _CN_NUM[m.group(1)]  # {"一":"1"}
+        return norm
+    vals = []
+    if spec.get("dimension"):
+        try:
+            vals = _branch_values(model, spec["entity"], spec["dimension"])
+        except ValueError:
+            vals = []
+    for v in vals:
+        if not isinstance(v, str) or not v:
+            continue
+        for pre_len in range(1, len(v)):
+            pre = v[:pre_len]
+            if not any(x != v and isinstance(x, str) and x.startswith(pre)
+                       for x in vals):
+                norm[pre] = v
+    return norm
+
+
+def _anchor_state_for(model, spec, t):
+    """transition 是否引用字段写点 → 是则返回锚点态（config 用 to，其余 from）。"""
+    if t.get("entity") != spec["entity"]:
+        return None
+    surface = spec.get("surface")
+    for txt in _precondition_texts(t):
+        if surface == "numeric_zero" and _NUMERIC_ZERO_RE.search(txt):
+            return t.get("from")
+        if surface == "occurrence" and _OCCURRENCE_RE.search(txt):
+            return t.get("from")
+        if surface == "consecutive" and _CONSECUTIVE_RE.search(txt):
+            return t.get("from")
+        if surface == "singleton" and _SINGLETON_RE.search(txt):
+            return t.get("to")
+        if surface is None and spec.get("dimension"):
+            try:
+                vals = _branch_values(model, spec["entity"], spec["dimension"])
+            except ValueError:
+                continue
+            if vals and all(isinstance(v, int) or _is_int_str(v) for v in vals):
+                # config：取值集合匹配 config 表层 → 配置完成态 to
+                if _config_choice_ints(txt) == {int(v) for v in vals}:
+                    return t.get("to")
+            elif vals and all(isinstance(v, str) for v in vals):
+                suffix = _common_suffix([v for v in vals if isinstance(v, str)])
+                if suffix:
+                    # 超时型：剥后缀值 + "时限超时" 触发 transition → 写点 from
+                    for v in vals:
+                        if v.endswith(suffix) and f"{v[:-len(suffix)]}时限超时" in txt:
+                            return t.get("from")
+                else:
+                    # 普通属性（评级）：引用 canonical 名（不含别名/值 → 不误收读点）
+                    if spec["name"] in txt:
+                        return t.get("from")
+    return None
+
+
+def _derive_anchors(model, spec):
+    """锚点 = 字段写点的 from/to 态；state_snapshot → 闭集（ref_state_dimension）。"""
+    ent = spec["entity"]
+    # state_snapshot：锚点 = 闭集（含源态维度）
+    dim = spec.get("dimension")
+    if dim:
+        try:
+            vals = _branch_values(model, ent, dim)
+        except ValueError:
+            vals = []
+        if vals and all(isinstance(v, str) for v in vals):
+            ssdim = _state_dim_containing(model, ent, vals)
+            if ssdim is not None:
+                return [{"entity": ent, "dimension": ssdim, "state": v}
+                        for v in vals]
+    # 其余 kind：锚点 = 引用写点 transition 的 from（config 为 to）
+    refs = [(t, s) for t in model.transitions
+            if (s := _anchor_state_for(model, spec, t)) is not None]
+    if not refs:
+        raise ValueError(
+            f"[{ent}.{spec['name']}] 找不到锚点引用 transition（数据源已漂移）")
+    dims = sorted({t.get("dimension") for t, _ in refs} - {None})
+    if not dims:
+        raise ValueError(f"[{ent}.{spec['name']}] 锚点维度缺失（引用 transition 无 dimension）")
+    states = sorted({s for _, s in refs} - {None})
+    return [{"entity": ent, "dimension": dims[0], "state": s} for s in states]
+
+
+def _derive_kind_value_type(model, spec):
+    """kind + value_type + ref_state_dimension 定式。"""
+    dim = spec.get("dimension")
+    vals = []
+    if dim:
+        try:
+            vals = _branch_values(model, spec["entity"], dim)
+        except ValueError:
+            vals = []
+    if dim and vals and all(isinstance(v, int) or _is_int_str(v) for v in vals):
+        return "config", "int", None                    # 评审组人数 5/7/9
+    if spec.get("surface") in ("occurrence", "consecutive"):
+        return "counter", "int", None                    # 选入次数 / 连续密码错误次数
+    if spec.get("surface") == "numeric_zero":
+        return "attribute", "int", None                  # 各项打分
+    if spec.get("surface") == "singleton":
+        return "config", "int", None                     # 组长专家数 = 1
+    if dim and vals and all(isinstance(v, str) for v in vals):
+        ssdim = _state_dim_containing(model, spec["entity"], vals)
+        if ssdim is not None:
+            return "state_snapshot", "str", f"{spec['entity']}.{ssdim}"  # 暂停前计划状态
+    return "attribute", "str", None                      # 评级 / 评审计划超时类型
+
+
+def _build_record(model, key, spec) -> dict:
+    """从发现 spec 派生完整记录。派生失败 → raise（fail-fast，数据源已漂移）。"""
+    ent, name = key.split(".", 1)
+    kind, value_type, ref_state_dimension = _derive_kind_value_type(model, spec)
+    spec = {**spec, "name": name}
+    aliases = _derive_aliases(model, spec)
+    rec = {
+        "entity": ent, "name": name, "kind": kind,
+        "value_type": value_type, "ref_state_dimension": ref_state_dimension,
+        "aliases": aliases,
+        "count_aliases": _derive_count_aliases(model, spec, aliases),
+        "value_normalization": _derive_normalization(model, spec),
+        "strip_suffix": None,
+        "values": None, "value_closed_set": None,
+    }
+    dim = spec.get("dimension")
+    if dim:
+        vals = _branch_values(model, ent, dim)
+        if kind == "state_snapshot":
+            rec["value_closed_set"] = vals
+        elif kind == "config":
+            rec["values"] = [int(v) for v in vals]
+        else:
+            rec["values"] = vals
+            suffix = _common_suffix([v for v in vals if isinstance(v, str)])
+            if suffix:
+                rec["strip_suffix"] = suffix
+    if kind == "config" and not rec["values"]:
+        rec["values"] = [1]  # singleton（组长专家数）无分支维度，恒 1
+    rec["populated_anchors"] = _derive_anchors(model, spec)
+    return rec
+
+
+def _alias_keys(registry: dict) -> dict:
+    """从各 canonical 记录的 aliases 合成别名注册键（不再手写第二条记录）。"""
+    add = {}
+    for key, rec in registry.items():
+        if rec.get("kind") == "alias":
+            continue
+        for al in rec.get("aliases") or []:
+            add[f"{rec['entity']}.{al}"] = {
+                "entity": rec["entity"], "name": al, "kind": "alias",
+                "canonical": key, "values": None, "value_normalization": {},
+                "strip_suffix": None,
+                "populated_anchors": [], "ref_state_dimension": None,
+                "value_closed_set": None,
+            }
+    return add
+
+
+def _validate_registry(model, registry: dict) -> None:
+    """对照模型 fail-fast：锚点状态可解析、闭集 ⊆ 维度态名、config 值为 int、
+    value_type 仅 str|int、别名键无冲突。任一不符 → raise，禁止静默 P0 降级。"""
+    errors: list[str] = []
+    for key, rec in registry.items():
+        if rec.get("kind") == "alias":
+            if rec.get("canonical") not in registry:
+                errors.append(f"别名键 {key} 的 canonical 缺失: {rec.get('canonical')}")
+            continue
+        if _entity(model, rec["entity"]) is None:
+            errors.append(f"[{key}] 实体 {rec['entity']} 不存在于 struct_srs.py")
+        for a in rec.get("populated_anchors") or []:
+            sts = _dim_states(model, a["entity"], a["dimension"])
+            if sts is None:
+                errors.append(
+                    f"[{key}] anchor 维度 {a['entity']}.{a['dimension']} 不存在")
+            elif a["state"] not in sts:
+                errors.append(
+                    f"[{key}] anchor 状态 {a['state']} 不在 "
+                    f"{a['entity']}.{a['dimension']} 态集 {sts}")
+        cs = rec.get("value_closed_set")
+        if cs and rec.get("ref_state_dimension"):
+            ent, dim = rec["ref_state_dimension"].split(".", 1)
+            sts = _dim_states(model, ent, dim)
+            for v in cs:
+                if sts is None or v not in sts:
+                    errors.append(f"[{key}] 闭集值 {v} 不在 {ent}.{dim} 态集")
+        if rec.get("kind") == "config" and (rec.get("values") or []):
+            for v in rec["values"]:
+                if not isinstance(v, int):
+                    errors.append(f"[{key}] config 值非 int: {v!r}")
+        vt = rec.get("value_type")
+        if vt not in ("str", "int"):
+            errors.append(f"[{key}] value_type 非法: {vt!r}（仅 str|int）")
+        if vt == "int" and (rec.get("values") or []):
+            for v in rec["values"]:
+                if not isinstance(v, (int, float)) or isinstance(v, bool):
+                    errors.append(f"[{key}] value_type=int 但值非数值: {v!r}")
+    if errors:
+        raise ValueError(
+            "constraint_fields 注册表与 struct_srs.py 不一致（数据源已漂移）:\n  "
+            + "\n  ".join(errors))
+
+
+def _build_registry():
+    model = _load_domain_model()
+    fields = _discover_fields(model)
+    registry: dict[str, dict] = {}
+    for key, spec in fields.items():
+        registry[key] = _build_record(model, key, spec)
+    aliases = _alias_keys(registry)
+    collisions = set(aliases) & set(registry)
+    if collisions:
+        raise ValueError(f"别名键与 canonical 键冲突: {sorted(collisions)}")
+    registry.update(aliases)
+    _validate_registry(model, registry)
+    return registry
+
+
+FIELD_REGISTRY: dict[str, dict] = _build_registry()
 
 
 def resolve_field(field_ref: dict) -> dict | None:
-    """按 {entity, name} 解析字段记录；别名（评价结果→评级、专家人数→评审组人数）
+    """按 {entity, name} 解析字段记录；别名（评价结果→评级、评审组→评审组人数）
     归一化到 canonical 记录。返回 None 表示未注册。"""
     entity = (field_ref or {}).get("entity")
     name = (field_ref or {}).get("name")
@@ -222,17 +638,45 @@ def resolve_field(field_ref: dict) -> dict | None:
     return rec
 
 
+def get_state_phase(entity: str, dimension: str, state: str,
+                    dep_state_phase_map: dict | None = None,
+                    phase_table: dict | None = None) -> int | None:
+    """统一相位查询：自动路由两表。
+
+    主实体的态相位在 phase_table.state_to_phase（按维度键控），依赖实体在
+    dep_state_phase_map（按实体键控）。E-PLAN 是主实体（计划状态），只查
+    dep_state_phase_map 会全部落空——这里封装成单一接口。
+
+    Step 5 做 (state, path) 消歧时，路径消歧后的相位查询只需改这一个函数，
+    不用散落在每个消费者里。
+    """
+    dmap = dep_state_phase_map or {}
+    ent_dims = dmap.get(entity, {})
+    if ent_dims:
+        ph = ent_dims.get(dimension, {}).get(state)
+        if ph is not None:
+            return int(ph)
+    pt = phase_table or {}
+    if entity == pt.get("primary_entity"):
+        ph = (pt.get("state_to_phase") or {}).get(dimension, {}).get(state)
+        if ph is not None:
+            return int(ph)
+    return None
+
+
 def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None,
-                            phase_table: dict | None = None) -> int | None:
+                            phase_table: dict | None = None,
+                            value: str | None = None) -> int | None:
     """字段 phase 下界 = min(各 populated_anchor 的 phase)，对照**当前**
     （Step 1 shift 之后）的相位表解析。
 
-    相位表分层：主实体的态相位在 phase_table.state_to_phase（按维度键控），
-    依赖实体的态相位在 dep_state_phase_map（按实体键控）。两表都要查——
-    E-PLAN 是主实体（计划状态），只查 dep_state_phase_map 会全部落空。
-
     语义规则（schema 第 4 节映射表）：谓词下界从字段生命周期推导，不存进字段。
     任一锚点不可解析 → 返回 None（消费方回退保守 P0，见 PREDICATE_RULES）。
+
+    value 参数为 value-level override 预留：超时类型这种"同字段多值、各值写入
+    时点不同"的情况，未来可接一张 {(field_key, value): phase} 覆盖表，避免
+    field-level min 丢失精度。当前未实现，默认走 field-level；接口先留好，
+    解析器现在不必传 value。
     """
     rec = resolve_field(field_ref)
     if rec is None:
@@ -240,23 +684,77 @@ def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None,
     anchors = rec.get("populated_anchors") or []
     if not anchors:
         return None
-    dmap = dep_state_phase_map or {}
-    pt = phase_table or {}
-    primary_entity = pt.get("primary_entity")
-    stp = pt.get("state_to_phase") or {}
     phases: list[int] = []
     for a in anchors:
-        ph = None
-        ent_dims = dmap.get(a["entity"], {})
-        if ent_dims:
-            ph = ent_dims.get(a["dimension"], {}).get(a["state"])
-        if ph is None and a["entity"] == primary_entity:
-            # 主实体：相位在 phase_table.state_to_phase（按维度键控）
-            ph = stp.get(a["dimension"], {}).get(a["state"])
+        ph = get_state_phase(a["entity"], a["dimension"], a["state"],
+                             dep_state_phase_map, phase_table)
         if ph is None:
             return None
-        phases.append(int(ph))
+        phases.append(ph)
     return min(phases)
+
+
+def predicate_phase_lower_bound(pred: dict | None, dep_state_phase_map: dict | None,
+                                phase_table: dict | None = None) -> int | None:
+    """谓词 phase 下界：谓词类型 → 字段/状态锚点的映射规则（schema 第 4 节映射表）。
+
+    与 field_phase_lower_bound 正交解耦：字段表回答"这个字段什么时候有值"，
+    本函数回答"这个谓词类型怎么用字段信息算下界"。两者独立可改。
+
+    规则：field_equals/field_range/field_in → 字段下界；aggregate_count → counter
+    字段下界；time_limit → 起算状态 phase；selection_range → source_state phase；
+    completion → 完成态 phase；occurrence_limit → 被限 transition 的 from/to phase；
+    always_true → 0；negation → operand 下界；conjunction → max(parts)；
+    disjunction → min(parts)；disjunction_ref → PREDICATE_RULES 保守 P0，resolved=False。
+    下界缺失的 part 按 0 处理（保守不抬升）；整体 None = 完全不可解析。
+    """
+    if pred is None:
+        return None
+    t = pred.get("type")
+
+    def _safe(p):
+        lb = predicate_phase_lower_bound(p, dep_state_phase_map, phase_table)
+        return lb if lb is not None else 0
+
+    if t in ("field_equals", "field_range", "field_in"):
+        return field_phase_lower_bound(pred.get("field"), dep_state_phase_map, phase_table,
+                                       value=pred.get("value"))
+    if t == "aggregate_count":
+        return field_phase_lower_bound(pred.get("counter"), dep_state_phase_map, phase_table,
+                                       value=pred.get("value"))
+    if t == "time_limit":
+        st = pred.get("start_state") or {}
+        return get_state_phase(st.get("entity"), st.get("dimension"), st.get("state"),
+                               dep_state_phase_map, phase_table)
+    if t == "selection_range":
+        ss = pred.get("source_state") or {}
+        return get_state_phase(ss.get("entity"), ss.get("dimension"), ss.get("state"),
+                               dep_state_phase_map, phase_table)
+    if t == "completion":
+        tg = pred.get("target") or {}
+        return get_state_phase(tg.get("entity"), tg.get("dimension"), tg.get("state"),
+                               dep_state_phase_map, phase_table)
+    if t == "occurrence_limit":
+        on = pred.get("on") or {}
+        return get_state_phase(on.get("entity"), on.get("dimension"),
+                               on.get("to") or on.get("from"),
+                               dep_state_phase_map, phase_table)
+    if t == "always_true":
+        return 0
+    if t == "negation":
+        return _safe(pred.get("operand"))
+    if t == "conjunction":
+        parts = pred.get("parts") or []
+        lbs = [_safe(p) for p in parts]
+        return max(lbs) if lbs else None
+    if t == "disjunction":
+        parts = pred.get("parts") or []
+        lbs = [_safe(p) for p in parts]
+        return min(lbs) if lbs else None
+    if t == "disjunction_ref":
+        # 未展开引用的保守下界：不抬升（P0），resolved=False
+        return PREDICATE_RULES["disjunction_ref"]["default_phase"]
+    return None  # 未识别类型（含 unparsed）
 
 
 # ── 谓词级规则（解析器侧约定，Schema 审查补充） ────────────────────────────

@@ -17,6 +17,7 @@ from nodes.field_validation import parse_entity_constraints, enrich_procedure_st
 from nodes.signal_validation import generate_signal_v_steps
 from context.entity_operators import form_operator_roles
 from context.time_control import needs_time_control_ids
+from context.constraint_fields import predicate_phase_lower_bound
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -928,7 +929,8 @@ def _resolve_phase_for_non_transition(state: dict, entity: str, obligation_type:
 def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
                                   to_state: str, state: AgentState,
                                   is_rollback: bool = False,
-                                  preconditions: list[str] | None = None) -> dict:
+                                  preconditions: list[str] | None = None,
+                                  constraint_predicate: dict | None = None) -> dict:
     """Phase assignment for transition procedures.
 
     Forward edges: phase = to_state's phase (entering a new stage).
@@ -965,6 +967,22 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
             return {
                 "phase": prec_phase,
                 "basis": f"{base_basis} → bumped to P{prec_phase} (precondition refs {prec_state})",
+            }
+
+    # v6 P2→P3 downstream: structured constraint predicate phase bump.
+    # Text-based _max_precondition_phase cannot parse aggregate_count/
+    # field_equals/etc. (their surface text matches no state name), so
+    # constraint TOs were silently stuck at P0. Consume the structured
+    # predicate from P2 and raise the phase to its true lower bound.
+    if constraint_predicate:
+        dep_map = state.get("dep_state_phase_map", {})
+        pt = state.get("phase_table", {})
+        pred_phase = predicate_phase_lower_bound(
+            constraint_predicate, dep_map, pt)
+        if pred_phase is not None and pred_phase > base_phase:
+            return {
+                "phase": pred_phase,
+                "basis": f"{base_basis} → bumped to P{pred_phase} (predicate {constraint_predicate.get('type')})",
             }
 
     return {"phase": base_phase, "basis": base_basis}
@@ -1211,6 +1229,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 te["entity"], dimension, to.get("from"), to.get("to"), state,
                 is_rollback=is_rollback,
                 preconditions=to.get("preconditions"),
+                constraint_predicate=to.get("constraint_predicate"),
             )
             dim_priority = _get_dimension_priority(te["entity"], dimension, state)
 

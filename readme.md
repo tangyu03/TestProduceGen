@@ -11,10 +11,10 @@ SRS 文档
   │
   ▼
 ┌─────────────────────────────────────────────────────┐
-│  P1 结构化抽取 (LLM)                                 │
+│  P1 结构化建模 (srs_pipeline)                         │
 │  SRS → domain_model + state_and_flow + constraints  │
-│  Prompt: context/P1_Prompt.md                        │
-│  产出:   P1output.json                               │
+│  入口:   srs_pipeline/（Step6 内联校验 C01-C17）     │
+│  产出:   review_structured.json（P1 真源）           │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
@@ -96,10 +96,9 @@ SRS 文档
 
 | 文件 | 职责 |
 |------|------|
-| `P1_Prompt.md` | P1 结构化抽取的 prompt——SRS → domain_model(entities/structural_relations/transition_relations) + state_and_flow(transitions) + constraints(cross_entity/invalid_transitions/business_rules) |
+| ~~P1_Prompt.md~~ | P1 抽取已迁移至 `srs_pipeline/`（仓库根模块，见下），此文件仅存为历史 prompt 留档 |
 | `P2_Prompt.md` | P2 覆盖义务建模的 prompt——P1 产出 → entity_obligations + transition_obligations + cross_entity_obligations + constraint_obligations |
 | `generate_obligation_model.py` | P2 确定性脚本实现。V08 修复：`_derive_phase_mapping` 从 transitions 推导相位映射写入 state_info；state_info 扁平化布局；分支拆分逻辑 |
-| `generate_json.py` | P1 抽取的辅助脚本 |
 
 ### `verify/` — Gate-S 骨架门禁
 
@@ -140,7 +139,6 @@ SRS 文档
 | `llm_e2e_check.py` | LLM 端到端检查 |
 | `test_*.py` | 单元测试（guard6、pause_restart、primary_entity 等） |
 | `patch_*.py` | 覆盖模型补丁脚本 |
-| `validate_p1_structured_fields.py` | P1 结构化字段校验 |
 | `verify_fixes.py` | 修复验证 |
 
 ### 配置文件
@@ -149,14 +147,14 @@ SRS 文档
 |------|------|
 | `config.json` | LLM 配置（api_key、base_url、model、concurrency 等） |
 | `coverage_obligations.json` | P2 产出（P3 流水线输入） |
-| `P1output.json` | P1 产出（P2 输入） |
+| `review_structured.json` | P1 产出（P2 输入，真源） |
 
 ---
 
 ## 数据流
 
 ```
-P1output.json
+review_structured.json
   │  context/generate_obligation_model.py (P2)
   ▼
 coverage_obligations.json
@@ -172,8 +170,8 @@ verdict.json (skeleton_pass: true/false)
 
 | 角色 | 职责 | 可见范围 |
 |------|------|---------|
-| **P1** (LLM 抽取) | SRS → 结构化 domain_model + transitions + constraints | SRS 原文 + P1_Prompt |
-| **P2** (确定性脚本) | P1 产出 → 覆盖义务模型 (EO/TO/CO/RO + state_info) | P1output.json + P2_Prompt |
+| **P1** (srs_pipeline) | SRS → 结构化 domain_model + transitions + constraints | SRS 原文 + srs_pipeline/ |
+| **P2** (确定性脚本) | P1 产出 → 覆盖义务模型 (EO/TO/CO/RO + state_info) | review_structured.json + P2_Prompt |
 | **P3 builder** (代码工程) | 修复 nodes/、prompts/、tools/、context/ 代码 | 失败证据 + routing_hints + context/ 参考目录 |
 | **verify** (校验) | 跑验证器、产出 verdict、定义路由表 | 全部（含 case_spec.json） |
 | **loop_manager** (管理者) | 编排快照→构建→冒烟→流水线→Gate-S→路由/升级 | 全部 |
@@ -186,13 +184,15 @@ verdict.json (skeleton_pass: true/false)
 
 ### 1. 运行 P2（从 P1 产出生成覆盖义务模型）
 
+> P1 输入必传（argv[1] 或 `P1_PATH` 环境变量），当前真源为仓库根 `review_structured.json`。
+
 ```bash
-python context/generate_obligation_model.py context/P1_output.json coverage_obligations.json
+python context/generate_obligation_model.py review_structured.json coverage_obligations.json
 ```
 ### 2. 校验P2生成质量
 
 ```bash
-python.exe context/verify/validate_p2.py coverage_obligations.json context/P1_output.json
+python.exe context/verify/validate_p2.py coverage_obligations.json review_structured.json
 ```
 ### 3. 运行 P3 流水线
 
