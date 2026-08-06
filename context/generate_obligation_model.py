@@ -38,6 +38,13 @@ import sys
 from collections import deque, defaultdict
 from datetime import datetime, timezone, timedelta
 
+# CO dependent-transition derivation rule (shared with validate_p2.py gate) —
+# single source of truth, no logic fork between generator and validator.
+try:
+    import co_derivation  # script-dir import (python context/generate_obligation_model.py)
+except ImportError:
+    from context import co_derivation  # package-relative (python -m context.generate_obligation_model)
+
 # ============ Configurable paths ============
 _DEFAULT_P1 = os.environ.get(
     "P1_PATH",
@@ -665,9 +672,7 @@ for t in p1["state_and_flow"]["transitions"]:
             "direction": direction,
             "priority": t.get("priority", ""),
             "source_ref": t.get("source_ref"),
-            "note": t.get("note", {}),
-            "sub_steps": t.get("sub_steps", []),
-            "coverage_priority": coverage_priority,
+            "note": t.get("note", {}),            "coverage_priority": coverage_priority,
             "is_repeatable": is_repeat,
             "repeat_condition": repeat_cond,
             "side_effects": side_effects,
@@ -730,9 +735,7 @@ for t in p1["state_and_flow"]["transitions"]:
                 "direction": direction,
                 "priority": t.get("priority", ""),
                 "source_ref": t.get("source_ref"),
-                "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 组合数{len(combos)}降级不拆分").strip("; ")},
-                "sub_steps": t.get("sub_steps", []),
-                "coverage_priority": coverage_priority,
+                "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 组合数{len(combos)}降级不拆分").strip("; ")},                "coverage_priority": coverage_priority,
                 "is_repeatable": is_repeat,
                 "repeat_condition": repeat_cond,
                 "side_effects": side_effects,
@@ -761,9 +764,7 @@ for t in p1["state_and_flow"]["transitions"]:
                 "direction": direction,
                 "priority": t.get("priority", ""),
                 "source_ref": t.get("source_ref"),
-                "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 全部{len(combos_all)}组合被R5过滤").strip("; ")},
-                "sub_steps": t.get("sub_steps", []),
-                "coverage_priority": coverage_priority,
+                "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 全部{len(combos_all)}组合被R5过滤").strip("; ")},                "coverage_priority": coverage_priority,
                 "is_repeatable": is_repeat,
                 "repeat_condition": repeat_cond,
                 "side_effects": side_effects,
@@ -797,9 +798,7 @@ for t in p1["state_and_flow"]["transitions"]:
                     "direction": direction,
                     "priority": t.get("priority", ""),
                     "source_ref": t.get("source_ref"),
-                    "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + "; 分支无实质差异(单组合)").strip("; ")},
-                    "sub_steps": t.get("sub_steps", []),
-                    "coverage_priority": coverage_priority,
+                    "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + "; 分支无实质差异(单组合)").strip("; ")},                    "coverage_priority": coverage_priority,
                     "is_repeatable": is_repeat,
                     "repeat_condition": repeat_cond,
                     "side_effects": side_effects,
@@ -841,9 +840,7 @@ for t in p1["state_and_flow"]["transitions"]:
                     "direction": direction,
                     "priority": t.get("priority", ""),
                     "source_ref": t.get("source_ref"),
-                    "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 主TO保留(跨维度联动),分支TO覆盖其他维度").strip("; ")},
-                    "sub_steps": t.get("sub_steps", []),
-                    "coverage_priority": coverage_priority,
+                    "note": {**t.get("note", {}), "comment": (t.get("note", {}).get("comment", "") + f"; 主TO保留(跨维度联动),分支TO覆盖其他维度").strip("; ")},                    "coverage_priority": coverage_priority,
                     "is_repeatable": is_repeat,
                     "repeat_condition": repeat_cond,
                     "side_effects": side_effects,
@@ -907,9 +904,7 @@ for t in p1["state_and_flow"]["transitions"]:
                         "direction": direction,
                         "priority": t.get("priority", ""),
                         "source_ref": t.get("source_ref"),
-                        "note": t.get("note", {}),
-                        "sub_steps": t.get("sub_steps", []),
-                        "coverage_priority": coverage_priority,
+                        "note": t.get("note", {}),                        "coverage_priority": coverage_priority,
                         "is_repeatable": is_repeat,
                         "repeat_condition": repeat_cond,
                         "side_effects": side_effects,
@@ -941,6 +936,11 @@ def classify_xc(xc):
     desc = xc.get("desc", "")
     # ── Deterministic keyword matching (primary) ──
     if desc.startswith("镜像 T-") or desc.startswith("由 Step 4.6 约束-因果鉴别确认"):
+        # 镜像默认门禁; 但镜像 desc 若显式带因果触发语义(触发/联动/自动/初始化),
+        # 其语义是联动触发而非门禁 —— 与同规则联动对是同一因果的重复建模。
+        # 归 auto lane, 让 dedup 按同签名合并, 消除洞4 跨 causal_type 冲突。
+        if any(kw in desc for kw in ("触发", "联动", "自动", "初始化")):
+            return "auto_candidate"
         return "constraint_candidate"
     if "前置条件" in desc or "门禁" in desc:
         return "constraint_candidate"
@@ -1312,29 +1312,50 @@ def process_auto_lane_from_xc(xc):
         add_judgment("CO auto XC G5", f"{xc['id']}: enabler_state 非法")
         return None
     
-    # enabler_transition_id: to==enabler_state
-    enabler_tid = find_to_by_state(source_entity, enabler_dimension, enabler_state)
-    
-    # dependent: parse target_condition
-    target_cond = xc.get("target_condition", "")
-    m = re.match(r"状态\s*=\s*(.+)", target_cond)
-    if m:
-        dependent_to_val = m.group(1).strip()
+    # enabler_transition_id: 优先 P1 声明的 source_transition(抽象感知), 兜底
+    # find_to_by_state。历史 first-pick 风险: E-PLAN→待评审 有 T-019/T-020/T-025
+    # 三个候选, find_to_by_state 取首条可能取错。
+    enabler_tid = None
+    st = xc.get("source_transition")
+    st_p1 = p1_transitions_by_id.get(st) if st else None
+    if st_p1 and st_p1.get("entity") == source_entity and st_p1.get("to") == enabler_state:
+        enabler_tid = st
     else:
-        dependent_to_val = target_cond.strip()
-    
-    dependent_tid = None
-    target_dim = xc.get("target_dimension")
-    if target_dim:
-        dependent_tid = find_to_by_state(target_entity, target_dim, dependent_to_val)
-    if not dependent_tid:
-        dependent_tid = find_to_by_entity_and_to(target_entity, dependent_to_val)
-    
-    if not dependent_tid:
-        add_judgment("CO auto XC dependent missing", f"{xc['id']}: 找不到 dependent 转换")
+        enabler_tid = find_to_by_state(source_entity, enabler_dimension, enabler_state)
+
+    # dependent: 走共享派生规则(①根本修复)。顺序: target_from/target_to 字段 →
+    # 解析 target_condition → 镜像继承 → (entity, dimension, from, to) 匹配。
+    # 残余 ≥2 候选 → judgment + 升级, 绝不取第一条。
+    # 历史 bug: find_to_by_state 方向盲反查, E-PROJ→已选入 四个候选
+    # (T-002/T-007/T-011/T-012) 静默取错 T-002, 应为 T-012。
+    dep_tid, dep_info = co_derivation.resolve_dependent_transition(
+        p1_xc, p1_transitions_by_id, xc)
+    if not dep_tid:
+        if dep_info.get("candidates"):
+            add_judgment(
+                "CO auto XC dependent ambiguous",
+                f"{xc['id']}: target_condition='{xc.get('target_condition','')}' "
+                f"无法唯一确定 dependent，候选 {len(dep_info['candidates'])} 个 "
+                f"{dep_info['candidates']} (from={dep_info['from_state']}, "
+                f"to={dep_info['to_state']})，升级跳过(不取第一条)")
+        else:
+            add_judgment(
+                "CO auto XC dependent missing",
+                f"{xc['id']}: 找不到 dependent 转换 "
+                f"(from={dep_info['from_state']}, to={dep_info['to_state']}, "
+                f"via={dep_info['via']})")
         return None
-    
-    dependent_to_obj = to_index[dependent_tid]
+    dependent_tid = dep_tid
+    dependent_to_obj = to_index.get(dependent_tid)
+    if dependent_to_obj is None:
+        add_judgment("CO auto XC dependent missing",
+                     f"{xc['id']}: dependent {dependent_tid} 不在 to_index")
+        return None
+    add_judgment(
+        "CO auto XC dependent resolved",
+        f"{xc['id']}: dependent={dependent_tid} "
+        f"(from={dep_info['from_state']}, to={dep_info['to_state']}, "
+        f"via={dep_info['via']}, candidates={dep_info['candidates']})")
     
     # G3: all from==null
     all_deps = [tid for tid, to in to_index.items() if to["entity"] == target_entity and to["dimension"] == dependent_to_obj["dimension"]]
@@ -1589,7 +1610,7 @@ for br in p1_br:
         "category": br.get("category"),
         "signal_type": br.get("signal_type"),
         "description": br.get("desc"),
-        "enforcement": br.get("severity"),
+        "enforcement": br.get("enforcement"),
         "ref_to_existing_br": None,
         "coverage_priority": "medium",
         "suggested_action": f"验证规则约束: {br.get('desc', '')}",

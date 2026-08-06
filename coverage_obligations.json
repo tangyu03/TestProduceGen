@@ -1147,9 +1147,7 @@
       "source_ref": "4.6 项目管理（1）a",
       "note": {
         "inferred": false
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1197,9 +1195,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1246,9 +1242,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定①文档含'选出'方向词到backward；traits 含 rollback"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1299,9 +1293,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-015 建立评审计划"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1347,9 +1339,7 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-019：评审计划启动后项目状态由待评审变为评审中（4.5（3））；direction 判定③状态先后到forward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1391,9 +1381,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；precondition 跨实体涉及 E-SCORE 由 XC 镜像"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1461,9 +1449,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1558,9 +1544,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1655,9 +1639,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-014 阶段变更",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1753,9 +1735,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1851,9 +1831,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -1948,9 +1926,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2045,9 +2021,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2142,9 +2116,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2239,9 +2211,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2336,9 +2306,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；项目进入终态",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2434,9 +2402,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2532,9 +2498,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2630,9 +2594,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2728,9 +2690,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2826,9 +2786,7 @@
         "inferred": false,
         "comment": "direction 判定④状态先后到backward；阶段不变",
         "branch_dimension": "项目评级"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2903,9 +2861,7 @@
       "note": {
         "inferred": true,
         "comment": "4.5（5）e：对已完成计划中包含的处于评审中状态的项目，项目状态回到该计划建立前（已选入）；direction 判定①'回到'到backward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -2959,9 +2915,7 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-016：取消计划后项目状态返回到该计划建立前的状态（4.8.3（2））；direction 判定①'返回'到backward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3008,9 +2962,7 @@
         "inferred": true,
         "comment": "跨维度初始化联动 T-001：新增项目时项目阶段初始化为开题",
         "branch_dimension": "项目阶段"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3062,9 +3014,7 @@
         "inferred": true,
         "comment": "跨维度初始化联动 T-001：新增项目时项目阶段初始化为开题",
         "branch_dimension": "项目阶段"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3126,9 +3076,7 @@
         "inferred": true,
         "comment": "联动 T-007：开题阶段+评级合格及以上归档时项目阶段由开题变为验收; 分支无实质差异(单组合)",
         "branch_dimension": "项目阶段"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3194,9 +3142,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3253,9 +3199,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3312,9 +3256,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-004 项目纳入计划；评审组人数（5/7/9）影响后续打分权重计算",
         "branch_dimension": "评审组人数"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3364,9 +3306,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；取消结束为终态；联动 T-012 项目回退"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3374,11 +3314,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "建立评审计划并纳入项目后，项目状态由已选入变为待评审"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "评审计划状态由已建立变为取消结束；项目和专家状态返回到该计划建立前的状态"
         }
       ],
       "branch_path": [],
@@ -3423,9 +3358,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3470,9 +3403,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）a 下发时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3515,9 +3446,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-005 项目进入评审中、T-034 打分初始化"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -3568,9 +3497,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）b 启动时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3622,9 +3549,7 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-035：评审专家打分保存后计划状态变化；direction 判定③状态先后到forward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -3684,15 +3609,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -3750,15 +3673,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -3816,15 +3737,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=待评审",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -3882,15 +3801,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -3948,15 +3865,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -4014,15 +3929,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=评审中",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -4080,15 +3993,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -4146,15 +4057,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -4212,15 +4121,13 @@
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态暂停到lateral；暂停前状态=已完成",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "计划状态变为暂停；专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
         }
       ],
@@ -4273,9 +4180,7 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=待评审; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4328,9 +4233,7 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=评审中; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4383,9 +4286,7 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；暂停前状态=已完成; 分支无实质差异(单组合)",
         "branch_dimension": "暂停前计划状态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4436,9 +4337,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-006 全部专家提交打分"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -4483,15 +4382,13 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由待评审变为已完成；计划中项目状态不变"
         }
       ],
@@ -4538,15 +4435,13 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由评审中变为已完成；计划中项目状态不变"
         }
       ],
@@ -4593,15 +4488,13 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由评审中变为已完成；计划中项目状态不变"
         }
       ],
@@ -4648,15 +4541,13 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由评审中变为已完成；计划中项目状态不变"
         }
       ],
@@ -4703,15 +4594,13 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.8.1（5）c 评审时限",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由评审中变为已完成；计划中项目状态不变"
         }
       ],
@@ -4758,15 +4647,13 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由暂停变为已完成；计划中项目状态不变"
         }
       ],
@@ -4813,15 +4700,13 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由暂停变为已完成；计划中项目状态不变"
         }
       ],
@@ -4868,15 +4753,13 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由暂停变为已完成；计划中项目状态不变"
         }
       ],
@@ -4923,15 +4806,13 @@
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态暂停到resume；4.8.1（5）c 评审时限；与 T-027 同起讫但触发源不同（超时 vs 手动重启），action 统一为'重启评审计划'消除 C09",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
         {
           "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
+          "target_dimension": "项目状态",
           "effect_desc": "评审超时后评审计划状态由暂停变为已完成；计划中项目状态不变"
         }
       ],
@@ -4974,9 +4855,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；评审助理亦可执行；结束为终态；联动 T-007-d/T-011 项目归档、T-042/T-044/T-045 机构评价"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -4989,11 +4868,6 @@
           "target_entity": "E-ORG",
           "target_dimension": "机构状态",
           "effect_desc": "计划归档时，对计划中项目涉及的研制机构进行累计情况更新，更新后按规则对机构判定"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "评审计划状态由已完成为结束；对该计划中项目按照 4.5（5）归档；根据项目阶段评价结果对机构进行评价，按照 4.9.7 处理"
         }
       ],
       "branch_path": [],
@@ -5037,9 +4911,7 @@
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；超时结束为终态；4.8.1（5）d 归档时限；联动 T-007-d/T-011 项目归档、T-042/T-044/T-045 机构评价; 分支无实质差异(单组合)",
         "branch_dimension": "评审计划超时类型"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -5052,11 +4924,6 @@
           "target_entity": "E-ORG",
           "target_dimension": "机构状态",
           "effect_desc": "计划归档时，对计划中项目涉及的研制机构进行累计情况更新，更新后按规则对机构判定"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "归档超时后评审计划状态由已完成变为超时结束；对该计划中项目按照 4.5（5）归档；根据项目阶段评价结果对机构进行评价，按照 4.9.7 处理"
         }
       ],
       "branch_path": [
@@ -5098,9 +4965,7 @@
       "note": {
         "inferred": true,
         "comment": "联动 T-019：评审计划启动后系统为每对（项目×专家）初始化打分记录；direction 判定③状态先后到forward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5142,9 +5007,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；联动 T-021 计划状态变为评审中"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -5193,9 +5056,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；已提交为终态；联动 T-006 全部专家提交后项目进入待归档；已保存状态可重复打分保存（T-035 可重入），已提交后不可修改"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [
@@ -5203,11 +5064,6 @@
           "target_entity": "E-PROJ",
           "target_dimension": "项目状态",
           "effect_desc": "评审组全部专家提交了项目打分后，项目状态由评审中变为待归档"
-        },
-        {
-          "target_entity": "E-PROJ",
-          "target_dimension": "项目阶段",
-          "effect_desc": "打分状态变为已提交；已提交的项目不能进行分数修改"
         }
       ],
       "branch_path": [],
@@ -5242,9 +5098,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；未锁定为隐式初态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5282,9 +5136,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定②to 为侧挂状态锁定到lateral；锁定不推进主链相位"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5327,9 +5179,7 @@
       "note": {
         "inferred": false,
         "comment": "4.13（8）：普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误 3 次时锁定该账户；direction 判定②to 为侧挂状态锁定到lateral"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5367,9 +5217,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定②frm 为侧挂状态锁定到resume；4.13（8）'锁定后可由系统管理员解锁'"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5405,9 +5253,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；合格为初态"
-      },
-      "sub_steps": [],
-      "coverage_priority": "critical",
+      },      "coverage_priority": "critical",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5441,9 +5287,7 @@
       "note": {
         "inferred": false,
         "comment": "4.9.7（1）a/b/c：所有项目阶段评价为差的次数累计 3 次及以上；或差 1 次及以上且不合格 3 次及以上；或不合格 5 次及以上；direction 判定③状态先后到forward；联动 T-032 归档时累计更新"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5486,9 +5330,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.9.7（2）a 不能对不合格研制机构所属项目进行评审；4.9.7（2）d 限制条件由 BR 承载"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5530,9 +5372,7 @@
       "note": {
         "inferred": false,
         "comment": "direction 判定③状态先后到forward；4.9.7（3）e 同时满足升或降时降为不合格"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5567,9 +5407,7 @@
       "note": {
         "inferred": false,
         "comment": "4.9.7（3）b/c/d/e：累计 2 次差；或 1 次差且 2 次及以上不合格；或 4 次不合格；或同时可满足升或降时降；direction 判定③状态先后到forward"
-      },
-      "sub_steps": [],
-      "coverage_priority": "high",
+      },      "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
@@ -5580,33 +5418,6 @@
   "cross_entity_obligations": [
     {
       "id": "CO-001",
-      "type": "cross_entity",
-      "constraint_id": "XC-016",
-      "causal_type": "constraint",
-      "enabler_entity": "E-PLAN",
-      "enabler_dimension": "计划状态",
-      "enabler_state": "待评审",
-      "enabler_transition_id": "T-019",
-      "enabler_role": "评审助理",
-      "dependent_entity": "E-SCORE",
-      "dependent_transition_id": "T-034",
-      "dependent_dimension": "打分状态",
-      "dependent_condition": "未打分",
-      "dependent_role": "系统",
-      "aggregation": "all",
-      "ref_to": "评审计划状态由待启动变为待评审",
-      "trigger": null,
-      "trigger_source": null,
-      "rollback_propagation": false,
-      "confidence": "high",
-      "desc": "E-PLAN.计划状态=待评审 是 E-SCORE.打分状态 推进至 未打分 的前置条件",
-      "coverage_priority": "critical",
-      "suggested_action": "对E-SCORE执行使其进入未打分状态的操作",
-      "merged_from": [],
-      "source_ref": "4.9.2 专家打分"
-    },
-    {
-      "id": "CO-002",
       "type": "cross_entity",
       "constraint_id": null,
       "causal_type": "auto",
@@ -5629,11 +5440,13 @@
       "desc": "建立评审计划并纳入项目后，项目状态由已选入变为待评审",
       "coverage_priority": "medium",
       "suggested_action": "对E-PROJ执行使其项目状态由已选入变为待评审的操作",
-      "merged_from": [],
-      "source_ref": "4.5 项目状态（2）；4.8.1（1）"
+      "merged_from": [
+        "CO-005"
+      ],
+      "source_ref": "4.5 项目状态（2）；4.8.1（1）; 4.5 项目状态（2）"
     },
     {
-      "id": "CO-003",
+      "id": "CO-002",
       "type": "cross_entity",
       "constraint_id": null,
       "causal_type": "auto",
@@ -5656,11 +5469,13 @@
       "desc": "评审组全部专家提交了项目打分后，项目状态由评审中变为待归档",
       "coverage_priority": "medium",
       "suggested_action": "对E-PROJ执行使其项目状态由评审中变为待归档的操作",
-      "merged_from": [],
-      "source_ref": "4.9.2 专家打分（3）"
+      "merged_from": [
+        "CO-008"
+      ],
+      "source_ref": "4.9.2 专家打分（3）; 4.5 项目状态（4）"
     },
     {
-      "id": "CO-004",
+      "id": "CO-003",
       "type": "cross_entity",
       "constraint_id": null,
       "causal_type": "auto",
@@ -5683,11 +5498,13 @@
       "desc": "评审专家对该计划的项目进行打分保存后，计划状态由待评审变为评审中",
       "coverage_priority": "medium",
       "suggested_action": "对E-PLAN执行使其计划状态由待评审变为评审中的操作",
-      "merged_from": [],
-      "source_ref": "4.9.2 专家打分（1）（2）"
+      "merged_from": [
+        "CO-009"
+      ],
+      "source_ref": "4.9.2 专家打分（1）（2）; 4.8.6 评审计划项目打分"
     },
     {
-      "id": "CO-005",
+      "id": "CO-004",
       "type": "cross_entity",
       "constraint_id": null,
       "causal_type": "auto",
@@ -5716,6 +5533,33 @@
     {
       "id": "CO-006",
       "type": "cross_entity",
+      "constraint_id": "XC-006",
+      "causal_type": "auto",
+      "enabler_entity": "E-PLAN",
+      "enabler_dimension": "计划状态",
+      "enabler_state": "待评审",
+      "enabler_transition_id": "T-019",
+      "enabler_role": "评审助理",
+      "dependent_entity": "E-PROJ",
+      "dependent_transition_id": "T-005",
+      "dependent_dimension": "项目状态",
+      "dependent_condition": "评审中",
+      "dependent_role": "评审助理",
+      "aggregation": null,
+      "ref_to": null,
+      "trigger": null,
+      "trigger_source": null,
+      "rollback_propagation": false,
+      "confidence": "high",
+      "desc": "联动: T-019 执行后 E-PROJ.项目状态 由 待评审 变为 评审中",
+      "coverage_priority": "high",
+      "suggested_action": "对E-PROJ执行使其进入评审中状态的操作",
+      "merged_from": [],
+      "source_ref": "4.5 项目状态（3）"
+    },
+    {
+      "id": "CO-007",
+      "type": "cross_entity",
       "constraint_id": "XC-007",
       "causal_type": "auto",
       "enabler_entity": "E-PLAN",
@@ -5737,11 +5581,13 @@
       "desc": "联动: T-019 执行后 E-SCORE.打分状态 初始化为 未打分",
       "coverage_priority": "critical",
       "suggested_action": "对E-SCORE执行使其进入未打分状态的操作",
-      "merged_from": [],
+      "merged_from": [
+        "CO-011"
+      ],
       "source_ref": "4.9.2 专家打分"
     },
     {
-      "id": "CO-007",
+      "id": "CO-010",
       "type": "cross_entity",
       "constraint_id": "XC-012",
       "causal_type": "auto",
@@ -5751,10 +5597,10 @@
       "enabler_transition_id": "T-016",
       "enabler_role": "评审管理员",
       "dependent_entity": "E-PROJ",
-      "dependent_transition_id": "T-002",
+      "dependent_transition_id": "T-012",
       "dependent_dimension": "项目状态",
       "dependent_condition": "已选入",
-      "dependent_role": "评审管理员",
+      "dependent_role": "系统",
       "aggregation": null,
       "ref_to": null,
       "trigger": null,
@@ -5766,6 +5612,33 @@
       "suggested_action": "对E-PROJ执行使其进入已选入状态的操作",
       "merged_from": [],
       "source_ref": "4.8.3 取消评审计划"
+    },
+    {
+      "id": "CO-012",
+      "type": "cross_entity",
+      "constraint_id": "XC-018",
+      "causal_type": "auto",
+      "enabler_entity": "E-PROJ",
+      "enabler_dimension": "项目状态",
+      "enabler_state": "已选入",
+      "enabler_transition_id": "T-007",
+      "enabler_role": "系统",
+      "dependent_entity": "E-PROJ",
+      "dependent_transition_id": "T-014",
+      "dependent_dimension": "项目阶段",
+      "dependent_condition": "验收",
+      "dependent_role": "系统",
+      "aggregation": null,
+      "ref_to": null,
+      "trigger": null,
+      "trigger_source": null,
+      "rollback_propagation": false,
+      "confidence": "high",
+      "desc": "分支[项目评级=合格及以上]: T-007 执行后项目阶段由开题变为验收（联动 T-014）",
+      "coverage_priority": "critical",
+      "suggested_action": "对E-PROJ执行使其进入验收状态的操作",
+      "merged_from": [],
+      "source_ref": "4.5 项目状态（5）a"
     }
   ],
   "constraint_obligations": [
@@ -5856,7 +5729,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "项目阶段影响项目状态流转：开题阶段归档后可能进入已选入（评级合格及以上，阶段变验收）或待选入（评级不合格或差，阶段不变）；验收阶段归档后可能进入已归档（评级合格及以上）或待选入（评级不合格或差）",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 项目阶段影响项目状态流转：开题阶段归档后可能进入已选入（评级合格及以上，阶段变验收）或待选入（评级不合格或差，阶段不变）；验收阶段归档后可能进入已归档（评级合格及以上）或待选入（评级不合格或差）",
@@ -5872,7 +5745,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "项目评级影响归档后项目状态转换：优秀/良好/合格到开题阶段变已选入（阶段变验收）/验收阶段变已归档；不合格/差到开题或验收阶段均变待选入（阶段不变）",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 项目评级影响归档后项目状态转换：优秀/良好/合格到开题阶段变已选入（阶段变验收）/验收阶段变已归档；不合格/差到开题或验收阶段均变待选入（阶段不变）",
@@ -5888,7 +5761,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "暂停前计划状态影响重启后目标状态：对暂停的评审计划进行重新启动，启动后状态返回到暂停前的状态",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 暂停前计划状态影响重启后目标状态：对暂停的评审计划进行重新启动，启动后状态返回到暂停前的状态",
@@ -5904,7 +5777,7 @@
       "category": "timing",
       "signal_type": "restrictive",
       "description": "评审计划超时类型影响超时触发的状态转换：下发时限 1-2 天默认 1（已建立到待启动）；启动时限 1-5 天默认 2（待启动到待评审）；评审时限 1-5 天默认 2（待评审/评审中/暂停到已完成）；归档时限 1-3 天默认 2（已完成到超时结束）",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审计划超时类型影响超时触发的状态转换：下发时限 1-2 天默认 1（已建立到待启动）；启动时限 1-5 天默认 2（待启动到待评审）；评审时限 1-5 天默认 2（待评审/评审中/暂停到已完成）；归档时限 1-3 天默认 2（已完成到超时结束）",
@@ -5921,7 +5794,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "评审计划的评审组由 5、7 或 9 个专家组成，有且只能有一个组长专家",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审计划的评审组由 5、7 或 9 个专家组成，有且只能有一个组长专家",
@@ -5938,7 +5811,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "每个评审专家的技术领域应覆盖评审计划中项目的领域",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 每个评审专家的技术领域应覆盖评审计划中项目的领域",
@@ -5956,7 +5829,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "默认回避计划中的项目所属机构的专家",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 默认回避计划中的项目所属机构的专家",
@@ -5990,7 +5863,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "一个计划中，评审组专家工作时段相同，专家一个工作时段只能被分配一个评审计划",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 一个计划中，评审组专家工作时段相同，专家一个工作时段只能被分配一个评审计划",
@@ -6024,7 +5897,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "只要计划结束，评审专家与计划相应的评审时段为可用",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 只要计划结束，评审专家与计划相应的评审时段为可用",
@@ -6040,7 +5913,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "对于本阶段不合格评价结果的项目，只有 1 次选入机会",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 对于本阶段不合格评价结果的项目，只有 1 次选入机会",
@@ -6072,7 +5945,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审管理员只能对已选入状态的项目进行选出",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员只能对已选入状态的项目进行选出",
@@ -6088,7 +5961,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "只能删除待选入且未评价过的项目",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 只能删除待选入且未评价过的项目",
@@ -6104,7 +5977,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "只可编辑待选入的项目信息，对评价过的项目编辑附件",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 只可编辑待选入的项目信息，对评价过的项目编辑附件",
@@ -6120,7 +5993,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "机构管理员可依据项目名称和技术领域条件进行查询",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 机构管理员可依据项目名称和技术领域条件进行查询",
@@ -6137,7 +6010,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审管理员和评审助理查看项目附件，机构管理员只可查看本机构的项目附件",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理查看项目附件，机构管理员只可查看本机构的项目附件",
@@ -6154,7 +6027,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审管理员从处于已选入状态的项目中选取 1-5 个项目纳入评审计划",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员从处于已选入状态的项目中选取 1-5 个项目纳入评审计划",
@@ -6170,7 +6043,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审助理可在待评审、评审中和已完成状态暂停评审计划和重启评审计划",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审助理可在待评审、评审中和已完成状态暂停评审计划和重启评审计划",
@@ -6186,7 +6059,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审管理员和评审助理可根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理可根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划",
@@ -6202,7 +6075,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "评审管理员和评审助理可删除处于已建立状态和取消结束状态的计划",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理可删除处于已建立状态和取消结束状态的计划",
@@ -6250,7 +6123,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "处于已建立状态的计划，可以进行编辑",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 处于已建立状态的计划，可以进行编辑",
@@ -6267,7 +6140,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "系统管理员可以设置下发时限、启动时限、评审时限和归档时限；超时设置完成后，对所有计划立即生效",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 系统管理员可以设置下发时限、启动时限、评审时限和归档时限；超时设置完成后，对所有计划立即生效",
@@ -6284,7 +6157,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "项目评价计算：去掉普通专家的一个最高分和一个最低分，计算剩余普通专家打分的平均分，然后按系统内置打分权重表进行计算，计算结果四舍五入，保留两位小数",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 项目评价计算：去掉普通专家的一个最高分和一个最低分，计算剩余普通专家打分的平均分，然后按系统内置打分权重表进行计算，计算结果四舍五入，保留两位小数",
@@ -6300,7 +6173,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "项目级别评判规则：优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 项目级别评判规则：优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）",
@@ -6317,7 +6190,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "本次评审项目的单个打分项分数为所有专家相应项打分的平均分",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 本次评审项目的单个打分项分数为所有专家相应项打分的平均分",
@@ -6333,7 +6206,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "开题评审评价结果为合格及以上的项目才能进行验收评审",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 开题评审评价结果为合格及以上的项目才能进行验收评审",
@@ -6350,7 +6223,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "对合格机构的处理：所有项目的阶段评价为差的次数累计达到 3 次及以上；或差 1 次及以上且不合格 3 次及以上；或不合格 5 次及以上；满足任一条将合格的研制机构评价为不合格机构",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 对合格机构的处理：所有项目的阶段评价为差的次数累计达到 3 次及以上；或差 1 次及以上且不合格 3 次及以上；或不合格 5 次及以上；满足任一条将合格的研制机构评价为不合格机构",
@@ -6401,7 +6274,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "对试用研制机构的处理：累计 10 次项目阶段评价结果为优可升为合格；累计 2 次差降为不合格；累计 1 次差且 2 次及以上不合格降为不合格；累计 4 次不合格降为不合格；同时可满足升或降时降为不合格",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 对试用研制机构的处理：累计 10 次项目阶段评价结果为优可升为合格；累计 2 次差降为不合格；累计 1 次差且 2 次及以上不合格降为不合格；累计 4 次不合格降为不合格；同时可满足升或降时降为不合格",
@@ -6449,7 +6322,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "评审专家打分实现对分配给其的项目进行打分、保存、提交功能，并显示内置的评分细则为专家打分提供参考",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审专家打分实现对分配给其的项目进行打分、保存、提交功能，并显示内置的评分细则为专家打分提供参考",
@@ -6499,7 +6372,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "在已选入的项目中进行专家回避项目设置，只对回避项目设置后建立的评审计划有效",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 在已选入的项目中进行专家回避项目设置，只对回避项目设置后建立的评审计划有效",
@@ -6516,7 +6389,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "新增专家时手机号作为账号，密码默认为手机号后六位",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 新增专家时手机号作为账号，密码默认为手机号后六位",
@@ -6580,7 +6453,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "系统管理员可根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 系统管理员可根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询",
@@ -6645,7 +6518,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "实现基于角色的访问控制",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 实现基于角色的访问控制",
@@ -6661,7 +6534,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "登录时，密码不以明文显示",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 登录时，密码不以明文显示",
@@ -6677,7 +6550,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "身份证的年月日不以明文显示",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 身份证的年月日不以明文显示",
@@ -6693,7 +6566,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "用户初次登录时需更改密码",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 用户初次登录时需更改密码",
@@ -6741,7 +6614,7 @@
       "category": "timing",
       "signal_type": "restrictive",
       "description": "用户登录系统后，若 30 分钟内无任何操作，则需要重新登录",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 用户登录系统后，若 30 分钟内无任何操作，则需要重新登录",
@@ -6757,7 +6630,7 @@
       "category": "timing",
       "signal_type": "restrictive",
       "description": "普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误 3 次时，锁定该账户，锁定后可由系统管理员解锁",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误 3 次时，锁定该账户，锁定后可由系统管理员解锁",
@@ -6789,7 +6662,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "用户修改自己密码时，需要输入原密码，如果输入的原密码不对，则给出提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次，且相同，否则系统给出提示",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 用户修改自己密码时，需要输入原密码，如果输入的原密码不对，则给出提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次，且相同，否则系统给出提示",
@@ -6803,7 +6676,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "对服务端返回客户端的数据进行加密",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 对服务端返回客户端的数据进行加密",
@@ -6819,7 +6692,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "对客户端提交到服务端的用户相关信息在传输中进行加密",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 对客户端提交到服务端的用户相关信息在传输中进行加密",
@@ -6836,7 +6709,7 @@
       "category": "authorization",
       "signal_type": "restrictive",
       "description": "系统日志记录只能由系统审计员查看",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 系统日志记录只能由系统审计员查看",
@@ -6852,7 +6725,7 @@
       "category": "validation",
       "signal_type": "restrictive",
       "description": "系统日志记录事件的时间、角色、操作类型、日志内容和日志类型等",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 系统日志记录事件的时间、角色、操作类型、日志内容和日志类型等",
@@ -6882,7 +6755,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "当输入的用户账号或者密码错时，有提示",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 当输入的用户账号或者密码错时，有提示",
@@ -6896,7 +6769,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "日期类数据输入，应提供日历选择功能",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 日期类数据输入，应提供日历选择功能",
@@ -6910,7 +6783,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "查询功能中的组合查询支持两个（含）以上字段'与'的查询",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 查询功能中的组合查询支持两个（含）以上字段'与'的查询",
@@ -6924,7 +6797,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "添加、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 添加、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示",
@@ -6938,7 +6811,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "同页面关联数据刷新后保持一致性，不同页面重新打开关联数据应保持同步",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 同页面关联数据刷新后保持一致性，不同页面重新打开关联数据应保持同步",
@@ -6955,7 +6828,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时 5 小时内的任务的说明",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时 5 小时内的任务的说明",
@@ -6972,7 +6845,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家",
@@ -6986,7 +6859,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "新增数据记录，系统提供相关页面，用户按照页面相关要求输入，并实现数据的提交功能和取消操作功能",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 新增数据记录，系统提供相关页面，用户按照页面相关要求输入，并实现数据的提交功能和取消操作功能",
@@ -7000,7 +6873,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "可对已存在的数据记录进行修改",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 可对已存在的数据记录进行修改",
@@ -7014,7 +6887,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "提供列表显示多条记录的摘要信息，必要时提供记录的详细信息",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 提供列表显示多条记录的摘要信息，必要时提供记录的详细信息",
@@ -7028,7 +6901,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "业务允许情况下，可删除选中的一条或多条记录",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 业务允许情况下，可删除选中的一条或多条记录",
@@ -7042,7 +6915,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "在有排序标识的列表中单击某一个列表头时，可以按照相应列的升序或者降序来显示列表数据",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 在有排序标识的列表中单击某一个列表头时，可以按照相应列的升序或者降序来显示列表数据",
@@ -7056,7 +6929,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "系统应支持按照条件逻辑与查询和模糊查询",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 系统应支持按照条件逻辑与查询和模糊查询",
@@ -7070,7 +6943,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "清除输入的查询条件，刷新页面",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 清除输入的查询条件，刷新页面",
@@ -7084,7 +6957,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数",
@@ -7098,7 +6971,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "在对数据进行新增、编辑操作后，确定后，实现对数据库中的数据更新",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 在对数据进行新增、编辑操作后，确定后，实现对数据库中的数据更新",
@@ -7114,7 +6987,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "将选中的附件从本地上传到数据库",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 将选中的附件从本地上传到数据库",
@@ -7130,7 +7003,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "将选中的附件从数据库下载到本地",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 将选中的附件从数据库下载到本地",
@@ -7144,7 +7017,7 @@
       "category": "usability",
       "signal_type": "usability",
       "description": "放弃本次新增、编辑操作或关闭弹窗",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 放弃本次新增、编辑操作或关闭弹窗",
@@ -7160,7 +7033,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "评审管理员和评审助理可以在首页查看：显示所有技术领域项目统计；所有开题阶段项目得分 TOP10",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理可以在首页查看：显示所有技术领域项目统计；所有开题阶段项目得分 TOP10",
@@ -7176,7 +7049,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "机构管理员在首页只可查看本机构的信息：显示各技术领域项目统计；显示本机构开题阶段项目得分 TOP10",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 机构管理员在首页只可查看本机构的信息：显示各技术领域项目统计；显示本机构开题阶段项目得分 TOP10",
@@ -7192,11 +7065,11 @@
       "category": "display",
       "signal_type": "display",
       "description": "审计管理员在首页可查看、查询日志信息",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 审计管理员在首页可查看、查询日志信息",
-      "source_ref": "4.12（3）"
+      "source_ref": "4.12"
     },
     {
       "id": "RO-BR-086",
@@ -7208,11 +7081,11 @@
       "category": "display",
       "signal_type": "display",
       "description": "评审专家在首页对分配的项目进行打分",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审专家在首页对分配的项目进行打分",
-      "source_ref": "4.12（4）"
+      "source_ref": "4.12"
     },
     {
       "id": "RO-BR-087",
@@ -7224,7 +7097,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "提供显示项目阶段评价结果的功能",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 提供显示项目阶段评价结果的功能",
@@ -7241,7 +7114,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "提供显示研制机构状态及其当前状态期间项目评级统计结果的功能",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 提供显示研制机构状态及其当前状态期间项目评级统计结果的功能",
@@ -7258,7 +7131,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "评审管理员可查看评价分数大于等于分数限值的项目信息",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员可查看评价分数大于等于分数限值的项目信息",
@@ -7275,7 +7148,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "评审管理员和评审助理可以查看评审计划启动后到归档前的各项目的打分进度和专家的打分情况",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理可以查看评审计划启动后到归档前的各项目的打分进度和专家的打分情况",
@@ -7291,7 +7164,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "评审管理员和评审助理可以对评审计划的状态、评审组的组成和计划的执行信息等进行查看",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评审管理员和评审助理可以对评审计划的状态、评审组的组成和计划的执行信息等进行查看",
@@ -7307,7 +7180,7 @@
       "category": "display",
       "signal_type": "display",
       "description": "评分细则自动显示当前阶段",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 评分细则自动显示当前阶段",
@@ -7549,7 +7422,7 @@
       "category": "computation",
       "signal_type": "restrictive",
       "description": "总分计算：开题=创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径&lt;=100.00；验收=创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术&lt;=100.00；四舍五入后保留两位小数",
-      "enforcement": "mandatory",
+      "enforcement": "conditional",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 总分计算：开题=创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径&lt;=100.00；验收=创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术&lt;=100.00；四舍五入后保留两位小数",
@@ -7626,80 +7499,12 @@
     {
       "id": "RO-BR-112",
       "type": "business_rule",
-      "constraint_id": "XC-005",
-      "entities_involved": [
-        "E-PLAN",
-        "E-PROJ"
-      ],
-      "category": "display",
-      "signal_type": null,
-      "description": "[来源于XC-005] 已选入到待评审; 联动: T-015 执行后 E-PROJ.项目状态 由 已选入 变为 待评审",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 已选入到待评审",
-      "source_ref": "4.5 项目状态（2）"
-    },
-    {
-      "id": "RO-BR-113",
-      "type": "business_rule",
-      "constraint_id": "XC-006",
-      "entities_involved": [
-        "E-PLAN",
-        "E-PROJ"
-      ],
-      "category": "display",
-      "signal_type": null,
-      "description": "[来源于XC-006] 待评审到评审中; 联动: T-019 执行后 E-PROJ.项目状态 由 待评审 变为 评审中",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 待评审到评审中",
-      "source_ref": "4.5 项目状态（3）"
-    },
-    {
-      "id": "RO-BR-114",
-      "type": "business_rule",
-      "constraint_id": "XC-008",
-      "entities_involved": [
-        "E-SCORE",
-        "E-PROJ"
-      ],
-      "category": "display",
-      "signal_type": null,
-      "description": "[来源于XC-008] 评审中到待归档; 联动: 全部 T-036 执行后 E-PROJ.项目状态 由 评审中 变为 待归档",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": "BR-028",
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 评审中到待归档",
-      "source_ref": "4.5 项目状态（4）"
-    },
-    {
-      "id": "RO-BR-115",
-      "type": "business_rule",
-      "constraint_id": "XC-009",
-      "entities_involved": [
-        "E-SCORE",
-        "E-PLAN"
-      ],
-      "category": "display",
-      "signal_type": null,
-      "description": "[来源于XC-009] 待评审到评审中; 联动: T-035 执行后 E-PLAN.计划状态 由 待评审 变为 评审中",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 待评审到评审中",
-      "source_ref": "4.8.6 评审计划项目打分"
-    },
-    {
-      "id": "RO-BR-116",
-      "type": "business_rule",
       "constraint_id": "XC-010",
       "entities_involved": [
         "E-PLAN",
         "E-PROJ"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-010] 按阶段和评级变更（t07a/t07b/t07c/t07d/t08）; 联动: T-032 执行后 E-PROJ.项目状态 按阶段和评级变更",
       "enforcement": "mandatory",
@@ -7709,14 +7514,14 @@
       "source_ref": "4.8.9 归档评审计划"
     },
     {
-      "id": "RO-BR-117",
+      "id": "RO-BR-113",
       "type": "business_rule",
       "constraint_id": "XC-011",
       "entities_involved": [
         "E-PLAN",
         "E-ORG"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-011] 按累计评价结果变更（o02/o04/o05）; 联动: T-032 执行后 E-ORG.机构状态 按累计评价结果变更",
       "enforcement": "mandatory",
@@ -7726,7 +7531,7 @@
       "source_ref": "4.9.7 机构评价"
     },
     {
-      "id": "RO-BR-118",
+      "id": "RO-BR-114",
       "type": "business_rule",
       "constraint_id": "XC-013",
       "entities_involved": [
@@ -7743,7 +7548,7 @@
       "source_ref": "4.9.7 机构评价（2）a"
     },
     {
-      "id": "RO-BR-119",
+      "id": "RO-BR-115",
       "type": "business_rule",
       "constraint_id": "XC-014",
       "entities_involved": [
@@ -7760,7 +7565,7 @@
       "source_ref": "4.9.7 机构评价（2）c"
     },
     {
-      "id": "RO-BR-120",
+      "id": "RO-BR-116",
       "type": "business_rule",
       "constraint_id": "XC-015",
       "entities_involved": [
@@ -7777,7 +7582,7 @@
       "source_ref": "4.8.8 完成评审计划（1）"
     },
     {
-      "id": "RO-BR-121",
+      "id": "RO-BR-117",
       "type": "business_rule",
       "constraint_id": "XC-017",
       "entities_involved": [
@@ -7794,24 +7599,7 @@
       "source_ref": "4.5 项目状态（5）a/b"
     },
     {
-      "id": "RO-BR-122",
-      "type": "business_rule",
-      "constraint_id": "XC-018",
-      "entities_involved": [
-        "E-PROJ",
-        "E-PROJ"
-      ],
-      "category": "display",
-      "signal_type": null,
-      "description": "[来源于XC-018] 开题到验收; 分支[项目评级=合格及以上]: T-007 执行后项目阶段由开题变为验收（联动 T-014）",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 开题到验收",
-      "source_ref": "4.5 项目状态（5）a"
-    },
-    {
-      "id": "RO-BR-123",
+      "id": "RO-BR-118",
       "type": "business_rule",
       "constraint_id": "XC-019",
       "entities_involved": [
@@ -7828,14 +7616,14 @@
       "source_ref": "4.5 项目状态（5）b"
     },
     {
-      "id": "RO-BR-124",
+      "id": "RO-BR-119",
       "type": "business_rule",
       "constraint_id": "XC-020",
       "entities_involved": [
         "E-PLAN",
         "E-SCORE"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-020] 权重按评审组人数配置; 分支[评审组人数=5/7/9]: T-015 建立计划后打分权重按表 4.9-4 配置（5人组长40%+普通60%；7人组长25%+普通75%；9人组长18%+普通82%）",
       "enforcement": "mandatory",
@@ -7845,14 +7633,14 @@
       "source_ref": "4.9.6 项目评价；表 4.9-4"
     },
     {
-      "id": "RO-BR-125",
+      "id": "RO-BR-120",
       "type": "business_rule",
       "constraint_id": "XC-021",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-021] 暂停到待评审; 分支[暂停前计划状态=待评审]: T-025 重启后状态返回到待评审",
       "enforcement": "mandatory",
@@ -7862,14 +7650,14 @@
       "source_ref": "4.8.7 暂停和重启评审计划（2）"
     },
     {
-      "id": "RO-BR-126",
+      "id": "RO-BR-121",
       "type": "business_rule",
       "constraint_id": "XC-022",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-022] 暂停到评审中; 分支[暂停前计划状态=评审中]: T-026 重启后状态返回到评审中",
       "enforcement": "mandatory",
@@ -7879,14 +7667,14 @@
       "source_ref": "4.8.7 暂停和重启评审计划（2）"
     },
     {
-      "id": "RO-BR-127",
+      "id": "RO-BR-122",
       "type": "business_rule",
       "constraint_id": "XC-023",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-023] 暂停到已完成; 分支[暂停前计划状态=已完成]: T-027 重启后状态返回到已完成",
       "enforcement": "mandatory",
@@ -7896,14 +7684,14 @@
       "source_ref": "4.8.7 暂停和重启评审计划（2）"
     },
     {
-      "id": "RO-BR-128",
+      "id": "RO-BR-123",
       "type": "business_rule",
       "constraint_id": "XC-024",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-024] 已建立到待启动（下发超时）; 分支[评审计划超时类型=下发超时]: T-018 下发时限超时后状态由已建立变为待启动",
       "enforcement": "mandatory",
@@ -7913,14 +7701,14 @@
       "source_ref": "4.8.4 下发评审计划（2）"
     },
     {
-      "id": "RO-BR-129",
+      "id": "RO-BR-124",
       "type": "business_rule",
       "constraint_id": "XC-025",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-025] 待启动到待评审（启动超时）; 分支[评审计划超时类型=启动超时]: T-020 启动时限超时后状态由待启动变为待评审",
       "enforcement": "mandatory",
@@ -7930,14 +7718,14 @@
       "source_ref": "4.8.5 启动评审计划（2）"
     },
     {
-      "id": "RO-BR-130",
+      "id": "RO-BR-125",
       "type": "business_rule",
       "constraint_id": "XC-026",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-026] 待评审到已完成（评审超时）; 分支[评审计划超时类型=评审超时]: T-029 评审时限超时后状态由待评审变为已完成",
       "enforcement": "mandatory",
@@ -7947,14 +7735,14 @@
       "source_ref": "4.8.8 完成评审计划（2）"
     },
     {
-      "id": "RO-BR-131",
+      "id": "RO-BR-126",
       "type": "business_rule",
       "constraint_id": "XC-027",
       "entities_involved": [
         "E-PLAN",
         "E-PLAN"
       ],
-      "category": "display",
+      "category": "validation",
       "signal_type": null,
       "description": "[来源于XC-027] 已完成到超时结束（归档超时）; 分支[评审计划超时类型=归档超时]: T-033 归档时限超时后状态由已完成变为超时结束",
       "enforcement": "mandatory",
@@ -7964,7 +7752,7 @@
       "source_ref": "4.8.9 归档评审计划（2）"
     },
     {
-      "id": "RO-BR-132",
+      "id": "RO-BR-127",
       "type": "business_rule",
       "constraint_id": "XC-028",
       "entities_involved": [
@@ -7983,13 +7771,13 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-05T17:30:20.591377+08:00",
+    "generated_at": "2026-08-06T16:27:51.094156+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
       "document_scope": "项目评审管理与系统管理（含项目/评审计划/专家/用户/机构/日志/打分/超时/分数限值/附件）",
       "has_critical_ambiguity": false,
-      "consistency_check": "passed",
+      "consistency_check": "warnings",
       "ambiguity_list": [
         {
           "amb_id": "AMB-FIX-001",
@@ -8787,8 +8575,8 @@
               "待评审": 2,
               "评审中": 3,
               "已完成": 4,
-              "结束": 5,
               "超时结束": 5,
+              "结束": 5,
               "暂停": 4
             }
           }
@@ -9786,7 +9574,11 @@
     ],
     "xc_to_br_mapping": [
       {
-        "xc_id": "XC-016",
+        "xc_id": "XC-005",
+        "status": "co"
+      },
+      {
+        "xc_id": "XC-006",
         "status": "co"
       },
       {
@@ -9794,7 +9586,23 @@
         "status": "co"
       },
       {
+        "xc_id": "XC-008",
+        "status": "co"
+      },
+      {
+        "xc_id": "XC-009",
+        "status": "co"
+      },
+      {
         "xc_id": "XC-012",
+        "status": "co"
+      },
+      {
+        "xc_id": "XC-016",
+        "status": "co"
+      },
+      {
+        "xc_id": "XC-018",
         "status": "co"
       },
       {
@@ -9811,22 +9619,6 @@
       },
       {
         "xc_id": "XC-004",
-        "status": "br"
-      },
-      {
-        "xc_id": "XC-005",
-        "status": "br"
-      },
-      {
-        "xc_id": "XC-006",
-        "status": "br"
-      },
-      {
-        "xc_id": "XC-008",
-        "status": "br"
-      },
-      {
-        "xc_id": "XC-009",
         "status": "br"
       },
       {
@@ -9851,10 +9643,6 @@
       },
       {
         "xc_id": "XC-017",
-        "status": "br"
-      },
-      {
-        "xc_id": "XC-018",
         "status": "br"
       },
       {
@@ -10196,132 +9984,64 @@
         "desc": "R E-USER->E-EXP: evidence_transitions 为空或无 enabler 转换"
       },
       {
-        "category": "CO auto XC dependent missing",
-        "desc": "XC-005: 找不到 dependent 转换"
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-005: dependent=T-004 (from=已选入, to=待评审, via=resolved, candidates=['T-004'])"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-006: dependent=T-005 (from=待评审, to=评审中, via=resolved, candidates=['T-005'])"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-007: dependent=T-034 (from=None, to=未打分, via=resolved, candidates=['T-034'])"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-008: dependent=T-006 (from=评审中, to=待归档, via=resolved, candidates=['T-006'])"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-009: dependent=T-021 (from=待评审, to=评审中, via=resolved, candidates=['T-021'])"
       },
       {
         "category": "CO auto XC dependent missing",
-        "desc": "XC-006: 找不到 dependent 转换"
+        "desc": "XC-010: 找不到 dependent 转换 (from=None, to=None, via=none)"
       },
       {
         "category": "CO auto XC dependent missing",
-        "desc": "XC-008: 找不到 dependent 转换"
+        "desc": "XC-011: 找不到 dependent 转换 (from=None, to=None, via=none)"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-012: dependent=T-012 (from=待评审, to=已选入, via=resolved, candidates=['T-012'])"
+      },
+      {
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-016: dependent=T-034 (from=None, to=未打分, via=resolved, candidates=['T-034'])"
       },
       {
         "category": "CO auto XC dependent missing",
-        "desc": "XC-009: 找不到 dependent 转换"
+        "desc": "XC-017: 找不到 dependent 转换 (from=None, to=None, via=none)"
       },
       {
-        "category": "CO auto XC dependent missing",
-        "desc": "XC-010: 找不到 dependent 转换"
+        "category": "CO auto XC dependent resolved",
+        "desc": "XC-018: dependent=T-014 (from=开题, to=验收, via=resolved, candidates=['T-014'])"
       },
       {
-        "category": "CO auto XC dependent missing",
-        "desc": "XC-011: 找不到 dependent 转换"
+        "category": "CO dedup",
+        "desc": "合并 CO-005 入 CO-001 (sig=('E-PLAN', '计划状态', '已建立', 'E-PROJ', '项目状态', '待评审', 'auto'))"
       },
       {
-        "category": "CO auto XC dependent missing",
-        "desc": "XC-017: 找不到 dependent 转换"
+        "category": "CO dedup",
+        "desc": "合并 CO-008 入 CO-002 (sig=('E-SCORE', '打分状态', '已提交', 'E-PROJ', '项目状态', '待归档', 'auto'))"
       },
       {
-        "category": "CO auto XC dependent missing",
-        "desc": "XC-018: 找不到 dependent 转换"
+        "category": "CO dedup",
+        "desc": "合并 CO-009 入 CO-003 (sig=('E-SCORE', '打分状态', '已保存', 'E-PLAN', '计划状态', '评审中', 'auto'))"
       },
       {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 display"
-      },
-      {
-        "category": "RO-BR LLM category",
-        "desc": "XC→RO-BR: keyword未命中，LLM判为 validation"
+        "category": "CO dedup",
+        "desc": "合并 CO-011 入 CO-007 (sig=('E-PLAN', '计划状态', '待评审', 'E-SCORE', '打分状态', '未打分', 'auto'))"
       },
       {
         "category": "phase_mapping_derived",
@@ -10360,11 +10080,11 @@
     ],
     "snapshot": {
       "to_index_size": 82,
-      "co_list_size": 7,
+      "co_list_size": 8,
       "xc_status_summary": {
         "total_xc": 28,
-        "as_co": 3,
-        "as_br": 25
+        "as_co": 8,
+        "as_br": 20
       },
       "precondition_state_refs_coverage": {
         "total_preconditions": 159,

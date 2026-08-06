@@ -15,6 +15,8 @@ from nodes.s0_topology import (
 )
 from nodes.field_validation import parse_entity_constraints, enrich_procedure_steps
 from nodes.signal_validation import generate_signal_v_steps
+from context.entity_operators import form_operator_roles
+from context.time_control import needs_time_control_ids
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -122,7 +124,7 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
     # P1's role=system declaration is the ground truth from SRS reading.
     # Without this early return, the code falls into the has_human_kw
     # branch below and returns '[待确认角色]', causing V03/V07 fails.
-    if role_id == 'system':
+    if role_id in ('system', '系统'):
         return '系统'
 
     # BDD: LLM-based action classification (replaces HUMAN_DECISION_KEYWORDS)
@@ -3242,39 +3244,14 @@ def _generate_type9_field_validation(
         #    - managed → 系统管理员（配置类实体由系统管理员维护）
         #    - core → 从同实体的 EO.suggested_action 上下文推断
         # 5. 兜底 → 系统管理员
+        # V07 修复（共享派生）: Type9 actor = 该实体表单的授权操作者,与 V07
+        # 校验器共用 context/entity_operators.py 同一份派生,避免"生成器兜底
+        # 系统管理员 / 校验器查 action 子串"两套逻辑漂移(见 co_derivation.py
+        # 立下的 single-source-of-truth 原则)。兜底仅当实体确实无法从模型
+        # 派生时(如 E-ROLE/E-LOG 这类只读实体,模型无其表单操作)。
         cm = state.get("coverage_model", {})
-        tos_all = cm.get("transition_obligations", [])
-        roles_ctx = cm.get("_context", {}).get("roles", [])
-        role_name_map = {r.get("id", ""): r.get("name", "") for r in roles_ctx if isinstance(r, dict)}
-        role_name_map["system"] = "系统"
-
-        # 收集该 entity 在 TO 中出现过的所有 role
-        entity_roles = []
-        for to in tos_all:
-            if to.get("entity") == entity_id:
-                role = to.get("role", "")
-                if role and role not in entity_roles:
-                    entity_roles.append(role)
-
-        # 优先选非 system 的业务角色
-        business_roles = [r for r in entity_roles if r != "system"]
-        if business_roles:
-            inferred_actor = role_name_map.get(business_roles[0], business_roles[0])
-        elif entity_roles:
-            # 只有 system role
-            inferred_actor = role_name_map.get(entity_roles[0], "系统")
-        else:
-            # 无 TO（managed 实体）：根据 entity_details.type 推断
-            entity_details = next((ed for ed in cm.get("_context", {}).get("entity_details", [])
-                                   if ed.get("id") == entity_id), None)
-            if entity_details:
-                etype = entity_details.get("type", "")
-                if etype == "managed":
-                    inferred_actor = role_name_map.get("R-SYSADMIN", "系统管理员")
-                else:
-                    inferred_actor = role_name_map.get("R-SYSADMIN", "系统管理员")
-            else:
-                inferred_actor = role_name_map.get("R-SYSADMIN", "系统管理员")
+        pick = form_operator_roles(cm, entity_id)
+        inferred_actor = pick[0] if pick else "系统管理员"
 
         # Build BDD clauses
         givens = [_make_given(
@@ -3511,7 +3488,8 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
 # S1.10 Procedure Dedup (I24)
 # ---------------------------------------------------------------------------
 
-def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[str]) -> list[dict]:
+def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[str],
+                      time_needs: set[str]) -> list[dict]:
     """S1.10: Deduplicate procedures — BDD-aware merge.
 
     Compares procedures by their BDD structure:
@@ -3573,6 +3551,24 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
             return False
         return sid == tid or sid.startswith(tid + "[")
 
+    def _ensure_time_control(proc: dict) -> None:
+        """After a merge unions source_ids, the survivor must still satisfy V06:
+        a procedure referencing a time-sensitive obligation (in time_needs) must
+        declare time_control. A survivor that came from the non-time-sensitive
+        sibling keeps time_control=None even though its source_ids now carry a
+        time-sensitive TO (e.g. PROC-025/026 merging T-038 manual lock with
+        T-039 auto-lock). Re-derive the mechanism from the action semantics so
+        the declaration matches what _generate_type1 would have produced."""
+        if proc.get("time_control"):
+            return
+        if not (set(proc.get("source_ids", []) or []) & time_needs):
+            return
+        action = (proc.get("when") or {}).get("action", "")
+        proc["time_control"] = {
+            "mechanism": _derive_time_mechanism(action),
+            "status": "planned",
+        }
+
     for i, p1 in enumerate(procedures):
         if p1["temp_id"] in to_remove:
             continue
@@ -3599,10 +3595,12 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                     and p1["post_state"] == p2["post_state"]):
                 if len(p1.get("thens", [])) >= len(p2.get("thens", [])):
                     p1["source_ids"] = list(set(p1.get("source_ids", []) + p2.get("source_ids", [])))
+                    _ensure_time_control(p1)
                     to_remove.add(p2["temp_id"])
                     warnings.append(f"DEDUP: {p2['temp_id']} merged into {p1['temp_id']} (reason: 完全重复)")
                 else:
                     p2["source_ids"] = list(set(p2.get("source_ids", []) + p1.get("source_ids", [])))
+                    _ensure_time_control(p2)
                     to_remove.add(p1["temp_id"])
                     warnings.append(f"DEDUP: {p1['temp_id']} merged into {p2['temp_id']} (reason: 完全重复)")
                 continue
@@ -3651,6 +3649,7 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                             primary_proc["thens"].append(then)
                             existing_exp.add(then.get("expectation"))
                     primary_proc["source_ids"] = list(set(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
+                    _ensure_time_control(primary_proc)
                     to_remove.add(secondary_proc["temp_id"])
                     warnings.append(f"DEDUP: {secondary_proc['temp_id']} merged into {primary_proc['temp_id']} (reason: 同实体因果合并)")
                     continue
@@ -3673,6 +3672,7 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                             primary_proc["thens"].append(then)
                             existing_exp.add(then.get("expectation"))
                     primary_proc["source_ids"] = list(set(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
+                    _ensure_time_control(primary_proc)
                     to_remove.add(secondary_proc["temp_id"])
                     warnings.append(f"DEDUP: {secondary_proc['temp_id']} merged into {primary_proc['temp_id']} (reason: 因果合并)")
                     continue
@@ -3942,7 +3942,12 @@ def s1_generation_node(state: AgentState) -> dict:
     # still claimed successful state migration.
 
     # S1.10 Dedup (I24)
-    procedures = _dedup_procedures(procedures, cos, warnings)
+    # time_needs: obligations that require a time_control declaration (shared
+    # criterion with V06 — context/time_control.py). A merge that unions a
+    # time-sensitive source into a non-time-sensitive survivor must keep the
+    # declaration, or V06 flags the merged proc.
+    time_needs = needs_time_control_ids(state.get("coverage_model", {}))
+    procedures = _dedup_procedures(procedures, cos, warnings, time_needs)
 
     # Validate all procedures
     from models.schema import validate_procedures

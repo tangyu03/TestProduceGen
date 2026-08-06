@@ -23,6 +23,10 @@ OP_CATEGORY_TABLE = {                                   # Step1 操作六枚举�
     "config": ("设置", "超时", "限值"),
 }
 RUNTIME_BRANCH = ("根据", "分为")                        # Step3 运行时选择型信号
+# 文档元信息词（GB/T8567 类 SRS 前言通用）：描述"文档本身"而非系统行为。
+# 域门不依赖章节编号（换项目引言编号会变），只按词法/结构排除。
+_DOC_META = ("本文档", "本文件", "文档标识", "知识产权", "编写单位",
+             "出版日期", "术语和缩略语", "引用文档", "文档概述", "系统概述")
 
 @dataclass
 class DocSignals:
@@ -33,6 +37,7 @@ class DocSignals:
     runtime_branches: list = field(default_factory=list) # 运行时分支候选
 
 def scan(text: str) -> DocSignals:
+    text = _normalize_doc(text)               # 归一化后再扫描，标题/章节号才能命中
     lines = text.splitlines()
     sig = DocSignals()
     sig.source_refs = [(m.group(1), m.group(2), i)
@@ -56,7 +61,9 @@ def scan(text: str) -> DocSignals:
             sig.changes.append({"from": m.group(1), "to": m.group(2),
                                 "context": ln.strip()[:60], "source_ref": ref})
         kw = next((k for k in RESTRICTIVE if k in ln), None)
-        if kw:
+        # 域门（Gate A）：表格行是字段规格、元信息词是文档自指，都不是系统行为规则
+        if kw and not ln.lstrip().startswith("|") \
+                and not any(w in ln for w in _DOC_META):
             cat = next((c for words, c in BR_CATEGORY_HINT
                         if any(w in ln for w in words)), "validation")
             sig.br_candidates.append({"text": ln.strip(), "keyword": kw,
@@ -72,21 +79,71 @@ def op_category_of(name: str) -> str | None:
             return cat
     return None
 
+def _normalize_doc(text: str) -> str:
+    """把 markdown 原文规整为可审计的纯文本：
+    去掉标题行前导 #，并解除反斜杠转义（原样 `## 4\\.6 项目管理` → `4.6 项目管理`），
+    使章节号/子项与数据里的 source_ref 逐字可比。"""
+    t = re.sub(r"(?m)^[ \t]*#+[ \t]*", "", text)
+    return re.sub(r"\\(.)", r"\1", t)
+
+# 标题行：`4.6 项目管理`、`4.8.1评审计划`（数字后可不带空格/标点）
+_HEAD = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$")
+# 子项标号：全角（1）与半角 (1) 都收（4.13 用转义的 \(1\)）
+_ITEM = re.compile(r"[（(](\d+)[）)]")
+
+def _section_bodies(norm: str):
+    """标题行号与各节正文区间。返回 (headings, {章节号: 正文全文})，
+    正文不含标题行，到下一个标题行截断。"""
+    lines = norm.splitlines()
+    at = {}
+    for i, ln in enumerate(lines):
+        m = _HEAD.match(ln)
+        if m:
+            at.setdefault(m.group(1), i)      # 重复章节号取首个
+    order = sorted((i, num) for num, i in at.items())
+    bodies = {}
+    for k, (i, num) in enumerate(order):
+        end = order[k + 1][0] if k + 1 < len(order) else len(lines)
+        bodies[num] = "".join(lines[i + 1:end])
+    return set(at), bodies
+
 def audit_source_refs(model, doc_text: str) -> list:
-    """铁律2 的确定性兜底：每条 source_ref 必须能在原文命中（反幻觉）。"""
+    """铁律2 的确定性兜底：每条 source_ref 必须能在原文命中（反幻觉）。
+    原文先规整（去 #、解转义）；复合引用（如 `4.8.1（5）；4.8.4（2）`）按
+    "；"切分后逐段核验：段首章节号必须存在、段内子项标号必须落在该节正文。"""
     issues = []
-    compact = re.sub(r"\s+", "", doc_text)
+    norm = _normalize_doc(doc_text)
+    headings, bodies = _section_bodies(norm)
+    compact = re.sub(r"\s+", "", norm)
 
     def check(ref, owner):
         if not ref:
             issues.append(f"{owner}: source_ref 为空（输入契约）")
             return
         head = ref.split()[0]
-        if re.fullmatch(r"\d+(\.\d+)*", head):
-            if not re.search(rf"^{re.escape(head)}[、.．\s]", doc_text, re.M):
+        if re.fullmatch(r"\d+(\.\d+)*", head):           # 纯章节号（可带标题）
+            if head not in headings:
                 issues.append(f"{owner}: 章节号[{head}]在原文中不存在")
-        elif re.sub(r"\s+", "", ref) not in compact:
-            issues.append(f"{owner}: 原文片段[{ref[:20]}…]未命中原文")
+            return
+        rp = re.sub(r"\s+", "", ref)                     # 复合引用：章节号+子项…
+        for part in re.split(r"[；;]", rp):               # 逐段，段首即归属章节
+            if not part:
+                continue
+            pm = re.match(r"^(\d+(?:\.\d+)*)", part)
+            if not pm:                                   # 无章节号 → 退回逐字搜索
+                if part not in compact:
+                    issues.append(f"{owner}: 原文片段[{ref[:20]}…]未命中原文")
+                continue
+            sec = pm.group(1)
+            if sec not in headings:
+                issues.append(f"{owner}: 章节号[{sec}]在原文中不存在")
+                return
+            body = bodies.get(sec, "")
+            for it in _ITEM.finditer(part):
+                n = it.group(1)
+                if f"（{n}）" not in body and f"({n})" not in body:
+                    issues.append(f"{owner}: 子项[{n}]未在章节[{sec}]正文中命中")
+                    return
 
     for t in model.transitions:
         check(t["source_ref"], t["id"])

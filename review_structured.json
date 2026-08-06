@@ -1,11 +1,11 @@
 {
   "_meta": {
     "version": "19.2",
-    "generated_at": "2026-08-04T17:30:46+08:00",
+    "generated_at": "2026-08-06T16:27:27+08:00",
     "source": "航天能力验证项目评审系统软件需求规格说明.md",
     "document_scope": "项目评审管理与系统管理（含项目/评审计划/专家/用户/机构/日志/打分/超时/分数限值/附件）",
     "has_critical_ambiguity": false,
-    "consistency_check": "passed",
+    "consistency_check": "warnings",
     "ambiguity_list": [
       {
         "amb_id": "AMB-FIX-001",
@@ -737,7 +737,8 @@
             "terminal": [
               "已归档"
             ],
-            "note": "见 4.5 项目状态"
+            "note": "见 4.5 项目状态",
+            "inferred": []
           },
           {
             "dimension_name": "项目阶段",
@@ -749,7 +750,8 @@
             "terminal": [
               "验收"
             ],
-            "note": "见 4.5 项目状态：项目评审阶段包括开题和验收"
+            "note": "见 4.5 项目状态：项目评审阶段包括开题和验收",
+            "inferred": []
           }
         ],
         "operations": [
@@ -1096,7 +1098,8 @@
               "超时结束",
               "取消结束"
             ],
-            "note": "见 4.8.1 评审计划；暂停为侧挂状态，与源状态同相位"
+            "note": "见 4.8.1 评审计划；暂停为侧挂状态，与源状态同相位",
+            "inferred": []
           }
         ],
         "operations": [
@@ -1245,7 +1248,10 @@
             "terminal": [
               "已提交"
             ],
-            "note": "见 4.9.2 专家打分；未打分为隐式初态（分配打分任务后初始化）"
+            "note": "见 4.9.2 专家打分；未打分为隐式初态（分配打分任务后初始化），原文无逐字状态名，经 inferred 声明为合理推断",
+            "inferred": [
+              "未打分"
+            ]
           }
         ],
         "operations": [
@@ -1342,7 +1348,8 @@
             ],
             "initial": "未锁定",
             "terminal": [],
-            "note": "见 4.11.1 用户管理（3）（4）及 4.13（8）；未锁定为隐式初态（新增用户时初始化）；锁定后不得登录此系统"
+            "note": "见 4.11.1 用户管理（3）（4）及 4.13（8）；未锁定为隐式初态（新增用户时初始化）；锁定后不得登录此系统",
+            "inferred": []
           }
         ],
         "operations": [
@@ -1538,7 +1545,8 @@
             ],
             "initial": "合格",
             "terminal": [],
-            "note": "见 4.9.7 机构评价；建立后默认为合格；依据项目阶段评价结果累计情况决定机构状态变更；无终态（可循环变更）"
+            "note": "见 4.9.7 机构评价；建立后默认为合格；依据项目阶段评价结果累计情况决定机构状态变更；无终态（可循环变更）",
+            "inferred": []
           }
         ],
         "operations": [
@@ -2071,7 +2079,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (b)：项目有独立创建流程，但机构创建时项目不自动入 initial；每条机构不必有项目；归为业务归属的 composition（按文档'本机构的项目'表述）"
+          "comment": "判定 (c)：项目有独立创建流程，但属 core 流程实体且有 dependent（附件/打分），A 为其业务归属容器，保持 composition+business_ownership（按文档'本机构的项目'表述）"
         }
       },
       {
@@ -2097,7 +2105,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (c)：项目有独立创建流程，评审计划建立时引用已有项目；M:N 无方向按叙述顺序"
+          "comment": "判定 (d)：项目有独立创建流程，A 非其业务归属容器（容器是机构），评审计划建立时引用已有项目；M:N 无方向按叙述顺序"
         }
       },
       {
@@ -2110,33 +2118,33 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (c)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"
+          "comment": "判定 (d)：专家有独立创建流程，评审计划建立时引用已有专家；M:N 无方向按叙述顺序"
         }
       },
       {
         "from": "E-ORG",
         "to": "E-EXP",
-        "relation_type": "composition",
+        "relation_type": "reference",
         "cardinality": "1:N",
-        "ownership_dimension": "business_ownership",
+        "ownership_dimension": "configuration_source",
         "desc": "研制机构拥有其下专家；专家.机构从已有研制机构中选择",
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (b)：专家有独立创建流程，但机构创建时专家不自动入 initial；归为业务归属的 composition"
+          "comment": "判定 (d)：专家有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"
         }
       },
       {
         "from": "E-ORG",
         "to": "E-USER",
-        "relation_type": "composition",
+        "relation_type": "reference",
         "cardinality": "1:N",
-        "ownership_dimension": "business_ownership",
+        "ownership_dimension": "configuration_source",
         "desc": "研制机构拥有其下用户；用户.所属机构从已有研制机构中选择",
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (b)：用户有独立创建流程，但机构创建时用户不自动入 initial；归为业务归属的 composition"
+          "comment": "判定 (d)：用户有独立创建流程、非 core 流程实体，结构上引用机构；业务归属由 desc/permission/BR 承载"
         }
       },
       {
@@ -2201,7 +2209,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (c)：打分记录引用已有项目"
+          "comment": "判定 (d)：打分记录引用已有项目"
         }
       },
       {
@@ -2214,7 +2222,7 @@
         "confidence": "high",
         "note": {
           "inferred": false,
-          "comment": "判定 (c)：打分记录引用已有专家"
+          "comment": "判定 (d)：打分记录引用已有专家"
         }
       },
       {
@@ -4330,7 +4338,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.5 项目状态（5）",
         "signal_type": "restrictive",
         "note": {
@@ -4345,7 +4353,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.5 项目状态（5）；4.9.6 项目评价",
         "signal_type": "restrictive",
         "note": {
@@ -4360,7 +4368,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.7 暂停和重启评审计划（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4375,7 +4383,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（5）；4.8.4（2）；4.8.5（2）；4.8.8（2）；4.8.9（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4391,7 +4399,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（6）a",
         "signal_type": "restrictive",
         "note": {
@@ -4407,7 +4415,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（6）b",
         "signal_type": "restrictive",
         "note": {
@@ -4423,7 +4431,7 @@
           "E-EXP",
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（6）c①",
         "signal_type": "restrictive",
         "note": {
@@ -4438,7 +4446,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.8.1（6）c②",
         "signal_type": "restrictive",
         "note": {
@@ -4453,7 +4461,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（6）d",
         "signal_type": "restrictive",
         "note": {
@@ -4468,7 +4476,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.8.1（6）e",
         "signal_type": "restrictive",
         "note": {
@@ -4483,7 +4491,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（7）",
         "signal_type": "restrictive",
         "note": {
@@ -4497,7 +4505,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.7.1（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4512,7 +4520,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.7.1（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4527,7 +4535,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.7.2",
         "signal_type": "restrictive",
         "note": {
@@ -4541,7 +4549,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.6（1）b",
         "signal_type": "restrictive",
         "note": {
@@ -4555,7 +4563,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.6（1）c",
         "signal_type": "restrictive",
         "note": {
@@ -4569,7 +4577,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.6（1）e",
         "signal_type": "restrictive",
         "note": {
@@ -4584,7 +4592,7 @@
           "E-PROJ",
           "E-ATT"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.6（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4599,7 +4607,7 @@
           "E-PLAN",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（1）",
         "signal_type": "restrictive",
         "note": {
@@ -4613,7 +4621,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（4）",
         "signal_type": "restrictive",
         "note": {
@@ -4627,7 +4635,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4641,7 +4649,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.10",
         "signal_type": "restrictive",
         "note": {
@@ -4655,7 +4663,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.8.4（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4669,7 +4677,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.8.2 表 4.8-1",
         "signal_type": "restrictive",
         "note": {
@@ -4683,7 +4691,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.2",
         "signal_type": "restrictive",
         "note": {
@@ -4698,7 +4706,7 @@
           "E-TOUT",
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.1（5）；4.11.4",
         "signal_type": "restrictive",
         "note": {
@@ -4714,7 +4722,7 @@
           "E-SCORE",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.6 项目评价",
         "signal_type": "restrictive",
         "note": {
@@ -4729,7 +4737,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.6 项目评价；表 4.9-5",
         "signal_type": "restrictive",
         "note": {
@@ -4745,7 +4753,7 @@
           "E-SCORE",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.6 项目评价",
         "signal_type": "restrictive",
         "note": {
@@ -4759,7 +4767,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9 项目评审",
         "signal_type": "restrictive",
         "note": {
@@ -4775,7 +4783,7 @@
           "E-ORG",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.7（1）",
         "signal_type": "restrictive",
         "note": {
@@ -4791,7 +4799,7 @@
           "E-PROJ",
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.7（2）a-c",
         "signal_type": "restrictive",
         "note": {
@@ -4805,7 +4813,7 @@
         "entities_involved": [
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.7（2）d",
         "signal_type": "restrictive",
         "note": {
@@ -4820,7 +4828,7 @@
           "E-ORG",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.7（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4834,7 +4842,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.2（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4848,7 +4856,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.2（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4862,7 +4870,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.2",
         "signal_type": "restrictive",
         "note": {
@@ -4876,7 +4884,7 @@
         "entities_involved": [
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.10（3）",
         "signal_type": "restrictive",
         "note": {
@@ -4890,7 +4898,7 @@
         "entities_involved": [
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.10（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4906,7 +4914,7 @@
           "E-PROJ",
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.10（6）",
         "signal_type": "restrictive",
         "note": {
@@ -4921,7 +4929,7 @@
           "E-EXP",
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.10（1）",
         "signal_type": "restrictive",
         "note": {
@@ -4935,7 +4943,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1（2）",
         "signal_type": "restrictive",
         "note": {
@@ -4949,7 +4957,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1（6）",
         "signal_type": "restrictive",
         "note": {
@@ -4963,7 +4971,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1",
         "signal_type": "restrictive",
         "note": {
@@ -4977,7 +4985,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.11.1（7）",
         "signal_type": "restrictive",
         "note": {
@@ -4991,7 +4999,7 @@
         "entities_involved": [
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.3（2）",
         "signal_type": "restrictive",
         "note": {
@@ -5005,7 +5013,7 @@
         "entities_involved": [
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.3（3）",
         "signal_type": "restrictive",
         "note": {
@@ -5019,7 +5027,7 @@
         "entities_involved": [
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.3 表 4.11-3",
         "signal_type": "restrictive",
         "note": {
@@ -5034,7 +5042,7 @@
           "E-USER",
           "E-ROLE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（1）",
         "signal_type": "restrictive",
         "note": {
@@ -5048,7 +5056,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（2）",
         "signal_type": "restrictive",
         "note": {
@@ -5062,7 +5070,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（3）",
         "signal_type": "restrictive",
         "note": {
@@ -5076,7 +5084,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（4）",
         "signal_type": "restrictive",
         "note": {
@@ -5090,7 +5098,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.13（5）",
         "signal_type": "field_constraint",
         "note": {
@@ -5104,7 +5112,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.13（6）",
         "signal_type": "restrictive",
         "note": {
@@ -5118,7 +5126,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（7）",
         "signal_type": "restrictive",
         "note": {
@@ -5132,7 +5140,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（8）",
         "signal_type": "restrictive",
         "note": {
@@ -5146,7 +5154,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.13（9）",
         "signal_type": "restrictive",
         "note": {
@@ -5160,7 +5168,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（10）",
         "signal_type": "restrictive",
         "note": {
@@ -5172,7 +5180,7 @@
         "category": "validation",
         "desc": "对服务端返回客户端的数据进行加密",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（11）",
         "signal_type": "restrictive",
         "note": {
@@ -5186,7 +5194,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（12）",
         "signal_type": "restrictive",
         "note": {
@@ -5201,7 +5209,7 @@
           "E-LOG",
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（13）",
         "signal_type": "restrictive",
         "note": {
@@ -5215,7 +5223,7 @@
         "entities_involved": [
           "E-LOG"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.13（14）",
         "signal_type": "restrictive",
         "note": {
@@ -5227,7 +5235,7 @@
         "category": "authorization",
         "desc": "页面提示信息不能含有系统后台、技术框架等信息",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.13（15）",
         "signal_type": "restrictive",
         "note": {
@@ -5241,7 +5249,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（1）",
         "signal_type": "usability",
         "note": {
@@ -5253,7 +5261,7 @@
         "category": "usability",
         "desc": "日期类数据输入，应提供日历选择功能",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（2）",
         "signal_type": "usability",
         "note": {
@@ -5265,7 +5273,7 @@
         "category": "usability",
         "desc": "查询功能中的组合查询支持两个（含）以上字段'与'的查询",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（3）",
         "signal_type": "usability",
         "note": {
@@ -5277,7 +5285,7 @@
         "category": "usability",
         "desc": "添加、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（4）",
         "signal_type": "usability",
         "note": {
@@ -5289,7 +5297,7 @@
         "category": "usability",
         "desc": "同页面关联数据刷新后保持一致性，不同页面重新打开关联数据应保持同步",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（5）",
         "signal_type": "usability",
         "note": {
@@ -5304,7 +5312,7 @@
           "E-PLAN",
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（6）",
         "signal_type": "usability",
         "note": {
@@ -5319,7 +5327,7 @@
           "E-PLAN",
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.14（7）",
         "signal_type": "usability",
         "note": {
@@ -5331,7 +5339,7 @@
         "category": "usability",
         "desc": "新增数据记录，系统提供相关页面，用户按照页面相关要求输入，并实现数据的提交功能和取消操作功能",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（1）",
         "signal_type": "usability",
         "note": {
@@ -5343,7 +5351,7 @@
         "category": "usability",
         "desc": "可对已存在的数据记录进行修改",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（2）",
         "signal_type": "usability",
         "note": {
@@ -5355,7 +5363,7 @@
         "category": "usability",
         "desc": "提供列表显示多条记录的摘要信息，必要时提供记录的详细信息",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（3）",
         "signal_type": "usability",
         "note": {
@@ -5367,7 +5375,7 @@
         "category": "usability",
         "desc": "业务允许情况下，可删除选中的一条或多条记录",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（4）",
         "signal_type": "usability",
         "note": {
@@ -5379,7 +5387,7 @@
         "category": "usability",
         "desc": "在有排序标识的列表中单击某一个列表头时，可以按照相应列的升序或者降序来显示列表数据",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（5）",
         "signal_type": "usability",
         "note": {
@@ -5391,7 +5399,7 @@
         "category": "usability",
         "desc": "系统应支持按照条件逻辑与查询和模糊查询",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（6）",
         "signal_type": "usability",
         "note": {
@@ -5403,7 +5411,7 @@
         "category": "usability",
         "desc": "清除输入的查询条件，刷新页面",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（7）",
         "signal_type": "usability",
         "note": {
@@ -5415,7 +5423,7 @@
         "category": "usability",
         "desc": "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（8）",
         "signal_type": "usability",
         "note": {
@@ -5427,7 +5435,7 @@
         "category": "usability",
         "desc": "在对数据进行新增、编辑操作后，确定后，实现对数据库中的数据更新",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（9）",
         "signal_type": "usability",
         "note": {
@@ -5441,7 +5449,7 @@
         "entities_involved": [
           "E-ATT"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（10）",
         "signal_type": "usability",
         "note": {
@@ -5455,7 +5463,7 @@
         "entities_involved": [
           "E-ATT"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（11）",
         "signal_type": "usability",
         "note": {
@@ -5467,7 +5475,7 @@
         "category": "usability",
         "desc": "放弃本次新增、编辑操作或关闭弹窗",
         "entities_involved": [],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.4（12）",
         "signal_type": "usability",
         "note": {
@@ -5481,7 +5489,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.12（1）",
         "signal_type": "display",
         "note": {
@@ -5495,7 +5503,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.12（2）",
         "signal_type": "display",
         "note": {
@@ -5509,8 +5517,8 @@
         "entities_involved": [
           "E-LOG"
         ],
-        "severity": "mandatory",
-        "source_ref": "4.12（3）",
+        "enforcement": "conditional",
+        "source_ref": "4.12",
         "signal_type": "display",
         "note": {
           "inferred": false
@@ -5523,8 +5531,8 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
-        "source_ref": "4.12（4）",
+        "enforcement": "conditional",
+        "source_ref": "4.12",
         "signal_type": "display",
         "note": {
           "inferred": false
@@ -5537,7 +5545,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.6",
         "signal_type": "display",
         "note": {
@@ -5552,7 +5560,7 @@
           "E-ORG",
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.7",
         "signal_type": "display",
         "note": {
@@ -5567,7 +5575,7 @@
           "E-PROJ",
           "E-LMT"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.5 结果汇总",
         "signal_type": "display",
         "note": {
@@ -5582,7 +5590,7 @@
           "E-PLAN",
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.3 实施情况",
         "signal_type": "display",
         "note": {
@@ -5596,7 +5604,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.8.11 查看评审计划",
         "signal_type": "display",
         "note": {
@@ -5610,7 +5618,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.1 表 4.9-2",
         "signal_type": "display",
         "note": {
@@ -5624,7 +5632,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.6 表 4.6-1（19）",
         "signal_type": "field_constraint",
         "note": {
@@ -5639,7 +5647,7 @@
           "E-PROJ",
           "E-ATT"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.6 表 4.6-1（25）",
         "signal_type": "field_constraint",
         "note": {
@@ -5653,7 +5661,7 @@
         "entities_involved": [
           "E-PROJ"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.6 表 4.6-1（16）",
         "signal_type": "field_constraint",
         "note": {
@@ -5667,7 +5675,7 @@
         "entities_involved": [
           "E-PLAN"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.8.2 表 4.8-1（7）",
         "signal_type": "field_constraint",
         "note": {
@@ -5681,7 +5689,7 @@
         "entities_involved": [
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.10 表 4.10-1（3）",
         "signal_type": "field_constraint",
         "note": {
@@ -5695,7 +5703,7 @@
         "entities_involved": [
           "E-EXP"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.10 表 4.10-1（4）",
         "signal_type": "field_constraint",
         "note": {
@@ -5709,7 +5717,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1 表 4.11-1（1）",
         "signal_type": "field_constraint",
         "note": {
@@ -5723,7 +5731,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1 表 4.11-1（4）",
         "signal_type": "field_constraint",
         "note": {
@@ -5737,7 +5745,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1 表 4.11-1（9）",
         "signal_type": "field_constraint",
         "note": {
@@ -5752,7 +5760,7 @@
           "E-USER",
           "E-ATT"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1 表 4.11-1（3）",
         "signal_type": "field_constraint",
         "note": {
@@ -5766,7 +5774,7 @@
         "entities_involved": [
           "E-USER"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.1 表 4.11-1（10）",
         "signal_type": "field_constraint",
         "note": {
@@ -5780,7 +5788,7 @@
         "entities_involved": [
           "E-ORG"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.11.3 表 4.11-3（1）",
         "signal_type": "field_constraint",
         "note": {
@@ -5794,7 +5802,7 @@
         "entities_involved": [
           "E-LMT"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.4 表 4.9-3",
         "signal_type": "field_constraint",
         "note": {
@@ -5808,7 +5816,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "mandatory",
         "source_ref": "4.9.1 表 4.9-1",
         "signal_type": "field_constraint",
         "note": {
@@ -5822,7 +5830,7 @@
         "entities_involved": [
           "E-SCORE"
         ],
-        "severity": "mandatory",
+        "enforcement": "conditional",
         "source_ref": "4.9.1 表 4.9-1（12）",
         "signal_type": "restrictive",
         "note": {

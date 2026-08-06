@@ -64,6 +64,7 @@ class LoopConfig:
                                                         "{run_dir}/output.json"])
     pipeline_cmd_full: list = field(default_factory=list)  # --full 时用的完整流水线
     validator_spec: str = "verify/case_spec.json"
+    validator_model: str = "coverage_obligations.json"
     smoke_cmd: list = field(default_factory=list)
     agent_cmd: list = field(default_factory=list)
     max_attempts_per_signature: int = 3
@@ -283,6 +284,7 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
 
         v = subprocess.run([sys.executable, "-m", "verify.validators",
                             "-s", cfg.validator_spec,
+                            "-m", cfg.validator_model,
                             "-o", str((run_dir / "output.json").resolve()),
                             "--json", str(verdict_path.resolve())],
                            cwd=snap, capture_output=True, text=True)

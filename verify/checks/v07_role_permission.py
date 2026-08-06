@@ -8,6 +8,13 @@
 两者并集构成矩阵。角色 ID 经 _context.roles 映射为角色名(与用例 actor 一致),
 消除"项目新增 vs 新增项目"这类手写矩阵的名称漂移。
 
+Type9(field_validation)特判——实体级,而非豁免：
+  Type9 的 action "提交含违规值的表单" 是脚手架动作,不是领域操作,action 子串
+  匹配对它天然失真(历史上 17/17 全报 no_permission,含 10 个正确 actor 的误报)。
+  Type9 真正的不变量是实体级的: actor 必须是该实体表单的授权操作者。校验用
+  context/entity_operators.py 的 entity_operator_set()——与生成器共用同一份
+  派生(single source of truth),因此校验器验证的正是生成器被要求产生的 actor。
+
 豁免(结构化标记,非文本)：
   - actor = 系统/空 → 系统驱动 transition
   - risk_trait ∈ {audit_rejection, time_sensitive} → S1 派生的驳回/超时变体
@@ -16,6 +23,7 @@
 缺 --model 时跳过(无法推导矩阵,不退回 case_spec)。
 """
 from .base import CheckResult, get_procedures, normalize_text
+from context.entity_operators import entity_operator_set
 
 CHECK_ID = "V07"
 SYSTEM_ACTORS = {"系统", "system"}
@@ -103,8 +111,22 @@ def check(output: dict, spec: dict) -> CheckResult:
         if p.get("risk_trait") in _S1_DERIVED_TRAITS:
             continue
 
-        # 3. 权限覆盖: actor 对 action 在矩阵中应有权限(负向用例依据)
-        if actor in matrix:
+        # 3. 权限覆盖
+        if otype == 9:
+            # Type9: action 是脚手架("提交含违规值的表单"),非领域操作 → action
+            # 子串匹配失真。不变量为实体级: actor 必须在该实体表单的操作者集合中
+            # (与生成器共用 context/entity_operators 同一份派生,无豁免)。
+            entity = (p.get("entity") or "").strip()
+            operators = entity_operator_set(model).get(entity, set())
+            if actor and actor not in SYSTEM_ACTORS and actor not in operators:
+                no_perm += 1
+                res.fail({"temp_id": p.get("temp_id"), "actor": actor,
+                          "entity": entity,
+                          "reason": f"Type9 actor '{actor}' is not an operator of "
+                                    f"entity '{entity}' "
+                                    f"(operators: {sorted(operators)})"})
+        elif actor in matrix:
+            # 非 Type9: actor 对 when.action 在矩阵中应有权限(负向用例依据)
             action = (when.get("action") or "").strip()
             if action and not _has_permission(action, matrix[actor]):
                 no_perm += 1

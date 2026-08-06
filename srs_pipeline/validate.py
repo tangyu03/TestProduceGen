@@ -78,7 +78,9 @@ class Validator:
                   self.c05_branch_penetration, self.c06_structural_consistency,
                   self.c07_causal_consistency, self.c08_composition_sync,
                   self.c09_cross_module, self.c10_char_safety,
-                  self.c11_null_spec, self.c12_operations, self.c13_direction):
+                  self.c11_null_spec, self.c12_operations, self.c13_direction,
+                  self.c14_expected_direction, self.c16_state_whitelist,
+                  self.c17_structural_cd_review):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -383,12 +385,52 @@ class Validator:
                 if t["to"] and not hit.group(2).startswith(t["to"]):
                     self.report.warn("C14", f"结果文本讫态[{hit.group(2)}]≠"
                                             f"to[{t['to']}]", t["id"])
-        # run_all 的校验元组末尾追加 self.c16_state_whitelist
+
+    # 17. structural (c)/(d) 判定一致性复核（4.4 框架兜底窄版）
+    def c17_structural_cd_review(self):
+        """composition+business_ownership 的 B 若满足独立创建且非 core/无 dependent
+        → warning 疑似应判 (d) reference。仅单向：B 属 (b)（创建依赖 A）或 (c)
+        （core 且有 dependent）时豁免。反向（reference 但 B 实为 (c)）依赖"A 为
+        业务归属容器"语义，机械不可判，不做。C08 已处理创建依赖第三方后期状态的
+        另一条降级路径，本检查补充"独立创建"分支。"""
+        r = self.report
+        # B 是否有独立创建流程：存在 from=None 且其 precondition 不 state_ref 指向 A
+        # （指向 A 说明 B 是 A 的产物，属 (b) composition，豁免）。
+        creates = {}
+        for t in self.m.transitions:
+            if t["from"] is None:
+                creates.setdefault(t["entity"], []).append(t)
+        # B 是否有 dependent：B 是否作为某 composition 的 frm（被其他实体挂靠）
+        comp_frms = {rel["from"] for rel in self.m.structural_relations
+                     if rel["relation_type"] == "composition"}
+        for rel in self.m.structural_relations:
+            if not (rel["relation_type"] == "composition"
+                    and rel["ownership_dimension"] == "business_ownership"):
+                continue
+            a, b = rel["from"], rel["to"]
+            creates_b = creates.get(b) or []
+            if not creates_b:
+                continue                                  # 无独立创建 → (b) 豁免
+            driven_by_a = any(
+                p["type"] == "state_ref" and p.get("ref")
+                and p["ref"]["entity"] == a
+                for t in creates_b for p in t["preconditions"])
+            if driven_by_a:
+                continue                                  # 创建依赖 A → (b) 豁免
+            be = self.entities.get(b)
+            b_type = be["type"] if be else None
+            if b_type == "core" and b in comp_frms:
+                continue                                  # 满足 (c) → 豁免
+            r.warn("C17", f"结构关系 {a}→{b} 为 composition+business_ownership，"
+                          f"但 B 有独立创建流程且不满足 (c)（type={b_type}，"
+                          f"有 dependent={b in comp_frms}），疑似应判 (d) reference"
+                          f"+configuration_source（Step 2）")
 
     def c16_state_whitelist(self):
         """状态值/顺序与原文枚举对账（铁律2 的机器版，替代一切'禁止改名'补丁）。
-        两级判定：不在任何枚举但出现在原文其他位置 → warning（合理推断）；
-        全文查无此值 → error（改写漂移，如'正常'之于'未锁定'）。"""
+        三级判定：不在任何枚举但出现在原文其他位置 → warning（合理推断）；
+        经 inferred 显式声明的推断态 → warning（如 E-SCORE 隐式初态'未打分'）；
+        全文查无此值且未声明 → error（改写漂移，如'正常'之于'未锁定'）。"""
         if not getattr(self.m, "evidence", None):
             return
         from .evidence import best_enum_match
@@ -396,8 +438,14 @@ class Validator:
             for d in e["state_dimensions"]:
                 span, covered = best_enum_match(d["states"], self.m.evidence)
                 missing = [s for s in d["states"] if s not in covered]
+                declared = set(d.get("inferred", []) or [])
                 for s in missing:
-                    if s in (self.m.doc_text or ""):
+                    if s in declared:
+                        self.report.warn(
+                            "C16", f"{e['id']}.{d['dimension_name']} 状态[{s}]"
+                                   f"原文无逐字状态名，但已在 inferred 声明"
+                                   f"为合理推断", e["id"])
+                    elif s in (self.m.doc_text or ""):
                         self.report.warn(
                             "C16", f"{e['id']}.{d['dimension_name']} 状态[{s}]"
                                    f"不在原文枚举行中（全文其他位置出现，"
@@ -405,8 +453,8 @@ class Validator:
                     else:
                         self.report.error(
                             "C16", f"{e['id']}.{d['dimension_name']} 状态[{s}]"
-                                   f"在原文全文中不存在：状态值必须逐字取自原文",
-                            e["id"])
+                                   f"在原文全文中不存在：状态值必须逐字取自原文"
+                                   f"（如需保留请在 inferred 声明）", e["id"])
                 if span and not missing:
                     ordered = [v for v in span.values if v in set(d["states"])]
                     if d["states"] != ordered:

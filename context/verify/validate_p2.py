@@ -13,6 +13,10 @@ with open(sys.argv[1], 'r', encoding='utf-8') as f:
     d = json.load(f)
 
 p1_path = sys.argv[2] if len(sys.argv) >= 3 else None
+p1 = None
+if p1_path:
+    with open(p1_path, 'r', encoding='utf-8') as f:
+        p1 = json.load(f)
 
 errors = []
 warnings = []
@@ -52,7 +56,7 @@ for eo in d['entity_obligations']:
 for to in d['transition_obligations']:
     required = ['id', 'entity', 'dimension', 'from', 'to', 'action', 'role',
                 'preconditions', 'expected_results', 'risk_traits', 'priority', 'source_ref',
-                'note', 'sub_steps', 'coverage_priority', 'is_repeatable', 'repeat_condition',
+                'note', 'coverage_priority', 'is_repeatable', 'repeat_condition',
                 'side_effects', 'branch_path', 'precondition_state_refs']
     for r in required:
         if r not in to:
@@ -187,8 +191,6 @@ for k, v in sc.items():
 if p1_path:
     xc_ids_in_status = {m['xc_id'] for m in ctx['xc_to_br_mapping']}
     p1_xc_ids = set()
-    with open(p1_path, 'r', encoding='utf-8') as f:
-        p1 = json.load(f)
     for xc in p1['constraints']['cross_entity']:
         p1_xc_ids.add(xc['id'])
     if xc_ids_in_status != p1_xc_ids:
@@ -214,6 +216,57 @@ for co in d['cross_entity_obligations']:
             resolves = (tid in to_ids) or (tid in splits) or any(k.startswith(tid + '[') for k in to_ids)
             if not resolves:
                 errors.append(f"CO {co['id']}: {fld} {tid} 不指向任何TO/拆分基 (dangling)")
+
+# ============ ③ CO dependent-uniqueness 闸门 ============
+# 用共享派生规则(co_derivation, 与 P2 生成器同一份逻辑)从 P1 重推导每个
+# auto CO 的 dependent_transition_id, 要求与产出严格一致。兜住历史 first-pick
+# 回归(E-PROJ→已选入 4 候选静默取错 T-002, 应为 T-012)。
+# 洞4: 同 (enabler_transition, dependent_transition) 边不允许跨 causal_type 共存。
+if p1 is not None:
+    import os as _os
+    import importlib as _importlib
+    _ctx_dir = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    if _ctx_dir not in sys.path:
+        sys.path.insert(0, _ctx_dir)
+    _co_derivation = _importlib.import_module("co_derivation")
+
+    _p1_tr_by_id = {t['id']: t for t in p1['state_and_flow']['transitions']}
+    _p1_xc = p1['constraints']['cross_entity']
+    _xc_by_id = {x['id']: x for x in _p1_xc}
+
+    for co in d['cross_entity_obligations']:
+        if co.get('causal_type') != 'auto':
+            continue
+        cid = co.get('constraint_id')
+        if not cid:
+            continue  # R 来源 CO 无 XC, 不在本闸门范围
+        xc = _xc_by_id.get(cid)
+        if not xc:
+            continue
+        dep_tid, info = _co_derivation.resolve_dependent_transition(
+            _p1_xc, _p1_tr_by_id, xc)
+        if co.get('dependent_transition_id') != dep_tid:
+            errors.append(
+                f"CO {co['id']}: dependent_transition_id={co.get('dependent_transition_id')} "
+                f"与共享派生规则不符 (应={dep_tid}, via={info['via']}, "
+                f"from={info['from_state']}, to={info['to_state']}, "
+                f"candidates={info['candidates']})"
+            )
+
+    _seen_edge = {}
+    for co in d['cross_entity_obligations']:
+        key = (co.get('enabler_transition_id'), co.get('dependent_transition_id'))
+        if not all(key):
+            continue
+        ct = co.get('causal_type')
+        if key in _seen_edge and _seen_edge[key] != ct:
+            errors.append(
+                f"CO {co['id']}: 边 {key} causal_type={ct} 与 {_seen_edge[key]} 冲突 "
+                f"(同 (enabler,dependent) 对不允许跨 causal_type 共存)"
+            )
+        _seen_edge.setdefault(key, ct)
+else:
+    infos.append("P1 JSON 未提供 —— 跳过 CO dependent-uniqueness 重推导闸门")
 
 print(f"Errors: {len(errors)}")
 for e in errors[:20]:

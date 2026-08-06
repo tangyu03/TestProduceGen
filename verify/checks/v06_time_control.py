@@ -2,35 +2,23 @@
 
 第一性原理："哪些用例需要 time_control"从模型推导(单一真相源),而非
 case_spec.time_control.events_requiring 关键词(那会误伤"设置超时"配置操作、
-"待办任务说明"等仅提及"超时"字样的非时间触发用例)：
+"待办任务说明"等仅提及"超时"字样的非时间触发用例)。判据与 S1 生成器共用
+context/time_control.py(同 entity_operators.py/co_derivation.py 的共享派生
+规则——生成器与闸门不能漂移)：
   - transition_obligations 中 risk_traits 含 time_sensitive 的 TO
   - constraint_obligations 中 category==timing(或 desc 含超时/时限)的 BR
 
 这些义务被引用(source_ids)的用例必须声明 time_control.mechanism ∈
 allowed_mechanisms(测试策略,来自 case_spec.time_control)或 status=="planned"。
 
-S1 生成器已从时效语义填充 time_control(见 _derive_time_mechanism)。
+S1 生成器已从时效语义填充 time_control(见 _derive_time_mechanism)；dedup
+合并并集 source_ids 时,即使存活的兄弟用例本身非时效,只要并集引用时效义务,
+也必须保留该声明。
 """
 from .base import CheckResult, get_procedures
+from context.time_control import needs_time_control_ids
 
 CHECK_ID = "V06"
-
-
-def _needs_time_control(model: dict) -> set:
-    """返回需要 time_control 的义务 id 集合。"""
-    needs: set = set()
-    for to in model.get("transition_obligations", []) or []:
-        if "time_sensitive" in (to.get("risk_traits") or []):
-            if to.get("id"):
-                needs.add(to["id"])
-    for r in model.get("constraint_obligations", []) or []:
-        desc = r.get("description") or ""
-        if (r.get("type") == "business_rule"
-                and (r.get("category") == "timing"
-                     or "超时" in desc or "时限" in desc)):
-            if r.get("id"):
-                needs.add(r["id"])
-    return needs
 
 
 def check(output: dict, spec: dict) -> CheckResult:
@@ -42,7 +30,7 @@ def check(output: dict, spec: dict) -> CheckResult:
         return res
 
     allowed = set((spec or {}).get("time_control", {}).get("allowed_mechanisms", []))
-    needs = _needs_time_control(model)
+    needs = needs_time_control_ids(model)
     if not needs:
         res.skip("model has no time-sensitive obligations")
         return res

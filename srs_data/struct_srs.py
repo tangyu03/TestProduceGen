@@ -325,7 +325,9 @@ def build() -> DomainModel:
                 "states": ["未打分", "已保存", "已提交"],
                 "initial": "未打分",
                 "terminal": ["已提交"],
-                "note": "见 4.9.2 专家打分；未打分为隐式初态（分配打分任务后初始化）",
+                "inferred": ["未打分"],
+                "note": "见 4.9.2 专家打分；未打分为隐式初态（分配打分任务后初始化），"
+                        "原文无逐字状态名，经 inferred 声明为合理推断",
             },
         ],
         operations=[
@@ -1500,25 +1502,25 @@ def build() -> DomainModel:
     m.add_br(
         "b01", "validation", "项目阶段影响项目状态流转：开题阶段归档后可能进入已选入（评级合格及以上，阶段变验收）或待选入（评级不合格或差，阶段不变）；验收阶段归档后可能进入已归档（评级合格及以上）或待选入（评级不合格或差）",
         ["E-PROJ"], "4.5 项目状态（5）",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目阶段"),
     )
     m.add_br(
         "b02", "validation", "项目评级影响归档后项目状态转换：优秀/良好/合格到开题阶段变已选入（阶段变验收）/验收阶段变已归档；不合格/差到开题或验收阶段均变待选入（阶段不变）",
         ["E-PROJ"], "4.5 项目状态（5）；4.9.6 项目评价",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目评级"),
     )
     m.add_br(
         "b03", "validation", "暂停前计划状态影响重启后目标状态：对暂停的评审计划进行重新启动，启动后状态返回到暂停前的状态",
         ["E-PLAN"], "4.8.7 暂停和重启评审计划（2）",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="暂停前计划状态"),
     )
     m.add_br(
         "b04", "timing", "评审计划超时类型影响超时触发的状态转换：下发时限 1-2 天默认 1（已建立到待启动）；启动时限 1-5 天默认 2（待启动到待评审）；评审时限 1-5 天默认 2（待评审/评审中/暂停到已完成）；归档时限 1-3 天默认 2（已完成到超时结束）",
         ["E-PLAN"], "4.8.1（5）；4.8.4（2）；4.8.5（2）；4.8.8（2）；4.8.9（2）",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="评审计划超时类型"),
     )
 
@@ -1526,119 +1528,119 @@ def build() -> DomainModel:
     m.add_br(
         "b05", "validation", "评审计划的评审组由 5、7 或 9 个专家组成，有且只能有一个组长专家",
         ["E-PLAN", "E-EXP"], "4.8.1（6）a",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="评审组人数"),
     )
     m.add_br(
         "b06", "validation", "每个评审专家的技术领域应覆盖评审计划中项目的领域",
         ["E-PLAN", "E-EXP"], "4.8.1（6）b",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b07", "authorization", "默认回避计划中的项目所属机构的专家",
         ["E-PLAN", "E-EXP", "E-ORG"], "4.8.1（6）c①",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b08", "authorization", "当人为设置了专家回避项目，评审计划中有该项目时，该专家不可选入评审组",
         ["E-PLAN", "E-EXP"], "4.8.1（6）c②",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b09", "authorization", "一个计划中，评审组专家工作时段相同，专家一个工作时段只能被分配一个评审计划",
         ["E-PLAN", "E-EXP"], "4.8.1（6）d",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b10", "timing", "专家不能被连续 3 天晚上分配任务",
         ["E-PLAN", "E-EXP"], "4.8.1（6）e",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b11", "authorization", "只要计划结束，评审专家与计划相应的评审时段为可用",
         ["E-PLAN", "E-EXP"], "4.8.1（7）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 项目选入/选出/编辑/删除约束
     m.add_br(
         "b12", "authorization", "对于本阶段不合格评价结果的项目，只有 1 次选入机会",
         ["E-PROJ"], "4.7.1（2）",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目评级"),
     )
     m.add_br(
         "b13", "authorization", "对于本阶段评价结果为差的项目，不可选入",
         ["E-PROJ"], "4.7.1（3）",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目评级"),
     )
     m.add_br(
         "b14", "authorization", "评审管理员只能对已选入状态的项目进行选出",
         ["E-PROJ"], "4.7.2",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b15", "authorization", "只能删除待选入且未评价过的项目",
         ["E-PROJ"], "4.6（1）b",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b16", "authorization", "只可编辑待选入的项目信息，对评价过的项目编辑附件",
         ["E-PROJ"], "4.6（1）c",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b17", "authorization", "机构管理员可依据项目名称和技术领域条件进行查询",
         ["E-PROJ"], "4.6（1）e",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b18", "authorization", "评审管理员和评审助理查看项目附件，机构管理员只可查看本机构的项目附件",
         ["E-PROJ", "E-ATT"], "4.6（2）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 评审计划约束
     m.add_br(
         "b19", "authorization", "评审管理员从处于已选入状态的项目中选取 1-5 个项目纳入评审计划",
         ["E-PLAN", "E-PROJ"], "4.8.1（1）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b20", "authorization", "评审助理可在待评审、评审中和已完成状态暂停评审计划和重启评审计划",
         ["E-PLAN"], "4.8.1（4）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b21", "authorization", "评审管理员和评审助理可根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划",
         ["E-PLAN"], "4.8.1（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b22", "authorization", "评审管理员和评审助理可删除处于已建立状态和取消结束状态的计划",
         ["E-PLAN"], "4.8.10",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b23", "authorization", "下发后的评审计划不能编辑或取消",
         ["E-PLAN"], "4.8.4（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b24", "authorization", "计划类型和技术领域计划保存后不可编辑",
         ["E-PLAN"], "4.8.2 表 4.8-1",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b25", "authorization", "处于已建立状态的计划，可以进行编辑",
         ["E-PLAN"], "4.8.2",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b26", "validation", "系统管理员可以设置下发时限、启动时限、评审时限和归档时限；超时设置完成后，对所有计划立即生效",
         ["E-TOUT", "E-PLAN"], "4.8.1（5）；4.11.4",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="评审计划超时类型"),
     )
 
@@ -1646,24 +1648,24 @@ def build() -> DomainModel:
     m.add_br(
         "b27", "computation", "项目评价计算：去掉普通专家的一个最高分和一个最低分，计算剩余普通专家打分的平均分，然后按系统内置打分权重表进行计算，计算结果四舍五入，保留两位小数",
         ["E-SCORE", "E-PROJ"], "4.9.6 项目评价",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="评审组人数"),
     )
     m.add_br(
         "b28", "computation", "项目级别评判规则：优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）",
         ["E-PROJ"], "4.9.6 项目评价；表 4.9-5",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目评级"),
     )
     m.add_br(
         "b29", "computation", "本次评审项目的单个打分项分数为所有专家相应项打分的平均分",
         ["E-SCORE", "E-PROJ"], "4.9.6 项目评价",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b30", "authorization", "开题评审评价结果为合格及以上的项目才能进行验收评审",
         ["E-PROJ"], "4.9 项目评审",
-        "restrictive", "mandatory",
+        "restrictive",
         note=N(branch_dimension="项目评级"),
     )
 
@@ -1671,405 +1673,405 @@ def build() -> DomainModel:
     m.add_br(
         "b31", "computation", "对合格机构的处理：所有项目的阶段评价为差的次数累计达到 3 次及以上；或差 1 次及以上且不合格 3 次及以上；或不合格 5 次及以上；满足任一条将合格的研制机构评价为不合格机构",
         ["E-ORG", "E-PROJ"], "4.9.7（1）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b32", "authorization", "不能对不合格研制机构所属项目进行评审；已下发的评审计划中的项目不受影响；对未下发计划的项目从计划中去掉，如果某个未下发评审计划中的项目均属于不合格的研制机构，则取消该计划",
         ["E-ORG", "E-PROJ", "E-PLAN"], "4.9.7（2）a-c",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b33", "authorization", "系统管理员可以对不合格机构提为试用机构，研制机构累计 3 次评级为不合格，则不能提为试用机构",
         ["E-ORG"], "4.9.7（2）d",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b34", "computation", "对试用研制机构的处理：累计 10 次项目阶段评价结果为优可升为合格；累计 2 次差降为不合格；累计 1 次差且 2 次及以上不合格降为不合格；累计 4 次不合格降为不合格；同时可满足升或降时降为不合格",
         ["E-ORG", "E-PROJ"], "4.9.7（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 打分约束
     m.add_br(
         "b35", "authorization", "已提交的项目不能进行分数修改",
         ["E-SCORE"], "4.9.2（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b36", "authorization", "项目各项打分全部为零的不能提交，并提示",
         ["E-SCORE"], "4.9.2（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b37", "validation", "评审专家打分实现对分配给其的项目进行打分、保存、提交功能，并显示内置的评分细则为专家打分提供参考",
         ["E-SCORE"], "4.9.2",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 专家管理约束
     m.add_br(
         "b38", "authorization", "专家有待评审或者评审中的项目时不可以删除，并提示；如删除后同一技术领域的专家不足 5 人时需进行确认；如删除后同一技术领域中组长专家不足 2 人时需进行确认",
         ["E-EXP"], "4.10（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b39", "authorization", "不能编辑专家的技术领域、机构、评审身份和手机号",
         ["E-EXP"], "4.10（2）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b40", "authorization", "在已选入的项目中进行专家回避项目设置，只对回避项目设置后建立的评审计划有效",
         ["E-EXP", "E-PROJ", "E-PLAN"], "4.10（6）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b41", "validation", "新增专家时手机号作为账号，密码默认为手机号后六位",
         ["E-EXP", "E-USER"], "4.10（1）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 用户管理约束
     m.add_br(
         "b42", "authorization", "不可编辑用户的用户账号、手机号、技术领域、所属机构和角色",
         ["E-USER"], "4.11.1（2）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b43", "authorization", "如有未完成的任务，不能删除用户",
         ["E-USER"], "4.11.1（6）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b44", "authorization", "不可对内置的审计管理员、系统管理员、评审管理员、评审助理进行编辑、锁定、重置密码等操作",
         ["E-USER"], "4.11.1",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b45", "validation", "系统管理员可根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询",
         ["E-USER"], "4.11.1（7）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 机构管理约束
     m.add_br(
         "b46", "authorization", "不可编辑机构的上级机构、机构编码、不合格次数和机构状态",
         ["E-ORG"], "4.11.3（2）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b47", "authorization", "机构下无项目、无用户、无子机构时，才可删除，根机构不可删除",
         ["E-ORG"], "4.11.3（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b48", "validation", "机构类型自动从上级机构继承，不可编辑；机构编码自动生成，不可编辑",
         ["E-ORG"], "4.11.3 表 4.11-3",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 安全功能要求
     m.add_br(
         "b49", "authorization", "实现基于角色的访问控制",
         ["E-USER", "E-ROLE"], "4.13（1）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b50", "validation", "登录时，密码不以明文显示",
         ["E-USER"], "4.13（2）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b51", "validation", "身份证的年月日不以明文显示",
         ["E-USER"], "4.13（3）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b52", "validation", "用户初次登录时需更改密码",
         ["E-USER"], "4.13（4）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b53", "validation", "密码设置时，长度在 8 到 18 位，要包含字母、数字和特殊字符",
         ["E-USER"], "4.13（5）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b54", "authorization", "用户都应有唯一标识，同一用户同时段不能重复登录",
         ["E-USER"], "4.13（6）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b55", "timing", "用户登录系统后，若 30 分钟内无任何操作，则需要重新登录",
         ["E-USER"], "4.13（7）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b56", "timing", "普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误 3 次时，锁定该账户，锁定后可由系统管理员解锁",
         ["E-USER"], "4.13（8）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b57", "timing", "普通用户密码有效期为 7 天，过期后强制对密码进行更改，不能与上一密码相同",
         ["E-USER"], "4.13（9）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b58", "validation", "用户修改自己密码时，需要输入原密码，如果输入的原密码不对，则给出提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次，且相同，否则系统给出提示",
         ["E-USER"], "4.13（10）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b59", "validation", "对服务端返回客户端的数据进行加密",
         [], "4.13（11）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b60", "validation", "对客户端提交到服务端的用户相关信息在传输中进行加密",
         ["E-USER"], "4.13（12）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b61", "authorization", "系统日志记录只能由系统审计员查看",
         ["E-LOG", "E-USER"], "4.13（13）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b62", "validation", "系统日志记录事件的时间、角色、操作类型、日志内容和日志类型等",
         ["E-LOG"], "4.13（14）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
     m.add_br(
         "b63", "authorization", "页面提示信息不能含有系统后台、技术框架等信息",
         [], "4.13（15）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # 易用性需求
     m.add_br(
         "b64", "usability", "当输入的用户账号或者密码错时，有提示",
         ["E-USER"], "4.14（1）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b65", "usability", "日期类数据输入，应提供日历选择功能",
         [], "4.14（2）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b66", "usability", "查询功能中的组合查询支持两个（含）以上字段'与'的查询",
         [], "4.14（3）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b67", "usability", "添加、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示",
         [], "4.14（4）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b68", "usability", "同页面关联数据刷新后保持一致性，不同页面重新打开关联数据应保持同步",
         [], "4.14（5）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b69", "usability", "评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时 5 小时内的任务的说明",
         ["E-PLAN", "E-SCORE"], "4.14（6）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b70", "usability", "在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家",
         ["E-PLAN", "E-EXP"], "4.14（7）",
-        "usability", "mandatory",
+        "usability",
     )
 
     # 通用功能要求
     m.add_br(
         "b71", "usability", "新增数据记录，系统提供相关页面，用户按照页面相关要求输入，并实现数据的提交功能和取消操作功能",
         [], "4.4（1）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b72", "usability", "可对已存在的数据记录进行修改",
         [], "4.4（2）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b73", "usability", "提供列表显示多条记录的摘要信息，必要时提供记录的详细信息",
         [], "4.4（3）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b74", "usability", "业务允许情况下，可删除选中的一条或多条记录",
         [], "4.4（4）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b75", "usability", "在有排序标识的列表中单击某一个列表头时，可以按照相应列的升序或者降序来显示列表数据",
         [], "4.4（5）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b76", "usability", "系统应支持按照条件逻辑与查询和模糊查询",
         [], "4.4（6）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b77", "usability", "清除输入的查询条件，刷新页面",
         [], "4.4（7）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b78", "usability", "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数",
         [], "4.4（8）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b79", "usability", "在对数据进行新增、编辑操作后，确定后，实现对数据库中的数据更新",
         [], "4.4（9）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b80", "usability", "将选中的附件从本地上传到数据库",
         ["E-ATT"], "4.4（10）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b81", "usability", "将选中的附件从数据库下载到本地",
         ["E-ATT"], "4.4（11）",
-        "usability", "mandatory",
+        "usability",
     )
     m.add_br(
         "b82", "usability", "放弃本次新增、编辑操作或关闭弹窗",
         [], "4.4（12）",
-        "usability", "mandatory",
+        "usability",
     )
 
     # 显示/展示类 BR
     m.add_br(
         "b83", "display", "评审管理员和评审助理可以在首页查看：显示所有技术领域项目统计；所有开题阶段项目得分 TOP10",
         ["E-PROJ"], "4.12（1）",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b84", "display", "机构管理员在首页只可查看本机构的信息：显示各技术领域项目统计；显示本机构开题阶段项目得分 TOP10",
         ["E-PROJ"], "4.12（2）",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b85", "display", "审计管理员在首页可查看、查询日志信息",
-        ["E-LOG"], "4.12（3）",
-        "display", "mandatory",
+        ["E-LOG"], "4.12",
+        "display",
     )
     m.add_br(
         "b86", "display", "评审专家在首页对分配的项目进行打分",
-        ["E-SCORE"], "4.12（4）",
-        "display", "mandatory",
+        ["E-SCORE"], "4.12",
+        "display",
     )
     m.add_br(
         "b87", "display", "提供显示项目阶段评价结果的功能",
         ["E-PROJ"], "4.9.6",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b88", "display", "提供显示研制机构状态及其当前状态期间项目评级统计结果的功能",
         ["E-ORG", "E-PROJ"], "4.9.7",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b89", "display", "评审管理员可查看评价分数大于等于分数限值的项目信息",
         ["E-PROJ", "E-LMT"], "4.9.5 结果汇总",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b90", "display", "评审管理员和评审助理可以查看评审计划启动后到归档前的各项目的打分进度和专家的打分情况",
         ["E-PLAN", "E-SCORE"], "4.9.3 实施情况",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b91", "display", "评审管理员和评审助理可以对评审计划的状态、评审组的组成和计划的执行信息等进行查看",
         ["E-PLAN"], "4.8.11 查看评审计划",
-        "display", "mandatory",
+        "display",
     )
     m.add_br(
         "b92", "display", "评分细则自动显示当前阶段",
         ["E-SCORE"], "4.9.1 表 4.9-2",
-        "display", "mandatory",
+        "display",
     )
 
     # 字段约束类 BR（重点字段）
     m.add_br(
         "b93", "validation", "项目.联系人电话：必填项；数字组成；手机号验证规则：第一位只能为数字 1，第二位数字为：3、4、5、6、7、8、9，共 11 位数字",
         ["E-PROJ"], "4.6 表 4.6-1（19）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b94", "validation", "项目.建议书：可上传格式 doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过 10MB；多次上传时覆盖上一次附件；必填项",
         ["E-PROJ", "E-ATT"], "4.6 表 4.6-1（25）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b95", "validation", "项目.申请经费（万元）：必填项；1-9999",
         ["E-PROJ"], "4.6 表 4.6-1（16）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b96", "validation", "评审计划.预计评审日期：必填项；yyyy-mm-dd",
         ["E-PLAN"], "4.8.2 表 4.8-1（7）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b97", "validation", "专家.手机号：必填项；数字组成；手机号验证规则：第一位只能为数字 1，第二位数字为：3、4、5、6、7、8、9，共 11 位数字；唯一",
         ["E-EXP"], "4.10 表 4.10-1（3）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b98", "validation", "专家.技术领域：取值范围 A-J 领域；可选择 1-3 个技术领域；必填项",
         ["E-EXP"], "4.10 表 4.10-1（4）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b99", "validation", "用户.用户账号：必填项；可以由汉字、字母、数字、下划线(_)组成；不可重复",
         ["E-USER"], "4.11.1 表 4.11-1（1）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b100", "validation", "用户.登录密码：必填项；只能由数字、字母和特殊符号组成；长度大于等于 8 个字符小于等于 18 个字符",
         ["E-USER"], "4.11.1 表 4.11-1（4）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b101", "validation", "用户.手机号码：必填项；数字组成；手机号验证规则：第一位数字 1，第二位数字：3、4、5、6、7、8、9，一共 11 位数字；唯一",
         ["E-USER"], "4.11.1 表 4.11-1（9）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b102", "validation", "用户.头像：图片大小不可超过 1MB；可上传格式 png、jpg；在首页显示",
         ["E-USER", "E-ATT"], "4.11.1 表 4.11-1（3）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b103", "validation", "用户.邮箱：必须包含 @ 和 .；不能包含中文、特殊符号",
         ["E-USER"], "4.11.1 表 4.11-1（10）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b104", "validation", "机构.机构名称：必填项；长度 50",
         ["E-ORG"], "4.11.3 表 4.11-3（1）",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b105", "validation", "分数限值：0.0<分数限值<=100.0；四舍五入后，结果保留一位小数",
         ["E-LMT"], "4.9.4 表 4.9-3",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b106", "validation", "打分项数值约束：创新性 0.00-15.00；应用前景 0.00-20.00；研究目标及技术指标 0.00-10.00；技术指标达标情况 0.00-10.00；成果及考核方式 0.00-20.00；成果及其完成情况 0.00-20.00；研究基础和保障条件 0.00-15.00；研究方案及技术途径 0.00-20.00；研制过程 0.00-15.00；关键技术 0.00-20.00；四舍五入后保留两位小数",
         ["E-SCORE"], "4.9.1 表 4.9-1",
-        "field_constraint", "mandatory",
+        "field_constraint",
     )
     m.add_br(
         "b107", "computation", "总分计算：开题=创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径<=100.00；验收=创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术<=100.00；四舍五入后保留两位小数",
         ["E-SCORE"], "4.9.1 表 4.9-1（12）",
-        "restrictive", "mandatory",
+        "restrictive",
     )
 
     # ---- 5.4 因果补充 ----

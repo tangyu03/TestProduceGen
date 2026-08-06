@@ -3,6 +3,7 @@
   "pipeline_cmd": [],
   "pipeline_cmd_full": ["python", "main.py", "coverage_obligations.json", "{run_dir}/output.json"],
   "validator_spec": "verify/case_spec.json",
+  "validator_model": "coverage_obligations.json",
   "smoke_cmd": ["python", "scripts/llm_e2e_check.py"],
   "agent_cmd": ["python", "verify/code_agent_cli.py"],
   "max_attempts_per_signature": 3,

@@ -265,7 +265,7 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
         cycle_nodes = list({edge[0] for edge in cycle_edges})
 
         # Build removal candidates for this cycle.
-        # Tuple layout: (category, -confidence, -depth, dep_id, proc_id)
+        # Tuple layout: (category, confidence, -depth, dep_id, proc_id)
         # → sorted ascending; first element = lowest category (weak first),
         #   then lowest confidence (prefer cut), then deepest chain_depth
         #   (prefer cut, v28 behavior preserved as tiebreaker).
@@ -282,7 +282,7 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
                 if dep_id in cycle_nodes:
                     origin = _origin_of(proc_id, dep_id, is_weak=True)
                     conf = _confidence(origin)
-                    candidates.append((0, -conf, -depth, dep_id, proc_id))
+                    candidates.append((0, conf, -depth, dep_id, proc_id))
 
             for dep_id in proc.get("_S3_fields", {}).get("dependencies", []):
                 if dep_id in cycle_nodes:
@@ -290,7 +290,7 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
                     category = 2 if cross else 1
                     origin = _origin_of(proc_id, dep_id, is_weak=False)
                     conf = _confidence(origin)
-                    candidates.append((category, -conf, -depth, dep_id, proc_id))
+                    candidates.append((category, conf, -depth, dep_id, proc_id))
 
         candidates.sort()
 
@@ -299,8 +299,11 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
             break
 
         # Remove the best candidate: lowest category → lowest confidence → deepest chain_depth
-        category, neg_conf, _, dep_id, proc_id = candidates[0]
-        conf = -neg_conf
+        # NOTE: ascending on +confidence (not -confidence) is deliberate — ascending
+        # on -confidence selected the HIGHEST-confidence edge for removal, the
+        # inverse of the documented intent, silently destroying authoritative
+        # deps (guard1/transition_upstream) whenever a cycle mixed edge types.
+        category, conf, _, dep_id, proc_id = candidates[0]
         proc = proc_by_id[proc_id]
         cat_name = {0: "weak", 1: "same-entity strong", 2: "cross-entity strong"}.get(category, "unknown")
         origin = _origin_of(proc_id, dep_id, is_weak=(category == 0))

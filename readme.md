@@ -204,6 +204,7 @@ python main.py coverage_obligations.json output.json
 
 ```bash
 python -m verify.validators -s verify/case_spec.json -o output.json --json verdict.json
+python verify/validators.py -s verify/case_spec.json -o p3_agent_output.json --model coverage_obligations.json -j verdict.json
 ```
 
 ### 5. 运行自优化循环（可选）

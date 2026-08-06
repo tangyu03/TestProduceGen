@@ -44,12 +44,12 @@ source_ref 用"章节号+标题"，无章节用原文片段(≤30字)，一律�
     "transition_relations":[{"from":"E-XXX","to":"E-YYY","desc":"","trigger":"","trigger_source":"cross_entity|action|expected_results|desc|business_rule|bidi_coupling","evidence_transitions":["T-XXX"],"rollback_propagation":false,"confidence":"high|medium|low","note":{"inferred":false,"comment":""}}]
   },
   "state_and_flow":{
-    "transitions":[{"id":"T-XXX","entity":"E-XXX","dimension":"","from":"源状态|null","to":"","action":"","role":"R-XXX|system","preconditions":[{"text":"","type":"state_ref|event_ref|constraint","ref":{"entity":"E-XXX","dimension":"","state":""}}],"expected_results":[],"traits":[],"direction":"forward|backward|lateral|resume","priority":"P0|P1|P2","source_ref":"","note":{"inferred":false,"comment":"","conflict":"","branch_dimension":""},"sub_steps":[{"step":1,"action":"","role":"R-XXX","expected_result":""}]}]
+    "transitions":[{"id":"T-XXX","entity":"E-XXX","dimension":"","from":"源状态|null","to":"","action":"","role":"R-XXX|system","preconditions":[{"text":"","type":"state_ref|event_ref|constraint","ref":{"entity":"E-XXX","dimension":"","state":""}}],"expected_results":[],"traits":[],"direction":"forward|backward|lateral|resume","priority":"P0|P1|P2","source_ref":"","note":{"inferred":false,"comment":"","conflict":"","branch_dimension":""}]}]
   },
   "constraints":{
     "invalid_transitions":[{"id":"IT-XXX","entity":"E-XXX","from":"","to":"","reason":"","source_ref":""}],
-    "cross_entity":[{"id":"XC-XXX","source_entity":"E-XXX","source_transition":"T-XXX","source_state":"","target_entity":"E-YYY","target_dimension":"","target_condition":"状态=Y","desc":"","source_ref":""}],
-    "business_rules":[{"id":"BR-XXX","category":"validation|computation|authorization|timing|notification|usability|display","desc":"","entities_involved":["E-XXX"],"severity":"mandatory|conditional","source_ref":"","signal_type":"restrictive|usability|display|field_constraint","note":{"inferred":false,"comment":"","branch_dimension":""}}]
+    "cross_entity":[{"id":"XC-XXX","source_entity":"E-XXX","source_transition":"T-XXX","source_state":"","target_entity":"E-YYY","target_dimension":"","target_from":"被驱动转换起点状态或null","target_to":"被驱动转换终点状态或null","target_condition":"人读备注(自由文本,可省略)","desc":"","source_ref":""}],
+    "business_rules":[{"id":"BR-XXX","category":"validation|computation|authorization|timing|notification|usability|display","desc":"","entities_involved":["E-XXX"],"enforcement":"mandatory|conditional","source_ref":"","signal_type":"restrictive|usability|display|field_constraint","note":{"inferred":false,"comment":"","branch_dimension":""}}]
   }
 }
 ```
@@ -118,7 +118,7 @@ management_dimension 必复核，纯管理归属可保留注复核结论否则�
 |③|states 有先后|to 在后=forward；to 在前=backward|
 |④|无法判断|inferred+依据|
 
-forward=主链推进；backward=合法回退；lateral=侧挂入口(同相位)；resume=从侧挂返回。分支穿透：受分支影响转换标 branch trait，expected_results 用"若{维度}={值}，则{结果}"，note.branch_dimension 标维度。跨维度联动：仅源维度建转换，expected_results 含目标维度变化，Step5 登记联动 XC。sub_steps 仅文档明确转换内多步骤且有角色/操作依赖时用。
+forward=主链推进；backward=合法回退；lateral=侧挂入口(同相位)；resume=从侧挂返回。分支穿透：受分支影响转换标 branch trait，expected_results 用"若{维度}={值}，则{结果}"，note.branch_dimension 标维度。跨维度联动：仅源维度建转换，expected_results 含目标维度变化，Step5 登记联动 XC。文档明确转换内多步骤且有角色/操作依赖时，拆分为多条转换，用 preconditions 表达步骤先后。
 
 **4.2.1 preconditions**(P12)：每项{text,type,ref}，text 保留原文(P1转义)。type 优先级 state_ref>event_ref>constraint。
 ```
@@ -152,6 +152,7 @@ Q3 层级性：上级状态作下级门禁→约束(入XC)；下级全完成上�
 ### Step 5 约束与因果补充
 - **invalid_transitions**：仅文档明确禁止时生成。
 - **XC 三来源**：①镜像：跨实体 precondition(state_ref 且 ref.entity≠当前实体)→desc 以"镜像T-xxx precondition'…'"开头；4.6 判约束关系同此,desc 加"由Step4.6约束-因果鉴别确认"。②联动：desc="联动:T-xxx执行后{实体}.{维度}由{旧值}变为{新值}"。③分支差异：desc="分支[{维度}={值}]:{约束差异}"。
+- **XC 结构化因果字段(必填,治本)**：每条 XC 必填 `target_from`/`target_to`，即被驱动转换的起止状态（target_entity 状态维度上的 from/to），由 desc 语义逐字转录——联动模板的"由{旧值}变为{新值}"即旧值=target_from、新值=target_to；镜像类同 rule 的联动对共享同一 (target_from,target_to)。单状态目标(如"回到计划建立前(已选入)")不得省略 from——回退语义下 from=回退前的状态(待评审)。聚合/计算/多转换目标(按…变更/不变…)填 null。`target_condition` 仅人读备注，下游优先读结构化字段，自由文本仅兜底。
 - **BR 三信号**：①限制性词(必须/不得/仅当/禁止/不能/不可/不超过)→validation|computation|authorization|timing|notification,restrictive；②陈述句(应提供/应支持/可)→usability，(显示/展示)→display，易用性章节逐条独立成BR；③字段约束属性→validation,desc 复用属性完整约束,field_constraint。每分支维度目标≥1条BR含 branch_dimension；无信号不生成，coverage 标缺口(P3)。
 - **5.4 因果补充**：XC 中 source≠target 且 source_transition+target_condition 构成因果链→cross_entity；timing 类 BR 时间触发+受影响实体→business_rule。均过 4.6，同(from,to)按 P10 仅升级。
 

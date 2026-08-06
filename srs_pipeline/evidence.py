@@ -4,6 +4,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from .signals import _normalize_doc
+
 _HEADING = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$", re.M)
 _ENUM_LINE = re.compile(r"(状态|阶段)(?:包括|分为)[：:]?\s*([^。\n]{2,100})")
 _SPLIT = re.compile(r"[、,，/；;]|和")
@@ -18,7 +20,9 @@ class Span:
     source_ref: str = ""
 
 def build_evidence(doc_text: str) -> list:
-    """机器抽取。任何入库存量都通过 `in doc_text` 精确验证，幻觉无从进入。"""
+    """机器抽取。任何入库存量都通过 `in doc_text` 精确验证，幻觉无从进入。
+    先归一化（去 #、解转义），标题 `## 4\\.6 …` 才能被 _HEADING 命中。"""
+    doc_text = _normalize_doc(doc_text)
     spans, seq = [], 0
 
     def add(kind, text, values=None, ref=""):

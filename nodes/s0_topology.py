@@ -1312,6 +1312,7 @@ def _compute_entry_phase(
     structural: list[dict] = None,
     cos: list[dict] = None,
     transition_relations: list[dict] = None,
+    restrict_05: bool = False,
 ) -> int:
     """Compute entry phase for a dependent entity's dimension.
 
@@ -1324,6 +1325,11 @@ def _compute_entry_phase(
     3. Structural composition: anchor creates child entity
     4. 从维度: transition_relations where to=entity
     5. Anchor min phase fallback
+
+    restrict_05=True: run ONLY Strategy 0 then Strategy 5.  The fixpoint-recursive
+    upstream anchoring (Strategy 1) and the heuristic fallbacks (2/3/4) are
+    skipped — they are the risk surface for cyclic-state-machine non-convergence
+    (V08's original reason for short-circuiting the whole anchoring path).
     """
     # Strategy 0: Precondition-based phase derivation
     # Scan this entity's TO preconditions for primary-entity state references.
@@ -1338,9 +1344,24 @@ def _compute_entry_phase(
     entity_tos = [t for t in tos if t.get('entity') == entity and t.get('dimension') == dim]
     for to in entity_tos:
         for prec in to.get('preconditions', []) or []:
+            # P2 emits preconditions as dicts {"text","type","ref"} (not bare
+            # strings), so membership must test the text, not dict keys.
+            prec_text = prec.get('text', '') if isinstance(prec, dict) else str(prec or '')
             for state_name, phase_val in primary_states.items():
-                if state_name and len(state_name) >= 2 and state_name in prec:
+                if state_name and len(state_name) >= 2 and state_name in prec_text:
                     return phase_val + 1  # +1: dependent starts AFTER primary reaches state
+
+    if restrict_05:
+        # Strategy 5 only: anchor min phase fallback.
+        # Primary-anchored entities: the primary is never in dep_map, so this
+        # degrades to 0 (no shift) — the conservative default for entities with
+        # no primary-state precondition signal.
+        if anchor in dep_map:
+            all_phases = [p for dm in dep_map[anchor].values() for p in dm.values()]
+            if all_phases:
+                non_zero = [p for p in all_phases if p > 0]
+                return min(non_zero) if non_zero else min(all_phases)
+        return 0
 
     # Strategy 1: Upstream anchoring for initial transitions (PRIORITY)
     # Check upstreams from anchor OR any entity in the dependency chain.
@@ -1732,7 +1753,27 @@ def _derive_dep_state_phase_map(
                 merged = dict(explicit_pm_dep)
                 for s in trans_states - pm_states:
                     merged[s] = 0
-                dim_map[dim] = {s: int(p) for s, p in merged.items()}
+                # Step-1 revival: global anchoring via entry phase (S0+5 only).
+                # Shift the local scale onto the primary timeline UNLESS the dim
+                # already shares state names with the primary dim — shared names
+                # mean the local scale was aligned to the primary already (e.g.
+                # E-PROJ.项目状态 待评审:2/评审中:3 == primary 待评审:2/评审中:3),
+                # and an extra offset would inflate phases past P5.
+                primary_dim_s = phase_table.get('primary_dimension', '')
+                primary_state_names = set(
+                    (phase_table.get('state_to_phase', {}) or {}).get(primary_dim_s, {}).keys()
+                )
+                _entry = 0
+                if not (set(merged.keys()) & primary_state_names):
+                    _entry = _compute_entry_phase(
+                        entity, anchor, dim, tos, phase_table, dep_map,
+                        transition_upstream_map, structural=structural, cos=cos,
+                        transition_relations=transition_relations, restrict_05=True,
+                    )
+                if _entry:
+                    dim_map[dim] = {s: int(_entry) + int(p) for s, p in merged.items()}
+                else:
+                    dim_map[dim] = {s: int(p) for s, p in merged.items()}
                 continue  # skip fixpoint / sub-sm / cyclic branches
             # ── End V08 fix ────────────────────────────────────────
             all_states = set()

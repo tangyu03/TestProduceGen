@@ -6,10 +6,8 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from .builders import N
-from .constants import (BR_CATEGORIES, BR_SEVERITIES, BR_SIGNALS, CARDINALITIES,
-                        CONFIDENCE, DIRECTIONS, ENTITY_TYPES, OWNERSHIP_DIMS,
-                        PRIORITIES, RELATION_TYPES, TAGS, TRAITS, TRIGGER_SOURCES)
 from .escape import esc
+from .schema import validate_llm
 
 SCHEMA_VERSION = "19.2"
 
@@ -38,6 +36,20 @@ def interrupt_schema(source, items) -> dict:
                       "source": source or "未命名文档",
                       "has_critical_ambiguity": True,
                       "ambiguity_list": list(items)}}
+
+# Step5 enforcement 映射的确定性实现：把 prompt 里 7 行的"severity 默认映射表"
+# 坍缩为 2 条规则——field_constraint 恒 mandatory；desc 含强措辞(必须/禁止/
+# 不得/不可/不能) → mandatory；其余(许可措辞/展示/易用性) → conditional。
+# 注：表内 display/usability 的"升级条件=原文含必须"在此泛化为"含任一强措辞"
+# (严格超集，如"不得显示"也归 mandatory)。enforcement 由框架推导，LLM 不手写。
+_STRONG_WORDS = ("必须", "禁止", "不得", "不可", "不能")
+
+def derive_enforcement(signal_type: str, desc: str) -> str:
+    if signal_type == "field_constraint":
+        return "mandatory"
+    if any(w in desc for w in _STRONG_WORDS):
+        return "mandatory"
+    return "conditional"
 
 class DomainModel:
     def __init__(self, source, document_scope="", version=SCHEMA_VERSION):
@@ -71,14 +83,15 @@ class DomainModel:
     # ---------- Step 1 ----------
     def add_entity(self, id, name, desc, type="core", tags=None,
                    attributes=None, state_dimensions=None, operations=None):
-        if type not in ENTITY_TYPES:
-            raise ValueError(f"实体[{id}] type 非法: {type!r}")
-        bad = set(tags or ()) - set(TAGS)
-        if bad:
-            raise ValueError(f"实体[{id}] tags 非法: {bad}")
+        validate_llm("entity", {"id": id, "name": name, "desc": desc, "type": type,
+                                "tags": tags, "attributes": attributes,
+                                "state_dimensions": state_dimensions,
+                                "operations": operations})
         dims = [{"dimension_name": d["dimension_name"], "states": list(d["states"]),
                  "initial": d["initial"], "terminal": list(d.get("terminal", [])),
-                 "note": d.get("note") or N()} for d in (state_dimensions or [])]
+                 "note": d.get("note") or N(),
+                 "inferred": list(d.get("inferred", []) or [])}
+                for d in (state_dimensions or [])]
         self.entities.append({
             "id": id, "name": name, "desc": esc(desc), "type": type,
             "tags": list(tags or []), "attributes": list(attributes or []),
@@ -88,13 +101,12 @@ class DomainModel:
     # ---------- Step 2 ----------
     def add_structural(self, frm, to, relation_type, cardinality,
                        ownership_dimension, desc, confidence="high", note=None):
-        for label, val, enum in (("relation_type", relation_type, RELATION_TYPES),
-                                 ("cardinality", cardinality, CARDINALITIES),
-                                 ("ownership_dimension", ownership_dimension,
-                                  OWNERSHIP_DIMS),
-                                 ("confidence", confidence, CONFIDENCE)):
-            if val not in enum:
-                raise ValueError(f"结构关系 {frm}→{to} {label} 非法: {val!r}")
+        validate_llm("structural", {"frm": frm, "to": to,
+                                    "relation_type": relation_type,
+                                    "cardinality": cardinality,
+                                    "ownership_dimension": ownership_dimension,
+                                    "desc": desc, "confidence": confidence,
+                                    "note": note})
         self.structural_relations.append({
             "from": frm, "to": to, "relation_type": relation_type,
             "cardinality": cardinality, "ownership_dimension": ownership_dimension,
@@ -104,6 +116,9 @@ class DomainModel:
     # ---------- Step 3 ----------
     def add_branch_dimension(self, dimension, entity, values, impact_scope,
                              evidence, branches):
+        validate_llm("branch_dimension", {"dimension": dimension, "entity": entity,
+                                          "values": values, "impact_scope": impact_scope,
+                                          "evidence": evidence, "branches": branches})
         escaped_branches = [
             {k: esc(v) if isinstance(v, str) else v for k, v in b.items()}
             for b in branches
@@ -116,38 +131,36 @@ class DomainModel:
 
     # ---------- Step 4 ----------
     def add_role(self, id, name, readonly=False):
+        validate_llm("role", {"id": id, "name": name, "readonly": readonly})
         self.roles.append({"id": id, "name": name, "readonly": bool(readonly)})
         return self
 
     def add_trans(self, tid, entity, dimension, frm, to, action, role,
                   preconditions, expected_results, traits, direction,
-                  priority, source_ref, note=None, sub_steps=None):
-        bad = set(traits) - set(TRAITS)
-        if bad:
-            raise ValueError(f"转换[{tid}] traits 非法: {bad}")
-        if direction not in DIRECTIONS:
-            raise ValueError(f"转换[{tid}] direction 非法: {direction!r}（必填）")
-        if priority not in PRIORITIES:
-            raise ValueError(f"转换[{tid}] priority 非法: {priority!r}")
-        if not source_ref:
-            raise ValueError(f"转换[{tid}] source_ref 必须非空（输入契约）")
+                  priority, source_ref, note=None):
+        validate_llm("trans", {"tid": tid, "entity": entity, "dimension": dimension,
+                               "frm": frm, "to": to, "action": action, "role": role,
+                               "preconditions": preconditions,
+                               "expected_results": expected_results, "traits": traits,
+                               "direction": direction, "priority": priority,
+                               "source_ref": source_ref, "note": note})
         t = {"id": tid, "entity": entity, "dimension": dimension,
              "from": frm, "to": to, "action": action, "role": role,
              "preconditions": list(preconditions),
              "expected_results": [esc(e) for e in expected_results],
              "traits": list(traits), "direction": direction, "priority": priority,
              "source_ref": esc(source_ref), "note": note or N()}
-        if sub_steps:
-            t["sub_steps"] = list(sub_steps)
         self.transitions.append(t)
         return self
 
     def add_causal(self, frm, to, desc, trigger, trigger_source,
                    evidence_transitions=None, rollback_propagation=False,
                    confidence="high", note=None):
-        if trigger_source not in TRIGGER_SOURCES:
-            raise ValueError(f"因果 {frm}→{to} trigger_source 非法: "
-                             f"{trigger_source!r}")
+        validate_llm("causal", {"frm": frm, "to": to, "desc": desc, "trigger": trigger,
+                                "trigger_source": trigger_source,
+                                "evidence_transitions": evidence_transitions,
+                                "rollback_propagation": rollback_propagation,
+                                "confidence": confidence, "note": note})
         self.transition_relations.append({
             "from": frm, "to": to, "desc": esc(desc), "trigger": esc(trigger),
             "trigger_source": trigger_source,
@@ -158,6 +171,8 @@ class DomainModel:
 
     # ---------- Step 5 ----------
     def add_invalid(self, iid, entity, frm, to, reason, source_ref):
+        validate_llm("invalid", {"iid": iid, "entity": entity, "frm": frm,
+                                 "to": to, "reason": reason, "source_ref": source_ref})
         self.invalid_transitions.append({
             "id": iid, "entity": entity, "from": frm, "to": to,
             "reason": esc(reason), "source_ref": esc(source_ref)})
@@ -166,6 +181,13 @@ class DomainModel:
     def add_xc(self, xid, source_entity, source_transition, source_state,
                target_entity, target_dimension, target_condition, desc,
                source_ref):
+        validate_llm("xc", {"xid": xid, "source_entity": source_entity,
+                            "source_transition": source_transition,
+                            "source_state": source_state,
+                            "target_entity": target_entity,
+                            "target_dimension": target_dimension,
+                            "target_condition": target_condition,
+                            "desc": desc, "source_ref": source_ref})
         self.cross_entity.append({
             "id": xid, "source_entity": source_entity,
             "source_transition": source_transition, "source_state": source_state,
@@ -175,15 +197,15 @@ class DomainModel:
         return self
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, severity="mandatory", note=None):
-        for label, val, enum in (("category", category, BR_CATEGORIES),
-                                 ("signal_type", signal_type, BR_SIGNALS),
-                                 ("severity", severity, BR_SEVERITIES)):
-            if val not in enum:
-                raise ValueError(f"规则[{bid}] {label} 非法: {val!r}")
+               signal_type, note=None):
+        validate_llm("br", {"bid": bid, "category": category, "desc": desc,
+                            "entities_involved": entities_involved,
+                            "source_ref": source_ref, "signal_type": signal_type,
+                            "note": note})
         self.business_rules.append({
             "id": bid, "category": category, "desc": esc(desc),
-            "entities_involved": list(entities_involved), "severity": severity,
+            "entities_involved": list(entities_involved),
+            "enforcement": derive_enforcement(signal_type, desc),
             "source_ref": esc(source_ref), "signal_type": signal_type,
             "note": note or N()})
         return self
@@ -197,6 +219,7 @@ class DomainModel:
         例:
             m.add_permission("评审管理员", ["建立评审计划", "下发评审计划", ...])
         """
+        validate_llm("permission", {"role": role, "operations": operations})
         self.permissions.append({"role": role, "operations": list(operations)})
         return self
 
@@ -213,6 +236,7 @@ class DomainModel:
                 "success_hints": [...],
             })
         """
+        validate_llm("prohibition_config", config or {})
         self.prohibition_config = dict(config or {})
         return self
 

@@ -172,7 +172,7 @@ TO = P1 transition 全字段透传 + 本节新增/覆盖字段。遍历 transiti
 | enabler_state | XC.source_state（过 G5） | P1 原转换 to | P1 原转换 to |
 | enabler_transition_id | to_index 中 to==enabler_state 的转换（无则 null） | evidence 中 entity==R.from 的 tid | 父创建转换（from==null，无则 null） |
 | dependent_entity | XC.target_entity | R.to | SR.to（子） |
-| dependent_transition_id | 由 (target_entity, target_dimension, target_condition) 反查 to_index（entity+dimension 匹配且 to==condition） | evidence 中 entity==R.to 的 tid | 子创建转换（无则 null） |
+| dependent_transition_id | ①优先 target_from/target_to 结构化字段；②缺失则解析 target_condition（到/→/变为/变更为/状态=）；③仍有损（仅 to）→ 从同 (source_transition,target_entity,target_to) 的镜像/联动对继承 from；④按 (entity,dimension,from,to) 匹配 P1 原转换（抽象感知）。候选≠1 升级跳过，绝不取第一条 | evidence 中 entity==R.to 的 tid | 子创建转换（无则 null） |
 | dependent_dimension | XC.target_dimension | 反查转换 dimension | 反查转换 dimension |
 | dependent_condition | XC.target_condition | 反查转换 to | 反查转换 to |
 | trigger / trigger_source | null / null | R 透传 | null / null |
@@ -205,7 +205,7 @@ TO = P1 transition 全字段透传 + 本节新增/覆盖字段。遍历 transiti
 
 **4.1 RO-IT**：透传 P1 invalid_transitions；id=RO-IT-NNN；constraint_id=P1 的 IT-XXX；coverage_priority="high"；source_ref 透传 P1 invalid_transitions.source_ref。
 
-**4.2 RO-BR**：透传 P1 business_rules；id=RO-BR-NNN；constraint_id=P1 的 BR-XXX；signal_type/category 原样透传，不得丢弃或降级；enforcement 透传 P1 severity 值（字段更名）；source_ref 透传 P1 business_rules.source_ref。
+**4.2 RO-BR**：透传 P1 business_rules；id=RO-BR-NNN；constraint_id=P1 的 BR-XXX；signal_type/category 原样透传，不得丢弃或降级；enforcement 直接透传 P1 enforcement 值（severity 已更名，无二次更名）；source_ref 透传 P1 business_rules.source_ref。
 
 **4.2.1 XC→RO-BR**（所有被门禁跳过、G5 失败或无法分类的 XC）：
 `id=RO-BR-NNN；type="business_rule"；constraint_id=XC.id；entities_involved=[source_entity, target_entity]；signal_type=null；description="[来源于XC-{id}] {target_condition}; {desc}"；enforcement="mandatory"；ref_to_existing_br=P1 有同主题 BR 则填其 BR-XXX；suggested_action 按核心规则 5；source_ref 透传 XC.source_ref。`

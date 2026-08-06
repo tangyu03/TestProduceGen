@@ -13,7 +13,7 @@ TRIGGER_SOURCES = ("cross_entity", "action", "expected_results",
 BR_CATEGORIES = ("validation", "computation", "authorization",
                  "timing", "notification", "usability", "display")
 BR_SIGNALS = ("restrictive", "usability", "display", "field_constraint")
-BR_SEVERITIES = ("mandatory", "conditional")
+BR_ENFORCEMENTS = ("mandatory", "conditional")
 ENTITY_TYPES = ("core", "managed")
 TAGS = ("approvable", "multi-state", "expirable", "collaborative", "configurable")
 CONFIDENCE = ("high", "medium", "low")
