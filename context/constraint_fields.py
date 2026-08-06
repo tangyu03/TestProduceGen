@@ -222,9 +222,14 @@ def resolve_field(field_ref: dict) -> dict | None:
     return rec
 
 
-def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None) -> int | None:
+def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None,
+                            phase_table: dict | None = None) -> int | None:
     """字段 phase 下界 = min(各 populated_anchor 的 phase)，对照**当前**
-    （Step 1 shift 之后）的 dep_state_phase_map 解析。
+    （Step 1 shift 之后）的相位表解析。
+
+    相位表分层：主实体的态相位在 phase_table.state_to_phase（按维度键控），
+    依赖实体的态相位在 dep_state_phase_map（按实体键控）。两表都要查——
+    E-PLAN 是主实体（计划状态），只查 dep_state_phase_map 会全部落空。
 
     语义规则（schema 第 4 节映射表）：谓词下界从字段生命周期推导，不存进字段。
     任一锚点不可解析 → 返回 None（消费方回退保守 P0，见 PREDICATE_RULES）。
@@ -236,10 +241,18 @@ def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None) -
     if not anchors:
         return None
     dmap = dep_state_phase_map or {}
+    pt = phase_table or {}
+    primary_entity = pt.get("primary_entity")
+    stp = pt.get("state_to_phase") or {}
     phases: list[int] = []
     for a in anchors:
-        ent_dim = dmap.get(a["entity"], {}).get(a["dimension"], {})
-        ph = ent_dim.get(a["state"])
+        ph = None
+        ent_dims = dmap.get(a["entity"], {})
+        if ent_dims:
+            ph = ent_dims.get(a["dimension"], {}).get(a["state"])
+        if ph is None and a["entity"] == primary_entity:
+            # 主实体：相位在 phase_table.state_to_phase（按维度键控）
+            ph = stp.get(a["dimension"], {}).get(a["state"])
         if ph is None:
             return None
         phases.append(int(ph))
