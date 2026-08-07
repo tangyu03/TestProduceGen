@@ -1349,16 +1349,43 @@ def _compute_entry_phase(
     primary_dim = phase_table.get('primary_dimension', '')
     primary_states = phase_table.get('state_to_phase', {}).get(primary_dim, {})
     entity_tos = [t for t in tos if t.get('entity') == entity and t.get('dimension') == dim]
+
+    # P2 emits preconditions as dicts {"text","type","ref"} where ref
+    # {"entity","dimension","state"} names the referenced state STRUCTURALLY.
+    # Prefer that data-layer signal over scanning the natural-language text:
+    #   - T-034 "评审计划状态由待启动变为待评审" ref.state=待评审 — the entry
+    #     condition is the TO-state 待评审 (phase 2), NOT the from-state 待启动
+    #     (phase 1) that a text scan hits first via dict iteration order.
+    #   - phase_anchor preconditions (pattern="phase_anchor") are single
+    #     transition anchors (见上), excluded here exactly as before.
+    # When multiple structured refs exist, the entry must wait for the LATEST
+    # primary state (max phase) — every referenced state gates the entry.
+    # Text scan remains only as a fallback for preconditions without a
+    # usable ref (e.g. P1-inherited bare strings).
+    ref_phase = None
+    text_phase = None
     for to in entity_tos:
         for prec in to.get('preconditions', []) or []:
-            # P2 emits preconditions as dicts {"text","type","ref"} (not bare
-            # strings), so membership must test the text, not dict keys.
             if isinstance(prec, dict) and prec.get('pattern') == 'phase_anchor':
                 continue  # 单转换相位锚定，非整机入口锚定（见上）
-            prec_text = prec.get('text', '') if isinstance(prec, dict) else str(prec or '')
-            for state_name, phase_val in primary_states.items():
-                if state_name and len(state_name) >= 2 and state_name in prec_text:
-                    return phase_val + 1  # +1: dependent starts AFTER primary reaches state
+            ref = prec.get('ref') if isinstance(prec, dict) else None
+            if (isinstance(ref, dict)
+                    and ref.get('entity') == primary_entity
+                    and ref.get('dimension') == primary_dim
+                    and ref.get('state') in primary_states):
+                pv = primary_states[ref['state']]
+                ref_phase = pv if ref_phase is None else max(ref_phase, pv)
+                continue
+            if text_phase is None:
+                prec_text = prec.get('text', '') if isinstance(prec, dict) else str(prec or '')
+                for state_name, phase_val in primary_states.items():
+                    if state_name and len(state_name) >= 2 and state_name in prec_text:
+                        text_phase = phase_val
+                        break
+    if ref_phase is not None:
+        return ref_phase + 1  # +1: dependent starts AFTER primary reaches state
+    if text_phase is not None:
+        return text_phase + 1
 
     if restrict_05:
         # Strategy 5 only: anchor min phase fallback.
