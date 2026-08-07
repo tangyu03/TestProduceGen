@@ -1338,6 +1338,13 @@ def _compute_entry_phase(
     # The +1 is critical: without it, E-ARC (precondition "已结束"=ph4) would
     # get entry=4, same as E-EVAL (评价中=ph4), causing them to interleave.
     # With +1, E-ARC entry=5, separating it from E-EVAL (entry=3).
+    #
+    # phase_anchor 前置例外：P2 的 phase_anchor 把"某个转换"锚定到主实体后置
+    # 状态（如 机构评价→计划状态.结束），这是**单转换相位**信号，S1/S3 消费。
+    # 它不代表"整个状态机入口在后置状态"——若在此被整机入口启发式捕获，会把
+    # 该维度全部状态抬到锚点相位（E-ORG 循环机 合格/不合格/试用 {0,1,2} 被
+    # 抬成 {6,7,8}，连创建转换 T-041 也被拖后），与 scope=non_creation 语义相悖。
+    # 故 pattern=phase_anchor 的前置跳过入口锚定推导。
     primary_entity = phase_table.get('primary_entity', '')
     primary_dim = phase_table.get('primary_dimension', '')
     primary_states = phase_table.get('state_to_phase', {}).get(primary_dim, {})
@@ -1346,6 +1353,8 @@ def _compute_entry_phase(
         for prec in to.get('preconditions', []) or []:
             # P2 emits preconditions as dicts {"text","type","ref"} (not bare
             # strings), so membership must test the text, not dict keys.
+            if isinstance(prec, dict) and prec.get('pattern') == 'phase_anchor':
+                continue  # 单转换相位锚定，非整机入口锚定（见上）
             prec_text = prec.get('text', '') if isinstance(prec, dict) else str(prec or '')
             for state_name, phase_val in primary_states.items():
                 if state_name and len(state_name) >= 2 and state_name in prec_text:

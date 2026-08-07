@@ -6171,6 +6171,16 @@
           "text": "评价结果满足下面任一条",
           "type": "constraint",
           "ref": null
+        },
+        {
+          "text": "计划状态为结束",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PLAN",
+            "dimension": "计划状态",
+            "state": "结束"
+          },
+          "pattern": "phase_anchor"
         }
       ],
       "expected_results": [
@@ -6191,7 +6201,15 @@
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": [],
+      "precondition_state_refs": [
+        {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "结束",
+          "raw_text": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定",
+          "pattern": "phase_anchor"
+        }
+      ],
       "constraint_predicate": {
         "type": "disjunction_ref",
         "ref": "评价结果满足下面任一条",
@@ -6220,6 +6238,16 @@
           "text": "研制机构累计 3 次评级为不合格的不可提为试用",
           "type": "constraint",
           "ref": null
+        },
+        {
+          "text": "计划状态为结束",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PLAN",
+            "dimension": "计划状态",
+            "state": "结束"
+          },
+          "pattern": "phase_anchor"
         }
       ],
       "expected_results": [
@@ -6247,6 +6275,13 @@
           "state": "不合格",
           "raw_text": "机构处于不合格状态",
           "pattern": "p1_inherited"
+        },
+        {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "结束",
+          "raw_text": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定",
+          "pattern": "phase_anchor"
         }
       ],
       "constraint_predicate": {
@@ -6279,6 +6314,16 @@
           "text": "机构累计 10 次项目阶段评价结果为优",
           "type": "constraint",
           "ref": null
+        },
+        {
+          "text": "计划状态为结束",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PLAN",
+            "dimension": "计划状态",
+            "state": "结束"
+          },
+          "pattern": "phase_anchor"
         }
       ],
       "expected_results": [
@@ -6299,7 +6344,15 @@
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": [],
+      "precondition_state_refs": [
+        {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "结束",
+          "raw_text": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定",
+          "pattern": "phase_anchor"
+        }
+      ],
       "constraint_predicate": {
         "type": "aggregate_count",
         "subject": {
@@ -6330,6 +6383,16 @@
           "text": "试用机构评价结果满足降级规则任一条",
           "type": "constraint",
           "ref": null
+        },
+        {
+          "text": "计划状态为结束",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PLAN",
+            "dimension": "计划状态",
+            "state": "结束"
+          },
+          "pattern": "phase_anchor"
         }
       ],
       "expected_results": [
@@ -6351,7 +6414,15 @@
       "repeat_condition": null,
       "side_effects": [],
       "branch_path": [],
-      "precondition_state_refs": [],
+      "precondition_state_refs": [
+        {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "结束",
+          "raw_text": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定",
+          "pattern": "phase_anchor"
+        }
+      ],
       "constraint_predicate": {
         "type": "disjunction_ref",
         "ref": "试用机构评价结果满足降级规则任一条",
@@ -8716,7 +8787,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-07T12:05:28.528468+08:00",
+    "generated_at": "2026-08-07T14:22:59.467949+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -10892,6 +10963,22 @@
         "desc": "EO-CRU-026 被初始化转换 T-037 覆盖（er 文本包含），去重"
       },
       {
+        "category": "phase_anchor",
+        "desc": "T-042 锚定到 E-PLAN.计划状态.结束（SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定）"
+      },
+      {
+        "category": "phase_anchor",
+        "desc": "T-043 锚定到 E-PLAN.计划状态.结束（SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定）"
+      },
+      {
+        "category": "phase_anchor",
+        "desc": "T-044 锚定到 E-PLAN.计划状态.结束（SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定）"
+      },
+      {
+        "category": "phase_anchor",
+        "desc": "T-045 锚定到 E-PLAN.计划状态.结束（SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定）"
+      },
+      {
         "category": "CO constraint dependent missing",
         "desc": "XC-001: 找不到 dependent 转换 (E-PROJ.to=待评审到评审中)"
       },
@@ -11039,12 +11126,12 @@
         "as_br": 20
       },
       "precondition_state_refs_coverage": {
-        "total_preconditions": 157,
-        "total_state_refs_expected": 78,
-        "total_state_refs_resolved": 78,
+        "total_preconditions": 161,
+        "total_state_refs_expected": 82,
+        "total_state_refs_resolved": 82,
         "unresolved_count": 0,
         "p1_inherited_count": 78,
-        "p2_filled_count": 0
+        "p2_filled_count": 4
       },
       "phase_mapping_coverage": {
         "dims_with_phase_mapping": 6,

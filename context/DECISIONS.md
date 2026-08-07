@@ -5,6 +5,33 @@
 
 ---
 
+## 2026-08-07 ⑮ A3 相位锚定的 S0 副作用——phase_anchor 前置误触发整机入口锚定
+
+**决策**:`context/generate_obligation_model.py` Step 2.5c 给 E-ORG.机构状态 非创建转换（T-042/043/044/045）写入 `precondition_state_refs`（S3 Guard 6 依赖边）+ `preconditions` state_ref dict（S1 `_max_state_ref_phase` 抬相位到 计划状态.结束=P5），配置在数据层 `_context.phase_anchors`（与 prohibition_config 同构，单一真相源）。
+
+**根因（改结果不改代码会踩的坑）**：首版只写了两个消费通道（S1/S3），结果全维抬到 {6,7,8}——S0 `_compute_entry_phase` Strategy 0 扫描**该维度所有转换**的 preconditions 文本，命中"计划状态为**结束**"→ 返回 `5+1=6`，把**整个循环状态机**（合格0/不合格1/试用2）入口锚到 6，连创建转换 T-041（scope=non_creation 明确排除）也被拖到 P6。这是 S0 把"单转换相位信号"误读为"整机入口锚定信号"。
+
+**解法（数据驱动，无名字硬编码）**：`phase_anchor` 前置带 `pattern="phase_anchor"` 标记（单转换锚定，非入口锚定）；S0 `_compute_entry_phase` Strategy 0 对 `pattern=="phase_anchor"` 的 precondition 跳过。`raw_text` 取数据层配置 `note`（领域语义不进代码），S3 Guard 6 只读 entity/dimension/state 不受影响。
+
+**验证结果**：重跑后 dep_state_phase_map 保持 {合格0,不合格1,试用2}，添加机构（T-041）回 P0；T-042/043/044/045 全部 P5（`phase_basis` 显式 "→ bumped to P5 (state_ref 评审计划.计划状态.结束)"），T-042 依赖边 →T-032 归档评审计划；phase 直方图回到 0-5，无 6/7/8。errors=[]、36/36、V01 pass。
+
+---
+
+## 2026-08-07 ⑭ C轮评审 7 问题 → Tier1 三动作（项目簇合并 / RO-IT 吸收 / 机构评价相位锚定）
+
+**决策**:C 轮用户评审 7 个问题归因为三类根因，按 A1→A2→A3 逐个实施、每步独立重跑验证：
+- **A1（新增项目簇合并+去重）**：P2 Step 2.5a 跨维度初始化联动并入（T-013 并入 T-001，标记 `merged_into`）；Step 2.5b CRUD 初始化覆盖去重（EO-CRU-001/026 被初始化转换覆盖，标记 `covered_by`）。解决 PROC-057/059 拆分重复（同源连锁反应拆成多条）与 PROC-057/060 重复。
+- **A2（选入簇 RO-IT 吸收+抑制）**：P2 将 RO-IT 吸收进 T-002 否定分支（标记 `absorbed_by_transition`）；S1 Type6 跳过 absorbed RO，Type1 否定分支注入具体拒绝理由。解决 PROC-080 前置不足（Given 未声明评价结果为差 → now "操作被拒绝，本阶段评价结果为差的项目不可选入"）。
+- **A3（机构评价相位锚定）**：见下。
+
+**新标记字段（本轮新增）**：`merged_into`（A1 跨维度合并）、`covered_by`（A1 CRUD 去重）、`absorbed_by_transition`（A2 RO 吸收）、`pattern=phase_anchor`（A3 锚定）。一致性保障：**单一写入点**在 P2 Step 2.5（a/b/c），S1 是多个消费端（跳过 merged/absorbed、读 state_ref 抬相位），写入与消费分离，校验器只查必填字段不拒未知字段。
+
+**验证结果**：`errors=[]`、`clause_coverage 36/36`、V01 依赖相位单调全图 0 违例；V10 的 3 条 coverage_misses（T-013 / EO-CRU-001,026 / RO-IT-001）为 A1/A2 刻意合并/吸收的**预期产物**，与 A2 基线逐字节相同（signature 一致），非回归。各动作提交：A1=e24a76a、A2=058260b、A3=（本轮）。
+
+**Tier 2 排期（本轮不做，记档待后续）**：PROC-009（没有项目就执行不了评审计划动作）、PROC-085（还没创建评审计划就查看计划）、PROC-087（还没打分就查看打分记录）、PROC-066（仅 CRUD 触发的评价靠前）同属**领域前置不足**类——CRUD/查看类义务缺少"前置对象必须已存在"的领域先决（如 E-PLAN 计划须已建立、E-SCORE 须已打分），非过渡类义务。根因方向：为 EO-CRU/查看类义务建立**领域前置机制**（数据驱动，声明该义务依赖的实体实例先决状态，接入 S1 preconditions/相位 与 S3 Guard 6 依赖），暂不实现。
+
+---
+
 ## 2026-08-07 ⑬ S1 结构化跨维度 state_ref 相位抬升——补上 P2 dict 前置的死代码缺口
 
 **决策**:`nodes/s1_generation.py` 新增 `_max_state_ref_phase()`，并把 `_resolve_phase_for_transition` 从早退 return 改为**逐级取 max 再统一返回**（三机制 AND 语义取最晚）：① 文本版 `_max_precondition_phase`（仅 string 前置）② `predicate_phase_lower_bound`（结构化字段谓词）③ 新增的结构化跨维度 state_ref。规则：`preconditions` 中 `type=="state_ref"` 且引用 `(entity, dimension)` ≠ 转移自身时，抬升到该状态相位；**同一状态机引用（`re_ent==entity and re_dim==dimension`）排除**（套套逻辑，自身 from/to 已表达）。

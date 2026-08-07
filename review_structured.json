@@ -531,6 +531,19 @@
           "查看首页"
         ]
       }
+    ],
+    "phase_anchors": [
+      {
+        "entity": "E-ORG",
+        "dimension": "机构状态",
+        "scope": "non_creation",
+        "anchor_ref": {
+          "entity": "E-PLAN",
+          "dimension": "计划状态",
+          "state": "结束"
+        },
+        "note": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定"
+      }
     ]
   },
   "domain_model": {

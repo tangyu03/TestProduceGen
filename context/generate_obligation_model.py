@@ -1423,6 +1423,60 @@ for _eo in entity_obligations:
             add_judgment("crud_init_dedup", f"{_eo['id']} 被初始化转换 {_to['id']} 覆盖（er 文本包含），去重")
             break
 
+# ============ Step 2.5c: 跨维度相位锚定（phase_anchor） ============
+# SRS 4.9.7：机构评价发生在"计划归档时"（对研制机构累计情况更新后判定），
+# 但 E-ORG.机构状态 的 phase_mapping 是纯序数（合格0/不合格1/试用2），
+# 无 workflow 位置 —— 不加锚定时评价类转换会被排到 P1/P2（早于评审），语义倒挂。
+# 锚定配置由 P1 数据层 _context.phase_anchors 声明（单一真相源，与 prohibition_config
+# 同构）：对 scope=non_creation 的 (entity, dimension) 转换，追加 anchor_ref 到
+# precondition_state_refs（S3 Guard 6 据此建依赖边，锚定后置状态必须已达成）。
+# 同时写入 preconditions（state_ref dict），S1 _max_state_ref_phase 据此把相位
+# 抬升到锚定状态（E-PLAN.计划状态.结束 = P5）。双写是复用既有两条消费通道，
+# 不新增 S1/S3 逻辑。
+_phase_anchors = (p1.get("_context") or {}).get("phase_anchors", [])
+for _pa in _phase_anchors:
+    _pa_entity = _pa.get("entity")
+    _pa_dim = _pa.get("dimension")
+    _pa_scope = _pa.get("scope", "non_creation")
+    _anchor = _pa.get("anchor_ref") or {}
+    if not (_pa_entity and _pa_dim and _anchor.get("entity") and _anchor.get("state")):
+        add_warning("phase_anchor_invalid", f"phase_anchor 配置缺字段: {_pa}")
+        continue
+    for _to in transition_obligations:
+        if _to.get("entity") != _pa_entity or _to.get("dimension") != _pa_dim:
+            continue
+        if _pa_scope == "non_creation" and _to.get("from") is None:
+            continue  # 创建转换（T-041 添加机构）不锚定到归档
+        # 幂等：已有同实体同维度同状态锚点则跳过
+        _refs = _to.setdefault("precondition_state_refs", [])
+        if any(r.get("entity") == _anchor.get("entity")
+               and r.get("dimension") == _anchor.get("dimension")
+               and r.get("state") == _anchor.get("state")
+               for r in _refs):
+            continue
+        _refs.append({
+            "entity": _anchor["entity"],
+            "dimension": _anchor["dimension"],
+            "state": _anchor["state"],
+            # raw_text 仅作溯源展示（S3 guard6 只读 entity/dimension/state），
+            # 领域语义一律来自数据层配置 note，代码不拼任何领域文本
+            "raw_text": _pa.get("note") or f"{_anchor['dimension']}为{_anchor['state']}",
+            "pattern": "phase_anchor",
+        })
+        # preconditions state_ref dict 供 S1 _max_state_ref_phase 抬升相位；
+        # pattern=phase_anchor 标记它是"单转换相位锚定"，不是"整机入口锚定"，
+        # S0 _compute_entry_phase(Strategy 0) 据此跳过，避免把整个维度的
+        # phase_mapping 抬到锚点相位（E-ORG 循环机全维 {0,1,2}→{6,7,8} 的根因）。
+        _to.setdefault("preconditions", []).append({
+            "text": f"{_anchor['dimension']}为{_anchor['state']}",
+            "type": "state_ref",
+            "ref": {"entity": _anchor["entity"],
+                    "dimension": _anchor["dimension"],
+                    "state": _anchor["state"]},
+            "pattern": "phase_anchor",
+        })
+        add_judgment("phase_anchor", f"{_to['id']} 锚定到 {_anchor['entity']}.{_anchor['dimension']}.{_anchor['state']}（{_pa.get('note', '')}）")
+
 # ============ Step 3a: constraint predicate structuring (post-pass) ============
 # Derive TO.constraint_predicate uniformly for ALL emitted transitions
 # (base / downgrade / branch variants). Re-deriving from each TO's own
