@@ -13,7 +13,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.6 项目管理"
     },
     {
       "id": "EO-ATC-002",
@@ -28,7 +28,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.6 项目管理"
     },
     {
       "id": "EO-ATC-003",
@@ -43,7 +43,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.8.1 评审计划"
     },
     {
       "id": "EO-ATC-004",
@@ -58,7 +58,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.8.1 评审计划"
     },
     {
       "id": "EO-ATC-005",
@@ -73,7 +73,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.8.1 评审计划"
     },
     {
       "id": "EO-ATC-006",
@@ -88,7 +88,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.8.1 评审计划"
     },
     {
       "id": "EO-ATC-007",
@@ -103,7 +103,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.1 用户管理"
     },
     {
       "id": "EO-ATC-008",
@@ -118,7 +118,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.1 用户管理"
     },
     {
       "id": "EO-ATC-009",
@@ -133,7 +133,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.3 机构管理"
     },
     {
       "id": "EO-ATC-010",
@@ -148,7 +148,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.10 专家管理"
     },
     {
       "id": "EO-ATC-011",
@@ -163,7 +163,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.10 专家管理"
     },
     {
       "id": "EO-ATC-012",
@@ -178,7 +178,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.4 超时设置"
     },
     {
       "id": "EO-ATC-013",
@@ -193,7 +193,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.4 超时设置"
     },
     {
       "id": "EO-ATC-014",
@@ -208,7 +208,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.4 超时设置"
     },
     {
       "id": "EO-ATC-015",
@@ -223,7 +223,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.11.4 超时设置"
     },
     {
       "id": "EO-ATC-016",
@@ -238,7 +238,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.9.4 分数限值"
     },
     {
       "id": "EO-ATC-017",
@@ -253,7 +253,7 @@
       "dimension": null,
       "from": null,
       "to": null,
-      "source_ref": null
+      "source_ref": "4.6 项目管理"
     },
     {
       "id": "EO-CRU-001",
@@ -8787,7 +8787,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-07T14:22:59.467949+08:00",
+    "generated_at": "2026-08-07T19:04:58.177395+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -10700,71 +10700,71 @@
     "judgments": [
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-001 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-001 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.6 项目管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-002 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-002 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.6 项目管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-003 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-003 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.8.1 评审计划"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-004 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-004 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.8.1 评审计划"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-005 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-005 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.8.1 评审计划"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-006 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-006 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.8.1 评审计划"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-007 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-007 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.1 用户管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-008 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-008 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.1 用户管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-009 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-009 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.3 机构管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-010 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-010 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.10 专家管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-011 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-011 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.10 专家管理"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-012 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-012 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.4 超时设置"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-013 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-013 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.4 超时设置"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-014 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-014 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.4 超时设置"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-015 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-015 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.11.4 超时设置"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-016 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-016 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.9.4 分数限值"
       },
       {
         "category": "EO-ATC source_ref",
-        "desc": "EO-ATC-017 P1 属性无 source_ref 字段，置 null"
+        "desc": "EO-ATC-017 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=4.6 项目管理"
       },
       {
         "category": "branch split delete base",

@@ -48,7 +48,7 @@ SRS 文档
 
 - 加载 coverage_model，编译 LangGraph 并 streaming 执行
 - 各阶段进度输出、结果统计、Phase 分布
-- 生成 `output.json`（机器可读）+ `output.md`（人类可读）+ `output_readable.md`（精炼版）
+- 生成 `output.json`（机器可读）+ `output.md`（人类可读测试规程）
 - 调用 LLM 生成 procedure 标题（可选，需配置 API key）
 
 ### `graph.py` — LangGraph 图定义

@@ -12,6 +12,7 @@ import re
 
 from models.state import AgentState
 from tools.graph_algo import break_cycles, topological_sort_procedures
+from context.domain_precondition import object_existence
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -64,6 +65,7 @@ DEP_CONFIDENCE: dict[str, int] = {
     "chain_ordering": 3,
     "guard5_create_use": 3,
     "guard6_precond": 2,
+    "domain_precond": 3,
     "weak_side_effect": 1,
 }
 
@@ -197,7 +199,7 @@ def s3_dependency_node(state: AgentState) -> dict:
     # ── I23: Business temporal guards (run FIRST — state-machine deps take priority) ──
     _apply_temporal_guards(procedures, proc_by_id, proc_by_entity, co_by_id, cm,
                            phase_table=state.get("phase_table"),
-                           state_pos=state_pos)
+                           state_pos=state_pos, state=state)
 
     # ── Strong dependencies ──
     for proc in procedures:
@@ -576,12 +578,24 @@ def _apply_temporal_guards(
     cm: dict,
     phase_table: dict | None = None,
     state_pos: dict | None = None,
+    state: dict | None = None,
 ):
-    """I23: Apply 5 business temporal guard rules as implicit strong dependencies.
+    """I23: Apply business temporal guard rules as implicit strong dependencies.
 
     v29 #3: Each guard records the ORIGIN of the deps it adds, so break_cycles
     can use causal confidence (not chain_depth) to pick which edge to cut.
+
+    state: S0 Engine State (topology_levels / dep_state_phase_map) — used by
+    Guard 7 (Tier 2 domain precondition) to identify lifecycle entities.
     """
+    # to_id → proc temp_ids (Tier 2 Guard 7 dep binding): branch TO ids like
+    # T-015[a] map to their own Type1 proc, so binding all same-dim creation
+    # branches is unambiguous.
+    to_id_to_proc_ids: dict[str, list] = {}
+    for p in procedures:
+        for sid in p.get("source_ids", []):
+            to_id_to_proc_ids.setdefault(sid, []).append(p["temp_id"])
+
     for proc in procedures:
         s3 = proc.get("_S3_fields", {})
         deps = set(s3.get("dependencies", []))
@@ -898,6 +912,28 @@ def _apply_temporal_guards(
                                     continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")
+
+        # ── Guard 7: 领域前置 — CRUD/查看义务须对象实例已存在 ──
+        # Tier 2: EO-CRU (Type5) 义务非状态转换, Guard 6 的 TO 查表路径够不到
+        # (source_ids 是 EO id, _resolve_to 返回 None)。这里用
+        # context.domain_precondition 派生对象存在性前置 (topology_level>0 的
+        # 业务生命周期对象), 依赖边连到对象创建转换 (from=None) 的过程。
+        # 管理类实体不派生 → 保持 "=存在", 不引入依赖。
+        if state and proc.get("obligation_type") == 6 and proc.get("entity"):
+            dp_ref = object_existence(cm, state, proc["entity"])
+            if dp_ref:
+                for cid in dp_ref["creation_to_ids"]:
+                    for cand in to_id_to_proc_ids.get(cid, []):
+                        if cand == proc["temp_id"]:
+                            continue
+                        if proc_by_id.get(cand, {}).get("risk_trait") == "audit_rejection":
+                            continue
+                        cph = proc_by_id.get(cand, {}).get("_S2_fields", {}).get("phase", 0)
+                        if cph > my_phase:
+                            continue
+                        if cand not in deps:
+                            deps.add(cand)
+                            _record(cand, "domain_precond")
 
         s3["dependencies"] = sorted(deps, key=lambda did: proc_by_id.get(did, {}).get("gen_seq", 999))
         s3["guard1_deps"] = sorted(guard1_deps, key=lambda did: proc_by_id.get(did, {}).get("gen_seq", 999))

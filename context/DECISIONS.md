@@ -5,6 +5,63 @@
 
 ---
 
+## 2026-08-07 ㉓ 阶段标签粗化为模块级 + 删阶段依据行 + 删逐用例多实例描述
+
+**决策**：用户三点反馈（阶段不用那么细 / 阶段依据有的有有的没有 / 多实例描述已多余），渲染层三处简化，全部保留数据：
+
+1. **阶段标签粗化为模块级**：`context/render_registry.py` `build_phase_labeler` 从"实体·状态"（26 种细标签，如 评审计划·取消结束/结束/超时结束）简化为粗粒度**模块**（8 种：评审计划/项目/用户/机构/打分 + 机制直译 基础数据维护/默认阶段/前置条件创建）。实体形态只返回实体中文模块名，机制形态返回跨实体直译。**删掉了整个相位号→状态反查逻辑**（_resolve/_states_at/_terminal/_initial/_join_states/_STATE_REF_RE 全部移除），labeler 从 ~150 行降到 ~50 行，仍全数据驱动。
+2. **删 `**阶段依据**` 行**：根因 `phase_basis_debug` 过滤（粗启发式形态被隐藏，139/275 显示）。这是引擎 traceability（原始 basis 字符串），非读者信息；结合模块级方向整行删除。`phase_basis`/`phase_basis_debug` 原样留在 JSON，schema 未动；`phase_basis` 仍被 labeler 消费派生模块标签。`phase_basis_debug` 无逻辑消费方了，作为 schema 字段保留无害。
+3. **删逐用例 `**多实例**` 描述**：根因 md 折叠 .1/.2 时产生的冗余展开说明。实测 241 个多实例组**全部是纯重复**（差异仅 temp_id 与 Given 描述 [实例 1]/[实例 2] 标签，S4 multi_reason=`dim_count=1 instances=2`），JSON 已拆成 .1/.2。删除逐用例 boilerplate，保留 ×N 徽标 + 顶部图例。
+
+**证据**：8 种模块标签覆盖 762 条；阶段依据 0 残留；逐用例多实例 0 残留（图例保留）；275 PROC 全带模块标签、无 "第N阶段" fallback 残留；确定性双跑哈希一致；py_compile 通过。
+
+## 2026-08-07 ㉒ PROC-001 三处渲染去重 + EO-ATC source_ref 透传
+
+**决策**：针对 PROC-001 的三条用户反馈，渲染层净化（不动 JSON）+ P2 数据源修复，全部数据驱动、无硬编码：
+
+1. **覆盖需求缺 source_ref**：`context/generate_obligation_model.py` EO-ATC 循环的 `source_ref` 由 `None` 改为从实体**首条操作的 source_ref** 透传（`_entity_config_section_ref(e)`）。P1 属性字段不携带章节信息，但属性所属实体的操作携带（如 4.10 专家管理）。17 条 EO-ATC 全部命中，无 None 残留。
+2. **When 名词框架重复**（"技术领域配置变更事件 [修改技术领域] 不是一回事么"）：`_dedupe_when_action` 改为返回 `(event, action)` 元组，规则顺序 = 空/相等/**子串** → **名词框架 event**（正则 `.*事件(?:\([^)]*\))?$`，覆盖配置变更/转换/已过期三类）取 action 作 When → **子序列**（逐字符，完全冗余）省略方括号。按规则"…"执行操作事件 因 action 是子串先命中，保留带 BR 文本的 event，不误伤。
+3. **Then 前缀重复**（"专家.技术领域 技术领域显示为… 技术领域又重复了"）：新增 `_dedupe_then_target`，target 为 实体.属性 限定链且 expectation 以最后点段开头时裁掉前导段。
+
+**证据**：
+- P2 确定性：temp diff 只改 17 条 EO-ATC source_ref + 17 条 judgment 文本 + `generated_at` 时间戳，结构性内容零漂移。
+- 渲染回归：762 条 When 全部去重（substring=626 / nominal→action=74 / subsequence=62 / bracket_kept=0），Then 裁剪 156/1493；`配置变更事件`/`转换事件`/`事件(已过期)` 三个名词框架短语在 md 全局 0 残留；确定性双跑哈希一致；py_compile 通过。
+- 事前全量扫描确认安全：含"事件"且与 action 非子串非子序列的 event 只有配置变更(34)/转换(14)两类；Then 最后点段全是明确属性/状态词（项目状态/计划状态/技术领域…），无歧义。
+
+## 2026-08-07 ㉑ ⑤ 排期项作废——相位反转降级前提已由 ⑬ 达成,不实施
+
+**决策**：⑤（S3 phase guard 对 backward/resume 边豁免相位反转降级）**不实施**，落档为"已由 ⑬ 达成"。⑤ 于 08-06 排期（weak_dependency 下游行为=弱化消费已确认）；本 session 实施前置核实时发现其设计前提已被 08-07 ⑬ 的结构化 state_ref 相位抬升消除。
+
+**证据（探针 `scripts/t5_probe.py` + 内联 probe，确定性 Engine State）**：
+1. **相位反转降级条件 0 次触发**：全图扫所有 transition-upstream 边，`dep_phase > my_phase`（`s3_dependency.py:276-283` 降级分支，origin=`transition_upstream_phase_inversion`）**从未发生**。当前 200 条 weak 边 origin 全为 `weak_side_effect`（副作用跨实体链 + Type8 规则实体链，`s3_dependency.py:430/468`），0 条是 ⑤ 要豁免的那种。
+2. **⑤ 点名的残留缺口已关闭**：`T-012 回滚不保证排在 T-016 后` → 实测 T-011（PROC-218, P5）硬依赖 [T-001, T-005, T-032]；**T-012（PROC-198, P5）硬依赖含 T-016**（PROC-197, P2）——拓扑排序强制 T-016 在前，V01=0。因果顺序已由硬依赖强制。
+3. **剩余 22 条涉及 backward/resume 的弱边全为 `weak_side_effect` 副作用链接**（T-016 取消→weak T-011 回退、T-035→weak T-025/026 恢复、T-033→weak T-011/T-012），语义正确（副作用"由该 proc 落实"，非排序前提），不属 ⑤ 范畴。
+
+**根因（⑤ 决策早于 ⑬）**：⑤ 于 08-06 定案时，回退 TO 相位偏低（T-011/T-012 曾在 P2/P3），其上游触发（T-032 归档 P5 / T-016 取消）相位更高 → 反转 → 降级 weak → 顺序不强制。⑬（08-07）用结构化 state_ref 把回退 TO 抬到 P4/P5（T-008/T-010→P4、T-011/T-012→P5）并补 Guard 6 锚定边，使上游边恒满足 `dep_phase ≤ my_phase`，反转条件**结构性消失**。⑤ 要修的正是 ⑬ 已消除的状态。
+
+**结论**：⑤ 不实施，不引入死代码。弱依赖降级机制（`weak_dependencies` + `weak_origins` 审计可见）保留现状。**遗留风险记录**：若未来 P1/P2 数据回潮重现该失败模式（pre-⑬ 真实发生过），反转降级会再次静默弱化回退边且 V01 不拦——届时按 ⑤ 设计补豁免（direction∈(backward,resume) → 保持 hard）即可，本条目为决策凭证。
+
+---
+
+## 2026-08-07 ⑳ Tier 2 领域前置机制——实施完成落档
+
+**决策**：⑱ 排期的 Tier 2（CRUD/查看类义务缺"前置对象必须已存在"领域先决）本 session 实施完成。采用仓库既有**共享派生模块**模式（`context/domain_precondition.py`，与 `entity_operators`/`time_control`/`constraint_fields` 同构，单一事实源），S1 与 S3 各显式接线。
+
+**与评审建议的关键偏差（批判性评估后修正）**：评审建议 P2 Step 2.5d 注入 + 零代码改动消费，经代码阅读**证伪**——① EO-CRU 义务**不流经** `_resolve_phase_for_transition`（Type5 内联逻辑），P2 注入无消费端；② Guard 6 的 `_resolve_to` 对 EO source_ids 返回 None（仅 TO source_ids 进 Guard 6），EO-CRU 程序不享受既有依赖通道；③ 真零代码需要 schema 改动（EO 无 preconditions 字段）。故不走 P2 注入，改显式 S1/S3 两处接线，全部数据驱动。
+
+**机制（第一性原理，无名字硬编码）**：
+- **判别器 = S0 `topology_levels > 0`**（{E-PLAN:1, E-PROJ:1, E-ATT:2, E-SCORE:1} 精确命中 4 目标实体；管理类全 0，保持 `=存在` 合理不变）。"有创建转换"非判别器（E-ORG/E-USER 有创建转换但是管理类）。
+- **存在锚定 = 创建转换（from=None）**；E-PROJ 双创建转换（T-001 项目状态→待选入 P0、T-013 项目阶段→开题）锚**最早 to_state 相位**（待选入）；E-ATT 无自身创建转换 → composition 父 E-PROJ；同维创建转换**全绑**（T-015[a/b/c]），异维（T-013）不绑。
+- **三个接入点**：① S1 Type5 弱 Given `=存在` 替换为 `X已存在，处于Y状态`（中文名经 entity_name_map 反查，**修正了方向 bug**——`_build_entity_name_map` 返回中文→E-XXX，须 `{v:k}` 反查）；② S1 相位底 = 创建 proc 实际相位（`_creation_proc_phase` proc 查表，**非文本重推导**——"处于已选入状态"不匹配相位正则但实际创建相位是 1）；③ S3 **Guard 7** 绑定 EO-CRU proc → 锚定创建转换（跳过 audit_rejection、相位单调性约束），Guard 6 保持只处理 TO。
+
+**验证（确定性 Engine State，非 P3 LLM 文本）**：`scripts/tier2_verify.py` 全断言 PASS——删除项目→`待选入`+T-001 dep；查看评审计划→`已建立`+phase 1+T-015[a/b/c] dep；查看评分细则→`未打分`+T-034 dep；上传建议书→target E-PROJ+`待选入`+T-001 dep；管理类 EO-CRU-045 保持 `存在`+无领域前置依赖；V01 0 违例；errors=0。量化：lifecycle 弱 Given 分布 **待选入 120 / 已建立 8 / 未打分 4**，管理类 `存在` 39 不变；依赖边 +41 domain_precond（总 1109）。**确定性双跑**：PYTHONHASHSEED 0 vs 999，S0→S3 业务数据 byte-identical。v32_check 回归：V01=0，⑬ focus TO（T-007/008/010/011/012/014）相位全 SAME。
+
+**已知边界**：① 计数 29 实体（项目 19+附件 5+计划 4+打分 1）vs ⑱ 的 28——差额 EO-CRU-009 通用"新增"并入项目生命周期（19 vs 18），取保守一侧；② PROC-087 查看打分记录用 `未打分` 锚定（has_data 与 exists 二义，首版取 exists/未打分 兜底，语义 ⑭ 记录一致）；③ 相位直方图整体 4→5 漂移系 ⑰ S0 Strategy 0 的 E-SCORE {2,3,4}→{3,4,5} 累积 vs 过期磁盘基线，非 Tier 2 引入（tier2_verify 已单独量化，E-PLAN 0→1、E-SCORE 0→3 为本轮唯二相位移动）。
+
+**文件**：`context/domain_precondition.py`（新，共享派生模块）；`nodes/s1_generation.py`（Type5 Given+相位底，含 name-map 方向修正）；`nodes/s3_dependency.py`（Guard 7）；`scripts/tier2_verify.py` / `scripts/tier2_determinism.py`（新，验证探针）。架构评审建议作废（P2 注入路径，见上偏差），不做。
+
+---
+
 ## 2026-08-07 ⑲ P3 渲染 `**阶段依据**` 行丢失——debug 分类器误杀依赖实体精确锚定
 
 **用户报告**:`p3_agent_output.md` 里 PROC-137（T-006 全部专家提交打分，`项目.项目状态 评审中→待归档`）"丢失了阶段这一前提"——没有 `**阶段依据**` 行，而同文件的 PROC-139 有 `phase_table.计划状态.暂停`。

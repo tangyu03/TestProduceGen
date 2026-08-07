@@ -16,6 +16,7 @@ from graph import compile_p3_graph
 from models.state import AgentState
 from tools.llm_client import TitleGenerator
 from tools.llm.http_utils import call_llm_api, parse_llm_response
+from context.render_registry import TYPE_LABEL_CN, build_phase_labeler
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 # The fallback collector is initialized in build_obligations.py (P2) and
@@ -291,13 +292,8 @@ def run_p3_pipeline(
     
     # Also generate markdown test procedures
     md_path = output_path.replace(".json", ".md")
-    _generate_markdown(procedures, md_path)
+    _generate_markdown(procedures, md_path, coverage_model)
     print(f"      [OK] Markdown saved to: {md_path}")
-
-    # Generate readable (card-style) test case document
-    readable_md_path = output_path.replace(".json", "_readable.md")
-    _generate_readable_markdown(procedures, coverage_model, readable_md_path)
-    print(f"      [OK] Readable markdown saved to: {readable_md_path}")
 
     if errors:
         print(f"\n[{len(errors)} errors encountered:]")
@@ -518,13 +514,109 @@ def _dedup_thens(thens: list[dict]) -> list[dict]:
     return out
 
 
-def _generate_markdown(procedures: list[dict], md_path: str):
+# 名词框架 event 的正则：event 以 "事件"（或其后的括号尾注，如 "(已过期)"）收尾，
+# 表明它是 S1 生成的名词化表述（"技术领域配置变更事件" / "尝试…转换事件" /
+# "尝试锁定用户事件(已过期)"），而非操作式表述
+_NOMINAL_EVENT_RE = re.compile(r".*事件(?:\([^)]*\))?$")
+
+
+def _is_subsequence(needle: str, haystack: str) -> bool:
+    """needle 是否为 haystack 的逐字符子序列（可跳跃，顺序不变）。"""
+    it = iter(haystack)
+    return all(ch in it for ch in needle)
+
+
+def _dedupe_when_action(event: str, action: str) -> tuple[str, str]:
+    """合并 When 行 event 与 [action] 的重复表述，返回 (展示的 event, 方括号内容)。
+
+    action 常由生成器包成 "执行/尝试<event>" 或与 event 高度重叠，此时方括号里的
+    操作名与事件重复，应省略。判定只用文本关系，不依赖任何硬编码动词前缀表：
+
+    1. action 为空 / 与 event 相等 / 互为子串 → 省略方括号，保留 event
+       （如 按规则"…"执行操作事件 + 按规则"…"执行操作，子串关系，保留带 BR 的 event）；
+    2. event 是名词框架（"…事件"收尾，如 技术领域配置变更事件 / 尝试…转换事件 /
+       尝试锁定用户事件(已过期)），action 是其操作式表述（修改技术领域 /
+       尝试执行从"已提交"到"已保存"的操作 / 尝试锁定用户(已过期)）→
+       两处同义重复，取 action 作为 When 的操作式表述，省略方括号；
+    3. action 是 event 的子序列（逐字符按序出现，如 event=提交含违规值的项目表单、
+       action=提交含违规值的表单）→ action 不含任何新信息，省略方括号，保留 event。
+
+    其余情况保留 event [action]。返回值直接用于渲染。
+    """
+    if not action:
+        return event, ""
+    action_core = action.strip()
+    if not action_core:
+        return event, ""
+    if action_core == event:
+        return event, ""
+    if event and (action_core in event or event in action_core):
+        return event, ""
+    # 名词框架 event 与操作式 action 同义 → 取 action（操作式更贴近 BDD When 语义）
+    if event and _NOMINAL_EVENT_RE.match(event.rstrip()):
+        return action_core, ""
+    # action 完全冗余（是 event 的子序列）→ 省略方括号，保留 event
+    if event and _is_subsequence(action_core, event):
+        return event, ""
+    return event, action_core
+
+
+def _dedupe_then_target(target: str, expectation: str) -> str:
+    """Then 行 target 与 expectation 开头重复时，裁掉 expectation 的重复前导段。
+
+    数据驱动：不硬编码任何实体/属性/状态名，只用文本关系。target 为
+    实体.属性 限定链（如 "专家.技术领域"）时，其最后一段（"技术领域"）若
+    原样出现在 expectation 开头（"技术领域显示为修改后的值"），说明
+    expectation 已自带主语，裁掉前导重复段，避免 "技术领域 技术领域显示…"。
+    """
+    if "." not in target:
+        return expectation
+    last = target.rsplit(".", 1)[1].strip()
+    if not last:
+        return expectation
+    if expectation.startswith(last) and len(expectation) > len(last):
+        return expectation[len(last):].lstrip()
+    return expectation
+
+
+def _generate_markdown(
+    procedures: list[dict],
+    md_path: str,
+    coverage_model: dict | None = None,
+):
     """Generate human-readable markdown from procedures.
 
     Collapses multi-instance copies (PROC-001.1, PROC-001.2, ...) into
     a single entry per base procedure with an instance-count badge.
     """
+    # source_id → 原始需求条目（SRS 章节）映射，用于标注每条用例覆盖的需求
+    source_ref_map: dict[str, str] = {}
+    state_info: dict = {}
+    if coverage_model:
+        for lst in ("entity_obligations", "transition_obligations",
+                    "cross_entity_obligations", "constraint_obligations"):
+            items = coverage_model.get(lst, [])
+            if isinstance(items, dict):
+                items = [it for sub in items.values() for it in sub]
+            for o in items:
+                oid = o.get("id")
+                ref = o.get("source_ref")
+                if oid and ref and oid not in source_ref_map:
+                    source_ref_map[oid] = ref
+        state_info = (coverage_model.get("_context") or {}).get("state_info") or {}
+
+    # 阶段语义解析器：数据驱动（phase_basis + state_info），见 context/render_registry
+    phase_label = build_phase_labeler(state_info, procedures)
+
     lines = ["# 测试规程\n"]
+    lines.append(
+        "> **业务定位**：用例类型（数据操作/审批流程/…） ｜ 业务模块"
+        "（用例所属的粗粒度业务模块，如“项目”、“评审计划”、“基础数据维护”）。\n"
+        "> **多实例**：标注 ×N 的用例需展开为 N 个独立实例重复执行，"
+        "各实例使用相互独立的测试数据。\n"
+        "> **覆盖需求**：标注用例覆盖的原始需求条目（如 EO-CRU-058）"
+        "及其 SRS 章节（如 4.6 项目管理）。\n"
+    )
 
     # Group multi-instance copies by base ID (strip .N suffix)
     groups: dict[str, list[dict]] = {}
@@ -545,7 +637,6 @@ def _generate_markdown(procedures: list[dict], md_path: str):
 
         s2 = proc.get("_S2_fields") or {}
         s3 = proc.get("_S3_fields") or {}
-        s4 = proc.get("_S4_fields") or {}
 
         temp_id = base
         if has_multi:
@@ -555,13 +646,21 @@ def _generate_markdown(procedures: list[dict], md_path: str):
         title = proc.get("title") or post_state
         lines.append(f"### {temp_id}：{title}")
 
-        phase_name = s2.get("phase_name", "")
         type_label = s2.get("type_label", "")
-        source_ids = _safe_join(proc.get("source_ids"))
-        lines.append(f"**业务定位**：{phase_name} ｜ {type_label} ｜ 溯源: `{source_ids}`")
+        source_ids = proc.get("source_ids", [])
 
-        if s2.get("phase_basis") and not s2.get("phase_basis_debug"):
-            lines.append(f"**阶段依据**：{s2.get('phase_basis')}")
+        # 业务定位：类型 + 阶段，全部中文化（标签来自 context.render_registry）
+        type_cn = TYPE_LABEL_CN.get(type_label, type_label) or "—"
+        lines.append(f"**业务定位**：{type_cn} ｜ {phase_label(proc)}")
+
+        # 覆盖需求：source_ids + 原始 source_ref（SRS 章节）
+        if source_ids:
+            ref_parts = []
+            for sid in source_ids:
+                ref = source_ref_map.get(sid, "")
+                ref_parts.append(f"{sid}（{ref}）" if ref else sid)
+            lines.append(f"**覆盖需求**：{'；'.join(ref_parts)}")
+
         if s2.get("context"):
             lines.append(f"**场景**：{s2.get('context')}")
         if proc.get("br_embedded"):
@@ -583,14 +682,20 @@ def _generate_markdown(procedures: list[dict], md_path: str):
                     desc_str = f" ({desc})" if desc else ""
                     lines.append(f"- {g.get('target', '')} 状态 = {g.get('state', '')}{desc_str}")
 
-            # When clause (single)
+            # When clause (single) — [action] 与 event 重复时省略方括号
             if when:
                 lines.append("")
                 lines.append("**When**")
                 w = when
                 actor_str = f" by {w.get('actor')}" if w.get("actor") else ""
-                action_str = f" [{w.get('action')}]" if w.get("action") else ""
-                lines.append(f"- {w.get('target', '')} {w.get('event', '')}{actor_str}{action_str}")
+                event_shown, action_core = _dedupe_when_action(
+                    w.get("event", ""), w.get("action", "")
+                )
+                action_str = f" [{action_core}]" if action_core else ""
+                lines.append(f"- {w.get('target', '')} {event_shown}{actor_str}{action_str}")
+                # 操作提示并入 When，作为缩进的执行步骤
+                for i, hint in enumerate(op_hints, 1):
+                    lines.append(f"  操作步骤{i}：{hint}")
 
             # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:
@@ -599,18 +704,10 @@ def _generate_markdown(procedures: list[dict], md_path: str):
                 for t in _dedup_thens(thens):
                     br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
                     xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
-                    lines.append(f"- {t.get('target', '')} {t.get('expectation', '')} ({t.get('kind', 'state')}){br_str}{xref_str}")
-
-            # Operation hints (separate from spec)
-            if op_hints:
-                lines.append("")
-                lines.append("**操作提示**")
-                for i, hint in enumerate(op_hints, 1):
-                    lines.append(f"{i}. {hint}")
-
-        # Post state
-        if proc.get("post_state"):
-            lines.append(f"\n**后置状态**：{proc.get('post_state')}")
+                    exp_shown = _dedupe_then_target(
+                        t.get("target", ""), t.get("expectation", "")
+                    )
+                    lines.append(f"- {t.get('target', '')} {exp_shown} ({t.get('kind', 'state')}){br_str}{xref_str}")
 
         # Cascade chain
         cascade = proc.get("cascade_chain")
@@ -625,77 +722,10 @@ def _generate_markdown(procedures: list[dict], md_path: str):
         if weak_deps:
             lines.append(f"**弱依赖**：{_safe_join(weak_deps)}")
 
-        # Multi instance
-        if s4.get("multi_instance"):
-            mc = s4.get("multi_count", "?")
-            mr = s4.get("multi_reason", "")
-            lines.append(
-                f"**多实例**：{mc} 个实例（{mr}），每个实例需使用独立测试数据")
-
         lines.append("")
 
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(lines))
-
-
-# ---------------------------------------------------------------------------
-# Readable (card-style) test case markdown
-# ---------------------------------------------------------------------------
-
-def _build_source_lookup(coverage_model: dict) -> dict[str, str]:
-    """Build a {source_id: requirement_text} map from the coverage model.
-
-    Traverses all four obligation lists and extracts human-readable
-    requirement descriptions keyed by obligation ID.
-    """
-    lookup: dict[str, str] = {}
-
-    # transition_obligations: action + preconditions
-    for to in coverage_model.get("transition_obligations", []):
-        tid = to.get("id", "")
-        if not tid:
-            continue
-        parts = []
-        action = to.get("action", "")
-        if action:
-            parts.append(action)
-        preconds = to.get("preconditions", [])
-        if preconds:
-            parts.append("前置: " + "; ".join(str(p) for p in preconds))
-        results = to.get("expected_results", [])
-        if results:
-            parts.append("预期: " + "; ".join(str(r) for r in results))
-        lookup[tid] = "；".join(parts) if parts else tid
-
-    # entity_obligations: description
-    for eo in coverage_model.get("entity_obligations", []):
-        eid = eo.get("id", "")
-        desc = eo.get("description", "")
-        if eid and desc:
-            lookup[eid] = desc
-
-    # cross_entity_obligations: desc > suggested_action
-    for co in coverage_model.get("cross_entity_obligations", []):
-        cid = co.get("id", "")
-        text = co.get("desc") or co.get("suggested_action", "")
-        if cid and text:
-            lookup[cid] = text
-
-    # constraint_obligations: description > reason
-    ros_raw = coverage_model.get("constraint_obligations", [])
-    if isinstance(ros_raw, dict):
-        ros_flat = [item for sublist in ros_raw.values() for item in sublist]
-    elif isinstance(ros_raw, list):
-        ros_flat = ros_raw
-    else:
-        ros_flat = []
-    for ro in ros_flat:
-        rid = ro.get("id", "")
-        text = ro.get("description") or ro.get("reason", "")
-        if rid and text:
-            lookup[rid] = text
-
-    return lookup
 
 
 # ---------------------------------------------------------------------------
@@ -1096,491 +1126,6 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
     }
 
 
-# ---------------------------------------------------------------------------
-# V-step expected-text polish (batched LLM call → natural language)
-# ---------------------------------------------------------------------------
-
-# Shared API config for polish calls (loaded once)
-_polish_api_config: tuple[str, str, str] | None = None
-
-
-def _get_polish_api_config() -> tuple[str, str, str]:
-    """Load API config for polish LLM calls (cached)."""
-    global _polish_api_config
-    if _polish_api_config is not None:
-        return _polish_api_config
-    import os as _os
-    api_base = _os.environ.get("LLM_API_BASE",
-                               "https://open.bigmodel.cn/api/paas/v4").rstrip("/")
-    api_key = _os.environ.get("LLM_API_KEY", "")
-    model = _os.environ.get("LLM_POLISH_MODEL", "glm-4-flash")
-    if not api_key:
-        cfg_path = Path(__file__).parent / "config.json"
-        try:
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-            llm_cfg = cfg.get("llm", {})
-            api_base = llm_cfg.get("api_base", api_base).rstrip("/")
-            api_key = llm_cfg.get("api_key", api_key)
-            task_models = llm_cfg.get("task_models", {})
-            model = task_models.get("polish", llm_cfg.get("polish_model", model))
-        except (FileNotFoundError, json.JSONDecodeError):
-            pass
-    _polish_api_config = (api_base, api_key, model)
-    return _polish_api_config
-
-
-_POLISH_SYSTEM_PROMPT = """你是一个测试用例语言润色器。请将"预期结果"中的文本改写为流畅的自然语言，保持所有关键信息不变。
-
-## 改写规则
-1. 去掉"状态验证:"、"验证:"、"预期结果:"等生硬前缀
-2. 将"状态变更为XXX"改写为"页面显示状态已更新为XXX"或"状态成功切换为XXX"
-3. 将"操作被拒绝"改写为"系统拒绝该操作"或"操作无法执行"
-4. 保留所有具体数值、状态名、提示文案原文
-5. 每条的改写结果长度应与原文接近，不要无意义扩写
-6. 如果原文已经是流畅自然语言，保持不变
-
-## 示例
-原文: 状态验证: 待开始
-改写: 项目状态成功变更为"待开始"
-
-原文: 验证: 删除项目
-改写: 项目已被删除，列表中不再显示该项目
-
-原文: 操作被拒绝，提示'待开始状态的项目不可删除'，项目状态不变
-改写: 系统拒绝删除操作，弹出提示"待开始状态的项目不可删除"，项目仍保持当前状态
-
-原文: [BR-02]验证: 待开始状态不可删除项目
-改写: [BR-02] 系统阻止删除操作，待开始状态的项目不允许被删除
-
-## 输出格式
-每行一个 JSON 对象（JSONL）：
-{"original": "原文", "polished": "改写后的自然语言"}
-
-只输出 JSONL，不要额外文字。"""
-
-
-def _polish_expected_text(procedures: list[dict]) -> dict[str, str]:
-    """Polish V-step expected texts: regex (fast) + LLM (hard cases).
-
-    Stage 1 — regex cleanup covers deterministic template patterns (~80%):
-      "状态验证: 待开始" → "状态成功变更为'待开始'"
-      "验证: 删除项目" → "项目已被删除"
-      "操作被拒绝,提示'xxx'" → "系统拒绝操作，提示'xxx'"
-
-    Stage 2 — remaining texts with "验证"/"状态" prefixes go to LLM.
-
-    Returns ``{original → polished}`` map.
-    """
-    # Collect unique expected texts from BDD Then clauses
-    texts_set: dict[str, None] = {}
-    for proc in procedures:
-        for then in proc.get("thens", []):
-            exp = then.get("expectation", "").strip()
-            if exp and len(exp) >= 4:
-                texts_set[exp] = None
-
-    if not texts_set:
-        return {}
-
-    unique_texts = list(texts_set.keys())
-    result: dict[str, str] = {}
-
-    # ── Stage 1: regex-based cleanup ─────────────────────────────────
-    still_needs_polish: list[str] = []
-
-    for text in unique_texts:
-        polished = _regex_polish(text)
-        if polished != text:
-            result[text] = polished
-        elif re.search(r'(状态验证|验证[:：]|预期结果)', text):
-            still_needs_polish.append(text)
-        # else: already natural — no change needed
-
-    print(f"      [POLISH] Stage 1 (regex): {len(result)} polished, "
-          f"{len(still_needs_polish)} need LLM")
-
-    if not still_needs_polish:
-        return result
-
-    # ── Stage 2: LLM for remaining hard cases ────────────────────────
-    api_base, api_key, model = _get_polish_api_config()
-    if not api_key:
-        print("      [POLISH] LLM_API_KEY not set — skipping Stage 2")
-        return result
-
-    # Check cache for the hard cases
-    cache_path = _polish_cache_path(still_needs_polish)
-    cached = _polish_load_cache(cache_path)
-    if cached is not None:
-        result.update(cached)
-        return result
-
-    batch_size = 30
-    all_entries: list[dict] = []
-
-    for batch_idx in range(0, len(still_needs_polish), batch_size):
-        batch = still_needs_polish[batch_idx:batch_idx + batch_size]
-        batch_num = batch_idx // batch_size + 1
-        total_batches = (len(still_needs_polish) + batch_size - 1) // batch_size
-
-        user_lines = ["请将以下预期结果改写为自然语言：", ""]
-        for i, text in enumerate(batch):
-            user_lines.append(f"### {batch_idx + i + 1}.")
-            user_lines.append(f"原文: {text}")
-            user_lines.append("")
-        user_msg = "\n".join(user_lines)
-
-        try:
-            raw = call_llm_api(
-                api_base=api_base, api_key=api_key, model=model,
-                messages=[
-                    {"role": "system", "content": _POLISH_SYSTEM_PROMPT},
-                    {"role": "user", "content": user_msg},
-                ],
-                temperature=0.2,
-                max_tokens=len(batch) * 120 + 200,
-                timeout=120,
-                max_retries=2,
-            )
-            entries = parse_llm_response(raw, prefer_jsonl=True)
-            if isinstance(entries, dict):
-                entries = [entries]
-            all_entries.extend(entries or [])
-            print(f"      [POLISH] Stage 2 Batch {batch_num}/{total_batches}: "
-                  f"{len(entries or [])} entries")
-        except Exception as e:
-            print(f"      [POLISH] Stage 2 Batch {batch_num}/{total_batches} failed: {e}")
-
-        if total_batches > 1 and batch_num < total_batches:
-            time.sleep(1)
-
-    for entry in all_entries:
-        orig = entry.get("original", "")
-        pol = entry.get("polished", "")
-        if orig and pol and pol != orig:
-            result[orig] = pol
-
-    _polish_save_cache(cache_path, {k: v for k, v in result.items() if k in still_needs_polish})
-    print(f"      [POLISH] Stage 2 (LLM): {len(all_entries)} texts polished")
-    return result
-
-
-def _regex_polish(text: str) -> str:
-    """Fast regex-based cleanup for deterministic template patterns."""
-    t = text.strip()
-
-    # "状态验证: XXX" → "状态成功变更为'XXX'" or "状态保持为'XXX'"
-    # Skip if the "state" contains entity references (e.g. "项目.项目状态 = 待开始")
-    m = re.match(r'状态验证[:：]\s*(.+)', t)
-    if m:
-        state = m.group(1).strip()
-        # Don't polish cross-entity state references
-        if '=' not in state and '.' not in state and '项目' not in state:
-            if '不变' in state:
-                return f"状态保持不变，仍为'{state.replace('不变', '').strip()}'"
-            return f"状态成功变更为'{state}'"
-        # Cross-entity: keep as-is or make slightly more readable
-        return t
-
-    # "验证: XXX" → make it declarative
-    m = re.match(r'验证[:：]\s*(.+)', t)
-    if m:
-        content = m.group(1).strip()
-        # If it describes an action result
-        if '删除' in content:
-            return f"{content}，操作已生效"
-        if '审核' in content:
-            return f"{content}，审核流程已完成"
-        return content
-
-    # "操作被拒绝，提示'XXX'" → "系统拒绝操作，提示'XXX'"
-    t = re.sub(r'操作被拒绝[,，]', '系统拒绝该操作，', t)
-
-    # "预期结果: XXX" → "XXX"
-    t = re.sub(r'^预期结果[:：]\s*', '', t)
-
-    # "[BR-XX]验证: XXX" → "[BR-XX] XXX"
-    t = re.sub(r'(\[BR-\d+\S*\])验证[:：]\s*', r'\1', t)
-
-    # "校验失败，提示'XXX'" → "校验不通过，输入框提示'XXX'"
-    t = re.sub(r"校验失败[,，]提示['‘]", "校验不通过，输入框下方提示'", t)
-
-    # "校验通过" → standalone polish
-    t = re.sub(r'^校验通过$', '输入通过所有校验规则，提交按钮可用', t)
-
-    return t
-
-
-# ── Polish cache helpers ──
-
-def _polish_cache_path(texts: list[str]) -> Path:
-    import hashlib
-    stable = json.dumps(sorted(texts), ensure_ascii=True, sort_keys=True)
-    h = hashlib.sha256(stable.encode()).hexdigest()[:16]
-    return Path(__file__).parent / "cache" / f"pol_{h}.json"
-
-
-def _polish_load_cache(cache_path: Path) -> dict[str, str] | None:
-    if not cache_path.exists():
-        return None
-    try:
-        with open(cache_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, dict):
-            return data
-    except (json.JSONDecodeError, OSError):
-        pass
-    return None
-
-
-def _polish_save_cache(cache_path: Path, result: dict[str, str]) -> None:
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
-    except OSError:
-        pass
-
-
-# ---------------------------------------------------------------------------
-# Readable (card-style) test case markdown
-# ---------------------------------------------------------------------------
-
-
-def _generate_readable_markdown(
-    procedures: list[dict],
-    coverage_model: dict,
-    md_path: str,
-) -> None:
-    """Generate card-style readable test case markdown.
-
-    Each procedure becomes a card with:
-    1. 测试用例名称 + 元信息（阶段/类型/需求来源）
-    2. 对应需求内容
-    3. 前置条件
-    4. 测试步骤（含操作数据+操作位置）
-    5. 预期结果
-    6. 后置状态
-    7. 依赖 + 级联链（有则显示）
-    """
-    lookup = _build_source_lookup(coverage_model)
-
-    # ── Polish V-step expected texts (batched LLM → natural language) ──
-    polish_map = _polish_expected_text(procedures)
-
-    # ── Build translation helpers ──────────────────────────────────────
-    # Entity ID → Chinese name
-    ctx = coverage_model.get("_context", {})
-    id_to_name: dict[str, str] = {}
-    entity_list = ctx.get("entity_details", [])
-    if isinstance(entity_list, dict):
-        entity_list = list(entity_list.values())
-    for e in entity_list:
-        eid = e.get("id", "")
-        ename = e.get("name", "")
-        if eid and ename:
-            id_to_name[eid] = ename
-
-    def _translate_entity(text: str) -> str:
-        """Replace entity codes like E-PROJ with Chinese names."""
-        for code, chinese in id_to_name.items():
-            text = text.replace(code, chinese)
-        return text
-
-    # Phase names: try entity state info → readable phase label
-    state_info = ctx.get("state_info", {})
-    phase_names = ctx.get("phase_names", ["P0", "P1", "P2"])
-    if isinstance(phase_names, dict):
-        phase_names = list(phase_names.values())
-
-    # Type label → Chinese
-    type_label_cn = {
-        "happy": "正向流程", "branch": "分支路径", "audit": "审批流程",
-        "audit_rejection": "审批驳回", "time_sensitive": "时效约束",
-        "data_constraint": "数据约束", "rollback": "回退验证",
-        "constraint": "前置门禁", "lifecycle": "生命周期",
-        "crud": "数据操作", "invalid": "非法验证", "rule": "业务规则",
-    }
-
-    # Procedure temp_id → title (for translating dependency references)
-    proc_title_map: dict[str, str] = {}
-    for p in procedures:
-        tid = p.get("temp_id", "")
-        # Store both full ID (PROC-001.1) and base ID (PROC-001)
-        base = re.sub(r"\.\d+$", "", tid)
-        t = p.get("title") or p.get("post_state", "")
-        proc_title_map[tid] = t
-        if base not in proc_title_map:
-            proc_title_map[base] = t
-
-    lines = ["# 测试用例（可读版）\n"]
-
-    # Group multi-instance copies by base ID
-    groups: dict[str, list[dict]] = {}
-    group_order: list[str] = []
-    for proc in procedures:
-        tid = proc.get("temp_id", "?")
-        base = re.sub(r"\.\d+$", "", tid)
-        if base not in groups:
-            groups[base] = []
-            group_order.append(base)
-        groups[base].append(proc)
-
-    tc_counter = 0
-
-    for base in group_order:
-        procs = groups[base]
-        proc = procs[0]
-        instance_count = len(procs)
-        tc_counter += 1
-        s2 = proc.get("_S2_fields", {})
-        s3 = proc.get("_S3_fields", {})
-
-        # ── Title ──
-        title = proc.get("title") or proc.get("post_state", "")
-        multi_badge = f" ×{instance_count}" if instance_count > 1 else ""
-        lines.append(f"---\n")
-        lines.append(f"### TC-{tc_counter:03d}：{title}\n")
-
-        # ── Meta line: 阶段 | 类型 | 需求来源 ──
-        phase_name = s2.get("phase_name", "")
-        type_label = s2.get("type_label", "")
-        type_cn = type_label_cn.get(type_label, type_label)
-        source_ids = proc.get("source_ids", [])
-
-        # Build readable requirement source from source_ids
-        req_refs: list[str] = []
-        for sid in source_ids:
-            req_text = lookup.get(sid, sid)
-            # Truncate long requirement text for the meta line
-            if len(req_text) > 60:
-                req_text = req_text[:57] + "..."
-            req_refs.append(req_text)
-        req_ref_str = "；".join(req_refs) if req_refs else "—"
-
-        lines.append(f"> **{phase_name}** | {type_cn} | 需求: {req_ref_str}\n")
-
-        # 多实例提示：所有实例 Given/When/Then 相同，需分别使用独立测试数据
-        if instance_count > 1:
-            lines.append(
-                f"> ⚠ **{instance_count} 个实例**：内容一致，每个实例需使用独立测试数据\n")
-
-        # ── 1. 对应需求内容 ──
-        req_texts: list[str] = []
-        for sid in source_ids:
-            req = lookup.get(sid, "")
-            if req and req not in req_texts:
-                req_texts.append(req)
-        requirement = "；".join(req_texts) if req_texts else "（未找到对应需求）"
-        lines.append(f"| 字段 | 内容 |")
-        lines.append(f"|---|---|")
-        lines.append(f"| **对应需求内容** | {requirement} |")
-
-        # ── 2. BDD Given（前置业务状态）──
-        givens = proc.get("givens", [])
-        if givens:
-            precond_parts: list[str] = []
-            for i, g in enumerate(givens, 1):
-                target = _translate_entity(g.get("target", ""))
-                state = g.get("state", "")
-                desc = g.get("description", "")
-                desc_str = f"（{desc}）" if desc else ""
-                precond_parts.append(f"{i}. {target} = {state}{desc_str}")
-            lines.append(f"| **Given（前置状态）** | {'<br>'.join(precond_parts)} |")
-        else:
-            lines.append(f"| **Given（前置状态）** | （无特殊前置状态） |")
-
-        # ── 3. BDD When（业务事件）──
-        when = proc.get("when", {})
-        if when and when.get("event"):
-            w_target = _translate_entity(when.get("target", ""))
-            w_event = when.get("event", "")
-            w_actor = when.get("actor", "")
-            w_action = when.get("action", "")
-            actor_str = f" by {w_actor}" if w_actor and w_actor != "系统" else ""
-            action_str = f" [{w_action}]" if w_action and w_action != w_event else ""
-            lines.append(f"| **When（业务事件）** | {w_target} {w_event}{actor_str}{action_str} |")
-        else:
-            lines.append(f"| **When（业务事件）** | （未指定业务事件） |")
-
-        # ── 4. BDD Then（可观察结果）──
-        # 渲染层去重（_dedup_thens 只影响呈现，JSON 数据不动）
-        thens = _dedup_thens(proc.get("thens", []))
-        if thens:
-            expectations: list[str] = []
-            for i, t in enumerate(thens, 1):
-                t_target = _translate_entity(t.get("target", ""))
-                exp_raw = t.get("expectation", "")
-                exp = _translate_entity(polish_map.get(exp_raw, exp_raw))
-                kind = t.get("kind", "state")
-                br_refs = t.get("br_refs", [])
-                cross_refs = t.get("cross_refs", [])
-                # Simplify target: strip entity prefix if redundant
-                entity = proc.get("entity", "")
-                entity_cn = id_to_name.get(entity, entity)
-                if t_target.startswith(entity_cn + "."):
-                    loc_short = t_target[len(entity_cn) + 1:]
-                elif t_target.startswith(entity + "."):
-                    loc_short = t_target[len(entity) + 1:]
-                else:
-                    loc_short = t_target
-                loc_tag = f"[{loc_short}] " if loc_short and loc_short not in (entity_cn, entity) else ""
-                br_tag = f" [BR:{','.join(br_refs)}]" if br_refs else ""
-                xref_tag = f" [cross:{','.join(cross_refs)}]" if cross_refs else ""
-                kind_tag = f"({kind})" if kind != "state" else ""
-                expectations.append(f"{i}. {loc_tag}{exp}{kind_tag}{br_tag}{xref_tag}")
-            lines.append(f"| **Then（预期结果）** | {'<br>'.join(expectations)} |")
-        else:
-            lines.append(f"| **Then（预期结果）** | （无可观察结果） |")
-
-        # ── 4b. Operation Hints（执行提示，与规范分离）──
-        op_hints = proc.get("operation_hints", [])
-        if op_hints:
-            hints_str = "<br>".join(f"{i}. {h}" for i, h in enumerate(op_hints, 1))
-            lines.append(f"| **操作提示** | {hints_str} |")
-
-        # ── 5. 后置状态 ──
-        post_state = proc.get("post_state", "")
-        if post_state:
-            post_state_cn = _translate_entity(post_state)
-            # Make it more readable: "项目.项目状态→待开始" → "项目状态变更为待开始"
-            if "→" in post_state_cn:
-                parts = post_state_cn.split("→", 1)
-                post_state_readable = f"执行后，{parts[0].strip()}变更为{parts[1].strip()}"
-            else:
-                post_state_readable = post_state_cn
-            lines.append(f"| **后置状态** | {post_state_readable} |")
-
-        # ── 6. 依赖 + 级联链 ──
-        extras: list[str] = []
-
-        deps = s3.get("dependencies", [])
-        if deps:
-            dep_titles = []
-            for d in deps:
-                dt = proc_title_map.get(d, d)
-                # Truncate if too long
-                if len(dt) > 40:
-                    dt = dt[:37] + "..."
-                dep_titles.append(dt)
-            extras.append(f"前置用例: {' → '.join(dep_titles)}")
-
-        cascade = proc.get("cascade_chain", "")
-        if cascade:
-            cascade_cn = _translate_entity(cascade)
-            # "项目.项目状态=待开始→报名.报名状态=待审核"
-            # → "项目进入待开始 → 报名状态自动变为待审核"
-            cascade_readable = cascade_cn.replace("=", "设为").replace("→", " → ")
-            extras.append(f"级联效果: {cascade_readable}")
-
-        if extras:
-            lines.append(f"| **关联** | {'<br>'.join(extras)} |")
-
-        lines.append("")
-
-    with open(md_path, 'w', encoding='utf-8') as f:
-        f.write("\n".join(lines))
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ from nodes.signal_validation import generate_signal_v_steps
 from context.entity_operators import form_operator_roles
 from context.time_control import needs_time_control_ids
 from context.constraint_fields import predicate_phase_lower_bound, get_state_phase
+from context.domain_precondition import object_existence
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -2299,7 +2300,25 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
 # Type5 — CRUD Operation procedures (filtered)
 # ---------------------------------------------------------------------------
 
-def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
+def _creation_proc_phase(creation_to_ids: list | None, prior_procs: list | None) -> int | None:
+    """创建转换对应 Type1 过程的实际相位 (经 ⑬ precondition bump 后的真实值).
+
+    用 prior_procs 查表而非重新推导 _resolve_phase_for_transition: 文本前置
+    (如 T-015 的"处于已选入状态") 正则吃不到但实际相位已被抬到 1, 重推导会
+    低估。Type1 在 Type5 之前生成, 传进来的 prior_procs 已含创建过程。
+    """
+    if not prior_procs or not creation_to_ids:
+        return None
+    best: int | None = None
+    for p in prior_procs:
+        if any(cid in (p.get("source_ids") or []) for cid in creation_to_ids):
+            ph = (p.get("_S2_fields") or {}).get("phase")
+            if ph is not None and (best is None or ph > best):
+                best = ph
+    return best
+
+
+def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None = None) -> list[dict]:
     """Generate Type5 (crud_operation) procedures with retention filter.
 
     Only retained EOs generate procedures. If the entity has been split into
@@ -2310,6 +2329,8 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
     ves = state.get("virtual_entities", {})
     topo = state["topology_levels"]
     primary = state["primary_entity"]
+    # _build_entity_name_map 是 中文名→E-XXX, 这里反转为 id→中文名 (领域前置 desc 用)
+    id_to_zh = {v: k for k, v in (indices.get("entity_name_map") or {}).items()}
 
     procedures: list[dict] = []
 
@@ -2360,6 +2381,22 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
                     target=ve_name, state="存在",
                     description=f"操作入口可用",
                 )]
+                # Tier 2 领域前置 (VE 分支): 用 original_entity 判别业务生命周期
+                # 对象, 声明对象实例须已存在 + 相位底不低于对象创建相位。
+                dp_ref = object_existence(
+                    state["coverage_model"], state, ve.get("original_entity") or entity)
+                if dp_ref:
+                    givens = [_make_given(
+                        target=dp_ref["object_entity"],
+                        state=dp_ref["object_state"],
+                        description=(
+                            f"{id_to_zh.get(dp_ref['object_entity'], dp_ref['object_entity'])}"
+                            f"已存在，处于{dp_ref['object_state']}状态"
+                        ),
+                    )]
+                    creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
+                    if creation_phase is not None and creation_phase > ve_phase:
+                        ve_phase = creation_phase
                 when = _make_when(
                     target=ve_name,
                     event=_derive_business_event(op_name),
@@ -2417,10 +2454,28 @@ def _generate_type5(state: AgentState, indices: dict) -> list[dict]:
             op_name = eo['operation_name']
             op_desc = eo.get('description', '')
             entity_name = eo.get('entity_name', entity)
-            givens = [_make_given(
-                target=entity, state="存在",
-                description="操作入口可用",
-            )]
+            # Tier 2 领域前置: CRUD/查看义务作用于业务生命周期对象 (topology>0)
+            # 时, Given 声明"对象实例须已存在"(锚定创建转换 to_state), 相位
+            # 不得早于对象创建相位。管理类实体 (topology 0) 不派生 → 保持 "=存在"。
+            dp_ref = object_existence(state["coverage_model"], state, entity)
+            if dp_ref:
+                givens = [_make_given(
+                    target=dp_ref["object_entity"],
+                    state=dp_ref["object_state"],
+                    description=(
+                        f"{id_to_zh.get(dp_ref['object_entity'], dp_ref['object_entity'])}"
+                        f"已存在，处于{dp_ref['object_state']}状态"
+                    ),
+                )]
+                creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
+                if creation_phase is not None and creation_phase > phase:
+                    phase = creation_phase
+                    phase_basis = f"domain_precond_creation.{dp_ref['creation_to_id']}.P{creation_phase}"
+            else:
+                givens = [_make_given(
+                    target=entity, state="存在",
+                    description="操作入口可用",
+                )]
             when = _make_when(
                 target=entity,
                 event=_derive_business_event(op_name),
@@ -4018,7 +4073,7 @@ def s1_generation_node(state: AgentState) -> dict:
     procedures: list[dict] = []
     procedures.extend(_generate_type1(state, indices, depth_cache, br_list))
     procedures.extend(_generate_type3(state, indices, depth_cache))
-    procedures.extend(_generate_type5(state, indices))
+    procedures.extend(_generate_type5(state, indices, procedures))
     procedures.extend(_generate_type6(state, indices, depth_cache))
     # BDD: field_validation as independent Type9 procedures (not injected into Type1/3/5)
     procedures.extend(_generate_type9_field_validation(state, indices, depth_cache))

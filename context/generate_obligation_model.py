@@ -278,10 +278,21 @@ eo_atc_counter = 0
 eo_cru_counter = 0
 
 # 1.1 EO-ATC
+# P1 属性字段本身不携带章节信息，但属性所属实体的操作（op）携带 source_ref
+# （如 "4.6 项目管理"）。透传实体首条操作的 source_ref 作为该配置属性覆盖
+# 需求的章节定位。数据驱动：不硬编码任何实体/章节。
+def _entity_config_section_ref(e):
+    for op in e.get("operations", []):
+        if isinstance(op, dict) and op.get("source_ref"):
+            return op["source_ref"]
+    return None
+
+
 for e in p1["domain_model"]["entities"]:
     for attr in e.get("attributes", []):
         if attr.get("is_config") is True:
             eo_atc_counter += 1
+            attr_src = _entity_config_section_ref(e)
             eo = {
                 "id": f"EO-ATC-{eo_atc_counter:03d}",
                 "type": "attribute_config",
@@ -295,10 +306,11 @@ for e in p1["domain_model"]["entities"]:
                 "dimension": None,
                 "from": None,
                 "to": None,
-                "source_ref": None  # P1 attributes have no source_ref
+                "source_ref": attr_src  # P1 属性无章节，透传实体首条操作的 source_ref
             }
             entity_obligations.append(eo)
-            add_judgment("EO-ATC source_ref", f"{eo['id']} P1 属性无 source_ref 字段，置 null")
+            add_judgment("EO-ATC source_ref",
+                         f"{eo['id']} P1 属性无 source_ref 字段，透传实体首条操作 source_ref={attr_src}")
 
 # 1.2 EO-CRU (all categories, no filter at this step)
 for e in p1["domain_model"]["entities"]:
