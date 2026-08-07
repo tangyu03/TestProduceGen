@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-08-07 ⑱ Tier 2 领域前置机制——诊断完成、落档待新 session 实施
+
+**决策**：⑭ 排期的 Tier 2（CRUD/查看类义务缺"前置对象必须已存在"领域先决）经本 session 完整诊断后**确认是当前最高优先级 todo**，但本 session 上下文已近窗口上限（已压缩 1 次 + 完成 P2 去硬编码 ⑯ + S0 Strategy 0 ⑰），**迁移交接**。完整诊断+方案+验证方法落档于 `context/TIER2_DOMAIN_PRECONDITION_HANDOFF.md`，新 session 直接接手。
+
+**诊断结论（已探针验证）**：
+- 数据层信号已就位：P2 已产出 `precondition_state_refs`（48/70 TO，结构化 `{entity,dimension,state,raw_text,pattern}`），但它是**状态转移前置**（对象处于X态才可做Y），不是"对象须存在"先决——缺口就在此。
+- 影响面量化（275 TC）：弱 Given（`=存在`/`=初始`/`操作入口可用`）56 个（20%）；**真问题约 28 个**（项目18+附件5+评审计划4+打分1），集中在业务生命周期对象的 CRUD/查看类；管理类（专家/角色/日志/配置）"=存在"是合理的，不做领域前置。
+- 方案第一性原理：表面层=CRUD/查看义务→作用对象须先存在（义务类型+实体函数，非名字硬编码）；数据层=`precondition_state_refs`+对象创建转换（from=None）；接入 S1 Given 生成 + S3 Guard 6 依赖 + 相位不早于对象创建相位。
+- 验证：全管线确定性 Engine State 对比（P3 LLM 随机不可比）；目标断言 TC-083 Given 含"计划已建立"、TC-132 含"打分已生成"、V01 0 违例、errors=0。
+
+---
+
 ## 2026-08-07 ⑰ S0 Strategy 0 匹配机制去脆弱——结构化 ref 优先取 max，文本扫描降级兜底
 
 **背景**:⑮ 修 phase_anchor 前置误触发后，用户要求"修复 S0 Strategy 0 的匹配机制脆弱的问题"。⑮ 只跳过了 `pattern=phase_anchor` 的前置，但 Strategy 0 本体仍是**裸子串扫描**（`state_name in prec_text`，first-match dict 迭代序），隐患依旧。
