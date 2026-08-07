@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-07 ⑯ 约束谓词解析器表层语法表去硬编码——领域名词全部数据派生
+
+**背景**:A3 修 phase_anchor `raw_text` 后，用户复查 `context/generate_obligation_model.py` 指出"仍然存在很多硬编码"。全文件中文串字面量清点后，违规集中在 **Step 3 约束谓词解析器 `_PREDICATE_SURFACES` 表层语法表**（记忆条目"P2 解析器禁止名字硬编码"的第三次触发）。
+
+**根因**:表层语法表把领域名词/动词/态名直接写进了正则与常量表：
+- `_NEGATION_MARKERS = ("不可选入", "不能提交")` —— 否定标记把领域动词（选入/提交）与通用否定词捆死；
+- `_COMPLETION_STATE_SURFACES = {"提交了": "已提交"}` —— 领域表层→态名的映射表；
+- selection_range / config / occurrence_limit / completion 四个正则分别硬编码实体名 **项目**（两处）、**评审计划+专家**、**项目**、**专家+打分**。
+
+**解法（第一性原理：表层语法只描述句式，名词一律来自数据）**：
+- 实体名（项目/评审计划/打分/专家/机构/…）由 p1 `domain_model.entities` 派生 `_ENTITY_NOUN_ALT`（`key=(-len, name)` 确定序，保证输出可复现），四个正则的实体名词位全部换用该 alternation；
+- 否定标记拆为 **通用中文否定前缀**（`_GENERIC_NEGATION_PREFIXES`，语言级，与 `_prohibition_config.negation_prefixes` 默认值共用单一真相源）+ 可选**动词尾捕获**（领域动作词从表层捕获但节点不消费）；
+- 完成态不查映射表，改由 `_resolve_completion_state` 在 state_lookup 中按 **"已"+动词** 解析（语言级"已X=已完成X"惯例），多候选优先 terminal 态；
+- `classify_xc` 的 to_br 内容信号去掉领域词 评级/归档（保留通用计算语义词 累计/计算/公式）——该分支对当前 28 条 XC 全被模板前缀分支先行捕获，属死分支，去领域词零风险。
+
+**验证结果**:重跑 P2，`coverage_obligations.json` 与 A3 基线（fa3a351）**递归 JSON diff = 0**（仅 generated_at 时间戳差异）——constraint_predicate / judgments / self_check / snapshot 逐项一致，无任何行为回归。谓词样例复核：T-006 completion target 仍 = {E-SCORE,打分状态,已提交}；T-002 仍 negation(field_equals 评级,差)；T-015 仍展开 field_in(评审组人数,[5,7,9]) ∧ field_equals(组长专家数,1)。
+
+**残留（未改，属数据层格式约定而非领域名词）**:`classify_xc` 的 desc 模板前缀（"镜像 T-" / "联动: T-" / "分支[" / "由 Step 4.6 约束-因果鉴别确认"）匹配的是 P1 生成的机器可读 desc 格式（管线契约）；`derive_direction` 的 `"(初始)"` 哨兵对当前 P1 数据为死代码（数据用 None）；RO-BR category 关键词（显示/展示/不得/禁止…）为通用中文词。若需把这些也数据化，需改 P1 输出格式，另行排期。
+
+---
+
 ## 2026-08-07 ⑮ A3 相位锚定的 S0 副作用——phase_anchor 前置误触发整机入口锚定
 
 **决策**:`context/generate_obligation_model.py` Step 2.5c 给 E-ORG.机构状态 非创建转换（T-042/043/044/045）写入 `precondition_state_refs`（S3 Guard 6 依赖边）+ `preconditions` state_ref dict（S1 `_max_state_ref_phase` 抬相位到 计划状态.结束=P5），配置在数据层 `_context.phase_anchors`（与 prohibition_config 同构，单一真相源）。

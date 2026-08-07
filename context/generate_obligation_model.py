@@ -652,13 +652,19 @@ def _selection_node(m, ctx):
 
 
 # ── 跨类型表层数据表 ─────────────────────────────────────────────────────
+#   领域名词一律从数据层现取：实体名（项目/评审计划/打分/专家/…）由 p1
+#   domain_model.entities 派生进 _ENTITY_NOUN_ALT，代码不写字面量。
+_ENTITY_NOUNS = sorted(
+    {e.get("name", "") for e in p1["domain_model"]["entities"] if e.get("name")},
+    key=lambda n: (-len(n), n))  # 确定序（长优先，再字典序），保证输出可复现
+_ENTITY_NOUN_ALT = "|".join(re.escape(n) for n in _ENTITY_NOUNS) or r"(?!)"
 #   计数模式：连续 → consecutive=True（被打断归零），累计 → False（all_time 累计）
 _COUNT_MODE_KEYWORDS = {"连续": True, "累计": False}
-#   否定标记：<operand>的<标记>（如 评价结果为差的项目不可选入）
-_NEGATION_MARKERS = ("不可选入", "不能提交")
-_NEGATION_ALT = "|".join(sorted(_NEGATION_MARKERS, key=len, reverse=True))
-#   完成态表层：提交了 → 完成态 已提交（经 state_lookup 解析到 E-SCORE.打分状态.已提交）
-_COMPLETION_STATE_SURFACES = {"提交了": "已提交"}
+#   通用中文否定前缀（语言级，非领域词汇——否定标记里的领域动词尾如 选入/提交
+#   由 negation 行的 verb 捕获但节点不消费，不写任何领域字面量）。
+#   _prohibition_config 的 negation_prefixes 默认值共用同一份（单一真相源）。
+_GENERIC_NEGATION_PREFIXES = ("不可", "不能", "不得", "禁止", "不允许", "无法", "无权", "未被", "未")
+_NEGATION_ALT = "|".join(re.escape(p) for p in sorted(_GENERIC_NEGATION_PREFIXES, key=len, reverse=True))
 #   数字字面量：为零 → 0（field_zero 聚合全零判定）
 _ZERO_WORDS = {"零": "0", "0": "0"}
 
@@ -757,13 +763,35 @@ def _negation_node(m, ctx):
 
 
 def _completion_node(m, ctx):
-    """completion：…全部专家提交了…打分。完成态经 _COMPLETION_STATE_SURFACES +
-    state_lookup 解析（提交了 → E-SCORE.打分状态.已提交）。"""
-    st = _resolve_state_from_text(_COMPLETION_STATE_SURFACES["提交了"], ctx)
+    """completion：…全部<谁><动词>了<对象>（如 全部专家提交了项目打分）。
+
+    完成态 = state_lookup 中以"已"+动词 命名的态（提交了 → 已提交；语言级
+    "已X=已完成X" 惯例），多候选时优先 terminal 态（完成态语义）。不写字面量。
+    """
+    st = _resolve_completion_state(m["verb"], ctx)
     if st is None:
         return {"type": "unparsed", "text": ctx.get("_text", ""),
-                "reason": "完成态未解析: 已提交"}
+                "reason": f"完成态未解析: 已{m['verb']}"}
     return {"type": "completion", "target": st}
+
+
+def _resolve_completion_state(verb, ctx):
+    """完成态解析：态名 == 已+verb 的候选（跨全部实体维度）；多候选优先 terminal。"""
+    sl = ctx.get("_state_lookup") or {}
+    cands = []
+    for ent_id, dims in sl.items():
+        for dim, states in dims.items():
+            for s in states:
+                if s == "已" + verb:
+                    cands.append({"entity": ent_id, "dimension": dim, "state": s})
+    if not cands:
+        return None
+    if len(cands) == 1:
+        return cands[0]
+    for c in cands:  # 多候选 → 优先 terminal（完成态 = 活动终点）
+        if c["state"] in terminal_index.get(c["entity"], {}).get(c["dimension"], set()):
+            return c
+    return cands[0]
 
 
 def _parse_occurrence_when(when, ctx):
@@ -837,12 +865,12 @@ _PREDICATE_SURFACES = [
          r"^\s*(?P<kind>.{1,8}?)时限超时（\s*(?P<dmin>\d+)\s*-\s*(?P<dmax>\d+)\s*天，"
          r"默认\s*(?P<ddef>\d+)\s*）\s*$"),
      "build": _time_limit_node},
-    # selection_range：<role?>从处于<state>状态的项目中选取 min-max 个项目。
-    # 前导 <lead> 是角色前缀（评审管理员 等）；<state> 经 state_lookup 解析。
+    # selection_range：<role?>从处于<state>状态的<实体>中选取 min-max 个<实体>。
+    # 实体名词从数据层派生（_ENTITY_NOUN_ALT）；<state> 经 state_lookup 解析。
     {"type": "selection_range",
      "pattern": re.compile(
-         r"^\s*(?P<lead>.{0,20}?)从处于(?P<state>.{1,12}?)状态的项目中选取\s*"
-         r"(?P<smin>\d+)\s*-\s*(?P<smax>\d+)\s*个项目"),
+         rf"^\s*(?P<lead>.{{0,20}}?)从处于(?P<state>.{{1,12}}?)状态的(?:{_ENTITY_NOUN_ALT})中选取\s*"
+         rf"(?P<smin>\d+)\s*-\s*(?P<smax>\d+)\s*个(?:{_ENTITY_NOUN_ALT})"),
      "build": _selection_node},
     # aggregate_count：<主语><连续|累计> <N> 次<计数对象>（如 普通用户连续密码错误 3 次）
     {"type": "aggregate_count",
@@ -850,30 +878,37 @@ _PREDICATE_SURFACES = [
          r"^\s*(?P<lead>.{0,24}?)(?P<mode>连续|累计)\s*(?P<object>.{0,12}?)\s*"
          r"(?P<th>\d+)\s*次(?P<tail>.{0,24}?)\s*$"),
      "build": _aggregate_node},
-    # config：<f1>由 V1、V2 或 V3 个专家组成，有且只能有 N 个<f2>
+    # config：<实体>的<f1>由 V1、V2 或 V3 个<实体>组成，有且只能有 N 个<f2>
+    #（如 评审计划的评审组由 5、7 或 9 个专家组成…）；实体名从数据层派生。
     {"type": "config",
      "pattern": re.compile(
-         r"^\s*评审计划的(?P<f1>.{1,8}?)由(?P<vals>.{1,20}?)个专家组成，有且只能有"
-         r"(?P<n1>.{1,4}?)个(?P<f2>.{1,8}?)\s*$"),
+         rf"^\s*(?:{_ENTITY_NOUN_ALT}的)?(?P<f1>.{{1,8}}?)由(?P<vals>.{{1,20}}?)个"
+         rf"(?:{_ENTITY_NOUN_ALT})组成，有且只能有(?P<n1>.{{1,4}}?)个(?P<f2>.{{1,8}}?)\s*$"),
      "build": _config_node},
     # disjunction_ref：…满足<ref>任一条（引用未展开规则列表）
     {"type": "disjunction_ref",
      "pattern": re.compile(r"^\s*(?P<lead>.{1,24}?)满足(?P<ref>.{1,16}?)任一条\s*$"),
      "build": _disjunction_ref_node},
-    # negation：<operand>的<subj?><否定标记>（subj 如 项目）
+    # negation：<operand>的<subj?><否定前缀><动词尾?>（如 评价结果为差的项目不可选入）。
+    # 否定前缀为通用中文否定词（语言级 _GENERIC_NEGATION_PREFIXES）；动词尾
+    #（选入/提交…）是领域动作词，从表层捕获但节点不消费——不写领域字面量。
     {"type": "negation",
      "pattern": re.compile(
-         rf"^\s*(?P<operand>.{{1,24}}?)的(?P<subj>.{{1,4}}?)?(?:{_NEGATION_ALT})\s*$"),
+         rf"^\s*(?P<operand>.{{1,24}}?)的(?P<subj>[一-龥]{{0,4}}?)?"
+         rf"(?:{_NEGATION_ALT})(?P<verb>[一-龥]{{0,6}}?)\s*$"),
      "build": _negation_node},
-    # occurrence_limit：对于<when>的项目，只有 N 次<动作>
+    # occurrence_limit：对于<when>的<实体>，只有 N 次<动作>
     {"type": "occurrence_limit",
      "pattern": re.compile(
-         r"^\s*对于(?P<when>.{1,24}?)的项目，只有\s*(?P<limit>\d+)\s*次"
-         r"(?P<what>.{1,12}?)\s*$"),
+         rf"^\s*对于(?P<when>.{{1,24}}?)的(?:{_ENTITY_NOUN_ALT})，只有\s*(?P<limit>\d+)\s*次"
+         rf"(?P<what>.{{1,12}}?)\s*$"),
      "build": _occurrence_node},
-    # completion：…全部专家提交了…打分（完成态）
+    # completion：…全部<谁?><动词>了<对象?><对象实体>（完成态；动词捕获，完成态经
+    # _resolve_completion_state 以"已"+动词 解析，不写字面量）
     {"type": "completion",
-     "pattern": re.compile(r"^\s*.{0,12}?全部专家提交了.{1,10}打分\s*$"),
+     "pattern": re.compile(
+         rf"^\s*(?P<lead>.{{0,12}}?)全部(?:{_ENTITY_NOUN_ALT})?(?P<verb>[一-龥]{{1,4}})了"
+         rf"(?P<obj>.{{1,8}}?)(?:{_ENTITY_NOUN_ALT})\s*$"),
      "build": _completion_node},
     # always_true：规则描述句（依据…对…进行…），非实质约束
     {"type": "always_true",
@@ -1515,7 +1550,10 @@ def classify_xc(xc):
         return "auto_candidate"
     if desc.startswith("分支["):
         return "branch_to_br"
-    if any(kw in desc for kw in ["累计", "计算", "公式", "评级", "归档"]):
+    # 内容信号只用通用计算语义词（累计/计算/公式）；领域动作/字段词（评级/归档…）
+    # 不得入表——XC 分类由 desc 模板前缀（镜像/联动/分支，P1 数据层格式）与
+    # 状态引用结构决定，不依赖业务词汇。
+    if any(kw in desc for kw in ["累计", "计算", "公式"]):
         return "to_br"
 
     # ── LLM fallback (only when keywords don't match) ──
@@ -2742,7 +2780,7 @@ if unresolved_list:
 # _context.prohibition_config 中声明(数据模块是项目词汇的单一真相源),
 # P2 不硬编码业务词汇。
 _prohibition_config = p1.get("_context", {}).get("prohibition_config", {
-    "negation_prefixes": ["不可", "不能", "不得", "禁止", "不允许", "无法", "无权", "未被", "未"],
+    "negation_prefixes": list(_GENERIC_NEGATION_PREFIXES),
     "action_verbs": ["启动", "提交", "保存", "删除", "修改", "新增",
                      "审批", "批准", "通过", "重启", "暂停", "结束",
                      "退出", "登录", "操作", "编辑", "查看", "进入",
