@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-07 ⑰ S0 Strategy 0 匹配机制去脆弱——结构化 ref 优先取 max，文本扫描降级兜底
+
+**背景**:⑮ 修 phase_anchor 前置误触发后，用户要求"修复 S0 Strategy 0 的匹配机制脆弱的问题"。⑮ 只跳过了 `pattern=phase_anchor` 的前置，但 Strategy 0 本体仍是**裸子串扫描**（`state_name in prec_text`，first-match dict 迭代序），隐患依旧。
+
+**根因（第一性原理：数据层信号弃而不用，反而猜表层文本）**:P2 已把每条前置产出为结构化 `{"text","type","ref"}`，`ref={entity,dimension,state}` 明确命名了被引用的状态。但 Strategy 0 不读 `ref`，转而对 `text` 做子串匹配：
+- **first-match 顺序脆弱**：E-SCORE T-034 前置"评审计划状态由待启动变为待评审"，`ref.state=待评审`（P2）。文本扫描在 `primary_states.items()` dict 序中先命中 from 态 **待启动**（P1）→ 返回 `1+1=2`；而 entry 条件实为 to 态 **待评审**（P2）→ 应返回 `2+1=3`。from 态/起始态恰好排在前，是典型误中。
+- **无维度限定**：只要文本含主维度状态名即触发，不校验引用对象是不是主实体/主维度（⑮ 的 {6,7,8} 就是例证）。
+- **first-match-wins**：多个主状态名出现时，赢家取决于 dict 插入序，非语义（入口须等所有引用状态达成 = 取 max）。
+
+**解法**:Strategy 0 优先用结构化 `ref`——`ref.entity==primary_entity`、`ref.dimension==primary_dim`、`ref.state in primary_states` 三者齐备才采信，多 ref 取 **max phase**（每个引用的状态都是入口门禁）；文本扫描保留为**兜底**（无可用 ref 的 P1-inherited 裸串）。`phase_anchor` 前置继续跳过（单转换锚定 ≠ 整机入口锚定，⑮ 语义不变）。
+
+**验证结果**（全管线重跑，Engine State 结构化对比）:
+- `dep_state_phase_map` 唯一差异 = **E-SCORE.打分状态 {2,3,4}→{3,4,5}**（T-034 ref 待评审=P2，+1=3），语义正确（打分任务在计划进入待评审后分配）；
+- E-ORG.机构状态 {0,1,2}、E-PROJ.项目状态/项目阶段、E-USER.锁定状态 **全部不变**——phase_anchor 跳过与共享状态名不调用两条路径均未回归；
+- contextual_phase_rules / state_type_map / dependent_entities / entity_parent / topology_levels / transition_upstream_map **canonical diff 全部 SAME**（dependency_depth/topology_levels 仅 dict 键序差异，数值一致）；
+- 0 errors，警告 49→48（减少 1 条，非新增）。
+- 注意：P3 为 LLM 生成，两次 run 的 TC 编号/标题不可跨 run 比对；相位验证一律以 S0/S1 的**确定性 Engine State** 为准。
+
+---
+
 ## 2026-08-07 ⑯ 约束谓词解析器表层语法表去硬编码——领域名词全部数据派生
 
 **背景**:A3 修 phase_anchor `raw_text` 后，用户复查 `context/generate_obligation_model.py` 指出"仍然存在很多硬编码"。全文件中文串字面量清点后，违规集中在 **Step 3 约束谓词解析器 `_PREDICATE_SURFACES` 表层语法表**（记忆条目"P2 解析器禁止名字硬编码"的第三次触发）。
