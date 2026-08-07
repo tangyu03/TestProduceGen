@@ -242,8 +242,15 @@ def _make_then(target: str, expectation: str,
 # 调试/内部推导的 phase_basis 值(引擎 traceability,对测试执行者是噪声)。
 # 分类在引擎层完成并写入 _S2_fields.phase_basis_debug,渲染层只读标记,
 # 不匹配具体 basis 字符串(避免渲染层耦合引擎内部命名)。
+#
+# 判定原则:只隐藏"启发式/聚合推导"的 basis(min/max/兜底/父锚/VE/配置类),
+# 保留"精确状态锚定"的 basis。精确锚定形如 phase_table.{dim}.{state} 或
+# dep_state_phase_map.{entity}.{dim}.{state}——指明"该过程因某实体某状态映射
+# 到相位 N 而执行于 N",是测试执行者可判定的阶段前提;启发式形如
+# dep_state_phase_map.X.min_phase(整表取 min)、dep_map_max_phase.X.N(取 max)
+# 等,是引擎估算,对执行者是噪声。故列表只含启发式标记,不含锚定前缀。
 _DEBUG_BASIS_PATTERNS = [
-    "fallback_default", "dep_state_phase_map.", ".min_phase",
+    "fallback_default", ".min_phase",
     "primary_entity_max_phase", "primary_entity_default",
     "dep_map_max_phase", "config_entity.", "parent_phase.",
     "parent_primary_phase", "VE.", "topology_level L0",

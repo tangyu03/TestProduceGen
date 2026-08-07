@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-08-07 ⑲ P3 渲染 `**阶段依据**` 行丢失——debug 分类器误杀依赖实体精确锚定
+
+**用户报告**:`p3_agent_output.md` 里 PROC-137（T-006 全部专家提交打分，`项目.项目状态 评审中→待归档`）"丢失了阶段这一前提"——没有 `**阶段依据**` 行，而同文件的 PROC-139 有 `phase_table.计划状态.暂停`。
+
+**诊断**:相位**从未丢失**——PROC-137 的 Engine State `_S2_fields.phase=4`（待归档→P4，正确），丢失的只是**渲染层打印**。main.py:563 仅在 `phase_basis and not phase_basis_debug` 时打印该行；PROC-137 的 basis 是 `dep_state_phase_map.项目.项目状态.待归档`，被 `_is_debug_phase_basis`（s1_generation.py:253）误判为 debug。
+
+**根因（第一性原理：分类器按"锚定前缀"而非"启发式标记"分类）**:`_DEBUG_BASIS_PATTERNS`（commit 2b921cc）本意是隐藏引擎启发式/聚合推导的 basis（min/max/兜底/父锚/VE/配置），保留精确状态锚定（`phase_table.计划状态.待启动`）。但列表里 `"dep_state_phase_map."` 是**锚定前缀**而非启发式标记——它把依赖实体上同样精确的逐状态锚定 `dep_state_phase_map.X.维度.状态` 及其 `→ bumped to PN (state_ref ...)` 抬升注释一并误杀。粗粒度形式其实只有 `dep_state_phase_map.X.min_phase` 一种，已由独立模式 `".min_phase"` 覆盖，`"dep_state_phase_map."` 完全冗余且有害。
+
+**解法**:从 `_DEBUG_BASIS_PATTERNS` 删除 `"dep_state_phase_map."`，只按启发式标记分类（`.min_phase` 继续兜住粗粒度）。仅影响渲染标记 `phase_basis_debug`，**不触碰任何相位值**，Engine State 确定性无损。
+
+**验证**:对 p3_agent_output.json 全量 762 过程重分类——debug 标记 583→424，159 条精确锚定恢复显示；PROC-137 basis `dep_state_phase_map.项目.项目状态.待归档` 恢复（False）；粗粒度（`.min_phase`/`max_phase`/`fallback`/`parent`/`VE`/`config`）全部仍隐藏；新显示的 50 类 basis 全部为精确锚定或抬升注释。
+
+---
+
 ## 2026-08-07 ⑱ Tier 2 领域前置机制——诊断完成、落档待新 session 实施
 
 **决策**：⑭ 排期的 Tier 2（CRUD/查看类义务缺"前置对象必须已存在"领域先决）经本 session 完整诊断后**确认是当前最高优先级 todo**，但本 session 上下文已近窗口上限（已压缩 1 次 + 完成 P2 去硬编码 ⑯ + S0 Strategy 0 ⑰），**迁移交接**。完整诊断+方案+验证方法落档于 `context/TIER2_DOMAIN_PRECONDITION_HANDOFF.md`，新 session 直接接手。
