@@ -41,7 +41,7 @@ def run(cm_path: str, focus: list[str] | None = None):
     procs = result.get("procedures") or []
     # Focus probes by SOURCE_ID (PROC numbering is order-dependent and the
     # on-disk p3_agent_output may be stale vs current code).
-    focus_sids = focus or ["T-ORG-004", "T-013[b]", "EO-CRU-007", "T-ORG-002"]
+    focus_sids = focus or ["T-ORG-004", "T-013", "EO-CRU-007", "T-ORG-002"]
     print("=" * 70)
     for sid in focus_sids:
         hits = [p for p in procs if sid in (p.get("source_ids") or [])]

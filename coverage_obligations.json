@@ -3355,24 +3355,14 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-013[a]",
+      "id": "T-013",
       "entity": "E-PROJ",
       "dimension": "项目阶段",
       "from": null,
       "to": "开题",
-      "action": "新增项目 [项目阶段=开题]",
+      "action": "新增项目",
       "role": "机构管理员",
-      "preconditions": [
-        {
-          "text": "项目阶段=开题",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-PROJ",
-            "dimension": "项目阶段",
-            "state": "开题"
-          }
-        }
-      ],
+      "preconditions": [],
       "expected_results": [
         "项目阶段初始化为开题"
       ],
@@ -3391,75 +3381,8 @@
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "项目阶段",
-          "value": "开题"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-PROJ",
-          "dimension": "项目阶段",
-          "state": "开题",
-          "raw_text": "项目阶段=开题",
-          "pattern": "branch_injected"
-        }
-      ],
-      "constraint_predicate": null
-    },
-    {
-      "id": "T-013[b]",
-      "entity": "E-PROJ",
-      "dimension": "项目阶段",
-      "from": null,
-      "to": "开题",
-      "action": "新增项目 [项目阶段=验收]",
-      "role": "机构管理员",
-      "preconditions": [
-        {
-          "text": "项目阶段=验收",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-PROJ",
-            "dimension": "项目阶段",
-            "state": "验收"
-          }
-        }
-      ],
-      "expected_results": [
-        "项目阶段初始化为开题"
-      ],
-      "risk_traits": [
-        "audit"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.6 项目管理（1）a",
-      "note": {
-        "inferred": true,
-        "comment": "跨维度初始化联动 T-001：新增项目时项目阶段初始化为开题",
-        "branch_dimension": "项目阶段"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "项目阶段",
-          "value": "验收"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-PROJ",
-          "dimension": "项目阶段",
-          "state": "验收",
-          "raw_text": "项目阶段=验收",
-          "pattern": "branch_injected"
-        }
-      ],
+      "branch_path": [],
+      "precondition_state_refs": [],
       "constraint_predicate": null
     },
     {
@@ -8789,7 +8712,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-06T21:51:54.997734+08:00",
+    "generated_at": "2026-08-07T09:15:00.283566+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -8907,8 +8830,7 @@
           ]
         },
         "affected_obligations": [
-          "T-013[a]",
-          "T-013[b]",
+          "T-013",
           "T-014"
         ]
       },
@@ -9186,10 +9108,6 @@
         "T-010[c]",
         "T-010[d]",
         "T-010[e]"
-      ],
-      "T-013": [
-        "T-013[a]",
-        "T-013[b]"
       ],
       "T-015": [
         "T-015[a]",
@@ -10850,10 +10768,6 @@
         "desc": "T-010[e]: 分支值 差 非法于 E-PROJ.项目评级，降级 constraint"
       },
       {
-        "category": "branch split delete base",
-        "desc": "T-013: 删除原TO(主TO不再输出),生成2个分支TO"
-      },
-      {
         "category": "R5 combo filtered",
         "desc": "T-014: 组合 ('验收',) 与 precondition 约束矛盾，过滤"
       },
@@ -11097,7 +11011,7 @@
       }
     ],
     "snapshot": {
-      "to_index_size": 82,
+      "to_index_size": 80,
       "co_list_size": 8,
       "xc_status_summary": {
         "total_xc": 28,
@@ -11105,12 +11019,12 @@
         "as_br": 20
       },
       "precondition_state_refs_coverage": {
-        "total_preconditions": 159,
-        "total_state_refs_expected": 80,
-        "total_state_refs_resolved": 80,
+        "total_preconditions": 157,
+        "total_state_refs_expected": 78,
+        "total_state_refs_resolved": 78,
         "unresolved_count": 0,
         "p1_inherited_count": 78,
-        "p2_filled_count": 2
+        "p2_filled_count": 0
       },
       "phase_mapping_coverage": {
         "dims_with_phase_mapping": 6,

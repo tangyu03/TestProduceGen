@@ -1068,6 +1068,13 @@ def get_matched_dims(t):
             for bd in p1_bd:
                 if bd["dimension"] in bn:
                     matched.append(bd)
+    # 初始化守卫：自身维度 from=None 的转移（如 T-013 新增项目 → 项目阶段初始化为开题）
+    # 没有"既有状态"可分支——coverage 命中只是因为该维度被初始化，不是条件分支。
+    # 按其维度值拆分只会伪造矛盾场景（如"新增项目 [项目阶段=验收] → 开题"，
+    # 而 SRS 4.6(1)a 明确新增项目即处于开题阶段）。剔除自身维度；
+    # 跨维度分支（如 T-015 按 评审组人数 分支）仍合法保留。
+    if t.get("from") is None:
+        matched = [bd for bd in matched if bd["dimension"] != t["dimension"]]
     return matched
 
 # Process transitions

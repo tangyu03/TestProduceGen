@@ -5,6 +5,46 @@
 
 ---
 
+## 2026-08-07 ⑬ S1 结构化跨维度 state_ref 相位抬升——补上 P2 dict 前置的死代码缺口
+
+**决策**:`nodes/s1_generation.py` 新增 `_max_state_ref_phase()`，并把 `_resolve_phase_for_transition` 从早退 return 改为**逐级取 max 再统一返回**（三机制 AND 语义取最晚）：① 文本版 `_max_precondition_phase`（仅 string 前置）② `predicate_phase_lower_bound`（结构化字段谓词）③ 新增的结构化跨维度 state_ref。规则：`preconditions` 中 `type=="state_ref"` 且引用 `(entity, dimension)` ≠ 转移自身时，抬升到该状态相位；**同一状态机引用（`re_ent==entity and re_dim==dimension`）排除**（套套逻辑，自身 from/to 已表达）。
+
+**背景（证据链）**:
+- 用户质疑 PROC-111："开题了马上就变验收？评审计划和评分都没开始呢"。T-014（归档后阶段变更，开题→验收）卡在 P1、仅依赖 PROC-059(新增项目)，链条读起来像"新增项目→立即验收"。
+- 根因三层失效：① `_max_precondition_phase` 对 P2 dict 前置是死代码（`isinstance(prec,str)` 过滤），且 `exclude_entity` 排掉整个自身实体；② `build_constraint_predicate` 只认 `type=="constraint"`，state_ref 全为 null；③ Guard 6 的结构化锚点边被相位单调性拦截——T-014 的"待归档"ref（P4）依赖候选相位 > 自身 P1，V01 丢弃。
+- 事实核对：T-014 触发条件本身是"待归档 ∧ 评级合格"（Given 描述即含），**不是**开题后立即触发；问题在呈现（phase/依赖），非事实矛盾。与 PROC-059 同源不同支。
+
+**解法（数据驱动，无名字硬编码）**：跨维度 state_ref 抬升用 `get_state_phase`（路由主实体 phase_table + 依赖实体 dep_state_phase_map 两表）。受影响 13 个 TO：T-007[a/b/c]/T-008[a/b]/T-010[a-e] 4→5（经 `计划状态.结束`）、T-011 3→5（计划归档回退）、T-012 2→5（计划取消回退）、T-014 1→4（经 `项目状态.待归档`）。T-011/T-012 的 +2/+3 是**回退边**（`is_rollback` base=from_state），触发于计划结束/取消之后，P5 为真实执行点，非过度抬升。新增 `scripts/v32_check.py`/`v32_edgediff.py` 作为回归探针。
+
+**验证结果（真实 S0→S3 重跑，非改旧图数字）**:
+- V01（依赖相位单调性）全图 0 违例；errors=0，warnings 全为既有信息消息。
+- 依赖边 diff：+11 新增、0 移除；11 条全为 Guard 6 结构化锚点且语义正确（T-007/008/010/011→T-032 归档评审计划、T-012→T-016 取消评审计划、**T-014→T-006 待归档**）。
+- PROC-111 相位 1→4，依赖变为 [T-013 开题, T-006 待归档]——用户关注的"评审计划/评分/待归档"链条解锁（Guard 6 锚点本来就存在，此前被相位单调性挡住）。
+- 相位移动严格限于 13 个 TO（60 procedure）；FIELD-VAL 在 diff 中"变化"系 source_ids 中文名/实体码命名差异的假阳性，相位相同。
+- 修复范围：仅 S3 内的 S1 节点，P1/P2 输出不动，只重跑 P3。
+
+---
+
+## 2026-08-07 ⑫ P2 分支拆分初始化守卫——剔除"自身维度 from=None"的伪分支
+
+**决策**:`context/generate_obligation_model.py` `get_matched_dims()` 增加初始化守卫——当转移为**自身维度初始化**（`t.from is None` 且匹配的分支维度 == 转移自身 dimension）时，从 matched 集剔除该维度。初始化转移没有"既有状态"可分支，coverage 命中只因该维度被**初始化**而非条件分支；按其维度值拆分只会伪造矛盾变体。
+
+**背景（证据链）**:
+- 用户报告 PROC-059 矛盾："项目阶段为验收，后面有说转为开题"。根因：T-013（新增项目 → 项目阶段初始化为开题，from=None, to=开题）被 P2 按 项目阶段 维度拆分为 T-013[a]（开题）/ T-013[b]（验收），后者产生 Given=验收 → Then=转换为开题的矛盾场景。
+- SRS 原文 4.6 项目管理（1）a："新增：实现项目新增的功能，项目状态初始化为待选入，处于开题阶段"——新增项目无条件处于开题阶段，无 验收 分支。
+- 拆分机制：P1 `_backfill_branch_coverage` 把 `note.branch_dimension="项目阶段"` 的转移（T-013/T-014）都计入 coverage.transitions；P2 `get_matched_dims` 命中后，因该维度无 target_transition=T-013 的分支，回退取**全部值** ["开题","验收"] → 2 combos → 拆出 [b]。
+- T-014（from=开题, to=验收, 有真实既有状态）不受守卫影响，分支保持正确。
+
+**解法（数据驱动，无名字硬编码）**：`from is None` + `bd.dimension == t.dimension` 时剔除——跨维度分支（如 T-015 按 评审组人数）不受影响。P2 重生成后 T-013 恢复单一转移（无 branch_path、无注入的"项目阶段=验收" precondition），`transition_splits` 移除 T-013。同步更新 `nodes/s1_generation.py` 中为之辩护的过时注释（588-593 行）与 `scripts/s3_probe.py` 默认 focus（T-013[b]→T-013）。
+
+**验证结果**:
+- P2 自检全绿（no_branch_scenarios: True 等 8 项），T-013[b] 从 coverage_obligations.json 消失。
+- P3 重生成（main.py 默认路径覆盖 p3_agent_output.*）：PROC-059 变为 `溯源: T-013`，Given=(初始)，When=新增项目，Then=初始化为开题——矛盾消除；总 procedure 782→777，恰减 5（T-013[b] ×5 实例）。
+- 全量 grep 确认"新增项目 [项目阶段=验收]"0 命中；剩余"项目阶段为验收"均为 T-009/T-010 归档分支（合法）。
+- validate_p2 CO 引用解析：T-013 现为已输出 TO id，无 dangling。
+
+---
+
 ## 2026-08-06 ⑪ P1 校验下沉 srs_pipeline——删除 P1_Prompt 派生的三个 validate_p1*.py
 
 **决策**:`context/verify/` 下三个 P1 校验脚本(`validate_p1.py` / `validate_p1_direction.py` / `validate_p1_structured_fields.py`)全部删除。P1 已由 `srs_pipeline/` 取代，校验内联于 `model.assemble()`（Step6 校验清单 C01~C17 + schema.validate_llm），独立的旧校验器是 `P1_Prompt.md` 时代的产物，随 P1 迁移作废。readme.md 同步清理：移除 `scripts/validate_p1_structured_fields.py` 行（文件本就不在该路径），P1 相关路径 `P1output.json`/`P1_Prompt.md`/`generate_json.py` 改为 `review_structured.json`/`srs_pipeline/`。

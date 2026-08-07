@@ -17,7 +17,7 @@ from nodes.field_validation import parse_entity_constraints, enrich_procedure_st
 from nodes.signal_validation import generate_signal_v_steps
 from context.entity_operators import form_operator_roles
 from context.time_control import needs_time_control_ids
-from context.constraint_fields import predicate_phase_lower_bound
+from context.constraint_fields import predicate_phase_lower_bound, get_state_phase
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -585,12 +585,14 @@ def _is_state_derived_branch_dimension(
       merely restates the state machine; splitting produces only diagonal
       (from=pre_pause) reachable pairs, not 3×3 combos.
 
-    NOT state-derived (项目阶段, e.g. 新增项目):
-      T-013[a] branch=[项目阶段=开题] to=开题
-      T-013[b] branch=[项目阶段=验收] to=开题   ← 验收 ≠ its own to=开题
-      The branch value is ORTHOGONAL to the transition's own state, so it is a
-      genuine branch and MUST be preserved (else the variants merge and the
-      开题/验收 scenarios are lost).
+    NOT state-derived (项目阶段, e.g. T-014 归档后阶段变更):
+      T-014 branch=[项目阶段=开题] from=开题 to=验收
+      The branch value equals its OWN from_state 开题 — but this dimension is
+      NOT state-derived for T-014 alone (its sibling T-013 新增项目 is an
+      INITIALIZATION: from=None, to=开题, and P2 now guards initialization
+      transitions against splitting on their own dimension — see
+      generate_obligation_model.get_matched_dims — so T-013 is never split and
+      no 项目阶段=验收→开题 contradiction variant exists).
 
     Detection (generic): a dimension is state-derived iff EVERY affected TO's
     branch value for that dimension equals its OWN from_state or to_state.
@@ -958,16 +960,26 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
         base_phase = result.get("phase", 0)
         base_basis = result.get("basis", "")
 
-    # P0 fix: bump phase if preconditions reference later-phase states
+    # P0 fix: bump phase if preconditions reference later-phase states.
+    # Three orthogonal mechanisms compose by max (AND 语义取最晚):
+    #   1. _max_precondition_phase   — text-based, only string preconditions
+    #      (dead code for P2 dicts, but harmless).
+    #   2. predicate_phase_lower_bound — structured field/aggregate/time
+    #      constraint predicates (评级 字段 → 待归档 P4).
+    #   3. _max_state_ref_phase      — structured cross-dimension state_ref
+    #      (T-014 引用 项目状态.待归档 P4; 文本版吃不到 dict, predicate 只认
+    #      constraint, 二者都漏 → 卡在 P1).
+    # 原来用早退 return, 后到的机制会跳过前面的; 改为逐级取 max 再统一返回。
+    best_phase = base_phase
+    best_basis = base_basis
+
     if preconditions:
         prec_phase, prec_state = _max_precondition_phase(
             preconditions, state, exclude_entity=entity
         )
-        if prec_phase > base_phase:
-            return {
-                "phase": prec_phase,
-                "basis": f"{base_basis} → bumped to P{prec_phase} (precondition refs {prec_state})",
-            }
+        if prec_phase > best_phase:
+            best_phase = prec_phase
+            best_basis = f"{base_basis} → bumped to P{prec_phase} (precondition refs {prec_state})"
 
     # v6 P2→P3 downstream: structured constraint predicate phase bump.
     # Text-based _max_precondition_phase cannot parse aggregate_count/
@@ -979,13 +991,21 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
         pt = state.get("phase_table", {})
         pred_phase = predicate_phase_lower_bound(
             constraint_predicate, dep_map, pt)
-        if pred_phase is not None and pred_phase > base_phase:
-            return {
-                "phase": pred_phase,
-                "basis": f"{base_basis} → bumped to P{pred_phase} (predicate {constraint_predicate.get('type')})",
-            }
+        if pred_phase is not None and pred_phase > best_phase:
+            best_phase = pred_phase
+            best_basis = f"{base_basis} → bumped to P{pred_phase} (predicate {constraint_predicate.get('type')})"
 
-    return {"phase": base_phase, "basis": base_basis}
+    # v32: structured cross-dimension state_ref bump.
+    # 引用 (entity, dimension) ≠ 转移自身的 state_ref 是真实的时序前置
+    # (计划结束/取消结束 P5, 待归档 P4), 抬升到该状态相位.
+    if preconditions:
+        sr_phase, sr_state = _max_state_ref_phase(
+            preconditions, entity, dimension, state)
+        if sr_phase > best_phase:
+            best_phase = sr_phase
+            best_basis = f"{base_basis} → bumped to P{sr_phase} (state_ref {sr_state})"
+
+    return {"phase": best_phase, "basis": best_basis}
 
 
 def _max_precondition_phase(
@@ -1102,6 +1122,42 @@ def _max_precondition_phase(
                         max_phase = p
                         max_state = chunk
 
+    return max_phase, max_state
+
+
+def _max_state_ref_phase(preconditions: list | None, entity: str,
+                         dimension: str, state: AgentState) -> tuple[int, str]:
+    """结构化跨维度 state_ref 抬升 (P2 dict 前置专用).
+
+    文本版 _max_precondition_phase 对 dict 前置是死代码 (isinstance str 过滤),
+    且 exclude_entity 排掉整个自身实体 — T-014 的项目状态.待归档 (同实体跨维度)
+    因此两边都漏, 卡在 P1。这里按 (entity, dimension) 精确排除"同一状态机"的
+    自我引用 (如 T-025 引用 计划状态.暂停 之于 计划状态 转移是套套逻辑, 自身
+    from/to 已表达), 其余跨维度 state_ref 取最大相位。
+    """
+    if not preconditions:
+        return 0, ""
+    dep_map = state.get("dep_state_phase_map", {})
+    pt = state.get("phase_table", {})
+    max_phase = 0
+    max_state = ""
+    for prec in preconditions:
+        if not isinstance(prec, dict):
+            continue
+        if prec.get("type") != "state_ref":
+            continue
+        ref = prec.get("ref") or {}
+        re_ent = ref.get("entity")
+        re_dim = ref.get("dimension")
+        re_st = ref.get("state")
+        if not re_ent or not re_st:
+            continue
+        if re_ent == entity and re_dim == dimension:
+            continue  # 同一状态机自我引用, 套套逻辑, 不抬升
+        p = get_state_phase(re_ent, re_dim, re_st, dep_map, pt)
+        if p is not None and p > max_phase:
+            max_phase = p
+            max_state = f"{re_ent}.{re_dim}.{re_st}"
     return max_phase, max_state
 
 
