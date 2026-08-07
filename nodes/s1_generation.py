@@ -727,6 +727,12 @@ def _is_type5_retained(eo: dict, state: AgentState) -> bool:
     dependents = state.get("dependent_entities", [])
     ves = state.get("virtual_entities", {})
 
+    # P2 初始化去重标记（Step 2.5b）：crud 操作已被同(entity,action) 的初始化
+    # 转换的 expected_results 文本覆盖 → 不产出独立 Type5 用例。
+    # 该 EO 仍保留在模型中作溯源，只是不生成过程。
+    if eo.get("covered_by"):
+        return False
+
     # Rule 1: relevant entity + special op (configurable via coverage_model)
     # BDD: TYPE5_SPECIAL_OPS is now read from coverage_model._context.type5_special_ops
     # instead of being a hardcoded business keyword list.
@@ -1254,6 +1260,11 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
     procedures: list[dict] = []
 
     for to in tos:
+        # P2 跨维度初始化联动合并（Step 2.5a）：note.inferred 且 (entity, action,
+        # role) 与父转换一致的初始化 TO 标 merged_into，其 expected_results 已并入
+        # 父 TO → 不产出独立 Type1 用例，避免"新增项目"类行为出现两条过程。
+        if to.get("merged_into"):
+            continue
         entity = to["entity"]
         dimension = to.get("dimension", "")
         risk_traits = to.get("risk_traits", [])

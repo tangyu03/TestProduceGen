@@ -1366,6 +1366,63 @@ for t in p1["state_and_flow"]["transitions"]:
                 # Record the split: abstract transition id -> concrete variant TO ids.
                 transition_splits[t["id"]] = split_ids
 
+# ============ Step 2.5: 跨维度初始化联动合并 + CRUD 初始化去重 ============
+# 同一 SRS 行为被 P1 挖成多条义务（operation 与 transition 两套），在此收口。
+# 纯数据驱动判定（note/er 文本/动作三元组），不硬编码域名。
+
+# 2.5a 跨维度初始化联动合并：note.inferred 且 (entity, action, role) 与已产出的
+# 非 inferred 初始化转换(from=None, 无分支)完全一致 → 该 TO 是父转换的跨维度
+# 初始化联动（如 T-013 联动 T-001：SRS 4.6(1)a 一句话同时断言项目状态与项目阶段）。
+# 不产出独立用例：expected_results 并入父 TO，本 TO 标 merged_into 供 S1 跳过；
+# 保留在列表中避免 branch_dimensions / 下游按 id 查找产生悬空引用。
+for _to in transition_obligations:
+    if _to.get("note", {}).get("inferred") is not True or _to.get("from") is not None:
+        continue
+    if _to.get("merged_into"):
+        continue
+    _parent = next(
+        (p for p in transition_obligations
+         if not p.get("note", {}).get("inferred")
+         and p.get("from") is None
+         and not p.get("branch_path")
+         and p.get("entity") == _to.get("entity")
+         and p.get("action") == _to.get("action")
+         and p.get("role") == _to.get("role")),
+        None)
+    if _parent is None:
+        continue
+    for _er in _to.get("expected_results", []):
+        if _er and _er not in _parent.get("expected_results", []):
+            _parent.setdefault("expected_results", []).append(_er)
+    _parent["note"] = dict(_parent.get("note") or {})
+    _parent["note"]["comment"] = (
+        (_parent.get("note", {}).get("comment", "")
+         + f"; 并入 {_to['id']} 跨维度初始化联动（{_to.get('dimension')}→{_to.get('to')}）").strip("; "))
+    _to["merged_into"] = _parent["id"]
+    _to["expected_results"] = []
+    add_judgment("cross_dim_init_merge", f"{_to['id']} 跨维度初始化联动并入 {_parent['id']}")
+
+# 2.5b CRUD 初始化去重：crud 操作若与某"初始化转换"(from=None, 同 entity+action)
+# 的 expected_results 逐条被转换 er 文本包含 → 标 covered_by，S1 跳过独立用例。
+# 双重约束（初始化转换 + er 文本包含）保证只回收被完全覆盖的冗余 CRUD；
+# 转换 er 只是 CRUD er 子集（如"添加成功"未在转换中出现）时保留 CRUD，不误删。
+for _eo in entity_obligations:
+    if _eo.get("type") != "crud_operation":
+        continue
+    _eo_ers = _eo.get("expected_results", [])
+    if not _eo_ers or _eo.get("covered_by"):
+        continue
+    for _to in transition_obligations:
+        if (_to.get("from") is not None or _to.get("merged_into")
+                or _to.get("entity") != _eo.get("entity")
+                or _to.get("action") != _eo.get("operation_name")):
+            continue
+        _to_er_blob = "".join(_to.get("expected_results", []))
+        if _to_er_blob and all(_er and _er in _to_er_blob for _er in _eo_ers):
+            _eo["covered_by"] = _to["id"]
+            add_judgment("crud_init_dedup", f"{_eo['id']} 被初始化转换 {_to['id']} 覆盖（er 文本包含），去重")
+            break
+
 # ============ Step 3a: constraint predicate structuring (post-pass) ============
 # Derive TO.constraint_predicate uniformly for ALL emitted transitions
 # (base / downgrade / branch variants). Re-deriving from each TO's own

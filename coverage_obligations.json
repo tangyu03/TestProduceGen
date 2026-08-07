@@ -268,7 +268,8 @@
       ],
       "suggested_action": "对项目执行新增项目",
       "coverage_priority": "medium",
-      "source_ref": "4.6 项目管理"
+      "source_ref": "4.6 项目管理",
+      "covered_by": "T-001"
     },
     {
       "id": "EO-CRU-002",
@@ -643,7 +644,8 @@
       ],
       "suggested_action": "对用户执行新增用户",
       "coverage_priority": "medium",
-      "source_ref": "4.11.1 用户管理"
+      "source_ref": "4.11.1 用户管理",
+      "covered_by": "T-037"
     },
     {
       "id": "EO-CRU-027",
@@ -1137,7 +1139,8 @@
       "role": "机构管理员",
       "preconditions": [],
       "expected_results": [
-        "项目状态初始化为待选入，处于开题阶段"
+        "项目状态初始化为待选入，处于开题阶段",
+        "项目阶段初始化为开题"
       ],
       "risk_traits": [
         "audit"
@@ -1146,7 +1149,8 @@
       "priority": "P0",
       "source_ref": "4.6 项目管理（1）a",
       "note": {
-        "inferred": false
+        "inferred": false,
+        "comment": "并入 T-013 跨维度初始化联动（项目阶段→开题）"
       },
       "coverage_priority": "critical",
       "is_repeatable": false,
@@ -3363,9 +3367,7 @@
       "action": "新增项目",
       "role": "机构管理员",
       "preconditions": [],
-      "expected_results": [
-        "项目阶段初始化为开题"
-      ],
+      "expected_results": [],
       "risk_traits": [
         "audit"
       ],
@@ -3383,6 +3385,7 @@
       "side_effects": [],
       "branch_path": [],
       "precondition_state_refs": [],
+      "merged_into": "T-001",
       "constraint_predicate": null
     },
     {
@@ -8712,7 +8715,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-07T09:15:00.283566+08:00",
+    "generated_at": "2026-08-07T11:21:21.575498+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -10874,6 +10877,18 @@
       {
         "category": "branch_injected invalid",
         "desc": "T-031[d]: 分支值 归档超时 非法于 E-PLAN.评审计划超时类型，降级 constraint"
+      },
+      {
+        "category": "cross_dim_init_merge",
+        "desc": "T-013 跨维度初始化联动并入 T-001"
+      },
+      {
+        "category": "crud_init_dedup",
+        "desc": "EO-CRU-001 被初始化转换 T-001 覆盖（er 文本包含），去重"
+      },
+      {
+        "category": "crud_init_dedup",
+        "desc": "EO-CRU-026 被初始化转换 T-037 覆盖（er 文本包含），去重"
       },
       {
         "category": "CO constraint dependent missing",
