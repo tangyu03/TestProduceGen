@@ -316,6 +316,17 @@ def _safe_join(value):
     return str(value)
 
 
+def _display_id(tid) -> str:
+    """折叠后展示用 procedure id：剥掉实例后缀 .N。
+
+    多实例折叠后 doc 只渲染规范例（PROC-057），JSON 的 .N 副本不单独成页，
+    依赖/弱依赖里对具体实例的引用（PROC-057.1）在展示时归一为基例 id。
+    纯展示归一，不碰 JSON 数据；实例是纯重复，语义等价。
+    """
+    s = tid if isinstance(tid, str) else str(tid)
+    return re.sub(r"\.\d+$", "", s)
+
+
 def _generate_titles(procedures: list[dict],
                      batch_size: int = 20,
                      max_concurrency: int = 3) -> list[dict]:
@@ -561,22 +572,43 @@ def _dedupe_when_action(event: str, action: str) -> tuple[str, str]:
     return event, action_core
 
 
-def _dedupe_then_target(target: str, expectation: str) -> str:
-    """Then 行 target 与 expectation 开头重复时，裁掉 expectation 的重复前导段。
+def _dedupe_then_target(target: str, expectation: str) -> tuple[str, str]:
+    """Then 行 target 与 expectation 的文本重复净化，返回 (target_shown, exp_shown)。
 
-    数据驱动：不硬编码任何实体/属性/状态名，只用文本关系。target 为
-    实体.属性 限定链（如 "专家.技术领域"）时，其最后一段（"技术领域"）若
-    原样出现在 expectation 开头（"技术领域显示为修改后的值"），说明
-    expectation 已自带主语，裁掉前导重复段，避免 "技术领域 技术领域显示…"。
+    数据驱动：不硬编码任何实体/属性/状态名，只用文本关系。两条规则顺序判定：
+    1. target 为 实体.属性 限定链（如 "专家.技术领域"）且 expectation 以其
+       最后一段开头（"技术领域显示为修改后的值"）→ 裁掉 expectation 前导
+       重复段，target 保留作主语（"专家.技术领域 显示为修改后的值"）；
+    2. target 或其最后一段已原样出现在 expectation 文本中（target=附件、
+       expectation="显示项目附件集中查看页面"；或 target=专家.技术领域、
+       expectation="校验失败，提示'技术领域选择不在A-J范围内'"）→ target
+       完全冗余，省略（与 _dedupe_when_target 同判据）。
+    未命中则原样返回 (target, expectation)。
     """
-    if "." not in target:
-        return expectation
-    last = target.rsplit(".", 1)[1].strip()
-    if not last:
-        return expectation
-    if expectation.startswith(last) and len(expectation) > len(last):
-        return expectation[len(last):].lstrip()
-    return expectation
+    if "." in target:
+        last = target.rsplit(".", 1)[1].strip()
+        if last and expectation.startswith(last) and len(expectation) > len(last):
+            return target, expectation[len(last):].lstrip()
+    key = target.rsplit(".", 1)[-1].strip()
+    if key and key in expectation:
+        return "", expectation
+    return target, expectation
+
+
+def _dedupe_when_target(target: str, event: str) -> str:
+    """When 行 target（操作对象）已在 event 文本中出现时，省略前导 target。
+
+    数据驱动：纯文本关系判定，不硬编码任何实体/操作名。target 或其最后一段
+    （复合 target 如 项目.项目状态 取 "项目状态"）若已原样出现在 event 中
+    （如 target=附件、event=查看项目附件 → "附件 查看项目附件"，读作
+    "附件查看项目附件"），则前导 target 与操作名重复，应省略。
+    """
+    if not target or not event:
+        return target
+    key = target.rsplit(".", 1)[-1].strip()
+    if key and key in event:
+        return ""
+    return target
 
 
 def _generate_markdown(
@@ -586,8 +618,10 @@ def _generate_markdown(
 ):
     """Generate human-readable markdown from procedures.
 
-    Collapses multi-instance copies (PROC-001.1, PROC-001.2, ...) into
-    a single entry per base procedure with an instance-count badge.
+    Collapses multi-instance copies (PROC-001.1, PROC-001.2, ...) into a
+    single entry per base procedure — instances are pure duplicates (only
+    [实例 N] givens differ), so the readable doc shows one canonical case;
+    JSON keeps the .N copies for execution tooling.
     """
     # source_id → 原始需求条目（SRS 章节）映射，用于标注每条用例覆盖的需求
     source_ref_map: dict[str, str] = {}
@@ -612,8 +646,6 @@ def _generate_markdown(
     lines.append(
         "> **业务定位**：用例类型（数据操作/审批流程/…） ｜ 业务模块"
         "（用例所属的粗粒度业务模块，如“项目”、“评审计划”、“基础数据维护”）。\n"
-        "> **多实例**：标注 ×N 的用例需展开为 N 个独立实例重复执行，"
-        "各实例使用相互独立的测试数据。\n"
         "> **覆盖需求**：标注用例覆盖的原始需求条目（如 EO-CRU-058）"
         "及其 SRS 章节（如 4.6 项目管理）。\n"
     )
@@ -632,15 +664,11 @@ def _generate_markdown(
     for base in group_order:
         procs = groups[base]
         proc = procs[0]
-        instance_count = len(procs)
-        has_multi = instance_count > 1
 
         s2 = proc.get("_S2_fields") or {}
         s3 = proc.get("_S3_fields") or {}
 
         temp_id = base
-        if has_multi:
-            temp_id = f"{base} (×{instance_count})"
         post_state = proc.get("post_state", "")
         # Title line — prefer LLM-generated natural-language title
         title = proc.get("title") or post_state
@@ -679,6 +707,8 @@ def _generate_markdown(
                 lines.append("**Given**")
                 for g in givens:
                     desc = g.get("description", "")
+                    # 实例纯重复（JSON 已拆 .N 副本），展开后 [实例 N] 标签是渲染噪音
+                    desc = re.sub(r"^\[实例 \d+\]\s*", "", desc)
                     desc_str = f" ({desc})" if desc else ""
                     lines.append(f"- {g.get('target', '')} 状态 = {g.get('state', '')}{desc_str}")
 
@@ -692,7 +722,9 @@ def _generate_markdown(
                     w.get("event", ""), w.get("action", "")
                 )
                 action_str = f" [{action_core}]" if action_core else ""
-                lines.append(f"- {w.get('target', '')} {event_shown}{actor_str}{action_str}")
+                target_shown = _dedupe_when_target(w.get("target", ""), event_shown)
+                target_str = f"{target_shown} " if target_shown else ""
+                lines.append(f"- {target_str}{event_shown}{actor_str}{action_str}")
                 # 操作提示并入 When，作为缩进的执行步骤
                 for i, hint in enumerate(op_hints, 1):
                     lines.append(f"  操作步骤{i}：{hint}")
@@ -704,10 +736,11 @@ def _generate_markdown(
                 for t in _dedup_thens(thens):
                     br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
                     xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
-                    exp_shown = _dedupe_then_target(
+                    target_shown, exp_shown = _dedupe_then_target(
                         t.get("target", ""), t.get("expectation", "")
                     )
-                    lines.append(f"- {t.get('target', '')} {exp_shown} ({t.get('kind', 'state')}){br_str}{xref_str}")
+                    target_str = f"{target_shown} " if target_shown else ""
+                    lines.append(f"- {target_str}{exp_shown} ({t.get('kind', 'state')}){br_str}{xref_str}")
 
         # Cascade chain
         cascade = proc.get("cascade_chain")
@@ -717,10 +750,10 @@ def _generate_markdown(
         # Dependencies
         deps = s3.get("dependencies")
         if deps:
-            lines.append(f"**依赖**：{_safe_join(deps)}")
+            lines.append(f"**依赖**：{_safe_join([_display_id(x) for x in deps])}")
         weak_deps = s3.get("weak_dependencies")
         if weak_deps:
-            lines.append(f"**弱依赖**：{_safe_join(weak_deps)}")
+            lines.append(f"**弱依赖**：{_safe_join([_display_id(x) for x in weak_deps])}")
 
         lines.append("")
 
