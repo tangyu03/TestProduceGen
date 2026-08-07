@@ -2096,6 +2096,24 @@ constraint_obligations = []
 ro_it_counter = 0
 ro_br_counter = 0
 
+
+def _predicate_has_negation(p):
+    """递归判定约束谓词是否含否定分支（negation）。
+
+    转换的 constraint_predicate 若含否定，说明"操作被拒"场景已作为该转换的
+    负向分支建模（如 T-002 项目选入 含 negation(评级=差)）——此时同
+    (entity, from, to) 的独立 invalid_transition 即为该分支的低配重复，
+    可被吸收（断言并入负向用例），避免一条规则产出两条过程。
+    """
+    if not isinstance(p, dict):
+        return False
+    if p.get("type") == "negation":
+        return True
+    if _predicate_has_negation(p.get("operand")):
+        return True
+    return any(_predicate_has_negation(part) for part in (p.get("parts") or []))
+
+
 # 4.1 RO-IT
 for it in p1_it:
     ro_it_counter += 1
@@ -2110,6 +2128,19 @@ for it in p1_it:
         "coverage_priority": "high",
         "source_ref": it.get("source_ref")
     }
+    # 吸收判定：该 invalid_transition 的 (entity, from, to) 已被某转换的
+    # constraint_predicate 否定分支建模 → 标 absorbed_by_transition，S1 不产出
+    # 独立 Type6，其具体拒绝提示并入转换负向用例（数据驱动，非硬编码）。
+    _absorb_tid = next(
+        (t["id"] for t in transition_obligations
+         if t.get("entity") == ro["entity"]
+         and t.get("from") == ro["from"]
+         and t.get("to") == ro["to"]
+         and _predicate_has_negation(t.get("constraint_predicate"))),
+        None)
+    if _absorb_tid:
+        ro["absorbed_by_transition"] = _absorb_tid
+        add_judgment("ro_it_absorb", f"{ro['id']} 已由转换 {_absorb_tid} 否定分支覆盖，吸收（提示断言并入负向用例）")
     constraint_obligations.append(ro)
 
 # 4.2 RO-BR (from P1 business_rules)

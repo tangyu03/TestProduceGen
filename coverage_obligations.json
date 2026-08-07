@@ -6595,7 +6595,8 @@
       "to": "已选入",
       "reason": "本阶段评价结果为差的项目不可选入",
       "coverage_priority": "high",
-      "source_ref": "4.7.1 项目选入（3）"
+      "source_ref": "4.7.1 项目选入（3）",
+      "absorbed_by_transition": "T-002"
     },
     {
       "id": "RO-IT-002",
@@ -8715,7 +8716,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-07T11:21:21.575498+08:00",
+    "generated_at": "2026-08-07T12:05:28.528468+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "航天能力验证项目评审系统软件需求规格说明.md",
@@ -10989,6 +10990,10 @@
       {
         "category": "CO dedup",
         "desc": "合并 CO-011 入 CO-007 (sig=('E-PLAN', '计划状态', '待评审', 'E-SCORE', '打分状态', '未打分', 'auto'))"
+      },
+      {
+        "category": "ro_it_absorb",
+        "desc": "RO-IT-001 已由转换 T-002 否定分支覆盖，吸收（提示断言并入负向用例）"
       },
       {
         "category": "phase_mapping_derived",

@@ -1532,6 +1532,25 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     kind="state",
                     br_refs=[_guard_br_id] if _guard_br_id else None,
                 ))
+                # P2 吸收的 invalid_transition（同 entity/from/to，Step 4.1 标
+                # absorbed_by_transition）→ 把其具体拒绝提示并入负向用例作附加断言
+                # （如"本阶段评价结果为差的项目不可选入"），补齐独立 Type6 消失后的
+                # 提示文本覆盖。假设：转换只有单个负向分支；若未来出现多负向分支需
+                # 按分支条件匹配 reason，此处按整转换匹配。
+                _absorbed_ro = next(
+                    (r for r in (cm.get("constraint_obligations") or [])
+                     if r.get("type") == "invalid_transition"
+                     and r.get("entity") == entity
+                     and r.get("from") == to.get("from")
+                     and r.get("to") == to.get("to")
+                     and r.get("reason")),
+                    None)
+                if _absorbed_ro:
+                    thens.append(_make_then(
+                        target=loc,
+                        expectation=f"操作被拒绝，{_absorbed_ro['reason']}",
+                        kind="prompt",
+                    ))
                 _negative_branch_flag = True
                 # post_state uses from_state (no transition occurs)
                 to_state_for_post = from_state
@@ -2474,6 +2493,11 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
 
     invalid_transitions = indices["ro_by_type"].get("invalid_transition", [])
     for ro in invalid_transitions:
+        # P2 吸收判定（Step 4.1）：该 RO 的 (entity, from, to) 已由某转换的
+        # constraint_predicate 否定分支建模，拒绝提示并入转换负向用例 →
+        # 不产出独立 Type6（避免同一规则两条过程，如 RO-IT-001 vs T-002 反例）。
+        if ro.get("absorbed_by_transition"):
+            continue
         entity = ro["entity"]
         tl = topo.get(entity, 0)
         phase = 0
