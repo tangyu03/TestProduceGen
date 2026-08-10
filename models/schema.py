@@ -142,6 +142,14 @@ class GivenClause(BaseModel):
     target: str               # "E-X.维度" — the business object
     state: str                # required state value (e.g. "待审批")
     description: str = ""     # human-readable context (e.g. VE scenario label)
+    # 渲染格式选择器 (DECISIONS ㉛): S1 按前置类型路由, 渲染层纯格式分发, 不再文本匹配。
+    #   "state"      → `{target} 状态 = {state} ({desc})`   主锚定/同维度/跨维度纯状态
+    #   "event"      → 事件已完成断言, 独立 Given (同 state 格式)
+    #   "flow"       → `{target} 流转：{desc}`   跨维度流转形态 (ref.state 是目标态)
+    #   "constraint" → `约束：{desc}`             业务约束, 无前置态概念
+    #   "branch"     → `分支条件：{value}`         分支维度 Given
+    # constraint/flow 允许 state 为空 (无前置态); 其余类型 state 必须非空。
+    given_type: str = "state"
 
 
 class WhenClause(BaseModel):
@@ -275,10 +283,13 @@ class Procedure(BaseModel):
                     f"(I19: must be a concrete observable)"
                 )
 
-        # Givens must describe business state, not UI navigation
+        # Givens must describe business state, not UI navigation.
+        # given_type 分流 (DECISIONS ㉛): constraint/flow 是独立信息行 (业务约束/
+        # 流转形态), 无前置态概念, 允许 state 为空; state/event/branch 必须携带前置态。
         nav_keywords = ("导航", "点击", "进入页面", "打开")
+        _state_required = ("state", "event", "branch")
         for i, g in enumerate(self.givens):
-            if not g.state:
+            if g.given_type in _state_required and not g.state:
                 raise ValueError(
                     f"Procedure {self.temp_id}: Given[{i}].state is empty "
                     f"(Given must describe a business state, not an action)"

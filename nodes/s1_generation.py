@@ -191,14 +191,34 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
     return base
 
 
-def _make_given(target: str, state: str, description: str = "") -> dict:
+# 流转形态检测：跨维度 state_ref 若文本含"由…变为/变为/转为"，其 ref.state
+# 是流转的目标态（非前置态）。渲染层按 given_type 分流时，flow 走 `流转：X→Y`，
+# state 走 `状态 = X`——把流转结果伪装成前置条件是语义串线（正确性问题）。
+_FLOW_RE = re.compile(r"由[^;]*变为|变为|转为")
+
+
+def _is_flow_state(text: str) -> bool:
+    """跨维度 state_ref 文本是否流转形态（ref.state 为目标态）。"""
+    return bool(_FLOW_RE.search(text or ""))
+
+
+def _make_given(target: str, state: str, description: str = "",
+                given_type: str = "state") -> dict:
     """Build a BDD Given clause (business-state precondition).
 
     ``state`` must be a business state value (e.g. "待审批"), NOT a UI
     navigation instruction.  ``description`` is optional context (e.g.
     VE scenario label).
+
+    ``given_type`` selects the render format (纯格式选择器，无渲染层文本猜测):
+    - "state"      → `{target} 状态 = {state} ({desc})`   （主锚定/同维度/跨维度纯状态）
+    - "event"      → 事件已完成断言，独立 Given（同 state 格式）
+    - "flow"       → `{target} 流转：{desc}`  （跨维度流转形态，desc 保留原文）
+    - "constraint" → `约束：{desc}`            （业务约束，非状态前置）
+    - "branch"     → `分支条件：{value}`        （分支维度 Given）
     """
-    return {"target": target, "state": state, "description": description}
+    return {"target": target, "state": state, "description": description,
+            "given_type": given_type}
 
 
 def _make_when(target: str, event: str, actor: str = "", action: str = "") -> dict:
@@ -310,14 +330,17 @@ def _derive_business_event(action: str, from_state: str = "", to_state: str = ""
 
     Instead of "机构新增/修改实验室信息事件触发", produce "机构新增/修改实验室信息".
 
-    For state transitions, if from_state and to_state are available and
-    meaningful, the event can reference the target state:
-      action="提交审核", to_state="待审核" → "提交审核（目标状态：待审核）"
+    The target state is intentionally NOT appended to the event label (no
+    "（目标状态：X）"): it is an OUTCOME asserted by the Then clause
+    ("状态转换为X"), and for same-action branch families (e.g. 重启评审计划 →
+    待评审/评审中/已完成) the Given's branch condition already disambiguates
+    which instance is under test.  Repeating it in the When is redundant echo
+    for the test executor.  This is the single place When.event text is shaped,
+    so removing it here cleans both JSON and rendered MD (DECISIONS ㉝).
 
     Generic — no hardcoded business keywords.  Only does:
       1. Strip mechanical "事件触发" suffix
       2. If action is empty, describe via from→to state change
-      3. If to_state is known and meaningful, append target-state context
     """
     if not action:
         if from_state and to_state and from_state != to_state:
@@ -328,10 +351,6 @@ def _derive_business_event(action: str, from_state: str = "", to_state: str = ""
     cleaned = action.replace("事件触发", "").strip()
     if not cleaned:
         return "状态转换"
-
-    # Append target-state context when the to_state is meaningful (not initial)
-    if to_state and to_state != "(初始)" and to_state != from_state:
-        return f"{cleaned}（目标状态：{to_state}）"
 
     return cleaned
 
@@ -676,6 +695,7 @@ def _extract_branch_givens(
                 target=f"{to_entity}.{dim}",
                 state=val,
                 description=f"分支条件: {dim}={val}",
+                given_type="branch",
             ))
             seen_dims.add(dim)
 
@@ -697,6 +717,7 @@ def _extract_branch_givens(
                         target=f"{to_entity}.{dim_name}",
                         state=dim_value,
                         description=f"分支条件: {dim_name}={dim_value}",
+                        given_type="branch",
                     ))
                     seen_dims.add(dim_name)
     return givens
@@ -1238,6 +1259,28 @@ def _get_type_priority(risk_trait: str, obligation_type: int) -> int:
 # Type1 — Transition Obligation procedures
 # ---------------------------------------------------------------------------
 
+def _pred_contains_type(node, target: str) -> bool:
+    """递归检查 constraint_predicate 树是否含某类型的节点。
+
+    constraint_predicate 是 P2 后置解析器（generate_obligation_model.py
+    build_constraint_predicate）从 constraint precondition 文本确定性派生的
+    结构化谓词树。guard 极性检查以此结构为准：含 negation 节点 → 结构性负向，
+    不再依赖关键词文本匹配（文本匹配曾误伤频次限制词，如 "只有"）。
+    """
+    if not isinstance(node, dict):
+        return False
+    if node.get("type") == target:
+        return True
+    for v in node.values():
+        if isinstance(v, dict) and _pred_contains_type(v, target):
+            return True
+        if isinstance(v, list):
+            for item in v:
+                if isinstance(item, dict) and _pred_contains_type(item, target):
+                    return True
+    return False
+
+
 def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     br_list: list[dict] | None = None) -> list[dict]:
     """Generate Type1 (transition_obligation) procedures — BDD style.
@@ -1359,15 +1402,40 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
             # Falls back to keyword heuristic when type is absent.
             state_prec_texts: list[str] = []
             event_prec_texts: list[str] = []
+            detached_state_givens: list[dict] = []
+            constraint_texts: list[dict] = []
             for prec in preconditions:
                 # v29 #26f: check if precondition is a structured object
                 if isinstance(prec, dict):
                     prec_str = prec.get("text", "") or ""
                     prec_type = prec.get("type", "") or ""
+                    ref = prec.get("ref") if isinstance(prec.get("ref"), dict) else {}
                     if not prec_str.strip():
                         continue
-                    if prec_type == "state_ref":
-                        state_prec_texts.append(prec_str)
+                    if prec_type == "constraint":
+                        # constraint：独立 Given（业务约束，非状态前置）→ 渲染层 `约束：`
+                        constraint_texts.append(_make_given(
+                            target=loc, state="", description=prec_str,
+                            given_type="constraint"))
+                    elif prec_type == "state_ref":
+                        re_ent = ref.get("entity", "")
+                        re_dim = ref.get("dimension", "")
+                        # 跨维度 state_ref（ref.dimension ≠ 转换维度）：独立 Given 语义
+                        # 归位。纯状态形态 ref.state 是前置态 → state；流转形态
+                        # ref.state 是目标态，提升会串线 → flow（desc 保留原文）。
+                        if re_ent and re_dim and re_dim != dimension:
+                            if _is_flow_state(prec_str):
+                                detached_state_givens.append(_make_given(
+                                    target=f"{re_ent}.{re_dim}", state="",
+                                    description=prec_str, given_type="flow"))
+                            else:
+                                detached_state_givens.append(_make_given(
+                                    target=f"{re_ent}.{re_dim}",
+                                    state=ref.get("state", ""),
+                                    description=prec_str, given_type="state"))
+                        else:
+                            # 同维度 state_ref：并入 givens[0] 描述（当前语义）
+                            state_prec_texts.append(prec_str)
                     elif prec_type == "event_ref":
                         event_prec_texts.append(prec_str)
                     else:
@@ -1399,7 +1467,13 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     target=loc,
                     state=from_state,  # same state context
                     description=evt_prec,
+                    given_type="event",
                 ))
+            # 跨维度 state_ref（纯状态/流转形态）独立 Given：语义归位到 ref 的维度
+            # （渲染层按 given_type 选格式，不再文本匹配）。
+            givens.extend(detached_state_givens)
+            # constraint 独立 Given：业务约束行（渲染层 `约束：`）。
+            givens.extend(constraint_texts)
             # BDD: append branch-dimension Givens (generic, from branch_dimensions)
             # e.g. Given: E-PROJ.项目类型 = 能力验证 (分支条件)
             givens.extend(_extract_branch_givens(to, cm))
@@ -1484,6 +1558,17 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
             # 操作 → 该 TO 是负向用例,只生成拒绝断言,不生成成功态 Then。
             # 检测逻辑与原 post-processor 一致(见 _enforce_guard_polarity 历史版),
             # 额外要求 BR 实体命中当前 entity,避免纯文本巧合误判。
+            #
+            # 结构优先 (DECISIONS ㉜): 含 negation 节点 → 存在操作被拒分支,
+            # 结构性负向 (T-002[a]/T-036: 差不可选入 / 各项打分全零不可提交),
+            # 不依赖关键词文本。无 negation 的 TO (如 occurrence_limit "只有 N
+            # 次" 正向限次, 或 aggregate_count / {}) 走关键词文本兜底; 频次限制
+            # 词 "只有" 已从 prohibit_keywords 数据与默认兜底移除 (数据修正),
+            # occurrence_limit 分支无需结构豁免即不会被误判负向。
+            _cp_to = to.get("constraint_predicate") or {}
+            _cp_has_negation = _pred_contains_type(_cp_to, "negation")
+            if not is_negative_branch and _cp_has_negation:
+                is_negative_branch = True
             _guard_br_id = ""
             if not is_negative_branch and br_list:
                 _ctx_g = cm.get("_context", {}) or {}
@@ -1492,9 +1577,11 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 # 由 P2 的 prohibition_config.prohibit_keywords 提供(本数据集
                 # 已配置);此处默认值只保留领域无关的通用否定词,避免领域词汇
                 # 泄漏进通用引擎(违反 "NO hardcoded business keywords" 原则)。
+                # 默认值不含 "只有" —— 它是频次限制词(occurrence_limit), 非
+                # 禁止词, 作为禁止词会误伤正向限次用例 (T-002[b])。
                 _prohibit_kw = tuple(_pc_g.get("prohibit_keywords",
                     ["不可", "不能", "禁止", "不得", "不允许", "无法", "无权",
-                     "只能", "仅限", "才可", "只有"]))
+                     "只能", "仅限", "才可"]))
                 _givens_text = " ".join(
                     str(g.get("state", "")) + str(g.get("description", ""))
                     for g in givens or []
@@ -1803,6 +1890,13 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 for g in givens:
                     g_copy = dict(g)
                     desc = g_copy.get("description", "")
+                    # given_type=constraint 的 given 是独立信息行 (非 givens[0] 的
+                    # 分句): 整条描述即禁止性规则 (如"本阶段评价结果为差的项目不可
+                    # 选入"), 属拒绝路径的触发条件。正向(接受)路径直接删除该 given,
+                    # 不再像旧结构那样把 desc 清成空壳。
+                    if g_copy.get("given_type") == "constraint" \
+                            and isinstance(desc, str) and _PROHIBIT_RE.search(desc):
+                        continue
                     if isinstance(desc, str) and _PROHIBIT_RE.search(desc):
                         # Split on ; and keep only non-restrictive clauses
                         clauses = re.split(r'[;；]', desc)
@@ -3766,12 +3860,14 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
             if (same_entity and same_dim and similar_action
                     and p1["post_state"] == p2["post_state"]):
                 if len(p1.get("thens", [])) >= len(p2.get("thens", [])):
-                    p1["source_ids"] = list(set(p1.get("source_ids", []) + p2.get("source_ids", [])))
+                    # 确定性: list(set()) 迭代序随 PYTHONHASHSEED 抖动, 用
+                    # dict.fromkeys 保序去重 (主流程 source_ids 在前)。
+                    p1["source_ids"] = list(dict.fromkeys(p1.get("source_ids", []) + p2.get("source_ids", [])))
                     _ensure_time_control(p1)
                     to_remove.add(p2["temp_id"])
                     warnings.append(f"DEDUP: {p2['temp_id']} merged into {p1['temp_id']} (reason: 完全重复)")
                 else:
-                    p2["source_ids"] = list(set(p2.get("source_ids", []) + p1.get("source_ids", [])))
+                    p2["source_ids"] = list(dict.fromkeys(p2.get("source_ids", []) + p1.get("source_ids", [])))
                     _ensure_time_control(p2)
                     to_remove.add(p1["temp_id"])
                     warnings.append(f"DEDUP: {p1['temp_id']} merged into {p2['temp_id']} (reason: 完全重复)")
@@ -3820,7 +3916,7 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                         if then.get("expectation") not in existing_exp:
                             primary_proc["thens"].append(then)
                             existing_exp.add(then.get("expectation"))
-                    primary_proc["source_ids"] = list(set(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
+                    primary_proc["source_ids"] = list(dict.fromkeys(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
                     _ensure_time_control(primary_proc)
                     to_remove.add(secondary_proc["temp_id"])
                     warnings.append(f"DEDUP: {secondary_proc['temp_id']} merged into {primary_proc['temp_id']} (reason: 同实体因果合并)")
@@ -3843,7 +3939,7 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
                         if then.get("expectation") not in existing_exp:
                             primary_proc["thens"].append(then)
                             existing_exp.add(then.get("expectation"))
-                    primary_proc["source_ids"] = list(set(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
+                    primary_proc["source_ids"] = list(dict.fromkeys(primary_proc.get("source_ids", []) + secondary_proc.get("source_ids", [])))
                     _ensure_time_control(primary_proc)
                     to_remove.add(secondary_proc["temp_id"])
                     warnings.append(f"DEDUP: {secondary_proc['temp_id']} merged into {primary_proc['temp_id']} (reason: 因果合并)")

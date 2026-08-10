@@ -127,7 +127,7 @@ SRS 文档
 | V07 | `v07_role_permission.py` | warning | 角色权限：when.actor 必须在 role_permissions.matrix 内 |
 | V08 | `v08_phase_consistency.py` | blocker | 相位一致性：终态=最大相位、沿迁移相位不倒退、≥3 状态不坍缩到同一相位 |
 | V09 | `v09_dedup_instances.py` | blocker | 去重：相同 (givens,when,thens) 合并，单例实体不复制 |
-| V10 | `v10_coverage_matrix.py` | blocker | 覆盖矩阵：coverage_matrix 每条目的关键词必须在 procedure 文本中命中 |
+| V10 | `v10_coverage_matrix.py` | blocker | 覆盖矩阵：每个模型化义务（T-*/EO-*/RO-BR-*）须有 source_ids/embedded_brs 用例引用，状态机状态全覆盖（模型推导，非关键词匹配） |
 
 ### `scripts/` — 辅助脚本
 

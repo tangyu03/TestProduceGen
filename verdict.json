@@ -567,13 +567,13 @@
           "reason": "note-type constraint hit; needs semantic review"
         }
       ],
-      "evidence_truncated": 80,
+      "evidence_truncated": 90,
       "suspected_stage": "S4",
       "suspected_files": [
         "nodes/s4_multi_instance.py",
         "nodes/s0_topology.py"
       ],
-      "note": "note-type advisory hits: 130 (warning, not blocking)"
+      "note": "note-type advisory hits: 140 (warning, not blocking)"
     },
     {
       "check_id": "V06",
@@ -664,11 +664,11 @@
         "build_obligations.py",
         "nodes/s1_generation.py"
       ],
-      "note": "TO 69/70 | EO 73/75 | BR 127/127(embedded 13, xc_causal 20) | IT 6/7 | state_misses=0"
+      "note": "TO 71/72 | EO 73/75 | BR 127/127(embedded 13, xc_causal 20) | IT 6/7 | state_misses=0"
     }
   ],
   "metrics": {
-    "case_total": 762,
+    "case_total": 772,
     "dedup_ratio": 1.0,
     "guard_violations": 0,
     "dangling_deps": 0,

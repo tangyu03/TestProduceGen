@@ -46,7 +46,7 @@ TYPE_LABEL_CN: dict[str, str] = {
 
 # phase_basis 机制前缀 → 中文直译（S2 用这些机制名标注相位解析依据，直译即语义）
 PHASE_MECHANISM_CN: dict[str, str] = {
-    "base_data_setup_phase": "基础数据维护",
+    "base_data_setup_phase": "基础数据",
     "domain_precond_creation": "前置条件创建",
     "fallback_default": "默认阶段",
     "primary_entity_entry_phase": "业务入口",
@@ -136,9 +136,14 @@ def build_phase_labeler(state_info: dict, procedures: list | None = None):
         basis = (s2.get("phase_basis") or "").strip()
         phase = s2.get("phase")
 
-        # 机制形态：跨实体的粗粒度模块（数据维护/前置条件/默认阶段），直译即语义
+        # 机制形态：跨实体的粗粒度模块（数据维护/前置条件/默认阶段），直译即语义。
+        # base_data_setup_phase 后缀实体（`base_data_setup_phase.<实体>.<相位>`），
+        # 展示为 "基础数据-<实体>"（如 基础数据-专家），实体从 phase_basis 捕获，
+        # 不另立实体清单。其余机制形态（前置条件创建/默认阶段）无实体后缀，直译。
+        m = _BASE_SETUP_RE.match(basis or "")
+        if m:
+            return f"{PHASE_MECHANISM_CN['base_data_setup_phase']}-{_cn(m.group(1))}"
         for pat, cn in (
-            (_BASE_SETUP_RE, PHASE_MECHANISM_CN["base_data_setup_phase"]),
             (_PRECOND_RE, PHASE_MECHANISM_CN["domain_precond_creation"]),
             (_FALLBACK_RE, PHASE_MECHANISM_CN["fallback_default"]),
         ):

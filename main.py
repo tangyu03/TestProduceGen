@@ -582,7 +582,7 @@ def _dedupe_then_target(target: str, expectation: str) -> tuple[str, str]:
     2. target 或其最后一段已原样出现在 expectation 文本中（target=附件、
        expectation="显示项目附件集中查看页面"；或 target=专家.技术领域、
        expectation="校验失败，提示'技术领域选择不在A-J范围内'"）→ target
-       完全冗余，省略（与 _dedupe_when_target 同判据）。
+       完全冗余，省略（纯文本包含判定，不硬编码实体/属性名）。
     未命中则原样返回 (target, expectation)。
     """
     if "." in target:
@@ -595,20 +595,13 @@ def _dedupe_then_target(target: str, expectation: str) -> tuple[str, str]:
     return target, expectation
 
 
-def _dedupe_when_target(target: str, event: str) -> str:
-    """When 行 target（操作对象）已在 event 文本中出现时，省略前导 target。
+def _branch_condition_norm(s: str) -> str:
+    """分支条件归一化，用于判断状态给定分句与分支条件 given 是否同义。
 
-    数据驱动：纯文本关系判定，不硬编码任何实体/操作名。target 或其最后一段
-    （复合 target 如 项目.项目状态 取 "项目状态"）若已原样出现在 event 中
-    （如 target=附件、event=查看项目附件 → "附件 查看项目附件"，读作
-    "附件查看项目附件"），则前导 target 与操作名重复，应省略。
+    "为"≡"="、去空白。只作同义判据，不影响原文渲染。无领域词汇
+    （"为"是通用语言同义符号，非业务词表）。
     """
-    if not target or not event:
-        return target
-    key = target.rsplit(".", 1)[-1].strip()
-    if key and key in event:
-        return ""
-    return target
+    return re.sub(r"\s+", "", s or "").replace("为", "=")
 
 
 def _generate_markdown(
@@ -643,12 +636,6 @@ def _generate_markdown(
     phase_label = build_phase_labeler(state_info, procedures)
 
     lines = ["# 测试规程\n"]
-    lines.append(
-        "> **业务定位**：用例类型（数据操作/审批流程/…） ｜ 业务模块"
-        "（用例所属的粗粒度业务模块，如“项目”、“评审计划”、“基础数据维护”）。\n"
-        "> **覆盖需求**：标注用例覆盖的原始需求条目（如 EO-CRU-058）"
-        "及其 SRS 章节（如 4.6 项目管理）。\n"
-    )
 
     # Group multi-instance copies by base ID (strip .N suffix)
     groups: dict[str, list[dict]] = {}
@@ -670,8 +657,19 @@ def _generate_markdown(
 
         temp_id = base
         post_state = proc.get("post_state", "")
-        # Title line — prefer LLM-generated natural-language title
+        # 管理类兜底 Given（state="存在"/description="操作入口可用"，Tier 2 对
+        # topology 0 实体的哨兵）已被净化，LLM 标题里同源的退化条件短语
+        # （"操作入口可用时，" / "角色存在时，"）一并剥除——判据与 Given 净化
+        # 完全相同，不另立实体清单。
+        mgmt_fallback_givens = [
+            g for g in (proc.get("givens") or [])
+            if g.get("state", "") == "存在"
+            and re.sub(r"^\[实例 \d+\]\s*", "", g.get("description", "") or "") == "操作入口可用"
+        ]
+        is_mgmt_fallback = bool(mgmt_fallback_givens) and len(mgmt_fallback_givens) == len(proc.get("givens") or [])
         title = proc.get("title") or post_state
+        if is_mgmt_fallback:
+            title = re.sub(r"^(?:操作入口可用|[^，]+存在)时，", "", title)
         lines.append(f"### {temp_id}：{title}")
 
         type_label = s2.get("type_label", "")
@@ -704,30 +702,113 @@ def _generate_markdown(
             lines.append("")
             # Given clauses
             if givens:
-                lines.append("**Given**")
-                for g in givens:
+                g_lines = []
+                # 已有文本（Then 期望 / When event+action / 其他 given 描述）：
+                # 约束行与这些重复则跳过，避免与拒绝原因或分支条件行重复。
+                existing_texts = [t.get("expectation", "") for t in thens]
+                existing_texts += [when.get("event", ""), when.get("action", "")]
+                # 排除 constraint given 自身：S1 修复后约束是独立 given, 若把
+                # 它们算进 other_given_texts, 渲染某条约束时其 desc 必命中自己的
+                # 条目 → 自去重 → 全部约束行丢失 (0 约束行)。只与状态/流转/分支
+                # given 的 desc 比对 (约束文本重复出现在状态 given 描述才跳过)。
+                other_given_texts = [
+                    re.sub(r"^\[实例 \d+\]\s*", "", g2.get("description", "") or "")
+                    for g2 in givens[1:]
+                    if g2.get("given_type", "state") != "constraint"
+                ]
+                for i, g in enumerate(givens):
                     desc = g.get("description", "")
                     # 实例纯重复（JSON 已拆 .N 副本），展开后 [实例 N] 标签是渲染噪音
                     desc = re.sub(r"^\[实例 \d+\]\s*", "", desc)
-                    desc_str = f" ({desc})" if desc else ""
-                    lines.append(f"- {g.get('target', '')} 状态 = {g.get('state', '')}{desc_str}")
+                    # S1 管理类兜底 Given（state="存在"/description="操作入口可用"，
+                    # Tier 2 领域前置对 topology 0 实体的哨兵）无测试价值，跳过。
+                    # 纯渲染净化，JSON 哨兵保留给 tier2_verify。
+                    if g.get("state", "") == "存在" and desc == "操作入口可用":
+                        continue
+                    gtype = g.get("given_type", "state")
+                    # 分支条件去重：P2 把分支变体的分支条件同时落进 preconditions
+                    # 与 branch_path，S1 两处都渲染 → givens[0] 括号分句与分支
+                    # 条件 given 同义重复（全量 34 family/110 处；T-014 即
+                    # "项目阶段为开题" vs "分支条件: 项目阶段=开题"）。归一化后
+                    # 精确相等即从状态描述移除，分支条件行保留为唯一表达。
+                    # 纯渲染净化，JSON 数据原样保留。仅 givens[0]：分支条件
+                    # 只与第一条状态描述同义。
+                    if i == 0:
+                        branch_norms = {
+                            _branch_condition_norm(
+                                g2.get("description", "").replace("分支条件: ", ""))
+                            for g2 in givens
+                            if (g2.get("description") or "").startswith("分支条件: ")
+                        }
+                        if branch_norms:
+                            clauses = [c.strip() for c in desc.split(";") if c.strip()]
+                            kept = [c for c in clauses
+                                    if _branch_condition_norm(c) not in branch_norms]
+                            if len(kept) != len(clauses):
+                                desc = "; ".join(kept)
+                    # ── given_type 纯格式选择器（DECISIONS ㉛）──
+                    # S1 已按前置类型路由：constraint/flow/跨维度 state 是独立
+                    # Given，渲染层只按 given_type 选格式，不再文本匹配/反查
+                    # coverage_model。
+                    if gtype == "branch" or desc.startswith("分支条件:"):
+                        # 分支行纯化：分支 given 的 desc 是 "分支条件: X=Y"，其
+                        # target 末段=维度、state=值，与 desc 完全同义（全量 124
+                        # 处 0 信息丢失）——再渲染 "X 状态 = Y (…)" 会与状态行视觉
+                        # 撞脸（PROC-135 两行都是 "项目.项目阶段 状态 = 开题"）。
+                        # 只保留 "分支条件：X=Y" 标记行（用户确认：分支标记本身有
+                        # 可读性价值，纯化而非删除）。与约束行同用全角冒号。
+                        val = (desc[len("分支条件:"):].strip()
+                               if desc.startswith("分支条件:") else desc)
+                        g_lines.append(f"- 分支条件：{val}")
+                    elif gtype == "constraint":
+                        # 业务约束独立行；与 Then/When/其他 given 文本重复则跳过
+                        # （如负向用例的拒绝原因已在 Then 出现）。
+                        if any(desc in t for t in existing_texts if t):
+                            continue
+                        if any(desc in t for t in other_given_texts if t):
+                            continue
+                        g_lines.append(f"- 约束：{desc}")
+                    elif gtype == "flow":
+                        # 流转形态（ref.state 是目标态）：`流转：X→Y` 直陈流转过程，
+                        # desc 保留原文（含 "由…变为/变为/转为"），不伪装成前置态。
+                        g_lines.append(f"- {g.get('target', '')} 流转：{desc}")
+                    else:
+                        # state/event（默认）：主锚定/同维度/跨维度纯状态 统一格式
+                        desc_str = f" ({desc})" if desc else ""
+                        g_lines.append(
+                            f"- {g.get('target', '')} 状态 = {g.get('state', '')}{desc_str}")
+                if g_lines:
+                    lines.append("**Given**")
+                    lines.extend(g_lines)
 
             # When clause (single) — [action] 与 event 重复时省略方括号
             if when:
-                lines.append("")
-                lines.append("**When**")
                 w = when
                 actor_str = f" by {w.get('actor')}" if w.get("actor") else ""
                 event_shown, action_core = _dedupe_when_action(
                     w.get("event", ""), w.get("action", "")
                 )
                 action_str = f" [{action_core}]" if action_core else ""
-                target_shown = _dedupe_when_target(w.get("target", ""), event_shown)
-                target_str = f"{target_shown} " if target_shown else ""
-                lines.append(f"- {target_str}{event_shown}{actor_str}{action_str}")
-                # 操作提示并入 When，作为缩进的执行步骤
-                for i, hint in enumerate(op_hints, 1):
-                    lines.append(f"  操作步骤{i}：{hint}")
+                # 规则类用例（Type7 standalone BR）：When 行 `按规则"X"执行操作事件`
+                # 与 Then 的 [BR]X 正面期望同义反复（87/87 规则文本已完整重复在
+                # Then）。判定纯文本关系：event 匹配规则模板 且 引号内规则文本出现
+                # 在 Then 期望中 → 该行无独立信息，跳过。无硬编码规则词汇。
+                then_text = " ".join(t.get("expectation", "") for t in thens)
+                m = re.match(r'^按规则"(.*)"执行操作事件$', event_shown.rstrip())
+                tautological_rule = bool(m) and m.group(1) in then_text
+                # 操作提示先于 event，按执行顺序编成一张有序清单（序号代替
+                # "操作步骤N：" 标签）；无提示时 event 为第 1 步。
+                # When 行的 target（操作对象）不再前置——实体必在 Given/Then
+                # 上下文点名（保留 target 全量核验 0 缺失），前置反而造成
+                # "用户 修改角色" 被误读为执行者的歧义。
+                when_steps = [h for h in op_hints]
+                if not tautological_rule:
+                    when_steps.append(f"{event_shown}{actor_str}{action_str}")
+                if when_steps:
+                    lines.append("")
+                    lines.append("**When**")
+                    for i, step in enumerate(when_steps, 1):
+                        lines.append(f"{i}. {step}")
 
             # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:

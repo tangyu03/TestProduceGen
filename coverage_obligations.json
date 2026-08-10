@@ -1161,13 +1161,44 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-002",
       "entity": "E-PROJ",
       "dimension": "项目状态",
       "from": "待选入",
       "to": "已选入",
-      "action": "项目选入",
       "role": "评审管理员",
+      "direction": "forward",
+      "priority": "P0",
+      "source_ref": "4.7.1 项目选入",
+      "coverage_priority": "high",
+      "is_repeatable": false,
+      "repeat_condition": null,
+      "side_effects": [],
+      "precondition_state_refs": [
+        {
+          "entity": "E-PROJ",
+          "dimension": "项目状态",
+          "state": "待选入",
+          "raw_text": "项目处于待选入状态",
+          "pattern": "p1_inherited"
+        }
+      ],
+      "id": "T-002[a]",
+      "action": "项目选入 [项目评级=差]",
+      "risk_traits": [
+        "audit",
+        "branch"
+      ],
+      "branch_path": [
+        {
+          "dimension": "项目评级",
+          "value": "差"
+        }
+      ],
+      "note": {
+        "inferred": false,
+        "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载",
+        "branch_dimension": "项目评级"
+      },
       "preconditions": [
         {
           "text": "项目处于待选入状态",
@@ -1182,31 +1213,36 @@
           "text": "本阶段评价结果为差的项目不可选入",
           "type": "constraint",
           "ref": null
-        },
-        {
-          "text": "对于本阶段不合格评价结果的项目，只有 1 次选入机会",
-          "type": "constraint",
-          "ref": null
         }
       ],
+      "constraint_predicate": {
+        "type": "negation",
+        "operand": {
+          "type": "field_equals",
+          "field": {
+            "entity": "E-PROJ",
+            "name": "评级"
+          },
+          "value": "差"
+        }
+      },
       "expected_results": [
         "选入后项目状态变为已选入"
-      ],
-      "risk_traits": [
-        "audit"
-      ],
+      ]
+    },
+    {
+      "entity": "E-PROJ",
+      "dimension": "项目状态",
+      "from": "待选入",
+      "to": "已选入",
+      "role": "评审管理员",
       "direction": "forward",
       "priority": "P0",
       "source_ref": "4.7.1 项目选入",
-      "note": {
-        "inferred": false,
-        "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载"
-      },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
       "side_effects": [],
-      "branch_path": [],
       "precondition_state_refs": [
         {
           "entity": "E-PROJ",
@@ -1216,40 +1252,115 @@
           "pattern": "p1_inherited"
         }
       ],
-      "constraint_predicate": {
-        "type": "conjunction",
-        "parts": [
-          {
-            "type": "negation",
-            "operand": {
-              "type": "field_equals",
-              "field": {
-                "entity": "E-PROJ",
-                "name": "评级"
-              },
-              "value": "差"
-            }
-          },
-          {
-            "type": "occurrence_limit",
-            "on": {
-              "entity": "E-PROJ",
-              "dimension": "项目状态",
-              "from": "待选入",
-              "to": "已选入"
-            },
-            "limit": 1,
-            "when": {
-              "type": "field_equals",
-              "field": {
-                "entity": "E-PROJ",
-                "name": "评级"
-              },
-              "value": "不合格"
-            }
+      "id": "T-002[b]",
+      "action": "项目选入 [项目评级=不合格]",
+      "risk_traits": [
+        "audit",
+        "branch"
+      ],
+      "branch_path": [
+        {
+          "dimension": "项目评级",
+          "value": "不合格"
+        }
+      ],
+      "note": {
+        "inferred": false,
+        "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载",
+        "branch_dimension": "项目评级"
+      },
+      "preconditions": [
+        {
+          "text": "项目处于待选入状态",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PROJ",
+            "dimension": "项目状态",
+            "state": "待选入"
           }
-        ]
-      }
+        },
+        {
+          "text": "对于本阶段不合格评价结果的项目，只有 1 次选入机会",
+          "type": "constraint",
+          "ref": null
+        }
+      ],
+      "constraint_predicate": {
+        "type": "occurrence_limit",
+        "on": {
+          "entity": "E-PROJ",
+          "dimension": "项目状态",
+          "from": "待选入",
+          "to": "已选入"
+        },
+        "limit": 1,
+        "when": {
+          "type": "field_equals",
+          "field": {
+            "entity": "E-PROJ",
+            "name": "评级"
+          },
+          "value": "不合格"
+        }
+      },
+      "expected_results": [
+        "选入后项目状态变为已选入"
+      ]
+    },
+    {
+      "entity": "E-PROJ",
+      "dimension": "项目状态",
+      "from": "待选入",
+      "to": "已选入",
+      "role": "评审管理员",
+      "direction": "forward",
+      "priority": "P0",
+      "source_ref": "4.7.1 项目选入",
+      "coverage_priority": "high",
+      "is_repeatable": false,
+      "repeat_condition": null,
+      "side_effects": [],
+      "precondition_state_refs": [
+        {
+          "entity": "E-PROJ",
+          "dimension": "项目状态",
+          "state": "待选入",
+          "raw_text": "项目处于待选入状态",
+          "pattern": "p1_inherited"
+        }
+      ],
+      "id": "T-002[c]",
+      "action": "项目选入 [项目评级=优秀/良好/合格]",
+      "risk_traits": [
+        "audit",
+        "branch"
+      ],
+      "branch_path": [
+        {
+          "dimension": "项目评级",
+          "value": "优秀/良好/合格"
+        }
+      ],
+      "note": {
+        "inferred": false,
+        "comment": "direction 判定③状态先后到forward；评级约束由 BR 承载",
+        "branch_dimension": "项目评级"
+      },
+      "preconditions": [
+        {
+          "text": "项目处于待选入状态",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-PROJ",
+            "dimension": "项目状态",
+            "state": "待选入"
+          }
+        }
+      ],
+      "constraint_predicate": null,
+      "expected_results": [
+        "选入后项目状态变为已选入"
+      ]
     },
     {
       "id": "T-003",
@@ -6667,7 +6778,7 @@
       "reason": "本阶段评价结果为差的项目不可选入",
       "coverage_priority": "high",
       "source_ref": "4.7.1 项目选入（3）",
-      "absorbed_by_transition": "T-002"
+      "absorbed_by_transition": "T-002[a]"
     },
     {
       "id": "RO-IT-002",
@@ -8946,6 +9057,21 @@
             "value": "差",
             "target_transition": "T-008",
             "desc": "评级差：开题阶段到待选入/验收阶段到待选入"
+          },
+          {
+            "value": "差",
+            "target_transition": "T-002[a]",
+            "desc": "差：项目选入 [项目评级=差]"
+          },
+          {
+            "value": "不合格",
+            "target_transition": "T-002[b]",
+            "desc": "不合格：项目选入 [项目评级=不合格]"
+          },
+          {
+            "value": "优秀/良好/合格",
+            "target_transition": "T-002[c]",
+            "desc": "优秀/良好/合格：项目选入 [项目评级=优秀/良好/合格]"
           }
         ],
         "coverage": {
@@ -9215,6 +9341,11 @@
         "T-031[b]",
         "T-031[c]",
         "T-031[d]"
+      ],
+      "T-002": [
+        "T-002[a]",
+        "T-002[b]",
+        "T-002[c]"
       ]
     },
     "structural_relations": [
@@ -10420,7 +10551,6 @@
       ],
       "prohibit_keywords": [
         "本阶段评价结果为差的项目不可选入",
-        "本阶段不合格评价结果的项目，只有 1 次选入机会",
         "专家不能被连续 3 天晚上分配任务",
         "一个工作时段只能被分配一个评审计划",
         "项目各项打分全部为零的不能提交",

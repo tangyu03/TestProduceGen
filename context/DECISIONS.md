@@ -5,6 +5,148 @@
 
 ---
 
+## 2026-08-10 ㉝ When 事件不再携带「目标状态」注解 + Given 括号回显保留（溯源文本）
+
+**决策**：`nodes/s1_generation.py` `_derive_business_event` 移除 `（目标状态：X）` 后缀。目标状态是 **Then 的断言内容**（`状态转换为X` / `状态流转：A→X`），同动作多目标实例（重启评审计划 → 待评审/评审中/已完成）由 Given 分支条件消歧——When 事件标签重复目标状态对执行人员是干扰（user 指正：the Then 已有、上下文已知），且**无下游消费者**读取该注解（validators/schema/metadata 均不依赖；仅 `main.py:1208` 检查 "超时"、`schema.py:259` 检查非空）。
+
+**实现**：
+- `_derive_business_event` 删除 to_state 追加分支（原 line 352-354），docstring 更新。Type1 主路径/时间边界路径均受影响；invalid 路径（尝试…已过期，无 to_state）本就不带注解。
+- `scripts/s1_fix_replay.py` `_content_key` 新增 `_norm_event` 剥离 `（目标状态：X）` 后缀——归档 when.event 带后缀、回放新事件不带，两侧归一才能匹配，否则 title overlay 全失配。
+
+**验证（Gate-S）**：回放 772 procs 双跑 SHA-256 字节一致（`d2dcd6de…`）；Gate-S verdict 与归档**逐字节一致**（signature `6252476661b4`，guard=0，coverage_misses=3 不变，V07 empty/unknown/no_permission=0）；overlay 772/0。canonical 已提升。仅剩 2 处 "目标状态" 在 PROC-224/233 BR 规则名内（SRS 原文，须保留）。
+
+**Given 括号回显保留（user 定调）**：`(评审计划处于暂停状态且暂停前为已完成)` 由 `状态=暂停` + `分支条件` 各重写一次，是回显；但 paren 是 **SRS 前置原文溯源文本**。实测 782 个 state desc：401 独有信息（必须留）、381 提及状态（混合）、5 分支回显——无干净通用剥离法（语义判断会误杀 401 条，或需文本启发式），**保留原样**。
+
+---
+
+## 2026-08-10 ㉜ T-002 分支拆分 + overlay 改结构键（title-only）+ prohibit_keywords 数据修正
+
+**决策**：T-002（待选入→已选入，唯一 branch_path=[] 且 compound predicate 的 TO）按 项目评级 拆 3 变体；overlay 从 temp_id 主键改**结构键 title-only**（actor 不再 overlay）；prohibit_keywords 去掉频次限制短语（"只有"是频次限制词，非禁止词）。
+
+**T-002 拆分（`scripts/t2_branch_split.py`，纯数据驱动，零硬编码）**：从 constraint_predicate 结构派生变体——negation(评级=差)→T-002[a]（negative_test，5 实例），occurrence_limit(评级=不合格,limit=1)→T-002[b]（branch，5 实例），catch-all（全量值减约束值 join "/" → "优秀/良好/合格"）→T-002[c]（branch，5 实例）。变体序按 parts 出现顺序（差 在 不合格 前），ID [a][b][c] 后缀；constraint_predicate 与 branch_path 职责正交（branch_path 是分支唯一归属）。`_context.transition_splits`、branch_dimensions 各加 3 分支，RO-IT-001 absorbed_by_transition 按 reason 关键词路由到 T-002[a]（差）。字节精确 CRLF 写回，idempotent。**t3_occ_limit_detach.py 退役**（拆分后 occurrence_limit 在 T-002[b] given 里是合法归属，不再串线）。
+
+**overlay 改结构键（`scripts/s1_fix_replay.py`，根因修复）**：T-002 拆分致 temp_id 重编号（+42/-32），temp_id 主键 overlay 错配 → 483/720 公共 temp_id 的 actor/title 被污染 → V07 65 no_permission。**证据链**：重跑前 S1 的 actor 已是模型确定性派生（762/762 与归档零 diff），overlay actor 纯属多余且是污染源；title 是 LLM 产物（重跑为 None）才需补。改后 overlay 只补 title，内容键 =（source_ids 归一化 T-XXX[a]→T-XXX、obligation_type、entity、dimension、when.event、when.action、thens 结构），翻译空间匹配（archived 已翻译，replayed 先翻译副本），组内按实例号对齐（同组 title 可发散，如 PROC-056.5 ≠ .1-.4）。拆分新增的 T-002[b]/[c] 正向变体无归档标题，title 留 None（诚实，无 LLM 可补）。
+
+**prohibit_keywords 数据修正（guard 极性误判根因）**：`s1_generation.py:1541-1582` guard 极性把含 `prohibit_keywords` 短语的 RO-BR desc 判为禁止 → RO-BR-012 "本阶段不合格评价结果的项目，只有 1 次选入机会" 误判 T-002[b] negative_test。该短语是**频次限制**非禁止（"只有"勿入 strip/prohibit 正则）→ 从 `srs_data/struct_srs.py` 与模型 `_context.prohibition_config` 各删 1 条（30→29），sets 校验相等。拆分前被"差"前置条件掩盖（整体负例先行，guard 不触发），拆分后暴露。
+
+**验证（Gate-S，`verify/validators.py`）**：V01-V09 全 PASS，V10 fail=3（coverage_misses T-013/EO-CRU-001/026/RO-IT-001，与归档完全一致）；V07 `empty_actor=0, unknown_actor=0, no_permission=0`。T-002 分支 given 隔离：T-002[a] 仅"差不可选入"，T-002[b] 仅"只有 1 次选入机会"，T-002[c] 无 constraint。回放 772 procs（762→772，+10 正向变体），双跑 SHA-256 一致，fixpoint 验证（回放提升后的 canonical 再回放字节一致）。canonical 已提升（`p3_agent_output.s1fix.*` → `p3_agent_output.*`），verdict.json 已更新（sig 6252476661b4）。
+
+**guard 极性改结构优先（`s1_generation.py`，user 定调）**：guard 直接读 `constraint_predicate.type`——含 `negation` 节点 → 结构性负向（T-002[a]/T-036），不再依赖关键词文本匹配；同时 `_prohibit_kw` 默认兜底去掉"只有"（line 1549 默认 `["不可","不能","禁止","不得","不允许","无法","无权","只能","仅限","才可"]`）。**关键约束：无 negation 节点但真实负向的 TO（T-038/039/043，predicate 为 `{}`/aggregate_count）保留关键词文本兜底**——纯结构读取会把它们误翻成正向（已审计：它们负向来自 RO-BR-044/033，predicate 无 negation）。**不设 occurrence_limit 结构豁免**（user 指正：数据修正已足，勿叠加防护）。行为中性验证：回放 SHA `b9ab99...` 与 canonical 字节一致，Gate-S V01-V09 PASS / V10 fail=3 不变。
+
+---
+
+## 2026-08-10 ㉛ S1 else 兜底按 ref 类型分流 + given_type 字段——渲染层纯格式选择器（回放重跑）
+
+**决策**：S1 修复从渲染层搬回数据层（用户定调："S1 修复不能把这个错误从渲染层搬到数据层"）。`nodes/s1_generation.py` else 兜底按 ref 类型分流前置条件；`models/schema.py` GivenClause 增加 `given_type` 字段；`main.py` 渲染层变纯格式选择器，不再文本匹配/反查 coverage_model。**回放重跑**（决策 1 选 A）从归档 `engine_state` + `coverage_obligations.json` 重建 AgentState，确定性重跑 S1→S4，跳过全部 LLM。
+
+**根因**：旧 else 兜底把所有非 state_ref/event_ref 前置（含 constraint、跨维度 state_ref）dump 进 `givens[0].description`。结构化 ref 只在 `_phase_precondition_bound` 用于相位计算，givens 里丢失 → 渲染层 5 条规则/477 处干预反向补偿（约束文本从 desc 拆"约束："行、跨维度纯状态提升为独立行、流转形态 skip 留括号）。"你怎么知道 477 处之后没有第六个模式？"
+
+**S1 分流（s1_generation.py `_make_given` + givens 循环）**：
+- `constraint` 前置 → 独立 `given_type="constraint"` given（state 为空，desc=原文）。
+- 跨维度 `state_ref`（ref.dimension ≠ 转换维度）：纯状态形态 → `given_type="state"` 独立 given（ref.state=前置态）；**流转形态**（`_FLOW_RE = 由[^;]*变为|变为|转为`）→ `given_type="flow"` 独立 given（ref.state=目标态，desc 保留原文，**不**提升为 `状态 = X`——语义串线）。
+- 同维度 state_ref → 并进 givens[0].desc（不变）；event_ref → event given；分支变体 → `given_type="branch"`。
+- 正向变体 strip：禁止语义 constraint given 整个删除（非剥 desc 文本）。
+
+**given_type 语义（schema.py GivenClause）**：`state`→`{target} 状态 = {state} ({desc})`；`event`→同 state 格式；`flow`→`{target} 流转：{desc}`；`constraint`→`约束：{desc}`；`branch`→`分支条件：{value}`。state/event/branch 必须 state 非空；constraint/flow 允许空。
+
+**决策 2（actor/title overlay）**：不归档 action_classification；S1 注入空 stub 跳过动作分类 LLM；重跑后按 `temp_id` 主键 overlay 归档的 `when.actor`/`title`（762/762 命中，0 actor/title diff）。
+
+**T-002**：S1 修复后 occurrence_limit 约束成为独立 constraint given；`scripts/t3_occ_limit_detach.py` 更新为按 `given_type=="constraint"` 且 desc 精确相等**删除整个 given 条目**（非剥 desc 分句），断言恰好 10 处（PROC-133.1-.5 × PROC-134.1-.5），目标族外命中即中止。
+
+**确定性修复（两个隐坑）**：
+1. **source_ids 顺序抖动**：`list(set(...))` 四处在 s1_generation.py 合并去重（3829/3834/3883/3906 附近）迭代序随 PYTHONHASHSEED 抖动 → 改 `list(dict.fromkeys(...))`（保序去重，主流程 ID 在前）。temp_id 集不变，仅源 ID 顺序稳定。
+2. **约束行自去重丢失**：渲染层 `other_given_texts` 由 `givens[1:]` 构建，含 constraint given 自身 → 渲染某条约束时其 desc 命中自己的条目 → 全部约束行丢失（0 约束行）。修复：`other_given_texts` 排除 `given_type=="constraint"` 条目（只与状态/流转/分支 given 的 desc 比对）。
+
+**验证（确定性 Engine State，不信 LLM）**：
+- 回放 762 procs，temp_id diff +0/-0，overlay 762/762 命中，actor/title 零 diff。
+- 双跑 SHA-256 一致（JSON+MD），确定性 PASS。
+- 渲染信息零丢失：archived MD value 片段 556 → replay 557，0 片段 under-counted；0 空括号。
+- 流转形态从状态行括号拆为独立 `{target} 流转：{原文}`（18 base 处）；约束行 39=39、分支 41=41 与 archived 一致；覆盖需求（source_ids）顺序归一为保序去重序。
+- schema 校验 762/762 valid；Gate-S V01–V10 与 archived verdict 逐项零 diff（coverage_misses=3 系 pre-existing，非回归）。
+
+**边界**：实例副本（.N）不渲染 MD 块（archived 同为 275 块），故实例上的 constraint/flow given 不进 MD——既有行为，非回归。T-002 分支拆分（决策）另行。
+
+**提升 canonical（用户已批准）**：s1fix 经审阅后复制为 `p3_agent_output.json/.md`（字节一致，cmp 确认），s1fix staging 文件已删。提升前修复 statistics 一致性：`type_counts` 由 type_label 改为按 **obligation_type** 映射（与 main.py 同构，`1→Type1(Transition)`…），剔除 `_replay_meta`（回放诊断字段），信封与真实流水线完全一致。提升后再次确定性双跑 PASS、schema 762/762、Gate-S V01–V10 零 diff。occurrence_limit 规则确认无残留（PROC-133/134 given 干净，专属覆盖 PROC-181 保留规则文本）。
+
+---
+
+## 2026-08-10 ㉚ 业务定位模块标签：`基础数据维护` → `基础数据-<实体>`（实体从 phase_basis 捕获）
+
+**决策**：用户质疑业务定位里的 `基础数据维护` 太笼统，希望体现具体实体（如 基础数据-专家）。
+
+**根因**：`基础数据维护` 是 phase_labeler 的**机制形态直译**（`render_registry.py` `PHASE_MECHANISM_CN["base_data_setup_phase"]`）。phase_basis 实为 `base_data_setup_phase.<实体>.<相位>`（如 `base_data_setup_phase.专家.0`，s1_generation.py:881 生成），`_BASE_SETUP_RE` 正则**本就捕获实体**（group(1)），但旧代码只用它做匹配、返回固定直译，实体信息被丢弃。
+
+**修复（纯渲染层，context/render_registry.py）**：
+1. 注册表值 `"base_data_setup_phase"` 由 `"基础数据维护"` 改为 `"基础数据"`；
+2. `build_phase_labeler` 中 `_BASE_SETUP_RE` 分支改为 `f"基础数据-{_cn(m.group(1))}"`——实体从 phase_basis 捕获并经 `_cn` 归一（E-XXX id 或中文名均可），**不另立实体清单**；其余机制形态（前置条件创建/默认阶段）无实体后缀，保持直译。
+
+**证据**：28 条全部变为 `基础数据-<实体>`（专家10/超时设置6/分数限值4/角色3/用户2/日志2/机构1，与 phase_basis 分布完全一致）；`基础数据维护` 0 残留；确定性双跑 True；tier2_verify ALL PASS（JSON 数据不动）；py_compile 通过。
+
+**边界**：仅 base_data_setup_phase 机制形态带实体后缀；实体形态（状态锚定）本就返回实体模块名（项目/评审计划/用户/机构），不受影响。
+
+## 2026-08-10 ㉙ 规则类 When 行删除：`按规则"…"执行操作事件` 与 Then 同义反复
+
+**决策**：用户质疑 `1. 按规则"在已选入的项目中进行专家回避项目设置…"执行操作事件` 是否有必要。全量核验确认**删除无歧义**。
+
+**证据链**：
+1. **87 条规则用例**（Type7 standalone BR，RO-BR-* 义务），When event 均为 `按规则"{br_desc}"执行操作事件` 模板（`nodes/s1_generation.py:3214-3215`，action 同文本少"事件"两字 → `_dedupe_when_action` 子串规则 1 保留带"事件"的 event）。
+2. **87/87 规则文本完整重复在 Then 的 `[BR]正面:` 期望中**（`m.group(1) in then_text` 全命中）——When 行零独立信息。
+3. S1 自身注释把此形态称为 **tautological (同义反复)、unexecutable (不可执行)**（`nodes/s1_generation.py:3099`），该注释描述的正是这种"When 与 Then 同文本"的退化形态。
+4. 87 条 actor 全为空（无操作者信息丢失）；81 条无 operation_hints（When 唯一一行即规则行）；6 条 time_sensitive 带 3 个时钟触发 hint（PROC-044/045/046/095/223/241，When 是 3 hint + 规则行）。
+
+**实施（纯渲染层，main.py `_generate_markdown` When 块）**：判定 `event_shown` 匹配 `^按规则"(.*)"执行操作事件$` 且引号内文本出现在该用例 Then 期望文本中 → 跳过该 event 行。无硬编码规则词汇（不建规则表/关键词表），纯模板正则 + 文本包含关系。When 块重写为 `when_steps` 列表：hints 全部入列，非同义反复的 event 追加为最后一步；`when_steps` 为空则不渲染 `**When**` 头（81 条规则用例 → Given+Then 无 When）。
+
+**证据**：`按规则` 0 残留；When 块 275 → 194（81 条规则用例整块消失）；步进校验 0 异常；PROC-010（无 hint）→ Given+Then，PROC-044（有 hint）→ 保留 3 个时钟触发步；确定性双跑 True；`scripts/tier2_verify.py` ALL PASS（JSON 数据不动）；py_compile 通过。
+
+**边界**：`尝试执行被规则禁止的…操作`/`尝试违反规则操作事件`（PROC-038/117/182/228/233 等负面规则用例）When 是**可执行操作**，不匹配规则模板，**不受影响**。
+
+## 2026-08-10 ㉘ When 行 target（操作对象）前置删除：无信息丢失 + 消执行者歧义
+
+**决策**：用户追问 `2. 用户 修改角色` 前置的"用户"是什么。经查是 `when.target` 操作对象（PROC-022 / EO-ATC-008 / 4.11.1 用户管理，E-USER 系统用户——被改角色的那个用户，非执行者，actor 为空）。中文读法 "用户 修改角色" 天然被读成"用户(主语)修改角色"，把**宾语当成了执行者**，是歧义。用户提议：删除对象前缀，若不影响无歧义则删。
+
+**全量核验（渲染前判定，先证后改）**：275 个 When 块中 **172 条保留 target 前缀**，逐条检查：
+1. **实体可恢复性**：target 实体段（复合 target 取首段，如 `机构.机构状态`→机构）或末段是否已出现在该 proc 的 Given/Then 文本 → **0 缺失**（172 全可恢复）。
+2. **上下文唯一性**：target 实体不在事件文本、且 Given/Then 出现其它实体时是否歧义 → 仅 4 条（PROC-219 评审计划/项目；PROC-268/269/270 附件/项目），逐条复核**全部安全**：PROC-219 的 Given 已点名 `评审计划.计划状态=已完成`+`评审计划超时类型=归档超时`，When `归档超时` 直接对应 Given；PROC-268/269/270 的 Then 点名 `附件 建议书…上传到数据库`。
+
+**结论**：删除 When 前置 target **零信息丢失**（对象由 Given/Then 上下文确定），且**消除了"宾语被读成执行者"的歧义**——When 只剩动作本身（`修改角色` / `新增用户（目标状态：未锁定） by 系统管理员`）。
+
+**实施（纯渲染层）**：`main.py _generate_markdown` When 行不再拼接 `target_str`；删除已无调用点的 `_dedupe_when_target`（及其在 `_dedupe_then_target` docstring 中的引用，改为"纯文本包含判定"）。
+
+**证据**：前置 target 形态（`专家 修改`/`用户 修改`/`机构.机构状态 添加`/`评审计划.计划状态 建立`/`附件 上传`）全量 grep **0 残留**；When 块 275 个序号连续校验 0 异常；`操作步骤`/依赖 `.N` 0 残留；确定性双跑 True；py_compile 通过；tier2_verify ALL PASS（JSON 数据不动）。
+
+**边界**：Then 行 target（`用户.角色 显示为修改后的值`）保留——主语仍需明确；`_dedupe_then_target` 的包含省略规则不变。
+
+## 2026-08-10 ㉗ When 块重构：操作提示前置 + 有序清单（去"操作步骤N"标签）
+
+**决策**：用户两点反馈——① `**When**` 里 `操作步骤1：导航至专家页面` 的步骤拼接方式需要调整：操作提示应是**第一行**、event **第二行**；② 去掉 `操作步骤N：` 前缀，按执行顺序排列即可，"前面加个序号也行"。
+
+**修复（纯渲染层，main.py `_generate_markdown` When 块）**：When 重排为按执行顺序的**有序清单**，序号代替 `操作步骤N：` 标签：
+
+```markdown
+**When**
+1. 导航至专家页面
+2. 新增专家
+```
+
+- 操作提示（`operation_hints`）全部列在 event 之前，event 为最后一步；多提示（time_sensitive 3 提示：clock_injection/db_time_update/scheduler_manual_trigger）依序展开在 1..3，event 落第 4 步。
+- 无提示用例（451 基础用例）event 为第 1 步（`1. {event}`）。
+- event 行保留既有去重与修饰不变：`_dedupe_when_action`/`_dedupe_when_target`、`actor`、`[action]` 括号规则原样。
+- 实现：`step_no` 计数器，先逐条 hint 输出 `{step_no}. {hint}`，最后输出 `{step_no+1}. {event 行}`。
+
+**证据**：`操作步骤` 文本 0 残留；275 个 When 块序号**连续递增校验 0 异常**（脚本扫描每个 When 块，行首 `^\d+\. ` 必须从 1 步进，event 是块内最后一条）；三形态抽查正确（CRUD 1 提示→`1.导航 / 2.event`；time_sensitive 3 提示→`1..3 提示 / 4.event`；无提示→`1.event`）；确定性双跑哈希一致；`scripts/tier2_verify.py` ALL PASS（JSON 数据与哨兵不动，`('mgmt','存在'):39` 不变）；py_compile 通过。
+
+## 2026-08-10 ㉖ 管理类兜底 Given（存在/操作入口可用）渲染层净化
+
+**决策**：用户反馈 `专家 状态 = 存在 (操作入口可用)` 这类前置条件无用。经查这是 **Tier 2 领域前置对管理类实体（topology_level 0：专家/角色/机构/用户/日志/超时设置/分数限值）的兜底哨兵**——S1 Type5 非 VE 分支（`nodes/s1_generation.py:2474-2478`）调 `object_existence()`（`context/domain_precondition.py`），判别器 `topology_levels > 0` 只命中业务生命周期对象（E-PROJ/E-PLAN/E-ATT/E-SCORE），管理类返回 None → 落 `state="存在", description="操作入口可用"` 弱 Given。DECISIONS ⑳ 曾判定"管理类保持 =存在 合理"（作为 tier2_verify 哨兵），但该 Given 对增删改查无测试价值（新增时"存在"语义矛盾，编辑/删除/查询时是废话）。
+
+**修复（纯渲染层，JSON 数据与哨兵不动）**：
+1. **Given 块**：`state=="存在"` 且 desc（剥 `[实例 N]` 后）`=="操作入口可用"` 的行跳过；全被跳过则整个 `**Given**` 块不渲染 → 27 个管理类用例（专家7+机构3+用户9+角色3+日志2+超时设置1+分数限值2）变成 When+Then。
+2. **标题**：判据与 Given 净化相同（该 proc 的 Given 全为兜底哨兵）→ 剥 LLM 标题里同源的退化条件短语 `操作入口可用时，` / `<实体>存在时，`（`re.sub(r"^(?:操作入口可用|[^，]+存在)时，", "", title)`，8 条：5 操作入口可用 + 3 角色存在），不另立实体清单。
+
+**证据**：`操作入口可用`/`存在时` 0 残留；27 用例 When/Then 完整、0 孤立标题；非兜底 Given（ATC 配置值/转换 `(初始)`/分支条件如 评审组人数=5）完好；确定性双跑哈希一致；`scripts/tier2_verify.py` ALL PASS（JSON 数据里 `('mgmt','存在'):39` 哨兵原样保留，生命周期 Given 分布 待选入 120/已建立 8/未打分 4 与依赖边 1109/41 全不变）；py_compile 通过。
+
+**边界**：`规则适用前提满足` Given（PROC-010/038 等规则类，desc 带实际规则前提）是另一形态，**未动**——若用户也认为冗余需另行决策。
+
 ## 2026-08-07 ㉕ 标题实例徽标全删 + Then 侧 target 冗余省略（与 When 同判据）
 
 **决策**：用户两点反馈（标题后的实例个数如 ×5 不需要了 / 上次只处理了 When 没处理 Then），渲染层两处净化：

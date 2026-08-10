@@ -49,7 +49,7 @@ ROUTING_TABLE = {
     "V09": {"stage": "S4", "files": ["nodes/s4_multi_instance.py"],
             "hint": "多实例无差别复制：相同 (givens,when,thens) 合并；单例实体不复制"},
     "V10": {"stage": "P2", "files": ["context/generate_obligation_model.py", "prompts/s0_prompt.py"],
-            "hint": "覆盖缺口：coverage_matrix 条目未命中，补义务而非事后补丁"},
+            "hint": "覆盖缺口：义务（T-*/EO-*/RO-BR-*/IT）无 source_ids/embedded_brs 用例引用，补义务而非事后补丁"},
 }
 DEFAULT_ROUTING = {"stage": "S1", "files": ["nodes/s1_generation.py"],
                    "hint": "未分类失败，附完整 verdict 定位"}

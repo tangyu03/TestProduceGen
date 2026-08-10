@@ -63,7 +63,7 @@ class CheckResult:
             "V07": "角色权限检查通过：when.actor 均在 role_permissions.matrix 内",
             "V08": "相位一致性检查通过：终态=最大相位、forward 迁移相位递增、状态未坍缩",
             "V09": "去重检查通过：无重复 (givens,when,thens) 合并、单例实体未复制",
-            "V10": "覆盖矩阵检查通过：coverage_matrix 所有 probe 均在 procedure 文本中命中",
+            "V10": "覆盖矩阵检查通过：每个模型化义务（T-*/EO-*/RO-BR-*/IT）均有 source_ids/embedded_brs 用例引用，状态机状态全覆盖",
         }
         return reasons.get(self.check_id, "检查通过，无违规项")
 
