@@ -105,7 +105,7 @@ SRS 文档
 | 文件 | 职责 |
 |------|------|
 | `validators.py` | 校验调度器——加载 case_spec + output，运行 V01~V10 检查，聚合 verdict |
-| `case_spec.json` | 产品规约（verify 私有数据）——state_machines(含 phase_mapping)、guard_policies、coverage_matrix、role_permissions、field_validation_rules 等 |
+| `case_spec.json` | 产品规约（verify 私有数据，只含模型无法表达的测试设计事实）——guard_policies、built_in_entities(readonly/no_form_page)、dimension_constraints、time_control.allowed_mechanisms |
 | `loop_manager.py` | 自优化循环管理者——编排 git worktree 快照 → 代码 Agent 修改 → 冒烟 → 流水线 → Gate-S → 失败签名路由 / 回归门控 / 硬停止 / 升级 |
 | `oracles.py` | 预言机——评分计算、评级判定的可执行 Python 函数 |
 | `code_agent_cli.py` | 代码 Agent CLI 接入——stdin 收 task JSON，stdout 出声明 |
@@ -176,7 +176,7 @@ verdict.json (skeleton_pass: true/false)
 | **verify** (校验) | 跑验证器、产出 verdict、定义路由表 | 全部（含 case_spec.json） |
 | **loop_manager** (管理者) | 编排快照→构建→冒烟→流水线→Gate-S→路由/升级 | 全部 |
 
-**关键约束**：`verify/case_spec.json` 是 verify 私有数据，P3 builder 不能读。phase_mapping 应由 P2 产出到 coverage_model._context.state_info。
+**关键约束**：`verify/case_spec.json` 是 verify 私有数据，P3 builder 不能读，只承载模型无法表达的 4 类测试设计事实（guard_policies / built_in_entities / dimension_constraints / time_control.allowed_mechanisms）。状态机（含 phase_mapping）、动作目录、角色权限矩阵、覆盖矩阵、超时判据由 `coverage_obligations.json` 提供（phase_mapping 已在 coverage_model._context.state_info）——case_spec 不再重复这些段，避免多事实源。
 
 ---
 

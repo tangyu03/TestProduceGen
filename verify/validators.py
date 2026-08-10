@@ -7,9 +7,12 @@
 退出码：skeleton_pass=True → 0，否则 1。
 
 --model 传入 coverage_obligations.json(结构化模型)：
-  第一性原理——校验器的期望(动作目录/角色权限/覆盖义务)应从模型推导,
-  而非 case_spec.json 这个 AI 生成的二手代理。需要模型的校验器(V03/V07/V10)
-  通过 output["_model"] 读取;不需要的忽略。
+  第一性原理——校验器的期望(动作目录/角色权限/超时判据/相位映射/覆盖义务)
+  应从模型推导,而非 case_spec.json 这个 AI 生成的二手代理。需要模型的
+  校验器(V03/V06/V07/V08/V10)通过 output["_model"] 读取;不需要的忽略。
+  case_spec.json 只承载模型无法表达的 4 类测试设计事实(guard_policies /
+  built_in_entities.readonly+no_form_page / dimension_constraints /
+  time_control.allowed_mechanisms),其余期望一律以模型为准。
 """
 import argparse
 import importlib
