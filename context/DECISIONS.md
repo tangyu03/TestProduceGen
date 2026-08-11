@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-10 ㉞ ⑧ 遗留 entry=2 锚定：Strategy 0 消费 ref_state_dimension（谓词状态引用）
+
+**决策**：关闭 ⑧ 遗留"entry=2 TO 锚定修复（Strategy 0 消费 ref_state_dimension）"。两点分开对待：
+- **entry=2 的数值**：即 E-SCORE 入口相位，已由 ⑰（08-07）修复——`_compute_entry_phase` Strategy 0 优先读 `preconditions[].ref`，E-SCORE.打分状态 {2,3,4}→{3,4,5}（T-034 引用 待评审=P2，+1=3）。本条目不重复改值。
+- **点名的机制**（⑧ 写时作者以为的修复通道）：Strategy 0 **消费 constraint_predicate 的结构化状态引用**，`ref_state_dimension` 为首要机制——此前从未实现，`preconditions[].ref` 只覆盖 type=state_ref 前提，type=constraint 前提的状态引用（field_equals 的 ref_state_dimension / completion.target / selection_range.source_state / occurrence_limit.on）在 Strategy 0 完全漏采。
+
+**实现（共享派生，单一真相源）**：
+- `context/constraint_fields.py` 新增 `iter_predicate_state_refs(pred)`：遍历谓词树产出结构化状态引用 (entity, dimension, state)，与 `predicate_phase_lower_bound` 同源（field_*+ref_state_dimension → 值解析回状态维度；time_limit/selection_range/completion → 直接状态；occurrence_limit → on 的 to/from；negation/conjunction/disjunction/when 递归）。
+- `nodes/s0_topology.py` `_compute_entry_phase` Strategy 0 追加谓词引用扫描：命中主实体主维度状态 → 计入入口门禁（max 组合，与 preconditions[].ref 同语义；多引用各为门禁取最晚）。phase_anchor 是前置级标记，谓词树无此标记。
+
+**当前模型零行为变化（诚实声明）**：全模型 ref_state_dimension 仅 E-PLAN.暂停前计划状态（T-022/023/024，主实体自引用），**无依赖实体 TO 携带谓词状态引用**；entry 计算维度（E-ORG/E-SCORE/E-PROJ.项目阶段/E-USER）均不触发新路径。机制以 `scripts/v33_ref_state_dimension_entry.py` 回归探针锁定（合成依赖 TO 证明非死代码：谓词引用 评审中 → entry 3+1=4；非主维度引用不抬升；与前置 ref 取 max）。
+
+**验证结果**：全管线确定性重跑，engine_state 11 键与提交基线**字节一致**（DIFF KEYS=NONE）；procedures 772/772、errors=0；Gate-S signature `6252476661b4` 不变（V10 fail=3 为 DECISIONS ⑭ 预期）、spec_lint 0 errors/0 warnings。
+
+---
+
 ## 2026-08-10 ㉝ When 事件不再携带「目标状态」注解 + Given 括号回显保留（溯源文本）
 
 **决策**：`nodes/s1_generation.py` `_derive_business_event` 移除 `（目标状态：X）` 后缀。目标状态是 **Then 的断言内容**（`状态转换为X` / `状态流转：A→X`），同动作多目标实例（重启评审计划 → 待评审/评审中/已完成）由 Given 分支条件消歧——When 事件标签重复目标状态对执行人员是干扰（user 指正：the Then 已有、上下文已知），且**无下游消费者**读取该注解（validators/schema/metadata 均不依赖；仅 `main.py:1208` 检查 "超时"、`schema.py:259` 检查非空）。

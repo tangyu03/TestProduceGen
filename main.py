@@ -604,6 +604,56 @@ def _branch_condition_norm(s: str) -> str:
     return re.sub(r"\s+", "", s or "").replace("为", "=")
 
 
+def _sep_blank(lines: list[str]) -> None:
+    """追加块分隔空行：上一条已是空行则不重复。
+
+    Given 全被哨兵净化跳过时，BDD 组首空行会直接衔接 When/Then 块的
+    空行 → 连续两个空行。守卫避免之，不影响其它块的正常单空行分隔。
+    """
+    if not lines or lines[-1] != "":
+        lines.append("")
+
+
+def _br_rule_map(cm: dict | None) -> dict[str, str]:
+    """constraint_obligations → {RO-BR-XXX: 规则原文}（数据层单一事实源）。"""
+    out: dict[str, str] = {}
+    for b in (cm or {}).get("constraint_obligations") or []:
+        bid = str(b.get("id", "")).split("[")[0].strip()
+        if bid and b.get("description"):
+            out[bid] = b["description"]
+    return out
+
+
+def _proc_br_texts(proc: dict, br_map: dict[str, str]) -> list[str]:
+    """proc 引用的 BR 规则原文（source_ids + Then br_refs，RO-BR/BR 归一化）。"""
+    ids: set[str] = set()
+    for sid in list(proc.get("source_ids") or []) + [
+        b for t in proc.get("thens") or [] for b in (t.get("br_refs") or [])
+    ]:
+        s = str(sid).split("[")[0].strip()
+        if s.startswith("RO-BR"):
+            ids.add(s)
+        elif s.startswith("BR-") and not s.startswith("RO-BR"):
+            ids.add("RO-" + s)
+    return [br_map[i] for i in ids if i in br_map]
+
+
+def _is_rule_noise_given(proc: dict, given: dict, br_map: dict[str, str]) -> bool:
+    """规则类 Given 是否空泛噪音（state=规则适用前提满足 且 desc 不含被测规则原文）。
+
+    第一性原理: 规则测试的 Given 有价值 iff 其 desc 携带被测 BR 的规则原文。
+    判据取数据层 constraint_obligations.description——desc 含任一引用 BR 原文
+    → 有效规则上下文（负向模板 "规则：{原文}"），保留；否则 "{...}相关数据已准备"
+    空泛占位 → 噪音，跳过。不匹配 "规则：" 内容前缀，规则文本形态变化仍稳健；
+    BR 解析为空（无法确认噪音）则保守保留。
+    """
+    if given.get("state", "") != "规则适用前提满足":
+        return False
+    desc = re.sub(r"^\[实例 \d+\]\s*", "", given.get("description", "") or "")
+    br_texts = _proc_br_texts(proc, br_map)
+    return bool(br_texts) and not any(bt and bt in desc for bt in br_texts)
+
+
 def _generate_markdown(
     procedures: list[dict],
     md_path: str,
@@ -631,6 +681,9 @@ def _generate_markdown(
                 if oid and ref and oid not in source_ref_map:
                     source_ref_map[oid] = ref
         state_info = (coverage_model.get("_context") or {}).get("state_info") or {}
+
+    # 规则 Given 判据：数据层 BR 规则原文映射（见 _is_rule_noise_given）
+    br_map = _br_rule_map(coverage_model)
 
     # 阶段语义解析器：数据驱动（phase_basis + state_info），见 context/render_registry
     phase_label = build_phase_labeler(state_info, procedures)
@@ -667,9 +720,21 @@ def _generate_markdown(
             and re.sub(r"^\[实例 \d+\]\s*", "", g.get("description", "") or "") == "操作入口可用"
         ]
         is_mgmt_fallback = bool(mgmt_fallback_givens) and len(mgmt_fallback_givens) == len(proc.get("givens") or [])
+        # 规则类兜底 Given（state="规则适用前提满足"）：有效规则上下文（desc 携带
+        # 被测 BR 原文，负向模板）保留；"{...}相关数据已准备" 空泛噪音视为冗余跳过。
+        # 判据 = _is_rule_noise_given（数据层 BR 原文对照，非 "规则：" 前缀）。
+        # 与 管理类哨兵 同构——LLM 标题里同源的退化条件短语
+        # （"规则适用前提满足时，" / "项目规则适用前提满足时，"）一并剥除。
+        rule_fallback_givens = [
+            g for g in (proc.get("givens") or [])
+            if _is_rule_noise_given(proc, g, br_map)
+        ]
+        is_rule_fallback = bool(rule_fallback_givens) and len(rule_fallback_givens) == len(proc.get("givens") or [])
         title = proc.get("title") or post_state
         if is_mgmt_fallback:
             title = re.sub(r"^(?:操作入口可用|[^，]+存在)时，", "", title)
+        if is_rule_fallback:
+            title = re.sub(r"^[^，]*规则适用前提满足时，", "", title)
         lines.append(f"### {temp_id}：{title}")
 
         type_label = s2.get("type_label", "")
@@ -699,7 +764,7 @@ def _generate_markdown(
         op_hints = proc.get("operation_hints", [])
 
         if givens or when or thens:
-            lines.append("")
+            _sep_blank(lines)
             # Given clauses
             if givens:
                 g_lines = []
@@ -724,6 +789,13 @@ def _generate_markdown(
                     # Tier 2 领域前置对 topology 0 实体的哨兵）无测试价值，跳过。
                     # 纯渲染净化，JSON 哨兵保留给 tier2_verify。
                     if g.get("state", "") == "存在" and desc == "操作入口可用":
+                        continue
+                    # 规则类 Given（state="规则适用前提满足"）：仅跳过空泛噪音
+                    # （desc 不含被测 BR 原文，数据层对照）；"规则：{原文}" 有效
+                    # 规则上下文保留——负向模板 When/Then 只含被禁操作，规则原文
+                    # 可能只在 Given 呈现（PROC-262），删了丢规则。纯渲染净化，
+                    # JSON 数据保留。
+                    if _is_rule_noise_given(proc, g, br_map):
                         continue
                     gtype = g.get("given_type", "state")
                     # 分支条件去重：P2 把分支变体的分支条件同时落进 preconditions
@@ -805,14 +877,14 @@ def _generate_markdown(
                 if not tautological_rule:
                     when_steps.append(f"{event_shown}{actor_str}{action_str}")
                 if when_steps:
-                    lines.append("")
+                    _sep_blank(lines)
                     lines.append("**When**")
                     for i, step in enumerate(when_steps, 1):
                         lines.append(f"{i}. {step}")
 
             # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:
-                lines.append("")
+                _sep_blank(lines)
                 lines.append("**Then**")
                 for t in _dedup_thens(thens):
                     br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""

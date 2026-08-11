@@ -757,6 +757,47 @@ def predicate_phase_lower_bound(pred: dict | None, dep_state_phase_map: dict | N
     return None  # 未识别类型（含 unparsed）
 
 
+def iter_predicate_state_refs(pred):
+    """遍历 constraint_predicate 树，产出结构化状态引用 (entity, dimension, state)。
+
+    与 predicate_phase_lower_bound 同源（同一份谓词语义，单一真相源）：
+    - field_equals/field_range/field_in + `ref_state_dimension` → 字段值按状态维度
+      解析回状态（暂停前计划状态=评审中 → (E-PLAN, 计划状态, 评审中)）；
+    - time_limit.start_state / selection_range.source_state / completion.target →
+      直接命名状态；occurrence_limit.on 用 from/to（被限转换）；
+    - negation/conjunction/disjunction/when → 递归子树。
+    产出顺序确定（dict 键序 + 列表序）。消费方（S0 Strategy 0 入口锚定）按
+    max 语义把每个引用状态当作入口门禁；主实体主维度过滤在消费方做。
+    """
+    if not isinstance(pred, dict):
+        return
+    t = pred.get("type")
+    if t in ("field_equals", "field_range", "field_in"):
+        rsd = pred.get("ref_state_dimension")
+        if isinstance(rsd, str) and "." in rsd:
+            rent, rdim = rsd.split(".", 1)
+            vals = [pred.get("value")] if t != "field_in" else (pred.get("values") or [])
+            for v in vals:
+                if isinstance(v, str):
+                    yield (rent, rdim, v)
+    for k in ("start_state", "source_state", "target"):
+        st = pred.get(k)
+        if (isinstance(st, dict) and isinstance(st.get("entity"), str)
+                and isinstance(st.get("state"), str)):
+            yield (st["entity"], st.get("dimension"), st["state"])
+    on = pred.get("on")
+    if (isinstance(on, dict) and isinstance(on.get("entity"), str)
+            and isinstance(on.get("to") or on.get("from"), str)):
+        yield (on["entity"], on.get("dimension"), on.get("to") or on.get("from"))
+    for k in ("parts", "operand", "when"):
+        sub = pred.get(k)
+        if isinstance(sub, dict):
+            yield from iter_predicate_state_refs(sub)
+        elif isinstance(sub, list):
+            for s in sub:
+                yield from iter_predicate_state_refs(s)
+
+
 # ── 谓词级规则（解析器侧约定，Schema 审查补充） ────────────────────────────
 PREDICATE_RULES = {
     # disjunction_ref：引用未展开的规则列表（满足降级规则任一条）。

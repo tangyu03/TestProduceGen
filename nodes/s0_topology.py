@@ -21,6 +21,10 @@ from typing import Any
 
 from models.state import AgentState
 
+# ⑧ 遗留: Strategy 0 入口锚定消费 constraint_predicate 的结构化状态引用
+# （ref_state_dimension 为首要机制），与 S1 predicate_phase_lower_bound 同源。
+from context.constraint_fields import iter_predicate_state_refs
+
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
 
@@ -1382,6 +1386,19 @@ def _compute_entry_phase(
                     if state_name and len(state_name) >= 2 and state_name in prec_text:
                         text_phase = phase_val
                         break
+    # ⑧ 遗留: Strategy 0 消费 constraint_predicate 的结构化状态引用。
+    # preconditions[].ref 只覆盖 type=state_ref 前提；type=constraint 前提的
+    # 状态引用在 constraint_predicate 里——field_equals 的 ref_state_dimension
+    # 把字段值解析回状态维度（暂停前计划状态=待评审 → E-PLAN.计划状态.待评审），
+    # completion.target / selection_range.source_state 等直接命名状态。
+    # 与 preconditions[].ref 同语义：命中主实体主维度状态 → 计入入口门禁（max），
+    # 每个引用的状态都是入口门禁（⑰ 语义不变）。phase_anchor 是前置级标记，
+    # 谓词树无此标记，跳过规则不在此重复。
+    for to in entity_tos:
+        for rent, rdim, rstate in iter_predicate_state_refs(to.get('constraint_predicate')):
+            if rent == primary_entity and rdim == primary_dim and rstate in primary_states:
+                pv = primary_states[rstate]
+                ref_phase = pv if ref_phase is None else max(ref_phase, pv)
     if ref_phase is not None:
         return ref_phase + 1  # +1: dependent starts AFTER primary reaches state
     if text_phase is not None:
