@@ -28,13 +28,21 @@ def op(name, category, expected_results, source_ref, note=None) -> dict:
             "expected_results": [esc(e) for e in expected_results],
             "source_ref": esc(source_ref), "note": note or N()}
 
-def precond(text, ptype, ref=None) -> dict:
+def precond(text, ptype, ref=None, note=None) -> dict:
     """铁律12：结构化前置条件。ref 合法性由校验器 C03 兜底（补全或降级）。"""
     if ptype not in PRECOND_TYPES:
         raise ValueError(f"precondition type 非法: {ptype!r}，枚举 {PRECOND_TYPES}")
     if ptype != "state_ref":
         ref = None                                          # event_ref/constraint 的 ref 必为 null
-    return {"text": esc(text), "type": ptype, "ref": ref}
+    p = {"text": esc(text), "type": ptype, "ref": ref}
+    if note:
+        if isinstance(note, str):                           # 可选注解，校验器 C03 以 .get 访问
+            p["note"] = {"comment": esc(note)}
+        else:
+            p["note"] = dict(note)
+            if p["note"].get("comment"):
+                p["note"]["comment"] = esc(str(p["note"]["comment"]))
+    return p
 
 def state_ref(entity, dimension, state) -> dict:
     return {"entity": entity, "dimension": dimension, "state": state}

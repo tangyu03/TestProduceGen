@@ -190,7 +190,7 @@ class Validator:
                         "desc": f"镜像 {t['id']} precondition '{p['text']}'",
                         "source_ref": t["source_ref"]})   # 输入契约：继承宿主
                     covered.add(t["id"])
-                    r.fix(f"C04: 补镜像 {xid} ← {t['id']} 的跨实体前置条件")
+                    r.fix(f"C04: 补镜像 {xid}（源自 {t['id']} 的跨实体前置条件）")
 
     # 5. 分支穿透
     def c05_branch_penetration(self):
@@ -247,7 +247,7 @@ class Validator:
                 old["evidence_transitions"] = sorted(
                     set(old["evidence_transitions"]) | set(ev))
                 self.m.transition_relations.remove(rel)
-                r.fix(f"C07 铁律8: 去重 {key[0]}→{key[1]}，"
+                r.fix(f"C07 铁律8: 去重 {key[0]} 至 {key[1]}，"
                       f"保留 trigger_source={old['trigger_source']}")
             else:
                 seen[key] = rel
@@ -268,7 +268,7 @@ class Validator:
                 if ext:
                     rel["relation_type"] = "reference"
                     rel["ownership_dimension"] = "configuration_source"
-                    self.report.fix(f"C08: {a}→{b} 降级 reference（B 创建依赖 "
+                    self.report.fix(f"C08: {a} 至 {b} 降级 reference（B 创建依赖 "
                                     f"{ext[0]['ref']['entity']} 的后期状态）")
 
     # 9. 跨模块对账

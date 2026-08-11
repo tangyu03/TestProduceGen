@@ -564,8 +564,8 @@ def build() -> DomainModel:
     # ============================================================
     # 机构到项目：机构拥有项目（机构管理员对本机构项目进行管理），
     # 项目有独立创建流程（机构管理员新增），属于业务归属的 composition。
-    # 命中 (d)：项目是 core 流程实体且有自身 dependent（附件/打分挂靠），
-    # dependent 拓扑需沿 composition 链传递，不可降为 (c) reference。
+    # 命中 (c)：项目是 core 流程实体且有自身 dependent（附件/打分挂靠），
+    # 机构为其业务归属容器，dependent 拓扑沿 composition 链传递，不可降为 (d) reference。
     m.add_structural(
         "E-ORG", "E-PROJ", "composition", "1:N",
         "business_ownership",

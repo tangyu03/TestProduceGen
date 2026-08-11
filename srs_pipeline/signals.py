@@ -88,17 +88,20 @@ def _normalize_doc(text: str) -> str:
 
 # 标题行：`4.6 项目管理`、`4.8.1评审计划`（数字后可不带空格/标点）
 _HEAD = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$")
+# 目录条目尾缀：`4.4 通用功能要求....7`（标题 + 省略点 + 页码）。目录页行也匹配
+# _HEAD，若注册会把章节锚到 TOC 上、正文变空（C15 假阳性）。真实标题无此尾缀。
+_TOC_ENTRY = re.compile(r"\.{2,}\d*\s*$")
 # 子项标号：全角（1）与半角 (1) 都收（4.13 用转义的 \(1\)）
 _ITEM = re.compile(r"[（(](\d+)[）)]")
 
 def _section_bodies(norm: str):
     """标题行号与各节正文区间。返回 (headings, {章节号: 正文全文})，
-    正文不含标题行，到下一个标题行截断。"""
+    正文不含标题行，到下一个标题行截断。目录页条目（省略点+页码尾缀）跳过。"""
     lines = norm.splitlines()
     at = {}
     for i, ln in enumerate(lines):
         m = _HEAD.match(ln)
-        if m:
+        if m and not _TOC_ENTRY.search(ln):
             at.setdefault(m.group(1), i)      # 重复章节号取首个
     order = sorted((i, num) for num, i in at.items())
     bodies = {}

@@ -694,7 +694,13 @@ def _resolve_counter_from_text(text, ctx):
                 cands.append((len(alias), 0 if r.get("entity") == own else 1,
                               r, alias))
     if not cands:
-        return None
+        # 值→字段反查兜底：计数对象即值字面量（累计 2 次差 / 累计 4 次不合格）。
+        # 反查字段注册表（_resolve_field_by_value），歧义/未命中 → None（保守）。
+        rec = _resolve_field_by_value(text, ctx)
+        if rec is None:
+            return None
+        return {"entity": rec["entity"], "name": rec["name"],
+                "counted_value": _normalize_constraint_value(rec, text)}
     cands.sort(key=lambda c: (-c[0], c[1]))
     _, _, rec, alias = cands[0]
     # 键名统一为 name（与 field_equals 等的 field ref 及 resolve_field 一致）：
@@ -718,25 +724,55 @@ def _resolve_counter_from_text(text, ctx):
     return counter
 
 
-def _aggregate_node(m, ctx):
-    """aggregate_count：<主语><连续|累计> <N> 次<计数对象>。
-    subject = 触发 transition 自身的 from 态 + count_scope=subject_instance
-    （计数范围 = 主语实例；count_scope 是 Step 4 的输入，v1 标注）。
-    window 表层未声明 → all_time。"""
-    counting_text = (m["object"] or "") + (m["tail"] or "")
-    counter = _resolve_counter_from_text(counting_text, ctx)
-    if counter is None:
-        return {"type": "unparsed", "text": ctx.get("_text", ""),
-                "reason": f"计数对象未解析: {counting_text}"}
+def _aggregate_count_node(ctx, counter, threshold, consecutive):
+    """aggregate_count 节点单一构造（generic + count-value 两路共用）。
+    type/subject/count_scope/window 唯一事实源——节点类型由表层行声明
+    （type 键），构造不写字面量；count_scope=subject_instance、window 表层
+    未声明 → all_time 为语义默认（count_scope 是 Step 4 的输入，v1 标注）。"""
     return {
         "type": "aggregate_count",
         "subject": {"entity": ctx.get("entity"), "state": ctx.get("from"),
                     "count_scope": "subject_instance"},
         "counter": counter,
-        "threshold": int(m["th"]),
-        "consecutive": _COUNT_MODE_KEYWORDS.get(m["mode"], False),
+        "threshold": threshold,
+        "consecutive": consecutive,
         "window": "all_time",
     }
+
+
+def _count_node(val, th, ctx, countable=None):
+    """count-value 表层共享构建：<值>→字段反查（_resolve_field_by_value）构建
+    aggregate_count。计数对象短语 countable（form A：…的<countable>为<值>…）
+    对照字段 count_aliases 校验（阶段评价 ⊂ 项目阶段评价结果）。值与字段全部
+    来自注册表，不写字面量；节点构造复用 _aggregate_count_node（单点），
+    连续|累计 无标记 → 累计（consecutive=False，同 _COUNT_MODE_KEYWORDS 默认）。"""
+    rec = _resolve_field_by_value(val, ctx)
+    if rec is None:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": f"计数值未解析: {val}"}
+    if countable is not None:
+        ok = any((a in countable) or (countable in a)
+                 for a in (rec.get("count_aliases") or []))
+        if not ok:
+            return {"type": "unparsed", "text": ctx.get("_text", ""),
+                    "reason": f"计数对象 {countable} 与字段 {rec['name']} 别名不符"}
+    counter = {"entity": rec["entity"], "name": rec["name"],
+               "counted_value": _normalize_constraint_value(rec, val)}
+    return _aggregate_count_node(ctx, counter, int(th), False)
+
+
+def _aggregate_node(m, ctx):
+    """aggregate_count：<主语><连续|累计> <N> 次<计数对象>。
+    subject = 触发 transition 自身的 from 态 + count_scope=subject_instance
+    （计数范围 = 主语实例）。mode 经 _COUNT_MODE_KEYWORDS 数据驱动；
+    节点构造复用 _aggregate_count_node（单点）。"""
+    counting_text = (m["object"] or "") + (m["tail"] or "")
+    counter = _resolve_counter_from_text(counting_text, ctx)
+    if counter is None:
+        return {"type": "unparsed", "text": ctx.get("_text", ""),
+                "reason": f"计数对象未解析: {counting_text}"}
+    return _aggregate_count_node(ctx, counter, int(m["th"]),
+                                 _COUNT_MODE_KEYWORDS.get(m["mode"], False))
 
 
 def _config_node(m, ctx):
@@ -755,10 +791,82 @@ def _config_node(m, ctx):
 
 
 def _disjunction_ref_node(m, ctx):
-    """disjunction_ref：…满足<ref>任一条。引用未展开的规则列表；v1 记录原文为
-    引用、resolved=False（下游不得当硬约束，见 PREDICATE_RULES）。"""
+    """disjunction_ref：…满足<ref>任一条。若数据层 _context.disjunction_refs 声明了
+    对应 computation BR，把 BR 原文展开为 disjunction 谓词（DECISIONS ⑧ 遗留项）；
+    否则保守记录引用、resolved=False（下游不得当硬约束，见 PREDICATE_RULES）。"""
+    expanded = _expand_computation_disjunction(ctx.get("_text", ""), ctx)
+    if expanded is not None:
+        return expanded
     return {"type": "disjunction_ref", "ref": ctx.get("_text", ""),
             "resolved": False}
+
+
+# 计算规则展开配置：disjunction_ref 约束文本 → computation BR id（数据层单一
+# 真相源，与 phase_anchors 同构；见 review_structured.json _context.disjunction_refs）。
+_DISJUNCTION_REFS = (p1.get("_context") or {}).get("disjunction_refs", [])
+
+
+def _expand_computation_disjunction(text, ctx):
+    """把 computation BR 原文解析为 disjunction 谓词（展开 disjunction_ref）。
+
+    - 按 constraint_text 精确匹配 _context.disjunction_refs → br_id；
+    - BR desc 剥离"…："前缀后按；拆子句，剥前导或；
+    - 尾随结果后缀"<单字动词>为<state>"（状态集取自 state_lookup，数据驱动）：
+      结果态 ≠ 转移 to → 该子句属其他转换（升/平局），跳过；= to → 剥离后缀再解析。
+      动词限单字（结果短语惯例：降为/升为）——{1,2} 会吸收前一态字符（差降/格降）
+      把计数对象截断；state 锚定串尾 → 恒只命中末端的唯一 为<state>；
+    - 按且拆合取，每个合取项经 _parse_constraint_text 解析（count-value 表层行）；
+    - 无可解析条件子句 → 返回 None，调用方保守保留 resolved:false（不冒充硬约束）。
+    """
+    entry = next((e for e in _DISJUNCTION_REFS
+                  if e.get("constraint_text") == text), None)
+    if entry is None:
+        return None
+    br = next((b for b in p1_br if b["id"] == entry.get("br_id")), None)
+    if br is None:
+        add_warning("disjunction_ref_br_missing",
+                    f"disjunction_ref '{text}' 声明 BR {entry.get('br_id')} 不在 business_rules")
+        return None
+    desc = br.get("desc") or ""
+    body = desc.split("：", 1)[-1] if "：" in desc else desc
+    sl = ctx.get("_state_lookup") or {}
+    states = sorted(sl.get(ctx.get("entity"), {}).get(ctx.get("dimension"), []),
+                    key=lambda s: (-len(s), s))
+    outcome_re = (re.compile(
+        rf"[一-龥]为(?P<state>(?:{'|'.join(re.escape(s) for s in states)}))$")
+        if states else None)
+    parts = []
+    for clause in re.split(r"[；;]", body):
+        clause = re.sub(r"^\s*或", "", clause).strip()
+        if not clause:
+            continue
+        if outcome_re:
+            om = outcome_re.search(clause)
+            if om:
+                if om.group("state") != ctx.get("to"):
+                    continue
+                clause = clause[:om.start()].strip()
+        conjuncts = [c.strip() for c in clause.split("且") if c.strip()]
+        nodes = []
+        ok = True
+        for c in conjuncts:
+            node = _parse_constraint_text(c, ctx)
+            if not isinstance(node, dict) or node.get("type") == "unparsed":
+                ok = False
+                break
+            nodes.append(node)
+        if not ok or not nodes:
+            continue  # 非计数条件子句（结果句/平局规则）→ 跳过
+        parts.append(nodes[0] if len(nodes) == 1
+                     else {"type": "conjunction", "parts": nodes})
+    if not parts:
+        add_warning("disjunction_ref_expand_fail",
+                    f"disjunction_ref '{text}' → BR {entry.get('br_id')} 无可解析条件子句，保守保留 resolved:false")
+        return None
+    add_judgment("disjunction_ref_expanded",
+                 f"disjunction_ref '{text}' 展开自 BR {entry.get('br_id')}（{len(parts)} 个条件子句）")
+    return {"type": "disjunction", "ref": text,
+            "source_br": entry.get("br_id"), "parts": parts}
 
 
 def _negation_node(m, ctx):
@@ -884,6 +992,31 @@ _PREDICATE_SURFACES = [
          rf"^\s*(?P<lead>.{{0,20}}?)从处于(?P<state>.{{1,12}}?)状态的(?:{_ENTITY_NOUN_ALT})中选取\s*"
          rf"(?P<smin>\d+)\s*-\s*(?P<smax>\d+)\s*个(?:{_ENTITY_NOUN_ALT})"),
      "build": _selection_node},
+    # count-value A：…的<计数对象>为<值>的次数累计(达到)? <N> 次及以上
+    #（如 所有项目的阶段评价为差的次数累计达到 3 次及以上）。值→字段反查
+    #（_count_node），计数对象对照 count_aliases 校验。操作词复用
+    # _RANGE_OPERATORS/_RANGE_OP_ALT（不另写常量表）。须在 aggregate_count 前——
+    # 后者会把 累计 后的"达到"当计数对象、把"为差"当 tail 错配。
+    {"type": "aggregate_count",
+     "pattern": re.compile(
+         rf"^\s*(?P<lead>.{{0,16}}?)的(?P<countable>[^，。0-9]{{1,12}}?)为"
+         rf"(?P<val>[^，。0-9]{{1,4}})的次数累计(?:达到)?\s*(?P<th>\d+)\s*次"
+         rf"(?:{_RANGE_OP_ALT})?\s*$"),
+     "build": lambda m, ctx: _count_node(m["val"], m["th"], ctx,
+                                         countable=m["countable"])},
+    # count-value B：<值> <N> 次及以上（如 不合格 5 次及以上）。值在计数前。
+    {"type": "aggregate_count",
+     "pattern": re.compile(
+         rf"^\s*(?P<val>[^，。0-9]{{1,4}})\s*(?P<th>\d+)\s*次"
+         rf"(?:{_RANGE_OP_ALT})?\s*$"),
+     "build": lambda m, ctx: _count_node(m["val"], m["th"], ctx)},
+    # count-value C：<N> 次及以上 <值>（如 2 次及以上不合格）。值在计数后；
+    # 若缺操作词（2 次不合格）则交回 aggregate_count（tail 值反查）。
+    {"type": "aggregate_count",
+     "pattern": re.compile(
+         rf"^\s*(?P<th>\d+)\s*次(?:{_RANGE_OP_ALT})\s*"
+         rf"(?P<val>[^，。]{{1,4}})\s*$"),
+     "build": lambda m, ctx: _count_node(m["val"], m["th"], ctx)},
     # aggregate_count：<主语><连续|累计> <N> 次<计数对象>（如 普通用户连续密码错误 3 次）
     {"type": "aggregate_count",
      "pattern": re.compile(
@@ -959,6 +1092,29 @@ def _resolve_field_from_text(field_str, entity):
     for name, r in cands:
         if name in field_str:
             return r
+    return None
+
+
+def _resolve_field_by_value(value_str, ctx=None):
+    """值→字段反查：归一化值命中字段 values 的 canonical 记录。
+
+    别名键（kind=alias，values=None）跳过；多字段命中 → None（歧义保守，
+    不猜字段）。count-value 表层（差 1 次、累计 2 次差）用它反查计数字段
+    （评级）——与 _resolve_field_from_text（字段名→字段）方向互补。
+    """
+    v = value_str.strip()
+    matches = []
+    for r in _cf.FIELD_REGISTRY.values():
+        if r.get("kind") == "alias":
+            continue
+        vals = r.get("values") or []
+        if not vals:
+            continue
+        g = _normalize_constraint_value(r, v)
+        if g in vals:
+            matches.append(r)
+    if len(matches) == 1:
+        return matches[0]
     return None
 
 

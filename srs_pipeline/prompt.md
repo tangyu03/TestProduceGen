@@ -122,10 +122,11 @@ m.set_prohibition_config({
 
 **角色**：
 
-- 收录文档中出现的全部角色，用 `add_role(name, readonly=False)` 登记逐字 name。
+- 收录文档中出现的全部角色，用 `add_role(id, name, readonly=False)` 登记；`name` 逐字取原文。
+- `id` 为局部标签（`r01…`），框架不重编号、直接落盘；仅 `name` 参与引用。
 - 未作文档执行者的角色标 `readonly=True`。
 - `system` 保留角色不入 `roles`，`role` 参数可直接引用字符串 `"system"`。
-- 角色无手写 ID，一律用逐字 name 引用。
+- 转换 `role` 与 `add_permission` 的 `role` 一律用角色 `name` 引用（C01 兼容 ID/name 双键，但统一用 name）。
 
 **权限**：
 
@@ -140,9 +141,9 @@ m.set_prohibition_config({
 示例：
 
 ```python
-m.add_role("机构管理员")
-m.add_role("评审管理员")
-m.add_role("系统管理员", readonly=True)
+m.add_role("r01", "机构管理员")
+m.add_role("r02", "评审管理员")
+m.add_role("r03", "系统管理员", readonly=True)
 
 m.add_permission("机构管理员", ["编辑项目", "查看项目", "查询项目",
                                 "查看项目附件", "upload附件", "下载附件"])
@@ -170,10 +171,11 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 
 **状态维度**：
 
-- 维度名与状态值逐字复制原文。
-- 原文无枚举行时取原文原词，并在 `note` 注明出处。
-- 原文查无的状态值（如隐式初态）：用 `{"value": "状态名", "inferred": True, "note": "依据..."}` 标注。
-- 非推断状态允许纯字符串简写（如 `"已保存"`）。
+- 维度名与状态值逐字取原文；原文无枚举行时取原文原词，并在维度级 `note` 注明出处。
+- `states` 一律为纯字符串（如 `"已保存"`），禁止字典元素。
+- 原文逐字查无的状态值（隐式初态、散文抽象，如原文"已经登记入台账"→"已登记"）仍以纯字符串入 `states`，同时列入维度级 `inferred` 并写依据。**"查无"= 状态字符串全文逐字不存在，非"概念没提"**。
+- **属性操作 ≠ 状态变化**：仅变更属性（归属/持有时间/关系）而无新具名阶段的操作 → 只入 `operations` 或同状态自环，不建状态与转换；文档给出新具名阶段才算状态变化（移交/留存→不建态，外送→建态）。
+- **终态判据 = 具名 + 无回路**：`terminal` 只收文档具名、且全文无返回/归还回路的阶段，缺一不立（外送"确认载体已外送"且无归还回路 → 入 `terminal`）。
 
 **tags**：
 
@@ -207,17 +209,18 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 |---|---|---|---|
 | (a) A 为 B 提供配置/模板/分类，B 独立创建 | reference | configuration_source | |
 | (b) B 无独立创建，A 创建时 B 自动入 initial，每条 A 必有 B | composition | business_ownership | |
-| (c) B 有独立创建流程，但 B 是 **core 流程实体**（`type=core` 且自身有 dependent），A 为其业务归属容器 | composition | business_ownership | dependent 拓扑需沿 composition 链传递；不可降为 (d) |
-| (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source | |
+| (c) B 有独立创建流程，但 B 是 **core 流程实体**（`type=core` 且自身有 dependent），A 为其业务归属容器 | composition | business_ownership | dependent 拓扑需沿 composition 链传递；不可降为 (d)。排除：A 仅为 B 的发起人/申请人/持有人/操作对象（B 生命周期独立、删除 A 不级联 B）→ 不构成"A 为其业务归属容器"，降判 (d) |
+| (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source | 含纯关联型：A 仅发起/持有/操作 B（如申请人/持有人），B 生命周期独立 → reference + configuration_source；禁止按"拥有"直觉写 business_ownership |
 | B 核心产出属第三方 C | — | — | 改 C→B（以 C 为 `frm`） |
 | 判 (b) 且 1:1 | — | — | 复核"每条 A 必有 B"，可能无 B→归 (d) |
 
 (c) 必须先于 (d) 判定——两者前提相同（B 有独立创建流程），区别仅在于 B 是否为 core 流程实体。判定依据不引入新判断：`type=core` 在 Step 1 已定，B 是否有 dependent 在通读文档时已可查。若仍不确定，标 `confidence=medium`。
 
-联动约束：`composition ↔ business_ownership`、`reference ↔ configuration_source`；`management_dimension` 必须复核并在 `comment` 写结论。
+联动约束为**成套规则**：`relation_type` 与 `ownership_dimension` 必须来自同一判定行，禁止拆分直觉（如按"独立创建"取 reference、又按"拥有"取 business_ownership）。`composition ↔ business_ownership`、`reference ↔ configuration_source`。语义为"A 拥有 B"但 B 可独立创建、A 非容器 → 整行判 (d)。`management_dimension` 必须复核并在 `comment` 写结论。
 
 写入前 □：
 - (c) 判定是否先于 (d) 执行？
+- `relation_type` 与 `ownership_dimension` 是否成套取自同一判定行？
 - `management_dimension` 是否已复核并在 `comment` 写结论？
 - M:N 方向是否按叙述顺序并注明？
 
@@ -265,6 +268,8 @@ m.add_branch_dimension(
 
 必填字段：`tid, entity, dimension, frm, to, action, role, preconditions, expected_results, traits, direction, priority, source_ref`。
 
+- **创建转换**：每个状态维度的 `initial` 必须有 `frm=None → initial` 创建转换（如"新建导入申请"→草稿）。文档把新建登记为 crud 操作时仍需补，crud 照常入 `operations`；`source_ref` 指真实原文位置。
+
 - `traits` ∈ `[audit, rollback, branch, time_sensitive, data_constraint]`
 - `priority` ∈ `[P0, P1, P2]`
 - `direction` ∈ `[forward, backward, lateral, resume]`
@@ -290,9 +295,11 @@ m.add_branch_dimension(
 **分支穿透**：受分支维度影响的转换，`traits` 须含 `branch`，`note.branch_dimension` 填维度名，`expected_results` 用"若{维度}={值}，则{结果}"句式；对应 XC 的 desc 用 `分支[{维度}={值}]:{约束差异}` 前缀。
 
 写入前 □：
+- 每个维度的 `initial` 是否有 `frm=None` 创建转换？
 - `action` 的动词词根是否在 `action_verbs` 中？不在→通用回写协议（在当前位置插入追加调用）。
 - `direction` 走了哪级判定？comment 注明。
 - `frm` 是否为终态？
+- 该转换是状态变化还是属性操作？属性操作不得建状态转换。
 - 受分支影响的转换是否标 `branch` trait 并填 `branch_dimension`？
 
 #### 4.2 preconditions → `precond(text, ptype, ref, note)`
@@ -440,13 +447,14 @@ m.set_prohibition_config(config)           # Step 0 初始化，限调一次
 m.add_action_verbs(verbs)                  # Step 1-5 增量回写
 m.add_prohibit_keywords(keywords)          # Step 1-5 增量回写
 
-m.add_role(name, readonly=False)           # Step 0.5，name 即引用键
+m.add_role(id, name, readonly=False)       # Step 0.5，id 局部标签 r01…；name 即引用键
 m.add_permission(role, operations)         # Step 0.5，role 用 name
 
 m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, operations)
 # id: E-{2~6字母缩写}，AI 生成
-# dims 元素: {"dimension_name", "states", "initial", "terminal"}
-#   states 元素: 纯字符串（非推断）或 {"value", "inferred"?, "note"?}（推断）
+# dims 元素: {"dimension_name", "states", "initial", "terminal",
+#             "inferred"?（推断状态名列表）, "note"?（含推断依据）}
+#   states 元素: 一律纯字符串；推断状态列入维度级 "inferred" 列表，依据写入维度级 "note"
 
 m.add_structural(frm, to, relation_type, cardinality, ownership_dimension, desc,
                  confidence="high", note=None)                # frm/to 用实体 id
@@ -464,7 +472,7 @@ m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None,
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity,
-         target_dimension, category, type, desc, source_ref)  # XC 分类由 desc 前缀约定承载
+         target_dimension, target_condition, desc, source_ref)  # XC 分类由 desc 前缀约定承载
 
 m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None)
 # enforcement 由框架推导，此处不传
@@ -482,13 +490,14 @@ state_ref(entity, dimension, state)
 
 ### inferred 标注统一规则
 
-推断内容必须标注 `inferred=True` 并写明依据。标注方式按挂载点分两种：状态值在 states 元素内嵌 `{"value": "...", "inferred": True, "note": "..."}`；其余在 `note={"inferred": True, "comment": "..."}` 中标注；`attr`/`op` 用 `N(inferred=True, comment="...")`。XC/IT 无 note 字段，不单独标注，由源转换/源规则的标注继承。
+推断内容必须标注 `inferred=True` 并写明依据。标注方式按挂载点分两种：推断状态值在维度级 `inferred` 列表标注、依据写入维度级 `note`；其余在 `note={"inferred": True, "comment": "..."}` 中标注；`attr`/`op` 用 `N(inferred=True, comment="...")`。XC/IT 无 note 字段，不单独标注，由源转换/源规则的标注继承。
 
 ---
 
 ## 编号规则
 
-- 局部标签：`tid=t01…`，`xc=x01…`，`br=b01…`，`it=i01…`（小写无横线）。
+- 局部标签：`tid=t01…`，`xc=x01…`，`br=b01…`，`it=i01…`，角色 `id=r01…`（小写无横线）。
+- 角色 `id` 不做编号移交、直接落盘（schema 漂移#2：`R-xxx` 移交未实现）；仅 `name` 参与引用。
 - 实体 ID：`E-{2~6 字母缩写}`，取实体名核心词拼音首字母大写（如"项目"→`E-PROJ`），冲突时追加序号。
 
 ---
@@ -540,12 +549,10 @@ m.add_br(
 # add_entity 的 state_dimensions 片段
 state_dimensions=[
     {"dimension_name": "打分状态",
-     "states": [
-         {"value": "未打分", "inferred": True,
-          "note": "隐式初态：分配打分任务后初始化，原文 4.9.2 未命名此状态"},
-         "已保存", "已提交",
-     ],
-     "initial": "未打分", "terminal": ["已提交"]},
+     "states": ["未打分", "已保存", "已提交"],
+     "initial": "未打分", "terminal": ["已提交"],
+     "inferred": ["未打分"],
+     "note": {"comment": "隐式初态：分配打分任务后初始化，原文 4.9.2 未命名此状态"}},
 ]
 ```
 

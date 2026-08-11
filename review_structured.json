@@ -544,6 +544,20 @@
         },
         "note": "SRS 4.9.7：计划归档时对研制机构累计情况更新并按规则判定"
       }
+    ],
+    "disjunction_refs": [
+      {
+        "constraint_text": "评价结果满足下面任一条",
+        "br_id": "BR-031",
+        "br_src": "b31",
+        "note": "SRS 4.9.7（1）：对合格机构的处理（累计降级条件）"
+      },
+      {
+        "constraint_text": "试用机构评价结果满足降级规则任一条",
+        "br_id": "BR-034",
+        "br_src": "b34",
+        "note": "SRS 4.9.7（3）b-e：对试用研制机构的降级处理"
+      }
     ]
   },
   "domain_model": {

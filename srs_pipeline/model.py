@@ -16,6 +16,19 @@ SCHEMA_VERSION = "19.2"
 # 交叉引用 token。中文需求文本中"小写字母+数字"几乎必是标签, 误伤可忽略。
 _LOCAL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
 
+def _esc_note(note):
+    """note 统一转义：数据文件可直接传原始 dict（{comment/conflict/branch_dimension}）
+    或字符串，落盘前对自由文本键跑 esc，避免绕过硬转义铁律（C10）。"""
+    if note is None:
+        return N()
+    if isinstance(note, str):
+        return N(comment=note)
+    n = dict(note)
+    for k in ("comment", "conflict", "branch_dimension"):
+        if n.get(k):
+            n[k] = esc(str(n[k]))
+    return n
+
 def _now() -> str:
     return datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds")
 
@@ -110,7 +123,8 @@ class DomainModel:
         self.structural_relations.append({
             "from": frm, "to": to, "relation_type": relation_type,
             "cardinality": cardinality, "ownership_dimension": ownership_dimension,
-            "desc": esc(desc), "confidence": confidence, "note": note or N()})
+            "desc": esc(desc), "confidence": confidence,
+            "note": _esc_note(note)})
         return self
 
     # ---------- Step 3 ----------
@@ -149,7 +163,7 @@ class DomainModel:
              "preconditions": list(preconditions),
              "expected_results": [esc(e) for e in expected_results],
              "traits": list(traits), "direction": direction, "priority": priority,
-             "source_ref": esc(source_ref), "note": note or N()}
+             "source_ref": esc(source_ref), "note": _esc_note(note)}
         self.transitions.append(t)
         return self
 
@@ -166,7 +180,7 @@ class DomainModel:
             "trigger_source": trigger_source,
             "evidence_transitions": list(evidence_transitions or []),
             "rollback_propagation": bool(rollback_propagation),
-            "confidence": confidence, "note": note or N()})
+            "confidence": confidence, "note": _esc_note(note)})
         return self
 
     # ---------- Step 5 ----------
@@ -207,7 +221,7 @@ class DomainModel:
             "entities_involved": list(entities_involved),
             "enforcement": derive_enforcement(signal_type, desc),
             "source_ref": esc(source_ref), "signal_type": signal_type,
-            "note": note or N()})
+            "note": _esc_note(note)})
         return self
 
     # ---------- 扩展点 ----------
@@ -238,6 +252,33 @@ class DomainModel:
         """
         validate_llm("prohibition_config", config or {})
         self.prohibition_config = dict(config or {})
+        return self
+
+    def add_action_verbs(self, verbs):
+        """Step 1–5 增量回写 action_verbs（通用回写协议）。
+
+        发现新动词时在当前位置追加，无需回到 Step 0 修改原调用；
+        追加去重，已收录的动词不重复。prompt.md 规定此协议。
+        """
+        validate_llm("prohibition_config", self.prohibition_config or {})
+        existing = list(self.prohibition_config.get("action_verbs") or [])
+        for v in verbs:
+            if v not in existing:
+                existing.append(v)
+        self.prohibition_config["action_verbs"] = existing
+        return self
+
+    def add_prohibit_keywords(self, keywords):
+        """Step 1–5 增量回写 prohibit_keywords（通用回写协议）。
+
+        追加去重，语义同 add_action_verbs。
+        """
+        validate_llm("prohibition_config", self.prohibition_config or {})
+        existing = list(self.prohibition_config.get("prohibit_keywords") or [])
+        for k in keywords:
+            if k not in existing:
+                existing.append(k)
+        self.prohibition_config["prohibit_keywords"] = existing
         return self
 
     def add_check(self, fn):
@@ -289,7 +330,7 @@ class DomainModel:
         for i, fix in enumerate(report.fixes, 1):
             self.meta["ambiguity_list"].append(
                 ambiguity(f"AMB-FIX-{i:03d}", concept="Step6 自动修复",
-                          description=fix, severity="minor"))
+                          description=esc(fix), severity="minor"))
         self.meta["pipeline_trace"] = self._build_trace()   # 修复后重算
         if report.errors:
             raise CriticalAmbiguity([
