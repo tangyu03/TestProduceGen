@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-11 ㉟ 规则适用前提满足 Given 净化：数据层 BR 规则原文判别器（第一性原理，非"规则："前缀）
+
+**决策**：`规则适用前提满足` Given（Type7/负向规则 PROC 的状态哨兵）渲染层净化——**仅移除空泛噪音形态 `{…}相关数据已准备`，保留携带真实规则上下文的形态**（`规则：{原文}`，规则文本可能只存在于 Given）。判别器第一性原理：给定 desc 是否包含**被测 BR 的规则原文**（数据层 `constraint_obligations[].description` 对照），不依赖 `"规则："` 内容前缀——未来规则文本形态若不带前缀，只要含 BR 原文照样保留。
+
+**背景（两次修正）**：㉖ 边界明示该 Given"未动"。首版按"规则适用前提满足 也冗余"一刀切删全部 94 条 → user 指正 PROC-262 `规则：已提交的项目不能进行分数修改` 是有效规则（负向模板 When/Then 只有被禁操作，规则文本**仅存在于 Given**）。次版按 `desc.startswith("规则：")` 前缀匹配 → user 再指正"如果不是规则开头呢？第一性原理解决"。最终判别器 = 数据层 BR 原文包含关系。
+
+**实现（纯渲染层，main.py，JSON 数据与哨兵不动）**：
+- 三个数据驱动 helper：`_br_rule_map`（constraint_obligations → {RO-BR-XXX: 规则原文}，数据层单一事实源）、`_proc_br_texts`（proc 的 source_ids + Then br_refs 解析引用 BR，RO-BR/BR 归一化）、`_is_rule_noise_given`（state=="规则适用前提满足" 且 desc 不含任何被测 BR 原文 → 噪音）。
+- Given 循环跳过噪音行；某 proc 的 Given 全为噪音 → 剥标题同源退化短语 `^[^，]*规则适用前提满足时，`（PROC-119 的 Given 保留故标题保留，判据同源）。
+- `_sep_blank` 守卫：Given 块整体跳过时防止连续空行（顺带修 27 处 ㉖ 管理类净化留下的既存双空行）。
+
+**证据（数据层全量 + 渲染回归）**：
+- JSON 全量 257 条 `规则适用前提满足`（含实例 .N）：desc 含被测 BR 原文 **19 条**（6 基础 PROC）、纯 `相关数据已准备` 噪音 **238 条**、BR 解析落空 **0**——无灰色带。
+- 6 条 `规则：` PROC（PROC-119/184/230/235/262/263）相对提交基线**零 diff**，Given+When+Then 完整。
+- `相关数据已准备` 0 残留；`规则适用前提满足时` 标题 1（PROC-119，正确）；连续空行 0。
+- 确定性双跑 SHA-256 一致；`python -m scripts.tier2_verify` ALL PASS（JSON 数据不动）；py_compile 通过。纯渲染层，回放路径 `scripts/s1_fix_replay.py` 不涉及。
+
+**边界**：负向模板 PROC 的 When `尝试执行被规则禁止的…` 保持；与 ㉙（规则类 When 行同义反复删除）互不影响。判别器保守兜底：BR 解析落空 → 保留（不冒丢规则风险）。
+
+---
+
 ## 2026-08-10 ㉞ ⑧ 遗留 entry=2 锚定：Strategy 0 消费 ref_state_dimension（谓词状态引用）
 
 **决策**：关闭 ⑧ 遗留"entry=2 TO 锚定修复（Strategy 0 消费 ref_state_dimension）"。两点分开对待：

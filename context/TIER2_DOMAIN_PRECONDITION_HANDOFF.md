@@ -1,5 +1,7 @@
 # Tier 2 领域前置机制 — 落档（迁移交接）
 
+> ⚠️ **已过期（SUPERSEDED）**：Tier 2 领域前置机制已于 **DECISIONS ⑳（2026-08-07）** 实施完成并验证（`scripts/tier2_verify.py` ALL PASS，确定性双跑一致；依赖边 +41 domain_precond，管理类 `=存在` 39 不变）。后续相关净化见 DECISIONS **㉖**（管理类兜底 Given 渲染净化）、**㉟**（规则适用前提满足 Given 净化）。本文档仅作历史诊断参考，**勿再按"待实施"接手**。
+
 > 生成日期：2026-08-07。本文件是为跨 session 迁移准备的 Tier 2 完整诊断 + 方案 + 验证方法。
 > 新 session 从此文件 + DECISIONS ⑭/⑰ 接手，无需重做诊断。
 
