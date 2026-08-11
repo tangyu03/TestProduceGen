@@ -62,7 +62,9 @@ def scan(text: str) -> DocSignals:
                                 "context": ln.strip()[:60], "source_ref": ref})
         kw = next((k for k in RESTRICTIVE if k in ln), None)
         # 域门（Gate A）：表格行是字段规格、元信息词是文档自指，都不是系统行为规则
+        # 表格含 markdown（| 开头）与 HTML（<table>/<tr>/<td>/<th>）两种形态，都排除
         if kw and not ln.lstrip().startswith("|") \
+                and not re.search(r"<\s*(table|tr|td|th)\b", ln) \
                 and not any(w in ln for w in _DOC_META):
             cat = next((c for words, c in BR_CATEGORY_HINT
                         if any(w in ln for w in words)), "validation")

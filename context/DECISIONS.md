@@ -5,6 +5,110 @@
 
 ---
 
+## 2026-08-11 ㊷ 任务级别 branch 维度修复：target_transition 名/id 错配死代码 + R5 只看 state_dimensions 的盲区；36 条非法组合转换清零
+
+**决策**：修 P2 `generate_obligation_model.py` 的 R5 组合过滤 + 数据层补 9 条 审批拒绝 precond，使任务级别分支维度符合业务规则：**A级无需审批直入待执行；B级仅一级审批；C级二级审批**（证据：数据模块 4.5.2/4.6.2/…/4.13.2「任务级别为A级无需审批；B级需经过一级审批；C级需经过二级审批」）。P3 重生成后：procedures **859→727**（-132 非法组合），TO **127→91**，verdict **pass / 0 blocker**。
+
+**根因（三层叠加）**：
+1. **`branch_dimension.target_transition` 名/id 错配死代码**：分支的 `target_transition` 用的是转换**名称**（如「一级审批通过转换」），而比较目标 `t["id"]`（如 `"t02"`）——**永不相等**，`get_matched_dims` 恒落 all-values 兜底，每个分支转换对所有 3 个级别各生成 1 条 → 9 实体×(A级审批通过/拒绝 + B级直入 + C级直入)=36 条**非法**组合（A级断言审批、B/C级断言直入）。
+2. **R5 组合过滤 `combo_conflicts_with_preconds` 只看 `state_dimensions` 状态**：任务级别是 `is_config` 属性（config 维度），不在状态集里 → 同级 3 值互斥无从发现，非法组合不被拦截。
+3. **9 条审批拒绝转换缺「任务级别为B级或C级」precond**：数据层把「提交审批」误建模为可无条件走审批拒绝。
+
+**落地**：
+- `context/generate_obligation_model.py`：新增 `_dimension_value_universe(dim_name)`（遍历 `p1.domain_model.entities[].state_dimensions[].states` + `p1_bd` 的 values/分支 value 汇总维度值域），`combo_conflicts_with_preconds` 改为：`dim_name 出现在文本 且 val 不在文本 且 维度值域中存在其它同级值出现在文本` → 冲突。config 维度级别互斥由此可检出（同一转换内 givens 不能同时含 A级 与 B级）。
+- `srs_data/CASC-STEC-PT017.py`：9 个 审批拒绝 转换（t03/t09/t15/t21/t27/t33/t39/t45/t51）各补 `precond(text="任务级别为B级或C级", ptype="constraint", ref=None)`，锚定在 `<实体>处于待审批状态` state_ref 之后。
+
+**验证结果**（P1 0 error/5 warning → P2 TO 91 自检全 True → P3 727 procedures → verdict pass）：
+- 输出核查：A级+审批通过/拒绝 = **0**；B/C级+直入 = **0**；B级审批通过/拒绝 33+33 保留（givens 含「任务级别=B级」，action 通用「审批通过/拒绝」，级别语义在 precond 不在 action 名）；C级同构 33+33；「提交XX申请（A级直入）」33 条为申请提交转换（含 2 或 5 个申请变体），非审批动作。
+- V05 advisory 198→50，**全部 50 条逐一语义审计为假阳性**（粗探针只查 `current`（任务级别=B/A级）在 givens，不校验是否真断言违规：B级 审批用例不携带「二级审批」文本、A级 直入用例不携带审批动作）。
+- 任务 #12/#13 关闭。
+
+**判据速记**：分支维度 target 比较须用 `target_transition` 与转换 id 对齐的名称/标识，名/id 错配 = 死代码静默退化为全值兜底，是「看似全对实则错配」的隐蔽源；R5 组合过滤必须覆盖 config 维度（值域从 state_dimensions + branch_dimension 双向汇聚），不能只扫 state_dimensions；数据层「转换可无条件发生」的缺 precond 是业务规则漏写，校验器只能拦到「文本矛盾」，拦不到「缺前提」，须在数据层补齐。
+
+---
+
+## 2026-08-11 ㊶ V04 字段级保护废弃 case_spec readonly dict 数据源：唯一真相源在 P1 模型推导
+
+**决策**：V04 字段级保护**只信 P1 数据层模型推导**（`_sysfields_from_model`：从 `_context.entity_details[].attributes.desc` 匹配自动/系统标记，产出实体限定的 `实体.字段` 精确模式）。case_spec `built_in_entities.readonly` 的 **dict 条目（字段名+clause+note 证据）整体废弃**，不再转 `*.字段` 通配参与保护。case_spec 仅保留实体级 UI 事实：readonly 字符串条目=readonly 实体名、no_form_page 两种形态=无编辑表单实体。
+
+**根因（两处证据）**：
+1. **通配跨实体误伤**：`*.文件级别` 命中 4 条 type3/9 then-target「文件扫描任务.文件级别」（PROC-037.1/.2、PROC-045.1/.2）。但 E-SCN 4.13.1 该字段 desc=「只可选:A级、B级、C级」——**用户选定字段**；case_spec 的"文件级别"clause=4.12.1（E-EXP 导出任务）且 E-EXP 根本没有独立文件级别属性（只有「文件列表」，上传时**用户确定**文件级别）。同名字段在不同实体可编辑性不同，字段名通配必然误伤。
+2. **case_spec 字段证据不可靠且大多无意义**：测试架构为 AI 生成、未经人工确认（批判看待）。18 条 readonly dict 里，真正系统维护的字段（申请人/流水号/申请时间/申请部门/载体编号/载体到期提醒时间）**已全部被模型推导覆盖**（37 条）；其余（初始账号×3/内置角色×3/八种角色/密码重置默认值/载体持有时间默认值/载体快照/载体信息自动带入）都是**系统级记录、展示快照或默认值**，不是实体属性，字段名保护无意义。5 个真实 type3/9 then-target 经核验**无一**是系统维护字段（任务级别/文件级别/级别/载体类别/导出方式均为用户选定）——V04 正确结果为 0 失败。
+
+**落地**：
+- `verify/checks/v04_builtin_entity_protect.py`：readonly_ents 只收 readonly 的**字符串条目**；noform_ents 走 `entity_names_of`（两种形态）；sysfields 仅 `_sysfields_from_model`；废弃的 dict 条目在 note 中透明记录条数与清单（便于 verdict 阅读者理解）。
+- `base.py` `entity_names_of`、`v09` 单例修（本会话先前）保留——`entity_names_of` 对 dict 取 `entity` 键，仍服务 no_form_page 与 V09 单例。
+
+**验证结果**：`python -m verify.validators -s verify/PT017_case_spec.json -o PT017_output.json -m PT_017_coverage_obligations.json -j PT017_verdict.json` → **verdict=pass / blocker_failures=0 / warning_failures=0**，10/10 PASS。V04 fail=0（4→0），note 记录 18 条废弃字段证据；V10 TO 127/127 | EO 89/89 | BR 61/61 | IT 4/4 | state_misses=0；V05 198 条 note-type advisory 为既有 warning 非阻断。V09 崩溃（`set()` on dict）与单例修复同批验证通过。
+
+**判据速记**：校验器字段级保护的数据源选择，遵循「单一真相源在 P1 数据层」——AI 生成的测试架构 case_spec 作为保护证据时须批判看待，字段名通配因同名跨实体可编辑性不同而不可靠；实体限定精确模式（`实体.字段`）是安全的保护形态。
+
+---
+
+## 2026-08-11 ㊵ validate_p2.py EO-ATC source_ref 契约陈旧：透传设计已确立，校验器未跟随更新
+
+**决策**：修 `context/verify/validate_p2.py`——EO-ATC 的 source_ref 不再强制 null，改为 **null 或非空字符串（透传实体首条操作章节定位）**，并在 p1 块新增**数据驱动派生复核**闸门。生成器不改。
+
+**根因**：两模块契约漂移。`validate_p2.py` 07-30 立 "source_ref should be null (P1 attr has no source_ref)"；`generate_obligation_model.py` 08-07 才加透传（`_entity_config_section_ref`：P1 属性无 source_ref 字段，透传实体首条带 source_ref 的操作的 source_ref 作章节定位，有注释+judgment 记录）——**透传是更新的设计且已确立**（when-then-render 渲染层依赖该章节定位），校验器是陈旧的原始契约，未跟随更新。git blame 铁证时间线 07-30 < 08-07。
+
+**修法（validate_p2.py）**：
+- 首循环：`source_ref` 结构校验改为 "null 或非空字符串"，不再一刀切拒绝。
+- p1 块新增派生复核：逐条 EO-ATC 按生成器同规则重推导期望值（实体首条带 source_ref 的操作），实际 ≠ 期望即报错。数据驱动、无硬编码，防生成侧后续漂移。
+
+**验证结果**：`python context/verify/validate_p2.py PT_017_coverage_obligations.json PT017_structured.json` → **Errors: 0 / Warnings: 0**，Self-check 8 项全 True（EO-ATC 5、EO-CRU 84、TO 127、CO 5、RO-IT 4、RO-BR 61、Judgments 132）。负面测试：篡改 EO-ATC-001 source_ref 为 '9.9.9（漂移）' → 复核闸门精确报 "与派生不符 (实体首条操作应='4.5.1（1）')"，证明新闸门非空转。5 条 EO-ATC 的透传值逐一与实体首条 op 一致（4.5.1（1）/4.6.1/4.12.1/4.13.1）。
+
+**判据速记**：模块间契约冲突时，用 **git 时间线 + 生成侧注释/judgment/记忆中的设计意图** 判定谁是现行契约——较晚且带记录的实现是现行设计，较早的校验器是陈旧契约，修校验器而非回退新设计。
+
+---
+
+## 2026-08-11 ㊴ C12×44 crud 操作 4.4⑤ 回填完成：有状态效果→映射转换，无→"无对应转换"+理由
+
+## 2026-08-11 ㊴ C12×44 crud 操作 4.4⑤ 回填完成：有状态效果→映射转换，无→"无对应转换"+理由
+
+**决策**：给 44 条未回填的 crud 操作补 `note.comment`，满足 4.4⑤ 双型契约（①回填对应转换局部标签；②无对应转换注明"无对应转换"及理由）。C12×44 是**真完整性缺口**（crud 追溯缺失），机械补数据层。
+
+**映射判据（逐操作核原文语义，非凑标签）**：
+- **新增<X>申请**（9）→ 创建转换 t65–t73（frm=None→草稿，动作"新建X申请"）——op 即创建，有对应状态效果。
+- **确认导入完成**（E-IMP，1）→ t06（待执行→已完成，动作"确认导入完成"）——op 与转换同名。
+- **新增用户**（E-USER，1）→ t75（frm=None→正常，动作"新建用户"）。
+- **编辑/暂存<X>申请**（18）→ **无对应转换**：编辑=草稿阶段属性修改、暂存=保持草稿，均不改任务状态（4.4 通用功能），无状态效果故无转换可指。
+- **删除<X>申请**（9）→ **无对应转换**：删除=记录生命周期终止，文档无数码"已删除"具名态，不建模状态转换。
+- **重置用户密码**（1）→ **无对应转换**：密码重置为属性操作不改用户状态（解锁是独立 t62 解锁用户，语义不同不混指）。
+- **E-DEPT 新增/编辑/删除部门**（3）→ **无对应转换**：部门为组织分类配置实体，`state_dimensions=[]`，无状态维度。
+
+**验证结果**：`--strict` 全量 **0 error / 65 warning / 4 autofix**（109→65，精确 −44，无回归）；C12×44→**0**；评审队列仍 0。JSON 输出中 11 条带转换引用的回填被框架改写为最终 T-id，**逐一交叉核验全部指向正确转换**（E-IMP 新建→T-063、确认完成→T-006、E-EXP 新建→T-070、E-USER 新建→T-073 等）；33 条无转换引用带理由。
+
+**实现方式**：一次性机械补丁（带出现次数断言，44 处全命中后写盘），后删除脚本。**契约/代码层未改**——C12 判得对、回填契约已定义，缺口在数据实例层。
+
+---
+
+## 2026-08-11 ㊳ 评审队列 br_gap×2 全清：Gate A 排除 HTML 表格 + 短规则阈值结构性缺陷修复
+
+## 2026-08-11 ㊳ 评审队列 br_gap×2 全清：Gate A 排除 HTML 表格 + 短规则阈值结构性缺陷修复
+
+**决策**：清掉剩余 2 条 br_gap（限制性语句未收录）。一条是 Gate A 域门漏掉 HTML 表格形态的误报；另一条是 reconcile 覆盖判定的**结构性缺陷**——补了 BR b47 仍报，根因在判定阈值，不在数据。
+
+**根因分析**：
+1. **br_gap #1（HTML 表格误报）**：signals.py Gate A 只排除 markdown 表格行（`|` 开头），但原文 4.14.1 权限表用 **HTML `<table>`** 形态，行内容含限制词被当系统行为规则收录。→ 框架层修复：Gate A 加 `re.search(r"<\s*(table|tr|td|th)\b", ln)` 排除。
+2. **br_gap #2（短规则不可命中）**：`_br_covered` 用固定阈值 `_MIN_OVERLAP=10`，`"不能删除修改根部门"` 仅 8 字，LCS 上限 8 < 10 → **结构性永远无法命中**，任何 <10 字的限制语句必误报。补 BR b47 也救不了——判据本身不可达。→ 框架层修复：`_br_covered` 阈值随候选长度缩放 `min(_MIN_OVERLAP, len(c))`，短候选退化为**全匹配**（LCS ≥ 全文长），长候选维持原 10 字；`_candidate_core` 同步剥尾随句读（。；，）避免短候选被末标点截断。
+
+**落地**：
+- `srs_pipeline/signals.py`：Gate A 域门加 HTML 表格排除（表格含 markdown 与 HTML 两种形态都排除）。
+- `srs_pipeline/reconcile.py`：`_br_covered` 阈值缩放 + `_candidate_core` 剥尾随句读。
+- 数据层（`srs_data/CASC-STEC-PT017.py`）：补 BR b47（不能删除修改根部门，4.14.3，validation）；E-DEPT→E-USER、E-REG→E-CAR 由 composition/business_ownership 改 reference/configuration_source（C17×2 判 (d)），note 记 (d) 理由。
+
+**验证结果**：`--strict` 全量 **0 error / 109 warning / 4 autofix**，**评审队列 0 项**（br_gap 2→1→0）。warning 数与修复前一致，无回归。C17×2→0（改 reference 后不再触发疑似应判 composition）。
+
+**C17×2 判 (d) 理由**（本次一并修正评审）：
+- E-DEPT→E-USER：(d) 用户有独立创建流程（系统管理员新增），生命周期独立；部门仅提供组织分类，删除部门不级联用户（4.14.3 被使用部门禁止删除为阻断，非级联）。
+- E-REG→E-CAR：(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为**来源**非**归属容器**。E-REG 基数 1:1→1:N。
+
+**契约层**：本批两处根因都在**代码**（Gate A 漏形态、阈值不可达），非生成契约问题——prompt.md 未改。
+
+---
+
+## 2026-08-11 ㊲ E-CAR 载体状态建模修正：移交/留存降为属性级操作，已外送补终态
+
 ## 2026-08-11 ㊲ E-CAR 载体状态建模修正：移交/留存降为属性级操作，已外送补终态
 
 **决策**：E-CAR 载体状态移除假状态「已移交」「已留存」，`terminal` 补入「已外送」。C02×3 的根因是**建模错**（把属性级操作当状态转换），**非缺转换**——补转换是错修法，移除假状态 + 补终态才对。

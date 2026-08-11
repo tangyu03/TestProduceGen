@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "19.2",
-    "generated_at": "2026-08-11T15:58:37+08:00",
+    "generated_at": "2026-08-11T17:48:08+08:00",
     "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
     "document_scope": "载体管理系统 V1.00 的功能、易用性、安全需求；覆盖导入管理、载体登记、归档、移交、留存、回收、外送、文件导出、文件扫描、系统管理、监督管理、角色管理、日志管理等模块（4.x 章节）",
     "has_critical_ambiguity": false,
@@ -63,16 +63,16 @@
       "step4_transition_relations": 8,
       "step4_roles": 8,
       "step4_precondition_stats": {
-        "total_preconditions": 96,
+        "total_preconditions": 105,
         "state_ref_count": 37,
         "event_ref_count": 13,
-        "constraint_count": 46,
+        "constraint_count": 55,
         "state_ref_resolved_count": 37,
         "state_ref_unresolved_count": 0
       },
       "step5_invalid_transitions": 4,
       "step5_cross_entity": 14,
-      "step5_business_rules": 46
+      "step5_business_rules": 47
     },
     "branch_dimensions": [
       {
@@ -134,7 +134,6 @@
           ],
           "cross_entity": [],
           "business_rules": [
-            "BR-010",
             "BR-011",
             "BR-012",
             "BR-013",
@@ -142,7 +141,8 @@
             "BR-015",
             "BR-016",
             "BR-017",
-            "BR-018"
+            "BR-018",
+            "BR-019"
           ]
         }
       }
@@ -402,7 +402,8 @@
             ],
             "source_ref": "4.5.1（1）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-063"
             }
           },
           {
@@ -413,7 +414,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -425,7 +427,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -470,7 +472,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           },
           {
@@ -482,7 +485,7 @@
             "source_ref": "4.5.3",
             "note": {
               "inferred": false,
-              "comment": "crud 操作；对应执行后申请人确认动作"
+              "comment": "crud 操作；对应执行后申请人确认动作；对应转换 T-006"
             }
           }
         ]
@@ -594,7 +597,8 @@
             ],
             "source_ref": "4.6.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-064"
             }
           },
           {
@@ -605,7 +609,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -617,7 +622,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -661,7 +666,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -748,7 +754,8 @@
             ],
             "source_ref": "4.7.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-065"
             }
           },
           {
@@ -759,7 +766,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -771,7 +779,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -815,7 +823,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -907,7 +916,8 @@
             ],
             "source_ref": "4.8.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-066"
             }
           },
           {
@@ -918,7 +928,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -930,7 +941,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -974,7 +985,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1072,7 +1084,8 @@
             ],
             "source_ref": "4.9.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-067"
             }
           },
           {
@@ -1083,7 +1096,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1095,7 +1109,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1139,7 +1153,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1226,7 +1241,8 @@
             ],
             "source_ref": "4.10.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-068"
             }
           },
           {
@@ -1237,7 +1253,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1249,7 +1266,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1293,7 +1310,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1385,7 +1403,8 @@
             ],
             "source_ref": "4.11.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-069"
             }
           },
           {
@@ -1396,7 +1415,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1408,7 +1428,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1464,7 +1484,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1571,7 +1592,8 @@
             ],
             "source_ref": "4.12.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-070"
             }
           },
           {
@@ -1582,7 +1604,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1594,7 +1617,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1649,7 +1672,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1746,7 +1770,8 @@
             ],
             "source_ref": "4.13.1",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-071"
             }
           },
           {
@@ -1757,7 +1782,8 @@
             ],
             "source_ref": "4.4（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1769,7 +1795,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1813,7 +1839,8 @@
             ],
             "source_ref": "4.4（5）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1976,7 +2003,8 @@
             ],
             "source_ref": "4.14.1（1）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "crud 回填：对应转换 T-073"
             }
           },
           {
@@ -1987,7 +2015,8 @@
             ],
             "source_ref": "4.14.1（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（修改用户信息不改用户状态；账号不可修改）"
             }
           },
           {
@@ -2009,7 +2038,8 @@
             ],
             "source_ref": "4.14.1（6）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（重置密码为属性操作，不改用户状态）"
             }
           },
           {
@@ -2020,7 +2050,8 @@
             ],
             "source_ref": "4.14.1（7）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（删除为生命周期终止，不建模状态转换）"
             }
           },
           {
@@ -2091,7 +2122,8 @@
             ],
             "source_ref": "4.14.3（1）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           },
           {
@@ -2102,7 +2134,8 @@
             ],
             "source_ref": "4.14.3（2）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           },
           {
@@ -2113,7 +2146,8 @@
             ],
             "source_ref": "4.14.3（3）",
             "note": {
-              "inferred": false
+              "inferred": false,
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           }
         ]
@@ -2300,13 +2334,13 @@
       {
         "from": "E-DEPT",
         "to": "E-USER",
-        "relation_type": "composition",
+        "relation_type": "reference",
         "cardinality": "1:N",
-        "ownership_dimension": "business_ownership",
-        "desc": "部门拥有用户；用户新增时必填申请部门，根据登录用户自动获取",
+        "ownership_dimension": "configuration_source",
+        "desc": "部门为用户组织分类配置；用户新增时必填申请部门，根据登录用户自动获取",
         "confidence": "high",
         "note": {
-          "comment": "(b) 用户无独立创建入口（仅系统管理员可新增），且每条用户必有所属部门；management_dimension 复核为 business_ownership"
+          "comment": "(d) 用户有独立创建流程（系统管理员新增），生命周期独立；部门仅提供组织分类，删除部门不级联用户（文档 4.14.3：被使用部门禁止删除为阻断非级联）；management_dimension 复核为 configuration_source"
         }
       },
       {
@@ -2330,19 +2364,19 @@
         "desc": "用户持有载体；载体登记成功后记入申请人台账，持有时间默认72小时；移交后归属人变更",
         "confidence": "high",
         "note": {
-          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 E-REG变为E-CAR composition 承载）"
+          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC x10 联动承载）"
         }
       },
       {
         "from": "E-REG",
         "to": "E-CAR",
-        "relation_type": "composition",
-        "cardinality": "1:1",
-        "ownership_dimension": "business_ownership",
-        "desc": "登记任务执行完成后产出载体；载体经登记入个人台账",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "登记任务执行完成后产出载体；载体经登记入个人台账，产生后独立流转（归档/移交/回收/外送）",
         "confidence": "high",
         "note": {
-          "comment": "(c) 登记任务为 core 流程实体，其 dependent 载体亦为 core；载体由登记任务驱动产生；management_dimension 复核为 business_ownership"
+          "comment": "(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"
         }
       },
       {
@@ -2730,6 +2764,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -2920,6 +2959,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3113,6 +3157,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3309,6 +3358,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3510,6 +3564,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3713,6 +3772,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3909,6 +3973,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -4110,6 +4179,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -4307,6 +4381,11 @@
               "dimension": "任务状态",
               "state": "待审批"
             }
+          },
+          {
+            "text": "任务级别为B级或C级",
+            "type": "constraint",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -4864,7 +4943,7 @@
         "priority": "P0",
         "source_ref": "4.6.3",
         "note": {
-          "comment": "载体由 E-REG 登记执行产生（XC XC-010 联动）；composition E-REG变为E-CAR 承载创建语义，C17 疑似 reference 提示实为登记任务创建"
+          "comment": "载体由 E-REG 登记执行产生（XC XC-010 联动），产生后独立流转；E-REG变为E-CAR 为 reference（登记任务是来源，非归属容器）"
         }
       },
       {
@@ -4884,7 +4963,7 @@
         "priority": "P0",
         "source_ref": "4.14.1（1）",
         "note": {
-          "comment": "仅系统管理员可新增用户；必填申请部门（E-DEPT变为E-USER composition）"
+          "comment": "仅系统管理员可新增用户；必填申请部门（E-DEPT变为E-USER reference 提供组织分类）"
         }
       }
     ]
@@ -5083,6 +5162,20 @@
     "business_rules": [
       {
         "id": "BR-001",
+        "category": "validation",
+        "desc": "不能删除修改根部门",
+        "entities_involved": [
+          "E-DEPT"
+        ],
+        "enforcement": "mandatory",
+        "source_ref": "4.14.3",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "BR-002",
         "category": "timing",
         "desc": "用户连续输错3次密码，系统自动将此用户锁定",
         "entities_involved": [
@@ -5096,7 +5189,7 @@
         }
       },
       {
-        "id": "BR-002",
+        "id": "BR-003",
         "category": "authorization",
         "desc": "状态为'锁定'或'不存在'的用户不允许登录系统并给出对应提示信息",
         "entities_involved": [
@@ -5110,7 +5203,7 @@
         }
       },
       {
-        "id": "BR-003",
+        "id": "BR-004",
         "category": "validation",
         "desc": "用户密码输入错误，经系统认证后应返回'用户名或密码错误'提示",
         "entities_involved": [
@@ -5124,7 +5217,7 @@
         }
       },
       {
-        "id": "BR-004",
+        "id": "BR-005",
         "category": "timing",
         "desc": "用户登录后无操作30分钟，系统自动退出登录",
         "entities_involved": [
@@ -5138,7 +5231,7 @@
         }
       },
       {
-        "id": "BR-005",
+        "id": "BR-006",
         "category": "usability",
         "desc": "用户登录成功后，应在进入的功能操作页面右上角显示登录人员的名称；根据登录人员被指定的角色进入相应的页面，主菜单/功能操作、子菜单依据角色的不同而显示不同",
         "entities_involved": [
@@ -5153,7 +5246,7 @@
         }
       },
       {
-        "id": "BR-006",
+        "id": "BR-007",
         "category": "usability",
         "desc": "退出系统时应给出确认信息，只有确定后才可以退出，否则不能退出系统，保持当前操作页面和用户状态",
         "entities_involved": [
@@ -5167,7 +5260,7 @@
         }
       },
       {
-        "id": "BR-007",
+        "id": "BR-008",
         "category": "usability",
         "desc": "新增、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示；有约束的必填项，输入不符合约束时应给出提示",
         "entities_involved": [
@@ -5189,7 +5282,7 @@
         }
       },
       {
-        "id": "BR-008",
+        "id": "BR-009",
         "category": "usability",
         "desc": "查询功能中的组合查询支持一个（含）以上字段'与'的模糊查询",
         "entities_involved": [
@@ -5211,7 +5304,7 @@
         }
       },
       {
-        "id": "BR-009",
+        "id": "BR-010",
         "category": "usability",
         "desc": "对操作支持可逆性处理，有取消或者关闭操作",
         "entities_involved": [
@@ -5233,7 +5326,7 @@
         }
       },
       {
-        "id": "BR-010",
+        "id": "BR-011",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5247,7 +5340,7 @@
         }
       },
       {
-        "id": "BR-011",
+        "id": "BR-012",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5261,7 +5354,7 @@
         }
       },
       {
-        "id": "BR-012",
+        "id": "BR-013",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5275,7 +5368,7 @@
         }
       },
       {
-        "id": "BR-013",
+        "id": "BR-014",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5289,7 +5382,7 @@
         }
       },
       {
-        "id": "BR-014",
+        "id": "BR-015",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5303,7 +5396,7 @@
         }
       },
       {
-        "id": "BR-015",
+        "id": "BR-016",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5317,7 +5410,7 @@
         }
       },
       {
-        "id": "BR-016",
+        "id": "BR-017",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5331,7 +5424,7 @@
         }
       },
       {
-        "id": "BR-017",
+        "id": "BR-018",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5345,7 +5438,7 @@
         }
       },
       {
-        "id": "BR-018",
+        "id": "BR-019",
         "category": "authorization",
         "desc": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         "entities_involved": [
@@ -5359,7 +5452,7 @@
         }
       },
       {
-        "id": "BR-019",
+        "id": "BR-020",
         "category": "timing",
         "desc": "导入任务执行完成后如未进行确认，系统会在48小时后结束此任务，导入文件自动从系统中删除",
         "entities_involved": [
@@ -5373,7 +5466,7 @@
         }
       },
       {
-        "id": "BR-020",
+        "id": "BR-021",
         "category": "timing",
         "desc": "载体登记成功之后，载体记入申请人台账中，持有时间默认为72小时；在到期前12小时，系统会自动向持有人发送载体到期提醒",
         "entities_involved": [
@@ -5388,7 +5481,7 @@
         }
       },
       {
-        "id": "BR-021",
+        "id": "BR-022",
         "category": "authorization",
         "desc": "如果持有人到期不进行处理，系统会自动将此载体持有人用户进行功能限制，不能发起登记、导入、导出、扫描流程",
         "entities_involved": [
@@ -5407,7 +5500,7 @@
         }
       },
       {
-        "id": "BR-022",
+        "id": "BR-023",
         "category": "validation",
         "desc": "留存时间只能填入1~48之间的整数；留存最长可增加48小时持有时间",
         "entities_involved": [
@@ -5422,7 +5515,7 @@
         }
       },
       {
-        "id": "BR-023",
+        "id": "BR-024",
         "category": "validation",
         "desc": "导出文件不大于2GB；份数输入1~99数字；上传文件名中必须标明文件级别，例如:导出文件(A级)；级别可以使用中英文圆括号和中括号标记",
         "entities_involved": [
@@ -5436,7 +5529,7 @@
         }
       },
       {
-        "id": "BR-024",
+        "id": "BR-025",
         "category": "validation",
         "desc": "文件页数只能填入1~100之间的数字",
         "entities_involved": [
@@ -5450,7 +5543,7 @@
         }
       },
       {
-        "id": "BR-025",
+        "id": "BR-026",
         "category": "validation",
         "desc": "载体类别为纸质时，纸张页数必填；数值范围1-9999",
         "entities_involved": [
@@ -5464,7 +5557,7 @@
         }
       },
       {
-        "id": "BR-026",
+        "id": "BR-027",
         "category": "validation",
         "desc": "用户账号可以由汉字、小写字母、数字、下划线(_)组成；不可重复；不可修改",
         "entities_involved": [
@@ -5478,7 +5571,7 @@
         }
       },
       {
-        "id": "BR-027",
+        "id": "BR-028",
         "category": "validation",
         "desc": "登录密码由数字、大小写字母和特殊符号组成；长度大于等于8个字符小于等于18个字符；密码设置时长度在8到18位，要包含大小写字母、数字和特殊字符",
         "entities_involved": [
@@ -5492,7 +5585,7 @@
         }
       },
       {
-        "id": "BR-028",
+        "id": "BR-029",
         "category": "validation",
         "desc": "手机号码第一位数字1，第二位数字:3、4、5、6、7、8、9，一共11位数字；唯一",
         "entities_involved": [
@@ -5506,7 +5599,7 @@
         }
       },
       {
-        "id": "BR-029",
+        "id": "BR-030",
         "category": "validation",
         "desc": "邮箱必须包含@和.；不能包含中文、其它特殊符号",
         "entities_involved": [
@@ -5520,7 +5613,7 @@
         }
       },
       {
-        "id": "BR-030",
+        "id": "BR-031",
         "category": "validation",
         "desc": "修改密码需要输入原密码，如果输入的原密码不对，则给出相应提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次且相同，否则系统给出提示",
         "entities_involved": [
@@ -5534,7 +5627,7 @@
         }
       },
       {
-        "id": "BR-031",
+        "id": "BR-032",
         "category": "validation",
         "desc": "密码不以明文显示",
         "entities_involved": [
@@ -5548,7 +5641,7 @@
         }
       },
       {
-        "id": "BR-032",
+        "id": "BR-033",
         "category": "authorization",
         "desc": "具有流程信息的用户不能进行删除",
         "entities_involved": [
@@ -5562,7 +5655,7 @@
         }
       },
       {
-        "id": "BR-033",
+        "id": "BR-034",
         "category": "authorization",
         "desc": "不能删除修改根部门；被客户使用的部门不能进行必填项信息的修改；被客户使用和实验单使用的部门不能进行删除",
         "entities_involved": [
@@ -5576,7 +5669,7 @@
         }
       },
       {
-        "id": "BR-034",
+        "id": "BR-035",
         "category": "validation",
         "desc": "部门名称必填项；名称唯一",
         "entities_involved": [
@@ -5590,7 +5683,7 @@
         }
       },
       {
-        "id": "BR-035",
+        "id": "BR-036",
         "category": "authorization",
         "desc": "系统的日志管理只对日志管理员和角色管理员开放；系统日志记录只能由日志管理员和角色管理员查看",
         "entities_involved": [
@@ -5605,7 +5698,7 @@
         }
       },
       {
-        "id": "BR-036",
+        "id": "BR-037",
         "category": "validation",
         "desc": "登录日志至少记录用户登录日志；操作日志至少记录用户信息的新增、编辑、删除；系统日志可以记录事件的时间、操作人和日志类型等",
         "entities_involved": [
@@ -5619,7 +5712,7 @@
         }
       },
       {
-        "id": "BR-037",
+        "id": "BR-038",
         "category": "usability",
         "desc": "日志导出根据起始时间完成导出成Excel文件操作；可选择导出后删除导出项",
         "entities_involved": [
@@ -5633,7 +5726,7 @@
         }
       },
       {
-        "id": "BR-038",
+        "id": "BR-039",
         "category": "authorization",
         "desc": "角色管理员可授权普通用户、一级审批员、二级审批员、载体管理员和监督员；删除角色后用户角色默认为普通用户",
         "entities_involved": [
@@ -5648,7 +5741,7 @@
         }
       },
       {
-        "id": "BR-039",
+        "id": "BR-040",
         "category": "authorization",
         "desc": "本样品内置3个角色（系统管理员、监督员、日志管理员），不可对其进行更改、删除；系统管理员角色绑定系统管理员用户(sysadmin_a)、监督员(secadmin_a)和日志管理员(secauditor_a)，不可更改、删除和禁用，也不授予其他用户",
         "entities_involved": [
@@ -5663,7 +5756,7 @@
         }
       },
       {
-        "id": "BR-040",
+        "id": "BR-041",
         "category": "display",
         "desc": "提示信息不能含有系统运行、技术架构等信息",
         "entities_involved": [
@@ -5677,7 +5770,7 @@
         }
       },
       {
-        "id": "BR-041",
+        "id": "BR-042",
         "category": "usability",
         "desc": "对用户账号或者密码错误的输入有提示；用户不存在时，登录系统时可被证实",
         "entities_involved": [
@@ -5691,7 +5784,7 @@
         }
       },
       {
-        "id": "BR-042",
+        "id": "BR-043",
         "category": "usability",
         "desc": "日期类数据输入，应提供日历选择功能",
         "entities_involved": [
@@ -5714,7 +5807,7 @@
         }
       },
       {
-        "id": "BR-043",
+        "id": "BR-044",
         "category": "authorization",
         "desc": "实现基于角色的访问控制",
         "entities_involved": [
@@ -5729,7 +5822,7 @@
         }
       },
       {
-        "id": "BR-044",
+        "id": "BR-045",
         "category": "notification",
         "desc": "在载体里留存时间到期前12小时，系统会自动向持有人发送载体到期提醒，持有人可选择将载体进行归档、移交、回收、留存或者外送",
         "entities_involved": [
@@ -5744,7 +5837,7 @@
         }
       },
       {
-        "id": "BR-045",
+        "id": "BR-046",
         "category": "computation",
         "desc": "流水号系统自动生成，规则为:任务类型+申请时间+流水序号",
         "entities_involved": [
@@ -5766,7 +5859,7 @@
         }
       },
       {
-        "id": "BR-046",
+        "id": "BR-047",
         "category": "computation",
         "desc": "申请人、申请部门根据登录用户自动获取",
         "entities_involved": [

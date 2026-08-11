@@ -21,7 +21,10 @@ def _change_covered(frm: str, to: str, llm_pairs) -> bool:
                for a in _split_enum(frm) for b in _split_enum(to))
 
 # ---- Gate B：BR 候选覆盖判定 ----
-# 候选正文与模型任一面文本的最长公共子串 ≥ 此字数即视为已建模（minor 级，精度优先）
+# 候选正文与模型任一面文本的最长公共子串 ≥ 阈值即视为已建模（minor 级，精度优先）。
+# 阈值随候选长度缩放：长候选（≥10 字）需 LCS ≥ _MIN_OVERLAP；短候选（<10 字）需全匹配
+# （LCS == 全文长）。旧版用固定阈值 10，长度 < 10 的限制语句（如"不能删除修改根部门"，8 字）
+# LCS 上限 8 < 10，结构性永远无法命中，必误报 br_gap。
 _MIN_OVERLAP = 10
 
 def _normalize(s: str) -> str:
@@ -33,12 +36,13 @@ def _normalize(s: str) -> str:
     return s.replace("、", ",")                     # 顿号统一，避免 LCS 在标点处断裂
 
 def _candidate_core(text: str) -> str:
-    """候选正文：去空白 + 归一化 + 去掉 `> `/`（1）`/`a)`/`编辑：` 等前置标记。"""
+    """候选正文：去空白 + 归一化 + 去掉 `> `/`（1）`/`a)`/`编辑：` 等前置标记 + 尾随句读。"""
     c = _normalize(re.sub(r"\s+", "", text))
     c = re.sub(r"^[>#①②③④⑤⑥⑦⑧⑨⑩]+", "", c)
     c = re.sub(r"^[（(]\d+[）)]", "", c)
     c = re.sub(r"^[a-zA-Z][)）]", "", c)
     c = re.sub(r"^[^：:]{1,8}[：:]", "", c)
+    c = re.sub(r"[。；；,，]+$", "", c)
     return c
 
 def _model_texts(model) -> list:
@@ -73,12 +77,16 @@ def _overlap_len(a: str, b: str) -> int:
         0, len(a), 0, len(b)).size
 
 def _br_covered(cand_text: str, texts: list) -> bool:
-    """Gate B：候选正文与任一模型文本面的 LCS ≥ 阈值即视为已建模。命中即短路。"""
+    """Gate B：候选正文与任一模型文本面匹配即视为已建模。命中即短路。
+
+    短候选（len(c) < _MIN_OVERLAP）阈值退化为 len(c)：8 字规则需与模型文本
+    逐字全匹配；长候选维持 LCS ≥ _MIN_OVERLAP。防止短规则结构性不可命中。"""
     c = _candidate_core(cand_text)
     if not c:
         return False
+    thr = min(_MIN_OVERLAP, len(c))
     for m in texts:
-        if _overlap_len(c, m) >= _MIN_OVERLAP:
+        if _overlap_len(c, m) >= thr:
             return True
     return False
 

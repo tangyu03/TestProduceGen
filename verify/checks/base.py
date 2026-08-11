@@ -83,6 +83,20 @@ def get_procedures(output: dict) -> list:
     return output.get("procedures", []) or []
 
 
+def entity_names_of(items: Any) -> set:
+    """built_in_entities 条目规范化：字符串直接取，dict 取 `entity` 键。
+
+    case_spec 允许两种形态——旧版字符串清单（readonly: ["角色"]）与新证据式
+    dict（readonly: [{"entity": "申请人", "clause": "...", "note": "..."}]）。
+    统一收成名字字符串，避免对 dict 直接 set() 触发 unhashable 崩溃。"""
+    out = set()
+    for it in items or []:
+        name = it.get("entity") if isinstance(it, dict) else it
+        if name:
+            out.add(str(name))
+    return out
+
+
 def entity_alias(entity: str, known: set) -> str:
     """虚拟实体名归一：项目B/项目A/项目H → 项目（剥掉尾部单个大写字母）。"""
     if entity in known:

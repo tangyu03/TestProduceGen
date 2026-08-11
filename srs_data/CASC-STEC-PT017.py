@@ -125,14 +125,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增导入申请", category="crud",
                expected_results=["进入导入申请页面，可录入申请内容"],
-               source_ref="4.5.1（1）"),
+               source_ref="4.5.1（1）",
+               note=N(comment="crud 回填：对应转换 t65")),
             op(name="编辑导入申请", category="crud",
                expected_results=["可对已存在的导入申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存导入申请", category="crud",
                expected_results=["保存为草稿状态，不进入审批流程"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询导入任务", category="query",
                expected_results=["申请监控页面看到本人提交的导入任务列表及当前状态"],
                source_ref="4.5.4"),
@@ -145,11 +147,12 @@ def build() -> DomainModel:
                note=N(comment="通用功能：详情")),
             op(name="删除导入申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
             op(name="确认导入完成", category="crud",
                expected_results=["此任务结束"],
                source_ref="4.5.3",
-               note=N(comment="crud 操作；对应执行后申请人确认动作")),
+               note=N(comment="crud 操作；对应执行后申请人确认动作；对应转换 t06")),
         ],
     )
 
@@ -187,14 +190,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增登记申请", category="crud",
                expected_results=["进入载体登记申请页面，可录入申请内容"],
-               source_ref="4.6.1"),
+               source_ref="4.6.1",
+               note=N(comment="crud 回填：对应转换 t66")),
             op(name="编辑登记申请", category="crud",
                expected_results=["可对已存在的登记申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存登记申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询登记任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体登记任务列表及当前状态"],
                source_ref="4.6.4"),
@@ -206,7 +211,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除登记申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -239,14 +245,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增归档申请", category="crud",
                expected_results=["进入归档申请页面，可录入申请内容"],
-               source_ref="4.7.1"),
+               source_ref="4.7.1",
+               note=N(comment="crud 回填：对应转换 t67")),
             op(name="编辑归档申请", category="crud",
                expected_results=["可对已存在的归档申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存归档申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询归档任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体归档任务列表及当前状态"],
                source_ref="4.7.4"),
@@ -258,7 +266,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除归档申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -292,14 +301,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增移交申请", category="crud",
                expected_results=["进入载体移交申请页面，可录入申请内容"],
-               source_ref="4.8.1"),
+               source_ref="4.8.1",
+               note=N(comment="crud 回填：对应转换 t68")),
             op(name="编辑移交申请", category="crud",
                expected_results=["可对已存在的移交申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存移交申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询移交任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体移交任务列表及当前状态"],
                source_ref="4.8.4"),
@@ -311,7 +322,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除移交申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -346,14 +358,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增留存申请", category="crud",
                expected_results=["进入载体留存申请页面，可录入申请内容"],
-               source_ref="4.9.1"),
+               source_ref="4.9.1",
+               note=N(comment="crud 回填：对应转换 t69")),
             op(name="编辑留存申请", category="crud",
                expected_results=["可对已存在的留存申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存留存申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询留存任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体留存任务列表及当前状态"],
                source_ref="4.9.4"),
@@ -365,7 +379,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除留存申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -398,14 +413,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增回收申请", category="crud",
                expected_results=["进入回收申请页面，可录入申请内容"],
-               source_ref="4.10.1"),
+               source_ref="4.10.1",
+               note=N(comment="crud 回填：对应转换 t70")),
             op(name="编辑回收申请", category="crud",
                expected_results=["可对已存在的回收申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存回收申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询回收任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体回收任务列表及当前状态"],
                source_ref="4.10.4"),
@@ -417,7 +434,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除回收申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -451,14 +469,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增外送申请", category="crud",
                expected_results=["进入外送申请页面，可录入申请内容"],
-               source_ref="4.11.1"),
+               source_ref="4.11.1",
+               note=N(comment="crud 回填：对应转换 t71")),
             op(name="编辑外送申请", category="crud",
                expected_results=["可对已存在的外送申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存外送申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询外送任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体外送任务列表及当前状态"],
                source_ref="4.11.4"),
@@ -474,7 +494,8 @@ def build() -> DomainModel:
                note=N(comment="外送特有操作")),
             op(name="删除外送申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -511,14 +532,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增导出申请", category="crud",
                expected_results=["进入导出申请页面，可录入申请内容"],
-               source_ref="4.12.1"),
+               source_ref="4.12.1",
+               note=N(comment="crud 回填：对应转换 t72")),
             op(name="编辑导出申请", category="crud",
                expected_results=["可对已存在的导出申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存导出申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="上传导出文件", category="file",
                expected_results=["从本地磁盘中选择需要上传的文件，确定文件级别；文件名称、级别、大小由系统自动从文件中获取"],
                source_ref="4.12.1（2）；4.12.1（3）"),
@@ -533,7 +556,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）；4.12.1（4）"),
             op(name="删除导出申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -568,14 +592,16 @@ def build() -> DomainModel:
         operations=[
             op(name="新增扫描申请", category="crud",
                expected_results=["进入扫描申请页面，可录入申请内容"],
-               source_ref="4.13.1"),
+               source_ref="4.13.1",
+               note=N(comment="crud 回填：对应转换 t73")),
             op(name="编辑扫描申请", category="crud",
                expected_results=["可对已存在的扫描申请记录进行修改"],
-               source_ref="4.4（2）"),
+               source_ref="4.4（2）",
+               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）")),
             op(name="暂存扫描申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存")),
+               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）")),
             op(name="查询扫描任务", category="query",
                expected_results=["申请监控页面看到本人提交的文件扫描任务列表及当前状态"],
                source_ref="4.13.4"),
@@ -587,7 +613,8 @@ def build() -> DomainModel:
                source_ref="4.4（4）"),
             op(name="删除扫描申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
-               source_ref="4.4（5）"),
+               source_ref="4.4（5）",
+               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）")),
         ],
     )
 
@@ -654,19 +681,23 @@ def build() -> DomainModel:
         operations=[
             op(name="新增用户", category="crud",
                expected_results=["实现用户新增的功能"],
-               source_ref="4.14.1（1）"),
+               source_ref="4.14.1（1）",
+               note=N(comment="crud 回填：对应转换 t75")),
             op(name="编辑用户", category="crud",
                expected_results=["实现用户信息的修改，用户账号不能进行修改"],
-               source_ref="4.14.1（2）"),
+               source_ref="4.14.1（2）",
+               note=N(comment="无对应转换（修改用户信息不改用户状态；账号不可修改）")),
             op(name="查看用户详情", category="query",
                expected_results=["查看用户的详细信息"],
                source_ref="4.14.1（3）"),
             op(name="重置用户密码", category="crud",
                expected_results=["重置后的密码为:Abcd123456！"],
-               source_ref="4.14.1（6）"),
+               source_ref="4.14.1（6）",
+               note=N(comment="无对应转换（重置密码为属性操作，不改用户状态）")),
             op(name="删除用户", category="crud",
                expected_results=["将用户从系统中删除，具有流程信息的用户不能进行删除"],
-               source_ref="4.14.1（7）"),
+               source_ref="4.14.1（7）",
+               note=N(comment="无对应转换（删除为生命周期终止，不建模状态转换）")),
             op(name="查询用户", category="query",
                expected_results=["根据用户账号查询符合条件的用户"],
                source_ref="4.14.1（8）"),
@@ -694,14 +725,25 @@ def build() -> DomainModel:
         operations=[
             op(name="新增部门", category="crud",
                expected_results=["点击添加下级机构按钮可增加下级机构信息"],
-               source_ref="4.14.3（1）"),
+               source_ref="4.14.3（1）",
+               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）")),
             op(name="编辑部门", category="crud",
                expected_results=["实现对已存在部门信息的编辑，被客户使用的部门不能进行必填项信息的修改"],
-               source_ref="4.14.3（2）"),
+               source_ref="4.14.3（2）",
+               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）")),
             op(name="删除部门", category="crud",
                expected_results=["实现对已存在部门信息的删除，被客户使用和实验单使用的部门不能进行删除"],
-               source_ref="4.14.3（3）"),
+               source_ref="4.14.3（3）",
+               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）")),
         ],
+    )
+    m.add_br(
+        bid="b47",
+        category="validation",
+        desc="不能删除修改根部门",
+        entities_involved=["E-DEPT"],
+        source_ref="4.14.3",
+        signal_type="restrictive",
     )
 
     # ---------- E-ROLE 角色 ----------
@@ -760,14 +802,14 @@ def build() -> DomainModel:
     # ============================================================
     # Step 2: 结构关系
     # ============================================================
-    # 用户与部门：composition（用户必须归属部门）
+    # 用户与部门：reference（部门为用户组织分类配置，非拥有）
     m.add_structural(
         frm="E-DEPT", to="E-USER",
-        relation_type="composition", cardinality="1:N",
-        ownership_dimension="business_ownership",
-        desc="部门拥有用户；用户新增时必填申请部门，根据登录用户自动获取",
+        relation_type="reference", cardinality="1:N",
+        ownership_dimension="configuration_source",
+        desc="部门为用户组织分类配置；用户新增时必填申请部门，根据登录用户自动获取",
         confidence="high",
-        note={"comment": "(b) 用户无独立创建入口（仅系统管理员可新增），且每条用户必有所属部门；management_dimension 复核为 business_ownership"},
+        note={"comment": "(d) 用户有独立创建流程（系统管理员新增），生命周期独立；部门仅提供组织分类，删除部门不级联用户（文档 4.14.3：被使用部门禁止删除为阻断非级联）；management_dimension 复核为 configuration_source"},
     )
     # 用户与角色：reference（用户被授予角色，角色可独立存在）
     m.add_structural(
@@ -785,16 +827,16 @@ def build() -> DomainModel:
         ownership_dimension="configuration_source",
         desc="用户持有载体；载体登记成功后记入申请人台账，持有时间默认72小时；移交后归属人变更",
         confidence="high",
-        note={"comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 E-REG→E-CAR composition 承载）"},
+        note={"comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC x10 联动承载）"},
     )
-    # 登记任务与载体：composition（登记执行后创建载体）
+    # 登记任务与载体：reference（登记执行产出载体，载体产生后独立流转）
     m.add_structural(
         frm="E-REG", to="E-CAR",
-        relation_type="composition", cardinality="1:1",
-        ownership_dimension="business_ownership",
-        desc="登记任务执行完成后产出载体；载体经登记入个人台账",
+        relation_type="reference", cardinality="1:N",
+        ownership_dimension="configuration_source",
+        desc="登记任务执行完成后产出载体；载体经登记入个人台账，产生后独立流转（归档/移交/回收/外送）",
         confidence="high",
-        note={"comment": "(c) 登记任务为 core 流程实体，其 dependent 载体亦为 core；载体由登记任务驱动产生；management_dimension 复核为 business_ownership"},
+        note={"comment": "(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"},
     )
     # 归档/移交/留存/回收/外送任务与载体：reference（任务操作既有载体）
     m.add_structural(
@@ -934,6 +976,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="导入任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-IMP", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["导入任务终止；导入申请人需重新提交导入任务"],
         traits=["branch"],
@@ -1032,6 +1075,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="登记任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-REG", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["登记任务终止；登记申请人需重新提交登记任务"],
         traits=["branch"],
@@ -1128,6 +1172,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="归档任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-ARC", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["归档任务终止；归档申请人需重新提交归档任务"],
         traits=["branch"],
@@ -1225,6 +1270,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="移交任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-TRF", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["移交任务终止；移交申请人需重新提交移交任务"],
         traits=["branch"],
@@ -1323,6 +1369,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="留存任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RET", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["留存任务终止；留存申请人需重新提交留存任务"],
         traits=["branch"],
@@ -1421,6 +1468,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="回收任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RCY", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["回收任务终止；回收申请人需重新提交回收任务"],
         traits=["branch"],
@@ -1518,6 +1566,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="外送任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-OUT", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["外送任务终止；外送申请人需重新提交载体外送任务"],
         traits=["branch"],
@@ -1615,6 +1664,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="导出任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-EXP", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["导出任务终止；导出申请人需重新提交导出任务"],
         traits=["branch"],
@@ -1711,6 +1761,7 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="扫描任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-SCN", "任务状态", "待审批")),
+            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["扫描任务终止；扫描申请人需重新提交扫描任务"],
         traits=["branch"],
@@ -2130,9 +2181,9 @@ def build() -> DomainModel:
         expected_results=["载体由登记执行完成产生，状态初始化为已登记"],
         traits=[], direction="forward", priority="P0",
         source_ref="4.6.3",
-        note={"comment": "载体由 E-REG 登记执行产生（XC x10 联动）；composition E-REG→E-CAR 承载创建语义，C17 疑似 reference 提示实为登记任务创建"},
+        note={"comment": "载体由 E-REG 登记执行产生（XC x10 联动），产生后独立流转；E-REG→E-CAR 为 reference（登记任务是来源，非归属容器）"},
     )
-    # 用户：仅系统管理员可新增，归属部门（E-DEPT→E-USER composition）
+    # 用户：仅系统管理员可新增，归属部门为组织分类配置（E-DEPT→E-USER reference）
     m.add_trans(
         tid="t75",
         entity="E-USER", dimension="用户状态",
@@ -2143,7 +2194,7 @@ def build() -> DomainModel:
         expected_results=["用户创建，状态初始化为正常"],
         traits=[], direction="forward", priority="P0",
         source_ref="4.14.1（1）",
-        note={"comment": "仅系统管理员可新增用户；必填申请部门（E-DEPT→E-USER composition）"},
+        note={"comment": "仅系统管理员可新增用户；必填申请部门（E-DEPT→E-USER reference 提供组织分类）"},
     )
 
     # ============================================================

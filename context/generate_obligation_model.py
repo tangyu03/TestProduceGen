@@ -1214,6 +1214,30 @@ def has_real_difference(combos):
         keys.add(key)
     return len(keys) > 1
 
+def _dimension_value_universe(dim_name: str) -> set:
+    """分支/配置维度的全量值：state_dimensions states ∪ branch_dimensions values/branches。
+
+    R5 冲突检查需要知道维度有哪些可能值，才能识别"precond 文本枚举了允许值集、
+    但 combo 值不在其中"。任务级别 这类 is_config 分支维度不在 state_dimensions，
+    但其值域在 branch_dimensions（values + branches[].value）——缺了它，
+    precond "任务级别为B级或C级" 就永远无法过滤 A级 组合（DECISIONS ㊶ 同源：
+    case_spec 不可靠，P1 数据层才是真相源）。
+    """
+    vals = set()
+    for e in p1["domain_model"]["entities"]:
+        for d in e.get("state_dimensions", []):
+            if d["dimension_name"] == dim_name:
+                vals.update(d.get("states", []))
+    for bd in p1_bd:
+        if bd.get("dimension") == dim_name:
+            vals.update(bd.get("values") or [])
+            for br in bd.get("branches") or []:
+                v = br.get("value")
+                if v:
+                    vals.add(v)
+    return vals
+
+
 def combo_conflicts_with_preconds(combo, dim_values_lists, preconds):
     """R5: filter invalid combos - check if combo values conflict with existing precondition constraints.
     Evidence sources: invalid_transitions, restrictive BR, precondition contradictions (constraint AND state_ref).
@@ -1241,18 +1265,14 @@ def combo_conflicts_with_preconds(combo, dim_values_lists, preconds):
             if dim_name in text:
                 # Check if the branch value appears in text; if not, and
                 # another value of the same dimension appears, it's a conflict.
-                # We check the combo value and its siblings.
+                # We check the combo value and its siblings。值域用全量
+                # universe（state_dimensions ∪ branch_dimensions），使 config
+                # 分支维度（任务级别）的 precond 枚举（"任务级别为B级或C级"）
+                # 能正确排除不在允许集内的组合值。
                 if val not in text:
-                    # The branch value is NOT in the text — check if any
-                    # OTHER state of this dimension is in the text instead.
-                    # This requires knowing the dimension's state list.
-                    for e in p1["domain_model"]["entities"]:
-                        for d in e.get("state_dimensions", []):
-                            if d["dimension_name"] == dim_name:
-                                for s in d.get("states", []):
-                                    if s != val and s in text:
-                                        return True
-                                break
+                    for s in _dimension_value_universe(dim_name):
+                        if s != val and s in text:
+                            return True
     return False
 
 

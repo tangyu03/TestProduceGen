@@ -1,0 +1,757 @@
+{
+  "verdict": "pass",
+  "skeleton_pass": true,
+  "blocker_failures": 0,
+  "warning_failures": 0,
+  "checks": [
+    {
+      "check_id": "V01",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "tools/graph_algo.py"
+      ],
+      "note": "依赖图健康检查通过：无悬空引用、无依赖环、依赖相位单调（所有 proc 的 phase ≥ 其依赖的 phase）"
+    },
+    {
+      "check_id": "V02",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "prompts/s1_prompt.py"
+      ],
+      "note": "守卫极性检查通过：无 guard_policies 被触发（所有 proc 的 givens 均未命中任何 guard 的 when_given_matches 条件），无违规项"
+    },
+    {
+      "check_id": "V03",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "动作归属检查通过：跨实体级联均使用 indirect_via，未直接操作从动实体"
+    },
+    {
+      "check_id": "V04",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/field_validation.py"
+      ],
+      "note": "case_spec readonly 字段证据 18 条不参与字段级保护(AI 生成未确认、含误标；见代码注释): ['八种角色定义', '内置日志管理员角色', '内置监督员角色', '内置系统管理员角色', '初始日志管理员账号secauditor_a', '初始系统管理员账号sysadmin_a', '初始角色管理员账号secadmin_a', '密码重置默认值', '文件名称', '文件大小', '文件级别', '流水号', '申请人', '申请时间', '申请部门', '载体信息自动带入', '载体快照', '载体持有时间默认值']"
+    },
+    {
+      "check_id": "V05",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [
+        {
+          "level": "warning",
+          "temp_id": "PROC-155.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-155.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-157.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-157.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-159.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-159.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-161.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-161.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-163.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-163.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-163.3",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-163.4",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-163.5",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-165.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-165.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-165.3",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-165.4",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-165.5",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-167.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-167.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-167.3",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-167.4",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-167.5",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-169.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-169.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-169.3",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-169.4",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-169.5",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-171.1",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-171.2",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-171.3",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-171.4",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-171.5",
+          "constraint": "B级任务仅一级审批",
+          "combo": {
+            "current": "任务级别=B级",
+            "other_dim": "审批节点=二级审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-173.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-173.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-175.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-175.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-177.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-177.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-179.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-179.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-181.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-181.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-181.3",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-181.4",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-181.5",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-183.1",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-183.2",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-183.3",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        },
+        {
+          "level": "warning",
+          "temp_id": "PROC-183.4",
+          "constraint": "A级任务无需审批",
+          "combo": {
+            "current": "任务级别=A级",
+            "other_dim": "审批流程=需要审批",
+            "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+            "match_mode": "exact"
+          },
+          "reason": "note-type constraint hit; needs semantic review"
+        }
+      ],
+      "evidence_truncated": 49,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py",
+        "nodes/s0_topology.py"
+      ],
+      "note": "note-type advisory hits: 99 (warning, not blocking)"
+    },
+    {
+      "check_id": "V06",
+      "result": "pass",
+      "severity": "warning",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S1",
+      "suspected_files": [
+        "nodes/s1_generation.py"
+      ],
+      "note": "time obligations=8, missing time_control=0"
+    },
+    {
+      "check_id": "V07",
+      "result": "pass",
+      "severity": "warning",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "empty_actor=0, unknown_actor=0, no_permission=0"
+    },
+    {
+      "check_id": "V08",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s2_sorting.py"
+      ],
+      "note": "spec hygiene: 导入任务.T-003[a]: lateral 迁移缺少 note 依据 | 导入任务.T-003[b]: lateral 迁移缺少 note 依据 | 导入任务.T-005: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 载体登记任务.T-009[a]: lateral 迁移缺少 note 依据 | 载体登记任务.T-009[b]: lateral 迁移缺少 note 依据 | 载体登记任务.T-011: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 载体归档任务.T-015[a]: lateral 迁移缺少 note 依据 | 载体归档任务.T-015[b]: lateral 迁移缺少 note 依据 | 载体归档任务.T-017: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 载体移交任务.T-021[a]: lateral 迁移缺少 note 依据"
+    },
+    {
+      "check_id": "V09",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py"
+      ],
+      "note": "去重检查通过：无重复 (givens,when,thens) 合并、单例实体未复制"
+    },
+    {
+      "check_id": "V10",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "TO 91/91 | EO 89/89 | BR 61/61(embedded 15, xc_causal 14) | IT 4/4 | state_misses=0"
+    }
+  ],
+  "metrics": {
+    "case_total": 727,
+    "dedup_ratio": 1.0,
+    "guard_violations": 0,
+    "dangling_deps": 0,
+    "invalid_combos": 0,
+    "builtin_misuse": 0,
+    "coverage_misses": 0
+  },
+  "signature": null
+}

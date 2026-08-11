@@ -1,0 +1,774 @@
+{
+  "spec_version": "1.2.0",
+  "guard_policies": [
+    {
+      "guard_id": "G-USR-PWDLOCK",
+      "when_given_matches": "连续输错密码",
+      "action": "用户登录",
+      "expected": "rejected",
+      "assertion_pattern": "锁定",
+      "clause": "4.3.1(2)"
+    },
+    {
+      "guard_id": "G-USR-LOCKLOGIN",
+      "when_given_matches": "用户状态为锁定",
+      "action": "用户登录",
+      "expected": "rejected",
+      "assertion_pattern": "锁定|不允许登录",
+      "clause": "4.3.1(3)"
+    },
+    {
+      "guard_id": "G-USR-NONEXIST-LOGIN",
+      "when_given_matches": "用户状态为不存在",
+      "action": "用户登录",
+      "expected": "rejected",
+      "assertion_pattern": "不存在|不允许登录",
+      "clause": "4.3.1(3)"
+    },
+    {
+      "guard_id": "G-USR-PWDERROR-MSG",
+      "when_given_matches": "密码输入错误",
+      "action": "系统认证",
+      "expected": "rejected",
+      "assertion_pattern": "用户名或密码错误",
+      "clause": "4.3.1(4)"
+    },
+    {
+      "guard_id": "G-USR-SESSION-30MIN",
+      "when_given_matches": "登录后无操作三十分钟",
+      "action": "系统会话",
+      "expected": "rejected",
+      "assertion_pattern": "自动退出|重新登录",
+      "clause": "4.3.1(7)"
+    },
+    {
+      "guard_id": "G-USR-LOGOUT-CONFIRM",
+      "when_given_matches": "用户执行退出",
+      "action": "退出系统",
+      "expected": "confirm",
+      "assertion_pattern": "确认|确定",
+      "clause": "4.3.2(2)"
+    },
+    {
+      "guard_id": "G-IMPL-MEDIA-OTHER",
+      "when_given_matches": "源文件存储介质选择其它",
+      "action": "填写存储介质文本框",
+      "expected": "rejected",
+      "assertion_pattern": "必须输入|不能为空",
+      "clause": "4.5.1"
+    },
+    {
+      "guard_id": "G-IMPL-REASON-LEN",
+      "when_given_matches": "导入申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.5.1"
+    },
+    {
+      "guard_id": "G-IMPL-48H-DEL",
+      "when_given_matches": "导入任务未确认且超过四十八小时",
+      "action": "导入文件保存",
+      "expected": "rejected",
+      "assertion_pattern": "自动删除|已结束",
+      "clause": "4.5.3"
+    },
+    {
+      "guard_id": "G-REG-DOCNAME-LEN",
+      "when_given_matches": "文件或资料名称",
+      "action": "填写文件或资料名称",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.6.1"
+    },
+    {
+      "guard_id": "G-REG-ORIGNO-LEN",
+      "when_given_matches": "原载体编号",
+      "action": "填写原载体编号",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.6.1"
+    },
+    {
+      "guard_id": "G-REG-PAPERPAGES-RANGE",
+      "when_given_matches": "纸张页数",
+      "action": "填写纸张页数",
+      "expected": "rejected",
+      "assertion_pattern": "数值范围|只能填入",
+      "clause": "4.6.1"
+    },
+    {
+      "guard_id": "G-CARRIER-TIMEOUT-LIMIT",
+      "when_given_matches": "载体到期未处理",
+      "action": "发起登记或导入或导出或扫描流程",
+      "expected": "rejected",
+      "assertion_pattern": "功能限制|不能发起",
+      "clause": "4.6.5"
+    },
+    {
+      "guard_id": "G-ARCH-REASON-LEN",
+      "when_given_matches": "归档申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.7.1"
+    },
+    {
+      "guard_id": "G-ARCH-DONE-NOOP",
+      "when_given_matches": "载体状态为已归档",
+      "action": "对载体进行移交或留存或回收或外送",
+      "expected": "rejected",
+      "assertion_pattern": "无法|不可|已归档",
+      "clause": "4.7.3"
+    },
+    {
+      "guard_id": "G-TRSF-REASON-LEN",
+      "when_given_matches": "移交申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.8.1"
+    },
+    {
+      "guard_id": "G-RET-REASON-LEN",
+      "when_given_matches": "留存申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.9.1"
+    },
+    {
+      "guard_id": "G-RET-TIME-RANGE",
+      "when_given_matches": "留存时间",
+      "action": "填写留存时间",
+      "expected": "rejected",
+      "assertion_pattern": "只能填入|整数",
+      "clause": "4.9.1"
+    },
+    {
+      "guard_id": "G-RET-TIMEOUT-LIMIT",
+      "when_given_matches": "留存到期未处理",
+      "action": "发起登记或导入或导出或扫描流程",
+      "expected": "rejected",
+      "assertion_pattern": "功能限制|不能发起",
+      "clause": "4.9.3"
+    },
+    {
+      "guard_id": "G-RECY-REASON-LEN",
+      "when_given_matches": "回收申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.10.1"
+    },
+    {
+      "guard_id": "G-SEND-REASON-LEN",
+      "when_given_matches": "外送申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.11.1"
+    },
+    {
+      "guard_id": "G-SEND-UNIT-LEN",
+      "when_given_matches": "外送单位",
+      "action": "填写外送单位",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.11.1"
+    },
+    {
+      "guard_id": "G-EXP-REASON-LEN",
+      "when_given_matches": "导出申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-EXP-MAIL-REQ",
+      "when_given_matches": "导出方式选择邮件",
+      "action": "添加邮箱地址",
+      "expected": "rejected",
+      "assertion_pattern": "必须添加|邮箱地址",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-EXP-FILENAME-LEVEL",
+      "when_given_matches": "上传导出文件",
+      "action": "填写文件名",
+      "expected": "rejected",
+      "assertion_pattern": "文件级别|必须标明",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-EXP-SIZE-LIMIT",
+      "when_given_matches": "导出文件大小",
+      "action": "上传导出文件",
+      "expected": "rejected",
+      "assertion_pattern": "不大于|超出|文件大小",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-EXP-COUNT-RANGE",
+      "when_given_matches": "导出份数",
+      "action": "填写份数",
+      "expected": "rejected",
+      "assertion_pattern": "只能填入|数字",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-EXP-PWD-ENCRYPT",
+      "when_given_matches": "密码保护选择是",
+      "action": "系统加密导出文件",
+      "expected": "confirm",
+      "assertion_pattern": "加密|密码",
+      "clause": "4.12.1"
+    },
+    {
+      "guard_id": "G-SCAN-REASON-LEN",
+      "when_given_matches": "扫描申请事由",
+      "action": "填写申请事由",
+      "expected": "rejected",
+      "assertion_pattern": "字符数|长度",
+      "clause": "4.13.1"
+    },
+    {
+      "guard_id": "G-SCAN-PAGES-RANGE",
+      "when_given_matches": "文件页数",
+      "action": "填写文件页数",
+      "expected": "rejected",
+      "assertion_pattern": "只能填入|数字",
+      "clause": "4.13.1"
+    },
+    {
+      "guard_id": "G-USR-ACCT-IMMU",
+      "when_given_matches": "编辑用户信息",
+      "action": "修改用户账号",
+      "expected": "rejected",
+      "assertion_pattern": "不能修改|不可编辑",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-ACCT-UNIQUE",
+      "when_given_matches": "新增用户",
+      "action": "填写用户账号",
+      "expected": "rejected",
+      "assertion_pattern": "不可重复|已存在",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-PWD-COMPLEXITY",
+      "when_given_matches": "设置用户密码",
+      "action": "填写登录密码",
+      "expected": "rejected",
+      "assertion_pattern": "长度|大小写字母|数字|特殊字符",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-PWD-CONFIRM-MATCH",
+      "when_given_matches": "确认密码",
+      "action": "填写确认密码",
+      "expected": "rejected",
+      "assertion_pattern": "不一致|不相同",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-PHONE-RULE",
+      "when_given_matches": "手机号码",
+      "action": "填写手机号码",
+      "expected": "rejected",
+      "assertion_pattern": "手机号|格式|位",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-PHONE-UNIQUE",
+      "when_given_matches": "新增用户手机号",
+      "action": "填写手机号码",
+      "expected": "rejected",
+      "assertion_pattern": "唯一|已存在|重复",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-EMAIL-RULE",
+      "when_given_matches": "用户邮箱",
+      "action": "填写邮箱",
+      "expected": "rejected",
+      "assertion_pattern": "邮箱|格式|包含",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-DEL-PROC",
+      "when_given_matches": "删除具有流程信息的用户",
+      "action": "删除用户",
+      "expected": "rejected",
+      "assertion_pattern": "不能删除|流程信息",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-USR-PWDRESET-DEFAULT",
+      "when_given_matches": "重置用户密码",
+      "action": "系统重置密码",
+      "expected": "confirm",
+      "assertion_pattern": "Abcd123456",
+      "clause": "4.14.1"
+    },
+    {
+      "guard_id": "G-ROLE-NAME-SINGLE",
+      "when_given_matches": "角色查看查询",
+      "action": "选择角色名称",
+      "expected": "rejected",
+      "assertion_pattern": "只能单选",
+      "clause": "4.14.2"
+    },
+    {
+      "guard_id": "G-DEPT-ROOT-NOMOD",
+      "when_given_matches": "根部门",
+      "action": "修改或删除根部门",
+      "expected": "rejected",
+      "assertion_pattern": "不能删除|不能修改|根部门",
+      "clause": "4.14.3"
+    },
+    {
+      "guard_id": "G-DEPT-NAME-UNIQUE",
+      "when_given_matches": "新增或编辑部门",
+      "action": "填写部门名称",
+      "expected": "rejected",
+      "assertion_pattern": "唯一|已存在|重复",
+      "clause": "4.14.3"
+    },
+    {
+      "guard_id": "G-DEPT-INUSE-NODEL",
+      "when_given_matches": "被客户使用或实验单使用的部门",
+      "action": "删除部门",
+      "expected": "rejected",
+      "assertion_pattern": "不能删除|使用中",
+      "clause": "4.14.3"
+    },
+    {
+      "guard_id": "G-DEPT-INUSE-NOEDITREQ",
+      "when_given_matches": "被客户使用的部门",
+      "action": "修改部门必填项信息",
+      "expected": "rejected",
+      "assertion_pattern": "不能修改|必填项",
+      "clause": "4.14.3"
+    },
+    {
+      "guard_id": "G-LOG-AUDIT-ACCESS",
+      "when_given_matches": "非日志管理员且非角色管理员",
+      "action": "查看系统日志",
+      "expected": "rejected",
+      "assertion_pattern": "无权限|不允许",
+      "clause": "4.17.1"
+    },
+    {
+      "guard_id": "G-SEC-PWD-PLAINTEXT",
+      "when_given_matches": "显示密码",
+      "action": "系统展示密码",
+      "expected": "rejected",
+      "assertion_pattern": "不明文|掩码|隐藏",
+      "clause": "4.18(2)"
+    },
+    {
+      "guard_id": "G-SEC-PWD-OLD-REQ",
+      "when_given_matches": "修改密码",
+      "action": "输入原密码",
+      "expected": "confirm",
+      "assertion_pattern": "原密码|确认",
+      "clause": "4.18(4)"
+    },
+    {
+      "guard_id": "G-SEC-PWD-OLDCHECK",
+      "when_given_matches": "原密码输入错误",
+      "action": "系统验证原密码",
+      "expected": "rejected",
+      "assertion_pattern": "原密码不正确|错误",
+      "clause": "4.18(4)"
+    },
+    {
+      "guard_id": "G-SEC-PWD-DIFF",
+      "when_given_matches": "新密码与原密码相同",
+      "action": "设置新密码",
+      "expected": "rejected",
+      "assertion_pattern": "不同|不能相同",
+      "clause": "4.18(5)"
+    },
+    {
+      "guard_id": "G-SEC-PWD-CONFIRM-TWICE",
+      "when_given_matches": "设置新密码",
+      "action": "确认新密码",
+      "expected": "confirm",
+      "assertion_pattern": "确认|两次|相同",
+      "clause": "4.18(6)"
+    },
+    {
+      "guard_id": "G-SEC-PWD-CONFIRM-MISMATCH",
+      "when_given_matches": "两次输入的新密码不一致",
+      "action": "系统验证确认密码",
+      "expected": "rejected",
+      "assertion_pattern": "不一致|不相同",
+      "clause": "4.18(6)"
+    },
+    {
+      "guard_id": "G-SEC-MSG-NOINFO",
+      "when_given_matches": "系统提示信息",
+      "action": "系统返回提示",
+      "expected": "rejected",
+      "assertion_pattern": "系统运行|技术架构",
+      "clause": "4.18(9)"
+    },
+    {
+      "guard_id": "G-BUILTIN-ROLE-LOCK",
+      "when_given_matches": "内置角色",
+      "action": "更改或删除内置角色",
+      "expected": "rejected",
+      "assertion_pattern": "不可更改|不可删除|内置",
+      "clause": "5"
+    },
+    {
+      "guard_id": "G-BUILTIN-USR-LOCK",
+      "when_given_matches": "内置用户sysadmin或secadmin或secauditor",
+      "action": "更改或删除或禁用内置用户",
+      "expected": "rejected",
+      "assertion_pattern": "不可更改|不可删除|不可禁用",
+      "clause": "5"
+    },
+    {
+      "guard_id": "G-BUILTIN-USR-NOGRANT",
+      "when_given_matches": "内置用户sysadmin或secadmin或secauditor",
+      "action": "将内置角色授予其他用户",
+      "expected": "rejected",
+      "assertion_pattern": "不授予|不可授予",
+      "clause": "5"
+    }
+  ],
+  "built_in_entities": {
+    "readonly": [
+      {
+        "entity": "申请人",
+        "clause": "4.5.1/4.6.1/4.7.1/4.8.1/4.9.1/4.10.1/4.11.1/4.12.1/4.13.1",
+        "note": "根据登录用户自动获取"
+      },
+      {
+        "entity": "申请部门",
+        "clause": "4.5.1/4.6.1/4.7.1/4.8.1/4.9.1/4.10.1/4.11.1/4.12.1/4.13.1",
+        "note": "根据登录用户自动获取"
+      },
+      {
+        "entity": "流水号",
+        "clause": "4.5.1/4.6.1/4.7.1/4.8.1/4.9.1/4.10.1/4.11.1/4.12.1/4.13.1",
+        "note": "系统自动生成，规则为任务类型加申请时间加流水序号"
+      },
+      {
+        "entity": "申请时间",
+        "clause": "4.5.1/4.6.1/4.7.1/4.8.1/4.9.1/4.10.1/4.11.1/4.12.1/4.13.1",
+        "note": "系统自动生成"
+      },
+      {
+        "entity": "载体快照",
+        "clause": "4.6.1",
+        "note": "添加载体后可看到载体快照，系统自动生成"
+      },
+      {
+        "entity": "载体信息自动带入",
+        "clause": "4.7.1/4.8.1/4.9.1/4.10.1/4.11.1",
+        "note": "从申请人名下载体中选择，载体信息自动带入"
+      },
+      {
+        "entity": "文件名称",
+        "clause": "4.12.1",
+        "note": "系统自动从上传文件中获取"
+      },
+      {
+        "entity": "文件级别",
+        "clause": "4.12.1",
+        "note": "系统自动从上传文件中获取，上传文件名中须标明文件级别"
+      },
+      {
+        "entity": "文件大小",
+        "clause": "4.12.1",
+        "note": "系统自动从上传文件中获取"
+      },
+      {
+        "entity": "初始系统管理员账号sysadmin_a",
+        "clause": "4.3.1(1)/5",
+        "note": "内置用户，不可更改、删除和禁用"
+      },
+      {
+        "entity": "初始日志管理员账号secauditor_a",
+        "clause": "4.3.1(1)/5",
+        "note": "内置用户，不可更改、删除和禁用"
+      },
+      {
+        "entity": "初始角色管理员账号secadmin_a",
+        "clause": "4.3.1(1)/5",
+        "note": "内置用户，不可更改、删除和禁用，但文档4.3.1(1)写为secadmin_a，5中表述为监督员secadmin_a，存疑"
+      },
+      {
+        "entity": "内置系统管理员角色",
+        "clause": "5",
+        "note": "不可更改、删除"
+      },
+      {
+        "entity": "内置监督员角色",
+        "clause": "5",
+        "note": "不可更改、删除；5中表述绑定secadmin_a，但4.2定义监督员与角色管理员为不同角色，存疑"
+      },
+      {
+        "entity": "内置日志管理员角色",
+        "clause": "5",
+        "note": "不可更改、删除"
+      },
+      {
+        "entity": "八种角色定义",
+        "clause": "4.2",
+        "note": "系统管理员、普通用户、一级审批员、二级审批员、载体管理员、监督员、角色管理员、日志管理员，内置角色列表"
+      },
+      {
+        "entity": "密码重置默认值",
+        "clause": "4.14.1(6)",
+        "note": "重置后密码为Abcd123456，系统内置默认值"
+      },
+      {
+        "entity": "载体持有时间默认值",
+        "clause": "4.6.5",
+        "note": "持有时间默认为72小时，系统内置"
+      }
+    ],
+    "no_form_page": [
+      {
+        "entity": "登录日志",
+        "clause": "4.17.1",
+        "note": "系统自动记录用户登录日志，无新增或编辑表单入口；仅有查询和导入入口"
+      },
+      {
+        "entity": "操作日志",
+        "clause": "4.17.1",
+        "note": "系统自动记录用户新增编辑删除等操作日志，无新增或编辑表单入口；仅有查询和导出入口"
+      },
+      {
+        "entity": "载体台账",
+        "clause": "4.6.3/4.8.3",
+        "note": "载体登记完成后自动生成并变更归属人，无独立新增或编辑表单入口；通过登记和移交流程维护"
+      },
+      {
+        "entity": "载体到期提醒",
+        "clause": "4.6.5/4.9.3",
+        "note": "系统在到期前12小时自动向持有人发送，无新增或编辑表单入口"
+      }
+    ]
+  },
+  "dimension_constraints": [
+    {
+      "name": "已归档载体不可操作约束",
+      "rule": "载体状态为已归档时，不可进行移交、留存、回收、外送操作",
+      "invalid_combos": [
+        {
+          "current": "载体状态=已归档",
+          "other_dim": "操作类型=移交",
+          "note": "4.7.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "载体状态=已归档",
+          "other_dim": "操作类型=留存",
+          "note": "4.7.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "载体状态=已归档",
+          "other_dim": "操作类型=回收",
+          "note": "4.7.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "载体状态=已归档",
+          "other_dim": "操作类型=外送",
+          "note": "4.7.3",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "锁定用户不可登录",
+      "rule": "用户状态为锁定时，不允许登录系统",
+      "invalid_combos": [
+        {
+          "current": "用户状态=锁定",
+          "other_dim": "操作=登录",
+          "note": "4.3.1(3)",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "不存在用户不可登录",
+      "rule": "用户状态为不存在时，不允许登录系统",
+      "invalid_combos": [
+        {
+          "current": "用户状态=不存在",
+          "other_dim": "操作=登录",
+          "note": "4.3.1(3)",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "A级任务无需审批",
+      "rule": "任务级别为A级时，无需经过审批流程",
+      "invalid_combos": [
+        {
+          "current": "任务级别=A级",
+          "other_dim": "审批流程=需要审批",
+          "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "B级任务仅一级审批",
+      "rule": "任务级别为B级时，仅需经过一级审批，不经过二级审批",
+      "invalid_combos": [
+        {
+          "current": "任务级别=B级",
+          "other_dim": "审批节点=二级审批",
+          "note": "4.5.2/4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "纸质载体必填纸张页数",
+      "rule": "载体类别为纸质时，纸张页数为必填项",
+      "invalid_combos": [
+        {
+          "current": "载体类别=纸质",
+          "other_dim": "纸张页数=空",
+          "note": "4.6.1",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "邮件导出方式需邮箱",
+      "rule": "导出方式选择邮件时，必须添加邮箱地址",
+      "invalid_combos": [
+        {
+          "current": "导出方式=邮件",
+          "other_dim": "邮箱地址=空",
+          "note": "4.12.1",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "密码保护需加密",
+      "rule": "密码保护选择是时，系统须对导出文件进行加密操作",
+      "invalid_combos": [
+        {
+          "current": "密码保护=是",
+          "other_dim": "文件加密状态=未加密",
+          "note": "4.12.1",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "其它存储介质需文本",
+      "rule": "源文件存储介质选择其它时，文本框必须输入内容",
+      "invalid_combos": [
+        {
+          "current": "源文件存储介质=其它",
+          "other_dim": "存储介质文本框=空",
+          "note": "4.5.1",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "新密码不可与原密码相同",
+      "rule": "新密码与原密码应不同",
+      "invalid_combos": [
+        {
+          "current": "新密码值=原密码值",
+          "other_dim": "操作=修改密码",
+          "note": "4.18(5)",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "功能受限用户不可发起任务",
+      "rule": "载体到期未处理的用户被功能限制后，不能发起登记、导入、导出、扫描流程",
+      "invalid_combos": [
+        {
+          "current": "用户状态=功能受限",
+          "other_dim": "操作=发起登记",
+          "note": "4.6.5/4.9.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "用户状态=功能受限",
+          "other_dim": "操作=发起导入",
+          "note": "4.6.5/4.9.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "用户状态=功能受限",
+          "other_dim": "操作=发起导出",
+          "note": "4.6.5/4.9.3",
+          "match_mode": "exact"
+        },
+        {
+          "current": "用户状态=功能受限",
+          "other_dim": "操作=发起扫描",
+          "note": "4.6.5/4.9.3",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "用户账号不可重复",
+      "rule": "用户账号在系统中不可重复",
+      "invalid_combos": [
+        {
+          "current": "用户账号=已存在账号",
+          "other_dim": "操作=新增用户",
+          "note": "4.14.1",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "部门名称不可重复",
+      "rule": "部门名称在系统中唯一",
+      "invalid_combos": [
+        {
+          "current": "部门名称=已存在名称",
+          "other_dim": "操作=新增或编辑部门",
+          "note": "4.14.3",
+          "match_mode": "exact"
+        }
+      ]
+    },
+    {
+      "name": "手机号码不可重复",
+      "rule": "手机号码在系统中唯一",
+      "invalid_combos": [
+        {
+          "current": "手机号码=已存在号码",
+          "other_dim": "操作=新增用户",
+          "note": "4.14.1",
+          "match_mode": "exact"
+        }
+      ]
+    }
+  ],
+  "time_control": {
+    "allowed_mechanisms": [
+      "clock_injection",
+      "db_time_update",
+      "scheduler_manual_trigger"
+    ]
+  }
+}

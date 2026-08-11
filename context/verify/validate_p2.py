@@ -38,8 +38,12 @@ for eo in d['entity_obligations']:
                 errors.append(f"{eo['id']}: missing field {r}")
         if eo['dimension'] is not None or eo['from'] is not None or eo['to'] is not None:
             errors.append(f"{eo['id']}: dimension/from/to should be null")
-        if eo['source_ref'] is not None:
-            errors.append(f"{eo['id']}: source_ref should be null (P1 attr has no source_ref)")
+        # EO-ATC source_ref：P1 属性无 source_ref 字段，生成器透传实体首条操作的 source_ref
+        # 作章节定位（generate_obligation_model._entity_config_section_ref）。合法值 = null
+        # （实体无带 source_ref 的操作）或非空字符串（透传值）；一致性由下方 p1 派生复核闸门兜底。
+        if eo['source_ref'] is not None and (
+                not isinstance(eo['source_ref'], str) or not eo['source_ref'].strip()):
+            errors.append(f"{eo['id']}: source_ref 应为 null 或非空字符串（实体首条操作章节定位）")
     elif eo['type'] == 'crud_operation':
         required = ['id', 'type', 'entity', 'entity_name', 'operation_name', 'operation_category',
                     'description', 'expected_results', 'suggested_action', 'coverage_priority', 'source_ref']
@@ -265,8 +269,26 @@ if p1 is not None:
                 f"(同 (enabler,dependent) 对不允许跨 causal_type 共存)"
             )
         _seen_edge.setdefault(key, ct)
+
+    # EO-ATC source_ref 派生复核（数据驱动）：P1 属性无 source_ref，生成器透传实体首条
+    # 带 source_ref 的操作的 source_ref 作章节定位。此处按同规则重推导比对，防生成侧漂移。
+    _p1_e_by_id = {e['id']: e for e in p1['domain_model']['entities']}
+    for eo in d['entity_obligations']:
+        if eo['type'] != 'attribute_config':
+            continue
+        ent = _p1_e_by_id.get(eo['entity'])
+        expect = None
+        if ent:
+            for op in ent.get('operations', []):
+                if isinstance(op, dict) and op.get('source_ref'):
+                    expect = op['source_ref']
+                    break
+        if eo.get('source_ref') != expect:
+            errors.append(
+                f"EO {eo['id']}: source_ref={eo.get('source_ref')!r} 与派生不符 "
+                f"(实体首条操作应={expect!r})")
 else:
-    infos.append("P1 JSON 未提供 —— 跳过 CO dependent-uniqueness 重推导闸门")
+    infos.append("P1 JSON 未提供 —— 跳过 CO dependent-uniqueness 重推导与 EO-ATC source_ref 复核闸门")
 
 print(f"Errors: {len(errors)}")
 for e in errors[:20]:

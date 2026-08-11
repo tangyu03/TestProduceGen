@@ -1,6 +1,6 @@
 """V09 实例去重与多实例一致性：givens/when/thens 规范化哈希相同必须合并；
 同一实例组 source_ids 必须一致；内置/单例实体 multi_count 必须为 1。"""
-from .base import CheckResult, get_procedures, text_hash
+from .base import CheckResult, entity_names_of, get_procedures, text_hash
 
 CHECK_ID = "V09"
 
@@ -9,7 +9,8 @@ def check(output: dict, spec: dict) -> CheckResult:
     res = CheckResult(check_id=CHECK_ID, severity="blocker", suspected_stage="S4",
                       suspected_files=["nodes/s4_multi_instance.py"])
     builtin = (spec or {}).get("built_in_entities") or {}
-    singletons = set(builtin.get("readonly") or []) | set(builtin.get("no_form_page") or [])
+    singletons = (entity_names_of(builtin.get("readonly") or [])
+                  | entity_names_of(builtin.get("no_form_page") or []))
     seen, groups = {}, {}
     for p in get_procedures(output):
         sig = text_hash([p.get("givens"), p.get("when"), p.get("thens"), p.get("entity")])
