@@ -10,45 +10,34 @@ serves as the tiebreaker within topological levels during final ordering.
 """
 import copy
 from typing import Any
+from context.domain_precondition import base_data_entity_ids
 from models.state import AgentState
 
 
 def _entity_order_rank(cm: dict, topology_levels: dict, dependency_depth: dict) -> dict:
     """Entity ordering rank: 基础数据 → 主业务流 → 系统配置(尾部).
 
-    Robust, domain-agnostic (C1):
-      - 系统配置 tail: entities with NO state machine, NO transitions, and NOT
-        composed into a core entity → 角色/日志/超时/分数限值 sort LAST.
-      - Everything else orders by S0's topology_level (base data L0 before flow
-        L1/L2), then dependency_depth (upstream before downstream).
+    纯投影 of S0's topology_levels (单一事实源 = S0 拓扑)。rank 不再自行推导
+    "谁是基础数据/谁进尾部" (旧实现有第二套 config-tail 推导, 与 S0 判 L0 的
+    逻辑重复且有漂移风险)。S0 已分类:
+      - 基础数据 (拓扑 L0) → 最前
+      - 主业务流 (拓扑 L1-L4) → 中间
+      - 隔离叶子 (日志等, S0 提到独立 leaf_level = max+1) → 凭最高层级自然落尾
+    rank 只做同层 tiebreaker: 维度丰富度 (多状态机实体领先其层级) 再
+    dependency_depth (上游先于下游)。未知实体 (不在 topology_levels) → 9 落尾。
 
     Returns a dict keyed by entity id AND Chinese name → rank.
     """
     ctx = cm.get("_context", {})
     details = ctx.get("entity_details", []) or []
-    relations = ctx.get("structural_relations", []) or []
     state_info = ctx.get("state_info", {}) or {}
-    to_entities = {t.get("entity") for t in cm.get("transition_obligations", []) or []}
-
-    # config/audit tail: no state machine + no transitions + NO incoming
-    # structural reference (provides configuration outward; never referenced as
-    # a flow subject — unlike base reference data like 专家, which the flow
-    # references via E-ORG→E-EXP / E-PLAN→E-EXP).
-    incoming = {r.get("to") for r in relations if r.get("to")}
-    config_ids = set()
-    for ed in details:
-        eid = ed.get("id", "")
-        ndim = len(state_info.get(eid, {}).get("dimensions", []) or [])
-        if ndim == 0 and eid not in to_entities and eid not in incoming:
-            config_ids.add(eid)
 
     rank = {}
-    # Non-config: topology_level first, then a multi-dimensional state machine
-    # leads its level (the entity with the richest lifecycle is the flow lead —
-    # e.g. 项目 has 项目状态+项目阶段, so it leads 评审计划), then dependency_depth.
-    non_config = [ed.get("id") for ed in details if ed.get("id") and ed.get("id") not in config_ids]
     scored = []
-    for eid in non_config:
+    for ed in details:
+        eid = ed.get("id", "")
+        if not eid:
+            continue
         tl = topology_levels.get(eid, 9)
         ndim = len(state_info.get(eid, {}).get("dimensions", []) or [])
         dims_lead = 0 if ndim >= 2 else 100  # multi-dim entity leads its level
@@ -57,10 +46,6 @@ def _entity_order_rank(cm: dict, topology_levels: dict, dependency_depth: dict) 
     scored.sort()
     for i, (_, _, _, eid) in enumerate(scored):
         rank[eid] = i
-    # config tail after all flow entities
-    off = len(scored)
-    for i, eid in enumerate([ed.get("id") for ed in details if ed.get("id") in config_ids]):
-        rank[eid] = off + 10 + i
 
     # procedures may reference entities by Chinese name — map both
     for ed in details:
@@ -194,10 +179,9 @@ def s2_sorting_node(state: AgentState) -> dict:
             entity_name_map[eid] = ename
             entity_name_map[ename] = eid  # bidirectional
 
-    # Fix B/C1: entity dependency order (基础数据 → 主业务流 → 系统配置尾部).
-    # Replaces the old string/topology-level entity tiebreak: entities order by
-    # S0 topology_level + dependency_depth (upstream before downstream), with
-    # pure config/audit entities (分数限值/日志/角色/超时) sorted last.
+    # Entity dependency order (基础数据 → 主业务流 → 系统配置尾部): pure projection
+    # of S0's topology_levels — rank only adds same-level tiebreakers (dimension
+    # richness, dependency_depth).  Leaves (日志) reach the tail via S0's leaf_level.
     entity_order_rank = _entity_order_rank(cm, topology_levels, dependency_depth)
 
     def _topo_level_for_entity(ent_name_or_id: str) -> int:
@@ -219,9 +203,12 @@ def s2_sorting_node(state: AgentState) -> dict:
         s2 = proc.get("_S2_fields", {})
 
         # Ensure phase is non-null and phase_basis is non-empty (I5)
+        # 基础数据判定用单一谓词 base_data_entity_ids (S0 leaf 提升到 leaf_level
+        # 后不再是 0, 但仍是基础数据), 不查 `topology_level == 0` 硬编码。
         if s2.get("phase") is None:
-            tl = s2.get("topology_level", 0)
-            if tl == 0:
+            _ent = proc["entity"]
+            _ent_id = _ent if _ent in topology_levels else entity_name_map.get(_ent, _ent)
+            if _ent_id in base_data_entity_ids(state):
                 s2["phase"] = 0
                 s2["phase_basis"] = s2.get("phase_basis") or "P6: topology_level L0 → P0"
             else:

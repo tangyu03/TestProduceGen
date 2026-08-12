@@ -46,6 +46,7 @@ from main import (  # noqa: E402
     _translate_procedures,
 )
 from models.state import AgentState  # noqa: E402
+from nodes.s0_topology import _compute_s0_deterministic  # noqa: E402
 from nodes.s1_generation import s1_generation_node  # noqa: E402
 from nodes.s2_sorting import s2_sorting_node  # noqa: E402
 from nodes.s3_dependency import s3_dependency_node  # noqa: E402
@@ -230,6 +231,9 @@ def main() -> int:
     ap.add_argument("--coverage", default=str(COVERAGE_PATH))
     ap.add_argument("--out-json", default=str(OUT_JSON))
     ap.add_argument("--out-md", default=str(OUT_MD))
+    ap.add_argument("--recompute-s0", action="store_true",
+                    help="重算 S0 (确定性) 取代归档 engine_state — leaf_level/leaf_entity_ids "
+                         "只有重跑 S0 才会产出 (S0 是拓扑单一事实源)。S0 警告并入输出。")
     a = ap.parse_args()
     archived_path = Path(a.archive)
     coverage_path = Path(a.coverage)
@@ -239,7 +243,18 @@ def main() -> int:
     archived = _load(archived_path)
     cm = _load(coverage_path)
 
-    state = _run_pipeline(archived, cm)
+    warn0: list[str] = []
+    if a.recompute_s0:
+        es = _compute_s0_deterministic(cm, warn0)
+        # set → 确定性 sorted list (JSON 可序列化; 谓词侧 leaf_entity_ids() 会再 set())
+        es["leaf_entity_ids"] = sorted(es.get("leaf_entity_ids", set()))
+        archived_es = es
+        state = _run_pipeline({"engine_state": es}, cm)
+        # S0 警告并入 (重跑 S0 时 S1 起始为空, 否则 S0 警告丢失)
+        state["warnings"] = warn0 + list(state.get("warnings", []))
+    else:
+        archived_es = archived.get("engine_state") or {}
+        state = _run_pipeline(archived, cm)
     replayed = state["procedures"]
 
     # 校验 temp_id 集与归档一致 (S1 修复不改变 dedup/排序, 结构应 1:1)
@@ -259,8 +274,7 @@ def main() -> int:
     hit, miss = _overlay(replayed, archived["procedures"], id_to_name)
     print(f"[OVERLAY] title overlay (content-keyed): {hit} hit, {miss} miss")
 
-    output = _build_output(state, cm, archived.get("engine_state") or {},
-                           id_to_name)
+    output = _build_output(state, cm, archived_es, id_to_name)
 
     out_bytes = json.dumps(output, ensure_ascii=False, indent=2).replace("\n", "\r\n")
     out_json.write_bytes(out_bytes.encode("utf-8"))

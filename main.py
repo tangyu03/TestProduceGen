@@ -70,6 +70,7 @@ def run_p3_pipeline(
         "entity_parent": None,
         "dependency_depth": None,
         "topology_levels": None,
+        "leaf_entity_ids": set(),
         "virtual_entities": None,
         "transition_upstream_map": None,
         # P2 model
@@ -227,6 +228,7 @@ def run_p3_pipeline(
             "entity_parent": result.get("entity_parent"),
             "dependency_depth": result.get("dependency_depth"),
             "topology_levels": result.get("topology_levels"),
+            "leaf_entity_ids": sorted(result.get("leaf_entity_ids", set())),
             "virtual_entities": result.get("virtual_entities"),
             "transition_upstream_map": result.get("transition_upstream_map"),
         },

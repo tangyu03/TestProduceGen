@@ -18,7 +18,7 @@ from nodes.signal_validation import generate_signal_v_steps
 from context.entity_operators import form_operator_roles
 from context.time_control import needs_time_control_ids
 from context.constraint_fields import predicate_phase_lower_bound, get_state_phase
-from context.domain_precondition import object_existence
+from context.domain_precondition import base_data_entity_ids, object_existence
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
@@ -811,13 +811,14 @@ def _is_type5_retained(eo: dict, state: AgentState) -> bool:
     # Rule 2: priority >= medium
     if eo.get("coverage_priority") in ("medium", "high", "critical"):
         return True
-    # Rule 3: L0/L1/L5 + delete
+    # Rule 3: base data / primary / level-5 + delete
     # BDD: "删除" is now configurable via type5_special_ops; if not configured,
-    # check topology_level for L0/L1/L5 entities with any delete-like op.
+    # retain delete-as-Type5 for base data (topology 0 or S0 leaf), the primary
+    # entity (level 1) and level 5. Flow dependents (levels 2-4) are excluded.
     topology_levels = state.get("topology_levels", {})
     tl = topology_levels.get(entity, -1)
     delete_ops = {"删除", "remove", "delete"} | special_ops
-    if tl in (0, 1, 5) and any(d in op_name for d in delete_ops):
+    if (tl in (1, 5) or entity in base_data_entity_ids(state)) and any(d in op_name for d in delete_ops):
         return True
     # Rule 4: CO trigger match
     for co in cm.get("cross_entity_obligations", []):
@@ -844,7 +845,6 @@ def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentSt
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
     ctx_rules = state.get("contextual_phase_rules", {})
-    topo = state["topology_levels"]
     ves = state.get("virtual_entities", {})
     parent_map = state["entity_parent"]
 
@@ -865,9 +865,8 @@ def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentSt
     if ctx_key in ctx_rules:
         return {"phase": None, "basis": "contextual", "contextual": ctx_key}
 
-    # Topology fallback
-    tl = topo.get(entity, 0)
-    if tl == 0:
+    # Topology fallback — base data (topology 0 or S0 leaf) → P0
+    if entity in base_data_entity_ids(state):
         return {"phase": 0, "basis": "P6: topology_level L0 → P0"}
     if entity == primary:
         return {"phase": 0, "basis": "fallback"}
@@ -916,10 +915,10 @@ def _resolve_phase_for_non_transition(state: dict, entity: str, obligation_type:
         non_zero = [p for p in phases if p > 0]
         return max(non_zero) if non_zero else max(phases)
 
-    topo = state.get("topology_levels", {}) or {}
-    # Base data (topology_level 0, e.g. 机构/分数限值/角色/日志/超时): data
-    # maintenance precedes the flow → P0.
-    if is_setup and topo.get(entity, 9) == 0:
+    # Base data (topology 0 or S0 leaf, e.g. 机构/分数限值/角色/日志/超时): data
+    # maintenance precedes the flow → P0. 单一谓词 base_data_entity_ids 收敛原
+    # `topology_level == 0` 硬编码 — 叶子被 S0 提到 leaf_level 后仍算基础数据。
+    if is_setup and entity in base_data_entity_ids(state):
         return {"phase": 0, "basis": f"base_data_setup_phase.{entity}.0"}
 
     # Virtual entity: inherit its resolved_phase (set during S0 VE discovery).
@@ -3599,7 +3598,6 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
     deterministic template decomposition for embedded BR V-steps.
     """
     dep_map = state["dep_state_phase_map"]
-    topo = state["topology_levels"]
     phase_table = state["phase_table"]
     warnings = list(state.get("warnings", []))
     total_embedded = 0
@@ -3665,9 +3663,11 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                 # Create new Type6 variant procedure (negative_test BR with no existing Type6)
                 # v29 #18: was "E-PRJ" hardcoded — replaced with state["primary_entity"]
                 primary_br_entity = br_entities[0] if br_entities else state.get("primary_entity", "")
-                tl = topo.get(primary_br_entity, 0)
+                # topology_level 记录进 _S2_fields (叶子经 S0 提升到 leaf_level 后此处为 leaf_level)
+                tl = state.get("topology_levels", {}).get(primary_br_entity, 0)
                 phase = 0
-                phase_basis = "P6: topology_level L0 → P0" if tl == 0 else "default"
+                phase_basis = ("P6: topology_level L0 → P0"
+                               if primary_br_entity in base_data_entity_ids(state) else "default")
 
                 if primary_br_entity in dep_map:
                     all_phases = [p for dm in dep_map[primary_br_entity].values() for p in dm.values()]

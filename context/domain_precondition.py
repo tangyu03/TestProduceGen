@@ -1,11 +1,13 @@
 """领域前置派生 — CRUD/查看义务的"对象实例须已存在"先决 (Tier 2).
 
-单一事实源: 从 S0 派生的 topology_levels 判别业务生命周期对象, 从 P2 数据层
-的创建转换 (from=None) 派生对象存在性锚定。被 S1 (Given 生成 + 相位底) 与
-S3 (Guard 7 依赖绑定) 消费, 不硬编码任何领域名词。
+单一事实源: 从 S0 派生的 topology_levels + leaf_entity_ids 判别业务生命周期对象
+与基础数据, 从 P2 数据层的创建转换 (from=None) 派生对象存在性锚定。被 S1
+(Given 生成 + 相位底) 与 S3 (Guard 7 依赖绑定) 消费, 不硬编码任何领域名词。
 
-不变量: 管理类实体 (topology_level 0, 专家/角色/机构/用户/日志/配置) 保持
-"=存在" 弱 Given 是合理的, 不做领域前置。
+不变量: 管理类实体 (topology_level 0 或 S0 隔离叶子, 专家/角色/机构/用户/
+日志/配置) 保持 "=存在" 弱 Given 是合理的, 不做领域前置。S0 把隔离叶子
+(如 日志) 提升到独立高层级 (leaf_level, 用于排序), 但这里显式排除 → 叶子
+仍是管理类, 不进入业务生命周期。
 
 语义 (与 DECISIONS ⑭/⑱ 一致):
   - 对实体 E 的非创建操作 (查看/修改/删除), 仅在 E 的实例已存在时语义有效。
@@ -17,13 +19,42 @@ from __future__ import annotations
 from context.constraint_fields import get_state_phase
 
 
-def lifecycle_entity_ids(state: dict) -> set[str]:
-    """业务生命周期对象 = topology_level > 0 的实体 (数据驱动, 非名字硬编码).
+def leaf_entity_ids(state: dict) -> set[str]:
+    """S0 权威产出的隔离叶子实体 (系统配置尾部, 如 日志).
 
-    S0 已把 {E-PLAN:1, E-PROJ:1, E-ATT:2, E-SCORE:1} 标为 >0, 管理类全为 0。
+    无状态机 + 无转换 + 完全不出现在结构关系图里。S0 已把它们的
+    topology_level 提到独立高层级 (leaf_level) 供排序, 此集合是其身份标签。
+    """
+    leaves = state.get("leaf_entity_ids", set())
+    return set(leaves) if leaves else set()
+
+
+def lifecycle_entity_ids(state: dict) -> set[str]:
+    """业务生命周期对象 = topology_level > 0 且非隔离叶子的实体.
+
+    数据驱动, 非名字硬编码。S0 已把 {E-PLAN:1, E-PROJ:1, E-ATT:2, E-SCORE:1}
+    标为 >0; 隔离叶子 (如 日志) 虽被提到 leaf_level (>0), 但显式排除 → 仍是
+    管理类, 不做领域前置。
     """
     topo = state.get("topology_levels") or {}
-    return {e for e, lvl in topo.items() if isinstance(lvl, int) and lvl > 0}
+    leaves = leaf_entity_ids(state)
+    return {
+        e for e, lvl in topo.items()
+        if isinstance(lvl, int) and lvl > 0 and e not in leaves
+    }
+
+
+def base_data_entity_ids(state: dict) -> set[str]:
+    """基础数据 = topology_level 0 实体 ∪ S0 隔离叶子 (与 lifecycle 互补).
+
+    单一谓词, 替代散落在 s1_generation 的 `topology_level == 0` 硬编码:
+    S0 把叶子提到 leaf_level 后, 叶子不再是 0, 但语义上仍是基础数据
+    (管理类, 相位 P0, Type5 保留)。凡"这是否基础数据"一律查这里。
+    """
+    topo = state.get("topology_levels") or {}
+    base = {e for e, lvl in topo.items() if isinstance(lvl, int) and lvl == 0}
+    base |= leaf_entity_ids(state)
+    return base
 
 
 def creation_transitions(cm: dict, entity: str) -> list[dict]:

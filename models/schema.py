@@ -64,6 +64,7 @@ class EngineState(BaseModel):
     entity_parent: dict
     dependency_depth: dict
     topology_levels: dict
+    leaf_entity_ids: set = set()
     virtual_entities: dict = {}
     transition_upstream_map: dict
 

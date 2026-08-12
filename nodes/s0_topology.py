@@ -2542,6 +2542,38 @@ def _signal_rank(sig: str) -> int:
 # S0.5: Topology levels (V4 — BFS backtracking)
 # ---------------------------------------------------------------------------
 
+def _detect_leaf_entities(cm: dict, structural: list[dict],
+                          transition_obligations: list[dict],
+                          state_info: dict) -> set[str]:
+    """S0.5b: Leaf entities — relation-isolated, no transitions, no state machine.
+
+    Single source of truth for the "系统配置尾部" (config/audit tail, e.g. 日志):
+    absent from the structural-relation graph entirely, no transition
+    obligations, no state machine. Everything else is part of the domain model.
+
+    Direction convention: structural_relations from→to = downstream
+    (s0_prompt.py:188); appearing on either side means the entity is a provider
+    (base data) or a consumer of the domain graph — not a leaf. Formerly this
+    was re-derived inside S2's _entity_order_rank (config-tail) and drifted from
+    S0's L0 judgement (部门/角色 mis-sorted behind 用户). Now S0 owns it.
+    """
+    to_entity_ids = {t.get("entity") for t in transition_obligations if t.get("entity")}
+    related_ids = {r.get("from") for r in structural if r.get("from")} | \
+                  {r.get("to") for r in structural if r.get("to")}
+    entity_details = cm.get("_context", {}).get("entity_details", []) or []
+    if isinstance(entity_details, dict):
+        entity_details = list(entity_details.values())
+    leaves = set()
+    for ed in entity_details:
+        eid = ed.get("id", "")
+        if not eid:
+            continue
+        ndim = len((state_info.get(eid, {}) or {}).get("dimensions", []) or [])
+        if ndim == 0 and eid not in to_entity_ids and eid not in related_ids:
+            leaves.add(eid)
+    return leaves
+
+
 def _compute_topology_levels(
     primary: str,
     dependent_entities: list[str],
@@ -3322,6 +3354,7 @@ def s0_topology_node(state: AgentState) -> dict:
             "entity_parent": result.get("entity_parent", {}),
             "dependency_depth": result.get("dependency_depth", {}),
             "topology_levels": result.get("topology_levels", {}),
+            "leaf_entity_ids": result.get("leaf_entity_ids", set()),
             "virtual_entities": result.get("virtual_entities", {}),
             "transition_upstream_map": result.get("transition_upstream_map", {}),
             "errors": errors,
@@ -3339,6 +3372,7 @@ def s0_topology_node(state: AgentState) -> dict:
         "entity_parent": result.get("entity_parent", {}),
         "dependency_depth": result.get("dependency_depth", {}),
         "topology_levels": result.get("topology_levels", {}),
+        "leaf_entity_ids": result.get("leaf_entity_ids", set()),
         "virtual_entities": result.get("virtual_entities", {}),
         "transition_upstream_map": result.get("transition_upstream_map", {}),
         "coverage_model": coverage_model,
@@ -3394,15 +3428,15 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     )
     warnings.append(f"S0.4: {len(dependent_entities)} dependent entities: {dependent_entities}")
 
-    # Collect all entities
-    all_entities = set()
-    for to in tos:
-        all_entities.add(to.get('entity', ''))
-    for eo in eos:
-        all_entities.add(eo.get('entity', ''))
-    for rel in structural:
-        all_entities.add(rel.get('from', ''))
-        all_entities.add(rel.get('to', ''))
+    # Collect all entities — 保序去重 (dict.fromkeys), 不用 set:
+    # set 迭代序随 PYTHONHASHSEED 抖动 (DECISIONS.md 304 同款坑), 会污染
+    # dependency_depth/topology_levels 等输出 dict 的键插入序 → 双跑 SHA-256 不一致。
+    all_entities = list(dict.fromkeys(
+        [to.get('entity', '') for to in tos]
+        + [eo.get('entity', '') for eo in eos]
+        + [rel.get('from', '') for rel in structural]
+        + [rel.get('to', '') for rel in structural]
+    ))
 
     for e in all_entities:
         if e not in dependency_depth:
@@ -3462,6 +3496,22 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         )
         warnings.append(f"S0.7: {len(virtual_entities)} virtual entities: {list(virtual_entities.keys())}")
 
+    # S0.5b: Leaf entities (config/audit tail) — S0 owns this classification so
+    # downstream never re-derives "who is base data" (single source of truth).
+    # Give them a level strictly above all flow entities; ordering (a pure
+    # topology_levels projection) then sorts them last automatically, while
+    # lifecycle/phase predicates (context.domain_precondition.base_data_entity_ids)
+    # still treat them as non-lifecycle managed data.
+    leaf_entity_ids = _detect_leaf_entities(cm, structural, tos, state_info)
+    leaf_level = (max(topology_levels.values()) + 1) if topology_levels else 1
+    for e in leaf_entity_ids:
+        topology_levels[e] = leaf_level
+    if leaf_entity_ids:
+        warnings.append(
+            f"S0.5b: {len(leaf_entity_ids)} leaf entities at leaf_level={leaf_level}: "
+            f"{sorted(leaf_entity_ids)}"
+        )
+
     # Enforce S0 invariants
     warnings = _enforce_s0_invariants(
         primary, phase_table, dep_state_phase_map, contextual_phase_rules,
@@ -3479,6 +3529,7 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         'entity_parent': entity_parent,
         'dependency_depth': dependency_depth,
         'topology_levels': topology_levels,
+        'leaf_entity_ids': leaf_entity_ids,
         'virtual_entities': virtual_entities,
         'transition_upstream_map': transition_upstream_map,
     }
