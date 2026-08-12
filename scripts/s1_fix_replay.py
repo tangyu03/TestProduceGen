@@ -10,8 +10,11 @@
   按结构键 overlay 归档 title。actor 由 coverage 模型确定性派生 (已验证与归档
   零 diff), 不 overlay —— temp_id 主键会因拆分重编号而错配 (曾致 483/720 污染),
   故 overlay 一律结构键, 不动 actor。零 title diff。
-- 决策 3: S1 givens 增加 given_type 字段 (state|flow|constraint|event|branch),
-  渲染层变纯格式选择器。
+- 决策 3: S1 givens 增加 given_type 字段 (state|flow|constraint|event|branch|
+  rule|rule_noise|restatement), 渲染层变纯格式选择器。语义净化下沉:
+  rule=被测 BR 原文上下文, rule_noise=空泛占位跳过, restatement=对象实例复述
+  句子形态; 另 S1 标记 subsumed=True (transition_target 状态行被同 target
+  behavior 行完全包含 → 渲染省略)。
 - T-002 分支拆分 (scripts/t2_branch_split.py): T-002 → T-002[a-c] 按 项目评级
   拆 3 变体; occurrence_limit 归位于 T-002[b] (不合格), constraint_predicate 与
   branch_path 职责正交; t3_occ_limit_detach.py 已退役 (串线根因已消除)。

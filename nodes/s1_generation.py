@@ -216,6 +216,9 @@ def _make_given(target: str, state: str, description: str = "",
     - "flow"       → `{target} 流转：{desc}`  （跨维度流转形态，desc 保留原文）
     - "constraint" → `约束：{desc}`            （业务约束，非状态前置）
     - "branch"     → `分支条件：{value}`        （分支维度 Given）
+    - "rule"       → `{desc}`                  （规则上下文，desc=被测 BR 原文）
+    - "rule_noise" → 渲染跳过                  （空泛占位 "…相关数据已准备"，无测试价值）
+    - "restatement"→ `{desc}`                  （对象实例复述，desc 已含完整句子形态）
     """
     return {"target": target, "state": state, "description": description,
             "given_type": given_type}
@@ -254,6 +257,43 @@ def _make_then(target: str, expectation: str,
         "cross_refs": cross_refs or [],
         "dedup_group": dedup_group,
     }
+
+
+def _mark_then_subsumption(valid_procs: list) -> int:
+    """Then 吸收下沉：把「transition_target 状态行被同 target 的 behavior 行
+    完全包含」的判定从渲染层移到 S1 数据层。
+
+    transition_target 状态行（expectation="状态转换为X"）被同 target 的
+    behavior 行复述（"状态…为X"，如 "回收任务创建，状态初始化为草稿"）——
+    事件+状态双信息都被行为行携带，单独保留无独立信息。此吸收判断属语义
+    决策（判断某 Then 是否冗余），由数据层在 S1 标记 `subsumed=True`，
+    渲染层只消费标记，不再做文本比对。
+
+    判据与渲染层旧实现逐字一致（数据驱动，无硬编码动词表）：状态行须
+    dedup_group=="transition_target" 且 kind=="state"；behavior 行须同
+    target 且 expectation 含 "状态[^，。；]*为X"（纯文本关系）。全量
+    152 处精确命中、321 条标记行中 169 条无复述者保留。
+
+    返回标记数量。
+    """
+    marked = 0
+    for p in valid_procs:
+        for t in p.thens:
+            if t.kind != "state" or t.dedup_group != "transition_target":
+                continue
+            m = re.match(r"^状态转换为(.+)$", (t.expectation or "").strip())
+            if not m:
+                continue
+            st_val = m.group(1)
+            if any(
+                b.kind == "behavior" and b.target == t.target
+                and re.search(r"状态[^，。；]*为" + re.escape(st_val),
+                              (b.expectation or ""))
+                for b in p.thens
+            ):
+                t.subsumed = True
+                marked += 1
+    return marked
 
 
 # ── Procedure skeleton factories ─────────────────────────────────────────
@@ -355,26 +395,17 @@ def _derive_business_event(action: str, from_state: str = "", to_state: str = ""
     return cleaned
 
 
-# ── V06: time_sensitive 触发方式动态推导（模块级，无硬编码）─────────────
+# ── V06: time_sensitive 触发机制推导（模块级，无硬编码）──────────────
 #
-# validator 检查 time_sensitive 用例要求有明确的执行路径：
+# validator 检查 time_sensitive 用例要求声明执行路径（time_control.mechanism）：
 #   clock_injection / db_time_update / scheduler_manual_trigger
 #
-# 本函数根据 TO 的 action 语义动态推导主触发方式，其余作为备选。
-# 触发方式标识符本身是 validator 协议约定的（类似枚举值），不算业务硬编码。
-
-_ALLOWED_TRIGGER_METHODS = [
-    "clock_injection",
-    "db_time_update",
-    "scheduler_manual_trigger",
-]
-
-_TRIGGER_HINT_TEMPLATES = {
-    "clock_injection": "clock_injection: 测试时注入时钟到边界值",
-    "db_time_update": "db_time_update: 直接更新数据库时间到过期后",
-    "scheduler_manual_trigger": "scheduler_manual_trigger: 系统调度器在时限到达时自动触发",
-}
-
+# 机制在数据层推导（_derive_time_mechanism），写入 JSON time_control 字段供
+# V06 校验；**不再**生成 human-readable 触发方式 hint 行注入 operation_hints
+# —— 需求原文自陈触发语义（"48小时后系统自动结束"），把 3 种机制描述当编号
+# 步骤列进 When 块与执行事件混排，是测试基建措辞冒充业务操作（用户判
+# "位置与需求不符"，已删，DECISIONS ㊺）。触发方式标识符是 validator 协议
+# 约定的枚举，不算业务硬编码。
 
 def _derive_time_mechanism(action_text: str) -> str:
     """从 action 语义推导主触发机制(V06 time_control.mechanism)。
@@ -391,16 +422,6 @@ def _derive_time_mechanism(action_text: str) -> str:
     if any(kw in action_text for kw in ["过期", "已过期"]):
         return "db_time_update"
     return "scheduler_manual_trigger"
-
-
-def _build_timeout_hints(action_text: str) -> list[str]:
-    """根据 action 语义动态构建触发方式 hints。
-
-    所有 time_sensitive 用例都列出 3 种触发方式，主触发方式排第一。
-    """
-    primary = _derive_time_mechanism(action_text)
-    ordered = [primary] + [m for m in _ALLOWED_TRIGGER_METHODS if m != primary]
-    return [_TRIGGER_HINT_TEMPLATES[m] for m in ordered]
 
 
 def _find_reviewer_role_for_dim(
@@ -1803,11 +1824,9 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 "givens": givens,
                 "when": when,
                 "thens": thens,
-                # V06: time_sensitive 用例注入触发方式 hints（动态推导）
-                "operation_hints": (
-                    _build_timeout_hints(action) if "time_sensitive" in risk_traits else []
-                ),
-                # V06: 声明 time_control.mechanism(从时效语义推导);非时效为 None
+                # V06: 声明 time_control.mechanism(从时效语义推导);非时效为 None。
+                # 不再注入 human-readable 触发方式 hint 行（需求原文自陈触发语义）。
+                "operation_hints": [],
                 "time_control": (
                     {"mechanism": _derive_time_mechanism(action), "status": "planned"}
                     if "time_sensitive" in risk_traits else None
@@ -1920,9 +1939,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "givens": pos_givens,
                     "when": when,
                     "thens": pos_thens,
-                    "operation_hints": (
-                        _build_timeout_hints(action) if "time_sensitive" in risk_traits else []
-                    ),
+                    "operation_hints": [],
                     "time_control": (
                         {"mechanism": _derive_time_mechanism(action), "status": "planned"}
                         if "time_sensitive" in risk_traits else None
@@ -2098,8 +2115,8 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
 
             # --- Time sensitive variants ---
             if "time_sensitive" in risk_traits:
-                # V06: time_sensitive 用例必须含触发方式 operation_hints
-                # 使用模块级 _build_timeout_hints() 动态推导（无硬编码 hints 内容）
+                # V06: time_sensitive 用例声明 time_control.mechanism（JSON），
+                # 不再注入触发方式 hint 行（需求原文自陈触发语义，见模块头部）。
 
                 # Boundary variant
                 boundary_givens = [
@@ -2125,8 +2142,8 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "givens": boundary_givens,
                     "when": boundary_when,
                     "thens": boundary_thens,
-                    # V06: 注入触发方式 hints（动态推导，boundary 主触发为 clock_injection）
-                    "operation_hints": _build_timeout_hints(action + "(时间边界)"),
+                    # V06: boundary 主触发为 clock_injection（JSON 声明，无 hint 行）
+                    "operation_hints": [],
                     "time_control": {"mechanism": "clock_injection", "status": "planned"},
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→{to_state}(时间边界)",
@@ -2167,8 +2184,8 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "givens": expired_givens,
                     "when": expired_when,
                     "thens": expired_thens,
-                    # V06: 注入触发方式 hints（动态推导，expired 主触发为 db_time_update）
-                    "operation_hints": _build_timeout_hints(action + "(已过期)"),
+                    # V06: expired 主触发为 db_time_update（JSON 声明，无 hint 行）
+                    "operation_hints": [],
                     "time_control": {"mechanism": "db_time_update", "status": "planned"},
                     "gen_seq": _gen_seq_counter,
                     "post_state": f"{te['entity']}.{dimension}→(过期未执行)",
@@ -2494,6 +2511,7 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                             f"{id_to_zh.get(dp_ref['object_entity'], dp_ref['object_entity'])}"
                             f"已存在，处于{dp_ref['object_state']}状态"
                         ),
+                        given_type="restatement",
                     )]
                     creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
                     if creation_phase is not None and creation_phase > ve_phase:
@@ -2567,6 +2585,7 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                         f"{id_to_zh.get(dp_ref['object_entity'], dp_ref['object_entity'])}"
                         f"已存在，处于{dp_ref['object_state']}状态"
                     ),
+                    given_type="restatement",
                 )]
                 creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
                 if creation_phase is not None and creation_phase > phase:
@@ -3295,7 +3314,8 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             givens = [_make_given(
                 target=primary_br_entity,
                 state="规则适用前提满足",
-                description=f"规则：{br_desc}",
+                description=br_desc,
+                given_type="rule",
             )]
             when = _make_when(
                 target=primary_br_entity,
@@ -3309,6 +3329,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
                 target=primary_br_entity,
                 state="规则适用前提满足",
                 description=f"{', '.join(br_entities)}相关数据已准备",
+                given_type="rule_noise",
             )]
             when = _make_when(
                 target=primary_br_entity,
@@ -3383,10 +3404,8 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             "givens": givens,
             "when": when,
             "thens": thens,
-            "operation_hints": (
-                _build_timeout_hints(br_desc) if _is_timing_br else []
-            ),
-            # V06: 时限/超时 BR 用例声明 time_control(调度器触发)
+            # V06: 时限/超时 BR 用例声明 time_control(调度器触发);不注入 hint 行
+            "operation_hints": [],
             "time_control": (
                 {"mechanism": "scheduler_manual_trigger", "status": "planned"}
                 if _is_timing_br else None
@@ -3677,6 +3696,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                         target=primary_br_entity,
                         state="规则适用前提满足",
                         description=f"{prohibited}相关数据已准备",
+                        given_type="rule_noise",
                     )],
                     "when": _make_when(
                         target=primary_br_entity,
@@ -4243,6 +4263,12 @@ def s1_generation_node(state: AgentState) -> dict:
     embedded_brs_count = sum(len(p.get("embedded_brs", [])) for p in procedures)
 
     warnings.append(f"S1 summary: standalone_type7={standalone_count}, embedded_brs={embedded_brs_count}, type5_filtered={len(type5_filtered)}")
+
+    # Then 吸收下沉: transition_target 状态行被同 target 的 behavior 行完全
+    # 包含 → 数据层标记 subsumed, 渲染层只消费标记 (不再文本比对)。
+    subsumed_n = _mark_then_subsumption(valid_procs)
+    if subsumed_n:
+        warnings.append(f"S1 marked {subsumed_n} transition_target Thens subsumed by behavior")
 
     return {
         # BUGFIX #26: removed dead `hasattr(p, 'model_dump')` branch —

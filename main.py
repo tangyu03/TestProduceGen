@@ -504,10 +504,16 @@ def _translate_procedures(procedures: list[dict], id_to_name: dict[str, str]) ->
 def _dedup_thens(thens: list[dict]) -> list[dict]:
     """Render-layer Then dedup: drop redundant assertions.
 
-    Data-driven: the S1 layer marks Thens with ``dedup_group`` (see
-    _make_then) so the renderer does NOT match data-layer text conventions:
+    Data-driven: the S1 layer marks Thens with ``dedup_group`` / ``subsumed``
+    (see _make_then / _mark_then_subsumption) so the renderer does NOT match
+    data-layer text conventions:
       - "transition_target" (状态转换为X) is implied by "transition_flow"
         (状态流转：from→to), so it is omitted when a flow is present.
+      - "transition_target" (状态转换为X) is ALSO implied by a same-target
+        "behavior" Then whose expectation asserts the same state
+        (状态…为X，如 "回收任务创建，状态初始化为草稿")——状态行被行为行
+        完全包含（事件+状态），单独保留无独立信息，省略。吸收判定已下沉到
+        S1（_mark_then_subsumption 标记 subsumed=True），此处只消费标记。
       ("coverage_noise" 已随 P2 治本修复移除——op_desc 现用可观察结果,
       不再产生"覆盖X操作"噪声,此分支不再需要。)
     Exact duplicates (normalized whitespace) are also dropped.
@@ -520,6 +526,8 @@ def _dedup_thens(thens: list[dict]) -> list[dict]:
         if not exp:
             continue
         if t.get("dedup_group") == "transition_target" and has_flow:
+            continue
+        if t.get("subsumed"):
             continue
         norm = "".join(exp.split())
         if norm in seen:
@@ -576,23 +584,38 @@ def _dedupe_when_action(event: str, action: str) -> tuple[str, str]:
     return event, action_core
 
 
-def _dedupe_then_target(target: str, expectation: str) -> tuple[str, str]:
+def _dedupe_then_target(target: str, expectation: str,
+                        proc_entity: str | None = None) -> tuple[str, str]:
     """Then 行 target 与 expectation 的文本重复净化，返回 (target_shown, exp_shown)。
 
-    数据驱动：不硬编码任何实体/属性/状态名，只用文本关系。两条规则顺序判定：
+    数据驱动：不硬编码任何实体/属性/状态名，只用文本关系。规则顺序判定：
     1. target 为 实体.属性 限定链（如 "专家.技术领域"）且 expectation 以其
        最后一段开头（"技术领域显示为修改后的值"）→ 裁掉 expectation 前导
        重复段，target 保留作主语（"专家.技术领域 显示为修改后的值"）；
     2. target 或其最后一段已原样出现在 expectation 文本中（target=附件、
        expectation="显示项目附件集中查看页面"；或 target=专家.技术领域、
        expectation="校验失败，提示'技术领域选择不在A-J范围内'"）→ target
-       完全冗余，省略（纯文本包含判定，不硬编码实体/属性名）。
+       完全冗余，省略（纯文本包含判定，不硬编码实体/属性名）；
+    3. target 为 实体.状态属性（属性以「状态」结尾）且 expectation 自身含
+       「状态」（"状态转换为X"/"状态初始化为X"/…）：属性限定与期望文本语义
+       重复，且 target 实体与 proc 一致（跨实体 Then 保留，避免丢主语）→
+       target 整体省略。纯文本关系 + 通用语言 token「状态」，无领域词表。
+       数据量：同实体状态属性 958 中 831 命中；跨实体 20 条与期望不含
+       「状态」的 127 条保留 target；
+    4. 跨实体且期望以「状态转换X」开头 → 动词前导「状态」与属性名重复，
+       裁为「转换为X」（规则 3 未命中时的兜底）。
     未命中则原样返回 (target, expectation)。
     """
     if "." in target:
         last = target.rsplit(".", 1)[1].strip()
         if last and expectation.startswith(last) and len(expectation) > len(last):
             return target, expectation[len(last):].lstrip()
+        if last.endswith("状态") and "状态" in expectation:
+            ent_part = target.rsplit(".", 1)[0]
+            if proc_entity is None or ent_part == proc_entity:
+                return "", expectation
+        if last.endswith("状态") and expectation.startswith("状态转换"):
+            return target, expectation[len("状态"):].lstrip()
     key = target.rsplit(".", 1)[-1].strip()
     if key and key in expectation:
         return "", expectation
@@ -616,46 +639,6 @@ def _sep_blank(lines: list[str]) -> None:
     """
     if not lines or lines[-1] != "":
         lines.append("")
-
-
-def _br_rule_map(cm: dict | None) -> dict[str, str]:
-    """constraint_obligations → {RO-BR-XXX: 规则原文}（数据层单一事实源）。"""
-    out: dict[str, str] = {}
-    for b in (cm or {}).get("constraint_obligations") or []:
-        bid = str(b.get("id", "")).split("[")[0].strip()
-        if bid and b.get("description"):
-            out[bid] = b["description"]
-    return out
-
-
-def _proc_br_texts(proc: dict, br_map: dict[str, str]) -> list[str]:
-    """proc 引用的 BR 规则原文（source_ids + Then br_refs，RO-BR/BR 归一化）。"""
-    ids: set[str] = set()
-    for sid in list(proc.get("source_ids") or []) + [
-        b for t in proc.get("thens") or [] for b in (t.get("br_refs") or [])
-    ]:
-        s = str(sid).split("[")[0].strip()
-        if s.startswith("RO-BR"):
-            ids.add(s)
-        elif s.startswith("BR-") and not s.startswith("RO-BR"):
-            ids.add("RO-" + s)
-    return [br_map[i] for i in ids if i in br_map]
-
-
-def _is_rule_noise_given(proc: dict, given: dict, br_map: dict[str, str]) -> bool:
-    """规则类 Given 是否空泛噪音（state=规则适用前提满足 且 desc 不含被测规则原文）。
-
-    第一性原理: 规则测试的 Given 有价值 iff 其 desc 携带被测 BR 的规则原文。
-    判据取数据层 constraint_obligations.description——desc 含任一引用 BR 原文
-    → 有效规则上下文（负向模板 "规则：{原文}"），保留；否则 "{...}相关数据已准备"
-    空泛占位 → 噪音，跳过。不匹配 "规则：" 内容前缀，规则文本形态变化仍稳健；
-    BR 解析为空（无法确认噪音）则保守保留。
-    """
-    if given.get("state", "") != "规则适用前提满足":
-        return False
-    desc = re.sub(r"^\[实例 \d+\]\s*", "", given.get("description", "") or "")
-    br_texts = _proc_br_texts(proc, br_map)
-    return bool(br_texts) and not any(bt and bt in desc for bt in br_texts)
 
 
 def _generate_markdown(
@@ -686,9 +669,6 @@ def _generate_markdown(
                 if oid and ref and oid not in source_ref_map:
                     source_ref_map[oid] = ref
         state_info = (coverage_model.get("_context") or {}).get("state_info") or {}
-
-    # 规则 Given 判据：数据层 BR 规则原文映射（见 _is_rule_noise_given）
-    br_map = _br_rule_map(coverage_model)
 
     # 阶段语义解析器：数据驱动（phase_basis + state_info），见 context/render_registry
     phase_label = build_phase_labeler(state_info, procedures)
@@ -725,14 +705,14 @@ def _generate_markdown(
             and re.sub(r"^\[实例 \d+\]\s*", "", g.get("description", "") or "") == "操作入口可用"
         ]
         is_mgmt_fallback = bool(mgmt_fallback_givens) and len(mgmt_fallback_givens) == len(proc.get("givens") or [])
-        # 规则类兜底 Given（state="规则适用前提满足"）：有效规则上下文（desc 携带
-        # 被测 BR 原文，负向模板）保留；"{...}相关数据已准备" 空泛噪音视为冗余跳过。
-        # 判据 = _is_rule_noise_given（数据层 BR 原文对照，非 "规则：" 前缀）。
-        # 与 管理类哨兵 同构——LLM 标题里同源的退化条件短语
-        # （"规则适用前提满足时，" / "项目规则适用前提满足时，"）一并剥除。
+        # 规则类兜底 Given：有效规则上下文（given_type="rule"，desc 携带被测 BR
+        # 原文，负向模板）保留；"{...}相关数据已准备" 空泛噪音（S1 标记
+        # given_type="rule_noise"）视为冗余跳过。与 管理类哨兵 同构——LLM 标题里
+        # 同源的退化条件短语（"规则适用前提满足时，" / "项目规则适用前提满足时，"）
+        # 一并剥除。判据全在数据层标记，渲染层不做 BR 原文反查。
         rule_fallback_givens = [
             g for g in (proc.get("givens") or [])
-            if _is_rule_noise_given(proc, g, br_map)
+            if g.get("given_type") == "rule_noise"
         ]
         is_rule_fallback = bool(rule_fallback_givens) and len(rule_fallback_givens) == len(proc.get("givens") or [])
         title = proc.get("title") or post_state
@@ -800,14 +780,14 @@ def _generate_markdown(
                     # 纯渲染净化，JSON 哨兵保留给 tier2_verify。
                     if g.get("state", "") == "存在" and desc == "操作入口可用":
                         continue
-                    # 规则类 Given（state="规则适用前提满足"）：仅跳过空泛噪音
-                    # （desc 不含被测 BR 原文，数据层对照）；"规则：{原文}" 有效
-                    # 规则上下文保留——负向模板 When/Then 只含被禁操作，规则原文
-                    # 可能只在 Given 呈现（PROC-262），删了丢规则。纯渲染净化，
-                    # JSON 数据保留。
-                    if _is_rule_noise_given(proc, g, br_map):
-                        continue
+                    # 规则类 Given：空泛噪音（"{...}相关数据已准备"）由 S1 标记
+                    # given_type="rule_noise"，此处直接跳过；有效规则上下文
+                    # （given_type="rule"，desc=被测 BR 原文）走下面 rule 分支保留
+                    # ——负向模板 When/Then 只含被禁操作，规则原文可能只在 Given
+                    # 呈现（PROC-262），删了丢规则。判据全在数据层，渲染层无反查。
                     gtype = g.get("given_type", "state")
+                    if gtype == "rule_noise":
+                        continue
                     # 分支条件去重：P2 把分支变体的分支条件同时落进 preconditions
                     # 与 branch_path，S1 两处都渲染 → givens[0] 括号分句与分支
                     # 条件 given 同义重复（全量 34 family/110 处；T-014 即
@@ -854,11 +834,27 @@ def _generate_markdown(
                         # 流转形态（ref.state 是目标态）：`流转：X→Y` 直陈流转过程，
                         # desc 保留原文（含 "由…变为/变为/转为"），不伪装成前置态。
                         g_lines.append(f"- {g.get('target', '')} 流转：{desc}")
+                    elif gtype == "rule":
+                        # 规则上下文（S1 已把 desc 定为被测 BR 原文，无 "规则：" 前缀）：
+                        # 哨兵前缀（"X 状态 = 规则适用前提满足 (…)"）无测试价值、且与
+                        # 业务定位/规则文本重复，只保留规则原文本身。纯渲染净化，
+                        # JSON 哨兵保留。
+                        g_lines.append(f"- {desc}")
+                    elif gtype == "restatement":
+                        # 对象实例复述（desc 已是完整句子形态 "{实体}已存在，处于
+                        # {状态}状态"）：与结构化前缀（target 状态 = state）完全
+                        # 同义，保留句子形态。句子形态由 S1 模板生成，渲染层不拼接。
+                        g_lines.append(f"- {desc}")
                     else:
                         # state/event（默认）：主锚定/同维度/跨维度纯状态 统一格式
                         desc_str = f" ({desc})" if desc else ""
-                        g_lines.append(
-                            f"- {g.get('target', '')} 状态 = {g.get('state', '')}{desc_str}")
+                        tgt = g.get('target', '')
+                        # 属性已含「状态」（"载体.载体状态"）时，运算符「状态 =」的
+                        # 「状态」与属性名重复 → 只留「=」。裸实体 target
+                        # （"文件导出任务"）不含「状态」，运算符保留。纯后缀判定，
+                        # 无领域词表。
+                        op = "=" if "." in tgt and tgt.rsplit(".", 1)[1].endswith("状态") else "状态 ="
+                        g_lines.append(f"- {tgt} {op} {g.get('state', '')}{desc_str}")
                 if g_lines:
                     lines.append("**Given**")
                     lines.extend(g_lines)
@@ -905,12 +901,21 @@ def _generate_markdown(
                         br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
                         xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
                     target_shown, exp_shown = _dedupe_then_target(
-                        t.get("target", ""), t.get("expectation", "")
+                        t.get("target", ""), t.get("expectation", ""),
+                        proc.get("entity"),
                     )
+                    # 裸实体 target（无属性限定）且等于 proc 自身 entity：实体已在
+                    # 业务定位/Given/标题确立，Then 再作主语冗余，省略不丢信息。
+                    # 数据驱动 target==proc.entity 文本关系（JSON 全量 412 处无
+                    # 例外），属性限定 target（实体.属性）不受影响。
+                    if target_shown and "." not in target_shown and target_shown == proc.get("entity"):
+                        target_shown = ""
                     if hide_markers:
                         exp_shown = re.sub(r"^\[BR-\d+\]", "", exp_shown)
                     target_str = f"{target_shown} " if target_shown else ""
-                    lines.append(f"- {target_str}{exp_shown} ({t.get('kind', 'state')}){br_str}{xref_str}")
+                    # hide_markers=True 时连同 (behavior)/(state) 等 kind 标签一起省略
+                    kind_str = "" if hide_markers else f" ({t.get('kind', 'state')})"
+                    lines.append(f"- {target_str}{exp_shown}{kind_str}{br_str}{xref_str}")
 
         # Cascade chain
         cascade = proc.get("cascade_chain")
@@ -1243,7 +1248,7 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
     to_by_id = {to.get("id", ""): to for to in tos}
     to_by_tid = {to.get("transition_id", ""): to for to in tos if to.get("transition_id")}
 
-    # V06: 触发方式动态推导（与 s1_generation._build_timeout_hints 逻辑一致）
+    # V06: 触发方式动态推导（与 s1_generation._derive_time_mechanism 逻辑一致）
     # 触发方式标识符是 validator 协议约定的枚举值，不算业务硬编码
     def _determine_trigger_method(action: str, event: str) -> str:
         """根据 action/event 语义推导主触发方式。"""

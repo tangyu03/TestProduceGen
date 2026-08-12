@@ -183,6 +183,9 @@ class ThenClause(BaseModel):
                                       #   "transition_flow"   状态流转:from→to(保留)
                                       #   "transition_target" 状态转换为X(有 flow 时省略)
                                       #   "coverage_noise"    覆盖X的Y操作(无可观察结果)
+    subsumed: bool = False            # S1 吸收标记: transition_target 状态行被同 target
+                                      # 的 behavior 行完全包含(状态…为X)→ 渲染层省略。
+                                      # 吸收判断在 S1 完成(数据层), 渲染层只消费标记。
 
 
 class BRClassification(BaseModel):
@@ -228,7 +231,7 @@ class Procedure(BaseModel):
     # ── 时间控制声明 (V06) ──
     # 时间触发型用例须声明 mechanism ∈ {clock_injection, db_time_update,
     # scheduler_manual_trigger},骨架阶段 status 可为 "planned"。
-    # S1 从时效语义推导,见 _build_timeout_hints 的主触发机制。
+    # S1 从时效语义推导,见 _derive_time_mechanism 的主触发机制。
     time_control: Optional[dict] = None
 
     gen_seq: int
@@ -287,7 +290,7 @@ class Procedure(BaseModel):
         # given_type 分流 (DECISIONS ㉛): constraint/flow 是独立信息行 (业务约束/
         # 流转形态), 无前置态概念, 允许 state 为空; state/event/branch 必须携带前置态。
         nav_keywords = ("导航", "点击", "进入页面", "打开")
-        _state_required = ("state", "event", "branch")
+        _state_required = ("state", "event", "branch", "rule", "rule_noise", "restatement")
         for i, g in enumerate(self.givens):
             if g.given_type in _state_required and not g.state:
                 raise ValueError(

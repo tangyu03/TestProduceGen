@@ -5,6 +5,42 @@
 
 ---
 
+## 2026-08-12 ㊺ 删除 time_sensitive 用例的触发方式 hint 行：`scheduler_manual_trigger:/clock_injection:/db_time_update:` 不再作为 When 编号步骤注入
+
+**决策**（用户判「添加的位置和实际需求的不一样。如无必要可以删除」→ 删除）：S1 `_build_timeout_hints()` 不再把 3 种触发机制描述（`clock_injection: 测试时注入时钟到边界值` 等，AI 措辞）注入 `operation_hints`。time_sensitive 用例的 When 块恢复为只有真实执行事件（如 PROC-197 `1. 确认导入完成 by 普通用户`）；触发机制保留在 JSON `time_control.mechanism`（V06 协议字段，机器可读）。删除函数 `_build_timeout_hints`/`_TRIGGER_HINT_TEMPLATES`/`_ALLOWED_TRIGGER_METHODS`，保留 `_derive_time_mechanism`（仍供 `time_control.mechanism` 推导，3 处调用）。
+
+**为何可删**：
+- V06 只校验 JSON `time_control.mechanism ∈ allowed_mechanisms`（`v06_time_control.py:43-44`），不读 operation_hints → hint 行非闸门负载。
+- 需求原文自陈触发语义（t06「如未确认48小时后系统自动结束并删除导入文件」），Given 括号（`时间边界条件: 接近截止时间`）与 action 后缀（`(时间边界)`/`(已过期)`）已传达时序上下文 → hint 行零新增信息。
+- 3 种机制全列当编号步骤、与真实事件混排，把测试基建措辞冒充业务操作——PROC-197 需求是「系统自动结束」，列 `clock_injection`/`db_time_update` 与本用例语义不符（误导读成「注入时钟」「改库时间」步骤）。
+
+**验证结果**：重跑 727 procs，temp_id +0/-0，title overlay 727/0，双跑 SHA-256 字节一致；`time_control` 51 procs（scheduler_manual_trigger=25/clock_injection=13/db_time_update=13）保留；md 全文件 0 条 hint 行；Gate-S V01-V10 全 pass，V06 `time obligations=8, missing time_control=0`，signature null。
+
+**判据速记**：V06 协议字段（JSON time_control）与 md 可读性解耦——机器协议留数据层，AI 措辞的「测试基建」行不冒充业务步骤。time_sensitive 语义上下文已在需求原文/Givens/action 后缀承载。
+
+---
+
+## 2026-08-12 ㊹ 三处语义净化下沉到数据层（S1 标记）：规则兜底/复述 desc/Then 吸收
+
+**决策**（用户定调「三处全下沉」）：把此前在渲染层（main.py）用文本反查/逆解析实现的三个**语义型**净化全部下沉到数据层 S1，渲染层变纯格式选择器，不再反查 coverage_model 或拼接模板比对。三个纯格式净化（裸实体 target 省略、属性含「状态」时 `=` 运算符、`--hide-markers` 标签隐藏）留在渲染层——它们本就是格式选择，无语义决策。
+
+**下沉的三个语义判定**：
+1. **规则兜底 Given**（`given_type="rule"` / `"rule_noise"`）：Type7 neg_op 站 desc 由 `"规则：{原文}"` 改存纯 `{原文}`、标记 `rule`（有效规则上下文，负向模板 When/Then 只含被禁操作，规则原文只在 Given 呈现，PROC-262 删了丢规则）；两个「…相关数据已准备」空泛占位站标记 `rule_noise`（渲染直接跳过）。渲染层删除 `_is_rule_noise_given`/`_proc_br_texts`/`_br_rule_map` 三个反查 helper（原按 `desc 含被测 BR 原文？` 对照 coverage 判定，现判据在数据）。
+2. **复述 desc**（`given_type="restatement"`）：Tier 2 领域前置的 `object_existence` 对象实例复述 desc（`{实体}已存在，处于{状态}状态`，全量 200 处/7 唯一形态）标记 `restatement`，渲染按 `- {desc}` 句子形态输出。渲染层删除 `desc == f"{target}已存在…"` 的模板拼接比对（该比对只在翻译后 target=中文名时命中，属隐性文本约定耦合）。
+3. **Then 吸收**（`ThenClause.subsumed` 新字段）：transition_target 状态行（`状态转换为X`）被同 target 的 behavior 行（`状态…为X`，如「导出任务创建，状态初始化为草稿」）完全包含 → S1 后处理 `_mark_then_subsumption(valid_procs)` 标记 `subsumed=True`，渲染层 `_dedup_thens` 只消费标记。标记量 **152** = 旧渲染层文本比对的命中数（321 条 transition_target 中 169 条无复述者保留），逐字复刻。
+
+**为什么下沉**：语义决策（某 Given 是否噪音、某 Then 是否冗余）属数据层职责；渲染层做文本比对/模板拼接把「数据层文本约定」耦合进渲染逻辑（㉛ 已确立「引擎层打标记、渲染层只消费标记」）。下沉后渲染层不再依赖 `规则：` 前缀、BR 原文可解析性、target 翻译状态等隐式前提。
+
+**验证结果**（s1_fix_replay 确定性重跑 → Gate-S 全量）：
+- 重跑 727 procs，temp_id +0/-0（结构 1:1），title overlay 727 hit/0 miss；双跑 SHA-256 字节一致（确定性范式未破坏）。
+- 数据层：given_type 计数 state=485/constraint=393/restatement=200/rule_noise=61/rule=6/event=50/branch=165；`subsumed=True`=152。
+- Gate-S V01-V10 全 pass / 0 fail，signature null，case_total 727，coverage_misses=0。
+- 渲染核查：PT017_output.md PROC-067 Given=纯规则原文（无 `状态 = 规则适用前提满足` 哨兵前缀、无 `规则：` 前缀）；PROC-001 Then 只剩「导出任务创建，状态初始化为草稿」（`状态转换为草稿` 被吸收）；`相关数据已准备` 与 `状态 = 规则适用前提满足` 全文件 0 命中。
+
+**判据速记**：语义决策（Given 噪音/Then 冗余/句子形态）在数据层标记；渲染层按标记选格式，不做文本比对/模板拼接/coverage 反查。纯格式净化（省略主语、运算符、marker 隐藏）留渲染层。判定「下沉完整」= grep 渲染层无 `规则：` 前缀剥离、无 `已存在，处于` 拼接、无 transition_target 文本比对。
+
+---
+
 ## 2026-08-12 ㊸ 同文 BR 一实体一条的合并（9→1）：`_backfill_branch_coverage` 无实体作用域 → 配置用例 Then 重复 9 次清零
 
 **决策**：数据层把 9 条**文本完全相同**的「任务级别」BR（b10..b18，每任务实体一条，source_ref 4.5.2/4.6.2/…/4.13.2）合并为 1 条（b10，`entities_involved` 并列 9 实体，`source_ref` 并列全条款）。P3 重生成后：PROC-013/014/015（E-IMP 任务级别 A/B/C 三个配置过程）的 **Then 从 9 条同文 BR 行 → 1 条规则**，procedures 727 不变，verdict pass / 0 blocker，V10 `BR 53/53 (embedded 7, xc_causal 14)`。
