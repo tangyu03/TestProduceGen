@@ -49,6 +49,8 @@ from nodes.s3_dependency import s3_dependency_node  # noqa: E402
 from nodes.s4_multi_instance import s4_multi_instance_node  # noqa: E402
 import tools.fallback_log as _fl  # noqa: E402
 
+# 归档/输出路径默认指向通用样例;其它需求(如 PT017)经 CLI 参数覆盖,
+# 见 main() 的 argparse。p3_agent_output.* 为另一需求的产物,默认分支不变。
 ARCHIVED_PATH = ROOT / "p3_agent_output.json"
 COVERAGE_PATH = ROOT / "coverage_obligations.json"
 OUT_JSON = ROOT / "p3_agent_output.s1fix.json"
@@ -219,8 +221,20 @@ def _build_output(state: AgentState, cm: dict, es_orig: dict,
 
 
 def main() -> int:
-    archived = _load(ARCHIVED_PATH)
-    cm = _load(COVERAGE_PATH)
+    import argparse
+    ap = argparse.ArgumentParser(description="S1 确定性回放重建")
+    ap.add_argument("--archive", default=str(ARCHIVED_PATH))
+    ap.add_argument("--coverage", default=str(COVERAGE_PATH))
+    ap.add_argument("--out-json", default=str(OUT_JSON))
+    ap.add_argument("--out-md", default=str(OUT_MD))
+    a = ap.parse_args()
+    archived_path = Path(a.archive)
+    coverage_path = Path(a.coverage)
+    out_json = Path(a.out_json)
+    out_md = Path(a.out_md)
+
+    archived = _load(archived_path)
+    cm = _load(coverage_path)
 
     state = _run_pipeline(archived, cm)
     replayed = state["procedures"]
@@ -245,10 +259,10 @@ def main() -> int:
     output = _build_output(state, cm, archived.get("engine_state") or {},
                            id_to_name)
 
-    out_json = json.dumps(output, ensure_ascii=False, indent=2).replace("\n", "\r\n")
-    OUT_JSON.write_bytes(out_json.encode("utf-8"))
-    _generate_markdown(output["procedures"], str(OUT_MD), cm)
-    print(f"[OK] wrote {OUT_JSON.name} ({len(out_json)} bytes) + {OUT_MD.name}")
+    out_bytes = json.dumps(output, ensure_ascii=False, indent=2).replace("\n", "\r\n")
+    out_json.write_bytes(out_bytes.encode("utf-8"))
+    _generate_markdown(output["procedures"], str(out_md), cm)
+    print(f"[OK] wrote {out_json.name} ({len(out_bytes)} bytes) + {out_md.name}")
     return 0
 
 

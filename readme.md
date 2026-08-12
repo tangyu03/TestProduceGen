@@ -197,7 +197,10 @@ python.exe context/verify/validate_p2.py coverage_obligations.json review_struct
 ### 3. 运行 P3 流水线
 
 ```bash
+# 默认（开关关，标记全显示）
 python main.py coverage_obligations.json output.json
+# 开开关（隐藏 id 标记）
+python main.py coverage_obligations.json output.json --hide-markers
 ```
 
 ### 4. 运行 Gate-S 校验

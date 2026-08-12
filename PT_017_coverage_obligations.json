@@ -7063,134 +7063,14 @@
       "type": "business_rule",
       "constraint_id": "BR-011",
       "entities_involved": [
-        "E-IMP"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.5.2"
-    },
-    {
-      "id": "RO-BR-012",
-      "type": "business_rule",
-      "constraint_id": "BR-012",
-      "entities_involved": [
-        "E-REG"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.6.2"
-    },
-    {
-      "id": "RO-BR-013",
-      "type": "business_rule",
-      "constraint_id": "BR-013",
-      "entities_involved": [
-        "E-ARC"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.7.2"
-    },
-    {
-      "id": "RO-BR-014",
-      "type": "business_rule",
-      "constraint_id": "BR-014",
-      "entities_involved": [
-        "E-TRF"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.8.2"
-    },
-    {
-      "id": "RO-BR-015",
-      "type": "business_rule",
-      "constraint_id": "BR-015",
-      "entities_involved": [
-        "E-RET"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.9.2"
-    },
-    {
-      "id": "RO-BR-016",
-      "type": "business_rule",
-      "constraint_id": "BR-016",
-      "entities_involved": [
-        "E-RCY"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.10.2"
-    },
-    {
-      "id": "RO-BR-017",
-      "type": "business_rule",
-      "constraint_id": "BR-017",
-      "entities_involved": [
-        "E-OUT"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.11.2"
-    },
-    {
-      "id": "RO-BR-018",
-      "type": "business_rule",
-      "constraint_id": "BR-018",
-      "entities_involved": [
-        "E-EXP"
-      ],
-      "category": "authorization",
-      "signal_type": "restrictive",
-      "description": "任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "enforcement": "conditional",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.12.2"
-    },
-    {
-      "id": "RO-BR-019",
-      "type": "business_rule",
-      "constraint_id": "BR-019",
-      "entities_involved": [
+        "E-IMP",
+        "E-REG",
+        "E-ARC",
+        "E-TRF",
+        "E-RET",
+        "E-RCY",
+        "E-OUT",
+        "E-EXP",
         "E-SCN"
       ],
       "category": "authorization",
@@ -7200,12 +7080,12 @@
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
       "suggested_action": "验证规则约束: 任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-      "source_ref": "4.13.2"
+      "source_ref": "4.5.2；4.6.2；4.7.2；4.8.2；4.9.2；4.10.2；4.11.2；4.12.2；4.13.2"
     },
     {
-      "id": "RO-BR-020",
+      "id": "RO-BR-012",
       "type": "business_rule",
-      "constraint_id": "BR-020",
+      "constraint_id": "BR-012",
       "entities_involved": [
         "E-IMP"
       ],
@@ -7219,9 +7099,9 @@
       "source_ref": "4.5.3"
     },
     {
-      "id": "RO-BR-021",
+      "id": "RO-BR-013",
       "type": "business_rule",
-      "constraint_id": "BR-021",
+      "constraint_id": "BR-013",
       "entities_involved": [
         "E-CAR",
         "E-REG"
@@ -7236,9 +7116,9 @@
       "source_ref": "4.6.5"
     },
     {
-      "id": "RO-BR-022",
+      "id": "RO-BR-014",
       "type": "business_rule",
-      "constraint_id": "BR-022",
+      "constraint_id": "BR-014",
       "entities_involved": [
         "E-CAR",
         "E-USER",
@@ -7257,9 +7137,9 @@
       "source_ref": "4.6.5"
     },
     {
-      "id": "RO-BR-023",
+      "id": "RO-BR-015",
       "type": "business_rule",
-      "constraint_id": "BR-023",
+      "constraint_id": "BR-015",
       "entities_involved": [
         "E-RET",
         "E-CAR"
@@ -7274,9 +7154,9 @@
       "source_ref": "4.9.1；4.9"
     },
     {
-      "id": "RO-BR-024",
+      "id": "RO-BR-016",
       "type": "business_rule",
-      "constraint_id": "BR-024",
+      "constraint_id": "BR-016",
       "entities_involved": [
         "E-EXP"
       ],
@@ -7290,9 +7170,9 @@
       "source_ref": "4.12.1（5）；4.12.1（2）"
     },
     {
-      "id": "RO-BR-025",
+      "id": "RO-BR-017",
       "type": "business_rule",
-      "constraint_id": "BR-025",
+      "constraint_id": "BR-017",
       "entities_involved": [
         "E-SCN"
       ],
@@ -7306,9 +7186,9 @@
       "source_ref": "4.13.1（2）"
     },
     {
-      "id": "RO-BR-026",
+      "id": "RO-BR-018",
       "type": "business_rule",
-      "constraint_id": "BR-026",
+      "constraint_id": "BR-018",
       "entities_involved": [
         "E-REG"
       ],
@@ -7322,9 +7202,9 @@
       "source_ref": "4.6.1（1）；4.6.1（2）"
     },
     {
-      "id": "RO-BR-027",
+      "id": "RO-BR-019",
       "type": "business_rule",
-      "constraint_id": "BR-027",
+      "constraint_id": "BR-019",
       "entities_involved": [
         "E-USER"
       ],
@@ -7338,9 +7218,9 @@
       "source_ref": "4.14.1 表4.14.1-1（1）；4.14.1（2）"
     },
     {
-      "id": "RO-BR-028",
+      "id": "RO-BR-020",
       "type": "business_rule",
-      "constraint_id": "BR-028",
+      "constraint_id": "BR-020",
       "entities_involved": [
         "E-USER"
       ],
@@ -7354,9 +7234,9 @@
       "source_ref": "4.14.1 表4.14.1-1（3）；4.18（3）"
     },
     {
-      "id": "RO-BR-029",
+      "id": "RO-BR-021",
       "type": "business_rule",
-      "constraint_id": "BR-029",
+      "constraint_id": "BR-021",
       "entities_involved": [
         "E-USER"
       ],
@@ -7370,9 +7250,9 @@
       "source_ref": "4.14.1 表4.14.1-1（5）"
     },
     {
-      "id": "RO-BR-030",
+      "id": "RO-BR-022",
       "type": "business_rule",
-      "constraint_id": "BR-030",
+      "constraint_id": "BR-022",
       "entities_involved": [
         "E-USER"
       ],
@@ -7386,9 +7266,9 @@
       "source_ref": "4.14.1 表4.14.1-1（6）"
     },
     {
-      "id": "RO-BR-031",
+      "id": "RO-BR-023",
       "type": "business_rule",
-      "constraint_id": "BR-031",
+      "constraint_id": "BR-023",
       "entities_involved": [
         "E-USER"
       ],
@@ -7402,9 +7282,9 @@
       "source_ref": "4.18（4）；4.18（5）；4.18（6）"
     },
     {
-      "id": "RO-BR-032",
+      "id": "RO-BR-024",
       "type": "business_rule",
-      "constraint_id": "BR-032",
+      "constraint_id": "BR-024",
       "entities_involved": [
         "E-USER"
       ],
@@ -7418,9 +7298,9 @@
       "source_ref": "4.18（2）"
     },
     {
-      "id": "RO-BR-033",
+      "id": "RO-BR-025",
       "type": "business_rule",
-      "constraint_id": "BR-033",
+      "constraint_id": "BR-025",
       "entities_involved": [
         "E-USER"
       ],
@@ -7434,9 +7314,9 @@
       "source_ref": "4.14.1（7）"
     },
     {
-      "id": "RO-BR-034",
+      "id": "RO-BR-026",
       "type": "business_rule",
-      "constraint_id": "BR-034",
+      "constraint_id": "BR-026",
       "entities_involved": [
         "E-DEPT"
       ],
@@ -7450,9 +7330,9 @@
       "source_ref": "4.14.3；4.14.3（2）；4.14.3（3）"
     },
     {
-      "id": "RO-BR-035",
+      "id": "RO-BR-027",
       "type": "business_rule",
-      "constraint_id": "BR-035",
+      "constraint_id": "BR-027",
       "entities_involved": [
         "E-DEPT"
       ],
@@ -7466,9 +7346,9 @@
       "source_ref": "4.14.3 表4.14.3-1（1）"
     },
     {
-      "id": "RO-BR-036",
+      "id": "RO-BR-028",
       "type": "business_rule",
-      "constraint_id": "BR-036",
+      "constraint_id": "BR-028",
       "entities_involved": [
         "E-LOG",
         "E-ROLE"
@@ -7483,9 +7363,9 @@
       "source_ref": "4.17；4.18（7）"
     },
     {
-      "id": "RO-BR-037",
+      "id": "RO-BR-029",
       "type": "business_rule",
-      "constraint_id": "BR-037",
+      "constraint_id": "BR-029",
       "entities_involved": [
         "E-LOG"
       ],
@@ -7499,9 +7379,9 @@
       "source_ref": "4.17.1；4.18（8）"
     },
     {
-      "id": "RO-BR-038",
+      "id": "RO-BR-030",
       "type": "business_rule",
-      "constraint_id": "BR-038",
+      "constraint_id": "BR-030",
       "entities_involved": [
         "E-LOG"
       ],
@@ -7515,9 +7395,9 @@
       "source_ref": "4.17.2（1）"
     },
     {
-      "id": "RO-BR-039",
+      "id": "RO-BR-031",
       "type": "business_rule",
-      "constraint_id": "BR-039",
+      "constraint_id": "BR-031",
       "entities_involved": [
         "E-ROLE",
         "E-USER"
@@ -7532,9 +7412,9 @@
       "source_ref": "4.16.1；4.16.2；4.16.3"
     },
     {
-      "id": "RO-BR-040",
+      "id": "RO-BR-032",
       "type": "business_rule",
-      "constraint_id": "BR-040",
+      "constraint_id": "BR-032",
       "entities_involved": [
         "E-ROLE",
         "E-USER"
@@ -7549,9 +7429,9 @@
       "source_ref": "5；5"
     },
     {
-      "id": "RO-BR-041",
+      "id": "RO-BR-033",
       "type": "business_rule",
-      "constraint_id": "BR-041",
+      "constraint_id": "BR-033",
       "entities_involved": [
         "E-USER"
       ],
@@ -7565,9 +7445,9 @@
       "source_ref": "4.18（9）"
     },
     {
-      "id": "RO-BR-042",
+      "id": "RO-BR-034",
       "type": "business_rule",
-      "constraint_id": "BR-042",
+      "constraint_id": "BR-034",
       "entities_involved": [
         "E-USER"
       ],
@@ -7581,9 +7461,9 @@
       "source_ref": "4.19（1）；4.19（3）"
     },
     {
-      "id": "RO-BR-043",
+      "id": "RO-BR-035",
       "type": "business_rule",
-      "constraint_id": "BR-043",
+      "constraint_id": "BR-035",
       "entities_involved": [
         "E-USER",
         "E-IMP",
@@ -7606,9 +7486,9 @@
       "source_ref": "4.19（2）"
     },
     {
-      "id": "RO-BR-044",
+      "id": "RO-BR-036",
       "type": "business_rule",
-      "constraint_id": "BR-044",
+      "constraint_id": "BR-036",
       "entities_involved": [
         "E-ROLE",
         "E-USER"
@@ -7623,9 +7503,9 @@
       "source_ref": "4.18（1）"
     },
     {
-      "id": "RO-BR-045",
+      "id": "RO-BR-037",
       "type": "business_rule",
-      "constraint_id": "BR-045",
+      "constraint_id": "BR-037",
       "entities_involved": [
         "E-CAR",
         "E-RET"
@@ -7640,9 +7520,9 @@
       "source_ref": "4.9.3"
     },
     {
-      "id": "RO-BR-046",
+      "id": "RO-BR-038",
       "type": "business_rule",
-      "constraint_id": "BR-046",
+      "constraint_id": "BR-038",
       "entities_involved": [
         "E-IMP",
         "E-REG",
@@ -7664,9 +7544,9 @@
       "source_ref": "4.5.1 表4.5-1（3）；4.6.1；4.7.1；4.8.1；4.9.1；4.10.1；4.11.1；4.12.1；4.13.1"
     },
     {
-      "id": "RO-BR-047",
+      "id": "RO-BR-039",
       "type": "business_rule",
-      "constraint_id": "BR-047",
+      "constraint_id": "BR-039",
       "entities_involved": [
         "E-IMP",
         "E-REG",
@@ -7688,7 +7568,7 @@
       "source_ref": "4.5.1 表4.5-1（1）（2）；4.6.1；4.7.1；4.8.1；4.9.1；4.10.1；4.11.1；4.12.1；4.13.1"
     },
     {
-      "id": "RO-BR-048",
+      "id": "RO-BR-040",
       "type": "business_rule",
       "constraint_id": "XC-001",
       "entities_involved": [
@@ -7705,7 +7585,7 @@
       "source_ref": "4.7.1；4.7.3"
     },
     {
-      "id": "RO-BR-049",
+      "id": "RO-BR-041",
       "type": "business_rule",
       "constraint_id": "XC-002",
       "entities_involved": [
@@ -7722,7 +7602,7 @@
       "source_ref": "4.7.3"
     },
     {
-      "id": "RO-BR-050",
+      "id": "RO-BR-042",
       "type": "business_rule",
       "constraint_id": "XC-003",
       "entities_involved": [
@@ -7739,7 +7619,7 @@
       "source_ref": "4.7.3"
     },
     {
-      "id": "RO-BR-051",
+      "id": "RO-BR-043",
       "type": "business_rule",
       "constraint_id": "XC-004",
       "entities_involved": [
@@ -7756,7 +7636,7 @@
       "source_ref": "4.7.3"
     },
     {
-      "id": "RO-BR-052",
+      "id": "RO-BR-044",
       "type": "business_rule",
       "constraint_id": "XC-005",
       "entities_involved": [
@@ -7773,7 +7653,7 @@
       "source_ref": "4.7.3"
     },
     {
-      "id": "RO-BR-053",
+      "id": "RO-BR-045",
       "type": "business_rule",
       "constraint_id": "XC-006",
       "entities_involved": [
@@ -7790,7 +7670,7 @@
       "source_ref": "4.6.5；4.9.3"
     },
     {
-      "id": "RO-BR-054",
+      "id": "RO-BR-046",
       "type": "business_rule",
       "constraint_id": "XC-007",
       "entities_involved": [
@@ -7807,7 +7687,7 @@
       "source_ref": "4.6.5；4.9.3"
     },
     {
-      "id": "RO-BR-055",
+      "id": "RO-BR-047",
       "type": "business_rule",
       "constraint_id": "XC-008",
       "entities_involved": [
@@ -7824,7 +7704,7 @@
       "source_ref": "4.6.5；4.9.3"
     },
     {
-      "id": "RO-BR-056",
+      "id": "RO-BR-048",
       "type": "business_rule",
       "constraint_id": "XC-009",
       "entities_involved": [
@@ -7841,7 +7721,7 @@
       "source_ref": "4.6.5；4.9.3"
     },
     {
-      "id": "RO-BR-057",
+      "id": "RO-BR-049",
       "type": "business_rule",
       "constraint_id": "XC-010",
       "entities_involved": [
@@ -7858,7 +7738,7 @@
       "source_ref": "4.6.3"
     },
     {
-      "id": "RO-BR-058",
+      "id": "RO-BR-050",
       "type": "business_rule",
       "constraint_id": "XC-011",
       "entities_involved": [
@@ -7875,7 +7755,7 @@
       "source_ref": "4.8.1"
     },
     {
-      "id": "RO-BR-059",
+      "id": "RO-BR-051",
       "type": "business_rule",
       "constraint_id": "XC-012",
       "entities_involved": [
@@ -7892,7 +7772,7 @@
       "source_ref": "4.9.1"
     },
     {
-      "id": "RO-BR-060",
+      "id": "RO-BR-052",
       "type": "business_rule",
       "constraint_id": "XC-013",
       "entities_involved": [
@@ -7909,7 +7789,7 @@
       "source_ref": "4.10.1"
     },
     {
-      "id": "RO-BR-061",
+      "id": "RO-BR-053",
       "type": "business_rule",
       "constraint_id": "XC-014",
       "entities_involved": [
@@ -7928,7 +7808,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-11T17:48:28.079324+08:00",
+    "generated_at": "2026-08-12T08:51:37.971454+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
@@ -8001,7 +7881,7 @@
         },
         "step5_invalid_transitions": 4,
         "step5_cross_entity": 14,
-        "step5_business_rules": 47
+        "step5_business_rules": 39
       }
     },
     "branch_dimensions": [
@@ -8064,15 +7944,7 @@
           ],
           "cross_entity": [],
           "business_rules": [
-            "BR-011",
-            "BR-012",
-            "BR-013",
-            "BR-014",
-            "BR-015",
-            "BR-016",
-            "BR-017",
-            "BR-018",
-            "BR-019"
+            "BR-011"
           ]
         },
         "affected_obligations": [

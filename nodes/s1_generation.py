@@ -2269,7 +2269,11 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
             for branch in bd.get("branches", []):
                 transition_id = branch.get("target_transition", "")
                 chain_depth = depth_cache.get(transition_id, 0)
-                phase_info = _resolve_phase(eo["entity"], attr, branch["value"], state)
+                # Type3 是数据维护类:分支路径走 setup 解析器,与非分支路径
+                # (PROC-002 基础数据-文件导出任务)一致。_resolve_phase 面向
+                # 状态锚定,配置属性(任务级别)非状态维度会落到 L0 debug 标记
+                # "P6: topology_level L0 → P0"(渲染层不识别→"第N阶段"兜底)。
+                phase_info = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=3)
                 dim_priority = _get_dimension_priority(eo["entity"], attr, state)
 
                 val = branch['value']
@@ -2441,9 +2445,12 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
         if entity == primary:
             primary_dim_map = phase_table["state_to_phase"].get(phase_table["primary_dimension"], {})
             if primary_dim_map:
-                first_phase = next(iter(primary_dim_map.values()), 0)
+                # 锚定第一个状态,产成两段式 phase_table.<维度>.<状态>,渲染层
+                # _PHASE_TABLE_RE 与 _derive_primary_eid 都依赖 .状态 后缀解析
+                # (单段 phase_table.<维度> 匹配不上,落到"第N阶段"兜底)。
+                anchor_state, first_phase = next(iter(primary_dim_map.items()), (None, 0))
                 phase = first_phase if first_phase is not None else 0
-                phase_basis = f"phase_table.{phase_table['primary_dimension']}"
+                phase_basis = f"phase_table.{phase_table['primary_dimension']}.{anchor_state}"
         elif entity in dep_map:
             first_dim = next(iter(dep_map[entity].values()), None)
             if first_dim:
@@ -3475,9 +3482,10 @@ def _generate_type9_field_validation(
                 phase_table.get("primary_dimension", ""), {}
             )
             if primary_dim_map:
-                first_phase = next(iter(primary_dim_map.values()), 0)
+                # 同 Type5 主实体分支:锚定第一个状态,产成两段式 phase_table 形态
+                anchor_state, first_phase = next(iter(primary_dim_map.items()), (None, 0))
                 phase = first_phase if first_phase is not None else 0
-                phase_basis = f"phase_table.{phase_table.get('primary_dimension', '')}"
+                phase_basis = f"phase_table.{phase_table.get('primary_dimension', '')}.{anchor_state}"
         elif entity_id in dep_map:
             first_dim = next(iter(dep_map[entity_id].values()), None)
             if first_dim:

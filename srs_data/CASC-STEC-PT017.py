@@ -2394,85 +2394,15 @@ def build() -> DomainModel:
         source_ref="4.19（4）；4.4（8）；4.4（9）",
         signal_type="usability",
     )
-    # 任务级别分支约束（每个任务实体至少一条 BR 含 branch_dimension）
+    # 任务级别分支约束（4.5.2/4.6.2/…/4.13.2 同文重复，是一个规则适用于全部 9 类任务实体）
+    # 曾拆成 9 条相同文本 BR（每实体一条），被 _backfill_branch_coverage 全部挂进 E-IMP 分支维度
+    # → EO-ATC-001 配置用例 Then 重复 9 次（PROC-013/014/015）。合并为一条，source_ref 并列全条款。
     m.add_br(
         bid="b10",
         category="authorization",
         desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-IMP"],
-        source_ref="4.5.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b11",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-REG"],
-        source_ref="4.6.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b12",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-ARC"],
-        source_ref="4.7.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b13",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-TRF"],
-        source_ref="4.8.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b14",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-RET"],
-        source_ref="4.9.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b15",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-RCY"],
-        source_ref="4.10.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b16",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-OUT"],
-        source_ref="4.11.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b17",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-EXP"],
-        source_ref="4.12.2",
-        signal_type="restrictive",
-        note={"branch_dimension": "任务级别"},
-    )
-    m.add_br(
-        bid="b18",
-        category="authorization",
-        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-SCN"],
-        source_ref="4.13.2",
+        entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        source_ref="4.5.2；4.6.2；4.7.2；4.8.2；4.9.2；4.10.2；4.11.2；4.12.2；4.13.2",
         signal_type="restrictive",
         note={"branch_dimension": "任务级别"},
     )

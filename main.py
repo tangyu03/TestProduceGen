@@ -28,13 +28,17 @@ import tools.fallback_log as _fl
 def run_p3_pipeline(
     coverage_model_path: str,
     output_path: str,
+    hide_markers: bool = False,
 ) -> dict:
     """Run the complete P3 agent pipeline.
-    
+
     Args:
         coverage_model_path: Path to P2 coverage_model.json
         output_path: Path to write the output JSON
-    
+        hide_markers: When True, the rendered markdown omits machine id markers
+            (obligation ids in 覆盖需求, BR ids / cross annotations in Then),
+            keeping only human-readable refs and rule text.
+
     Returns:
         The final state dict
     """
@@ -292,7 +296,7 @@ def run_p3_pipeline(
     
     # Also generate markdown test procedures
     md_path = output_path.replace(".json", ".md")
-    _generate_markdown(procedures, md_path, coverage_model)
+    _generate_markdown(procedures, md_path, coverage_model, hide_markers=hide_markers)
     print(f"      [OK] Markdown saved to: {md_path}")
 
     if errors:
@@ -658,6 +662,7 @@ def _generate_markdown(
     procedures: list[dict],
     md_path: str,
     coverage_model: dict | None = None,
+    hide_markers: bool = False,
 ):
     """Generate human-readable markdown from procedures.
 
@@ -745,11 +750,16 @@ def _generate_markdown(
         lines.append(f"**业务定位**：{type_cn} ｜ {phase_label(proc)}")
 
         # 覆盖需求：source_ids + 原始 source_ref（SRS 章节）
+        # hide_markers=True 时省略义务 id（EO-XXX），仅保留 SRS 章节号；
+        # 无章节号时兜底保留 id，避免丢失追溯信息。
         if source_ids:
             ref_parts = []
             for sid in source_ids:
                 ref = source_ref_map.get(sid, "")
-                ref_parts.append(f"{sid}（{ref}）" if ref else sid)
+                if hide_markers:
+                    ref_parts.append(ref if ref else sid)
+                else:
+                    ref_parts.append(f"{sid}（{ref}）" if ref else sid)
             lines.append(f"**覆盖需求**：{'；'.join(ref_parts)}")
 
         if s2.get("context"):
@@ -887,11 +897,18 @@ def _generate_markdown(
                 _sep_blank(lines)
                 lines.append("**Then**")
                 for t in _dedup_thens(thens):
-                    br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
-                    xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
+                    # hide_markers=True 时省略 BR id（[BR: ...]）与 cross 实体标注，
+                    # 并剥除期望文本行首的 [BR-NNN] 前缀（保留 正面:/负面: 语义标签）。
+                    if hide_markers:
+                        br_str, xref_str = "", ""
+                    else:
+                        br_str = f" [BR: {','.join(t.get('br_refs', []))}]" if t.get("br_refs") else ""
+                        xref_str = f" [cross: {','.join(t.get('cross_refs', []))}]" if t.get("cross_refs") else ""
                     target_shown, exp_shown = _dedupe_then_target(
                         t.get("target", ""), t.get("expectation", "")
                     )
+                    if hide_markers:
+                        exp_shown = re.sub(r"^\[BR-\d+\]", "", exp_shown)
                     target_str = f"{target_shown} " if target_shown else ""
                     lines.append(f"- {target_str}{exp_shown} ({t.get('kind', 'state')}){br_str}{xref_str}")
 
@@ -1315,9 +1332,13 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
 
 
 if __name__ == "__main__":
+    # 位置参数 + 可选开关 --hide-markers（渲染层隐藏机器 id 标记：
+    # 覆盖需求省略义务 id、Then 省略 BR id / cross 标注）。JSON 数据不变。
     if len(sys.argv) < 2:
-        print("Usage: python main.py <coverage_model_path> [output_path]")
+        print("Usage: python main.py <coverage_model_path> [output_path] [--hide-markers]")
         sys.exit(1)
-    cm_path = sys.argv[1]
-    out_path = sys.argv[2] if len(sys.argv) > 2 else str(Path(cm_path).parent / "p3_agent_output.json")
-    run_p3_pipeline(cm_path, out_path)
+    hide_markers = "--hide-markers" in sys.argv[1:]
+    args = [a for a in sys.argv[1:] if a != "--hide-markers"]
+    cm_path = args[0]
+    out_path = args[1] if len(args) > 1 else str(Path(cm_path).parent / "p3_agent_output.json")
+    run_p3_pipeline(cm_path, out_path, hide_markers=hide_markers)

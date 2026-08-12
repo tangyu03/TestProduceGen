@@ -741,7 +741,7 @@
         "build_obligations.py",
         "nodes/s1_generation.py"
       ],
-      "note": "TO 91/91 | EO 89/89 | BR 61/61(embedded 15, xc_causal 14) | IT 4/4 | state_misses=0"
+      "note": "TO 91/91 | EO 89/89 | BR 53/53(embedded 7, xc_causal 14) | IT 4/4 | state_misses=0"
     }
   ],
   "metrics": {

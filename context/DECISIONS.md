@@ -5,7 +5,23 @@
 
 ---
 
-## 2026-08-11 ㊷ 任务级别 branch 维度修复：target_transition 名/id 错配死代码 + R5 只看 state_dimensions 的盲区；36 条非法组合转换清零
+## 2026-08-12 ㊸ 同文 BR 一实体一条的合并（9→1）：`_backfill_branch_coverage` 无实体作用域 → 配置用例 Then 重复 9 次清零
+
+**决策**：数据层把 9 条**文本完全相同**的「任务级别」BR（b10..b18，每任务实体一条，source_ref 4.5.2/4.6.2/…/4.13.2）合并为 1 条（b10，`entities_involved` 并列 9 实体，`source_ref` 并列全条款）。P3 重生成后：PROC-013/014/015（E-IMP 任务级别 A/B/C 三个配置过程）的 **Then 从 9 条同文 BR 行 → 1 条规则**，procedures 727 不变，verdict pass / 0 blocker，V10 `BR 53/53 (embedded 7, xc_causal 14)`。
+
+**根因**：`srs_pipeline/model.py` `_backfill_branch_coverage`（358-374）按 `re.split(r"[;；]", b["note"].get("branch_dimension"))` **只按维度名匹配、无实体作用域** → 9 条同文 BR 全挂进 E-IMP 任务级别 分支维度 coverage。P3 `_classify_business_rules` 把它们全判 attribute_effect（`s1_generation.py:2840-2850`），`_embed_brs`（3594-3598）全量嵌入 Type3 → 每条配置用例 Then 重复 9 次。用户 @PT017_output.md PROC-015 大量重复触发排查。
+
+**为何合并而非实体作用域**：给 `_backfill_branch_coverage` 加实体过滤会让 8 条 BR 各自落向所属实体 → `br_embed` 兜底把规则铺到另外 8 个过程（E-REG/E-ARC/… 的配置用例），只是把 9×1 变成 1×9，重复总量不变还更散。这 9 条本就是**一条规则适用于 9 类实体**（4.6.2 等条款与 4.5.2 同文），正确建模 = 合并为一条多实体 BR。分支维度本只定义在 E-IMP，其它 8 实体无 任务级别 分支维度（P2 `branch_dimensions` 只 1 条），Type3 单过程、不嵌 BR。
+
+**验证结果**（P1 0 error/5 warning → P2 TO 91/BR 53 描述全唯一、E-IMP 任务级别 coverage=['BR-011'] → P3 727 → verdict pass）：
+- 输出核查：PROC-013/014/015 Then = 行为期望行 + `[BR-011]正面`（含 `[cross: 载体登记任务,…8 实体]` 合并语义）+ `[BR-011]负面` 各 1 条，无重复。
+- 原始 `embedded_brs` 为 `['BR-011','BR-011']`（`_type3_then_expectation` 2206-2208 取 coverage 首条作行为期望 + `_embed_brs` 各记一次），渲染层按 BR id 去重 → md 只显示一次。此「双路径同 id」与旧文件 10 条（BR-011×2+BR-012..19）同机制，非 bug。
+- BR 重新编号一致性：BR-012..BR-019 现在指向别的规则（48小时自动删除/用户账号规则等），非旧规则残留；53 条 BR 描述两两唯一。
+- V05 advisory 99 不变（㊷ 已知噪音，与本次无关）；V10 embedded 由合并前更多 → 7。
+
+**判据速记**：coverage.business_rules 回填 = 「维度名 1:N BR」匹配，若同一规则被按实体拆成 N 条同文 BR，会 1 个分支过程嵌入 N 次 → 数据层合并为 1 条多实体 BR 才是正确建模；「修复」要看渲染输出而非原始 embedded 列表（双路径可能记两次同 id，渲染去重）。
+
+---
 
 **决策**：修 P2 `generate_obligation_model.py` 的 R5 组合过滤 + 数据层补 9 条 审批拒绝 precond，使任务级别分支维度符合业务规则：**A级无需审批直入待执行；B级仅一级审批；C级二级审批**（证据：数据模块 4.5.2/4.6.2/…/4.13.2「任务级别为A级无需审批；B级需经过一级审批；C级需经过二级审批」）。P3 重生成后：procedures **859→727**（-132 非法组合），TO **127→91**，verdict **pass / 0 blocker**。
 
@@ -20,7 +36,8 @@
 
 **验证结果**（P1 0 error/5 warning → P2 TO 91 自检全 True → P3 727 procedures → verdict pass）：
 - 输出核查：A级+审批通过/拒绝 = **0**；B/C级+直入 = **0**；B级审批通过/拒绝 33+33 保留（givens 含「任务级别=B级」，action 通用「审批通过/拒绝」，级别语义在 precond 不在 action 名）；C级同构 33+33；「提交XX申请（A级直入）」33 条为申请提交转换（含 2 或 5 个申请变体），非审批动作。
-- V05 advisory 198→50，**全部 50 条逐一语义审计为假阳性**（粗探针只查 `current`（任务级别=B/A级）在 givens，不校验是否真断言违规：B级 审批用例不携带「二级审批」文本、A级 直入用例不携带审批动作）。
+- V05 advisory 198→99，**全部 99 条逐一语义审计为假阳性**（复刻探针逻辑统计：B级任务仅一级审批 66 条 + A级任务无需审批 33 条 = 99；99 条中 `other_dim` 的值「二级审批/需要审批」**一处都不出现在文本** → 0 真违规）。注意 verdict `evidence` 数组只存前 50 条、`evidence_truncated=49`，真实数要读 `note` 的 `advisory hits` 字段，不能数 `len(evidence)`。
+- **决策（用户确认「保持现状（设计如此）」）**：V05 note-type 探针不收紧。note-type 本就是「语义约束无法纯文本精确判定 → current 命中记 warning 提示人工复核」的设计（`v05_dimension_combo.py:12-14`），99 条是 working-as-designed 的复核候选，非 bug、非阻断；收紧会引入「文本不含 other_dim 值的语义违规漏报」风险。记录为已知噪音。
 - 任务 #12/#13 关闭。
 
 **判据速记**：分支维度 target 比较须用 `target_transition` 与转换 id 对齐的名称/标识，名/id 错配 = 死代码静默退化为全值兜底，是「看似全对实则错配」的隐蔽源；R5 组合过滤必须覆盖 config 维度（值域从 state_dimensions + branch_dimension 双向汇聚），不能只扫 state_dimensions；数据层「转换可无条件发生」的缺 precond 是业务规则漏写，校验器只能拦到「文本矛盾」，拦不到「缺前提」，须在数据层补齐。
