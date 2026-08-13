@@ -1,0 +1,1248 @@
+{
+  "verdict": "fail",
+  "skeleton_pass": false,
+  "blocker_failures": 3,
+  "warning_failures": 2,
+  "checks": [
+    {
+      "check_id": "V01",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 470,
+      "evidence": [
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-001",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-003",
+          "dangling_ref": "PROC-045"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-008",
+          "dangling_ref": "PROC-014"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-015.1",
+          "dangling_ref": "PROC-014"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-015.2",
+          "dangling_ref": "PROC-014"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.1",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.1",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.2",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.2",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.3",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.3",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.4",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.4",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.5",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-018.5",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-019.1",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-019.2",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-019.3",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-019.4",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-019.5",
+          "dangling_ref": "PROC-017"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.1",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.1",
+          "dangling_ref": "PROC-019"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.2",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.2",
+          "dangling_ref": "PROC-019"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.3",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.3",
+          "dangling_ref": "PROC-019"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.4",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.4",
+          "dangling_ref": "PROC-019"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.5",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-020.5",
+          "dangling_ref": "PROC-019"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.1",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.1",
+          "dangling_ref": "PROC-018"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.2",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.2",
+          "dangling_ref": "PROC-018"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.3",
+          "dangling_ref": "PROC-018"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.3",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.4",
+          "dangling_ref": "PROC-018"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.4",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.5",
+          "dangling_ref": "PROC-018"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-021.5",
+          "dangling_ref": "PROC-016"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-025"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-084"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-088"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-078"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-079"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.1",
+          "dangling_ref": "PROC-082"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.2",
+          "dangling_ref": "PROC-025"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.2",
+          "dangling_ref": "PROC-084"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.2",
+          "dangling_ref": "PROC-088"
+        },
+        {
+          "kind": "dangling",
+          "temp_id": "PROC-026.2",
+          "dangling_ref": "PROC-078"
+        }
+      ],
+      "evidence_truncated": 420,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "tools/graph_algo.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V02",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "prompts/s1_prompt.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V03",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "prompts/s0_prompt.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V04",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/field_validation.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V05",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py",
+        "nodes/s0_topology.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V06",
+      "result": "fail",
+      "severity": "warning",
+      "fail_count": 29,
+      "evidence": [
+        {
+          "temp_id": "PROC-008",
+          "event": "按规则\"超时设置完成后，对所有计划立即生效\"执行操作事件",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-036.1",
+          "event": "下发超时（目标状态：待启动）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-036.2",
+          "event": "下发超时（目标状态：待启动）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-037.1",
+          "event": "下发超时(时间边界)（目标状态：待启动）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-037.2",
+          "event": "下发超时(时间边界)（目标状态：待启动）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-038.1",
+          "event": "尝试下发超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-038.2",
+          "event": "尝试下发超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-066.1",
+          "event": "按规则\"评审管理员、评审助理和评审专家登录账号时应有待办任务和距超时5小时内的任务的说明\"执行操作事件",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-066.2",
+          "event": "按规则\"评审管理员、评审助理和评审专家登录账号时应有待办任务和距超时5小时内的任务的说明\"执行操作事件",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-066.3",
+          "event": "按规则\"评审管理员、评审助理和评审专家登录账号时应有待办任务和距超时5小时内的任务的说明\"执行操作事件",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-066.4",
+          "event": "按规则\"评审管理员、评审助理和评审专家登录账号时应有待办任务和距超时5小时内的任务的说明\"执行操作事件",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-079.1",
+          "event": "启动超时（目标状态：待评审）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-079.2",
+          "event": "启动超时（目标状态：待评审）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-080.1",
+          "event": "启动超时(时间边界)（目标状态：待评审）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-080.2",
+          "event": "启动超时(时间边界)（目标状态：待评审）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-081.1",
+          "event": "尝试启动超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-081.2",
+          "event": "尝试启动超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-092.1",
+          "event": "评审超时（目标状态：已完成）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-092.2",
+          "event": "评审超时（目标状态：已完成）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-093.1",
+          "event": "评审超时(时间边界)（目标状态：已完成）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-093.2",
+          "event": "评审超时(时间边界)（目标状态：已完成）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-094.1",
+          "event": "尝试评审超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-094.2",
+          "event": "尝试评审超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-098.1",
+          "event": "归档超时（目标状态：超时结束）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-098.2",
+          "event": "归档超时（目标状态：超时结束）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-099.1",
+          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-099.2",
+          "event": "归档超时(时间边界)（目标状态：超时结束）",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-100.1",
+          "event": "尝试归档超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-100.2",
+          "event": "尝试归档超时事件(已过期)",
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "S1",
+      "suspected_files": [
+        "prompts/s1_prompt.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V07",
+      "result": "fail",
+      "severity": "warning",
+      "fail_count": 124,
+      "evidence": [
+        {
+          "temp_id": "PROC-014.1",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-014.2",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-015.1",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-015.2",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-016.1",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-016.2",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-016.3",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-016.4",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-016.5",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-017.1",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-017.2",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-017.3",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-017.4",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-017.5",
+          "actor": "R-ORG",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-018.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-018.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-018.3",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-018.4",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-018.5",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-019.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-019.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-019.3",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-019.4",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-019.5",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-020.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-020.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-020.3",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-020.4",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-020.5",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-025.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-025.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-025.3",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-025.4",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-026.1",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-026.2",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-026.3",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-026.4",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-027.1",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-027.2",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-027.3",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-027.4",
+          "actor": "R-EXPERT",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-032.1",
+          "actor": "R-SYS",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-032.2",
+          "actor": "R-SYS",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-033.1",
+          "actor": "R-SYS",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-033.2",
+          "actor": "R-SYS",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-034.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-034.2",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-035.1",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-035.2",
+          "actor": "R-ADMIN",
+          "reason": "actor not in role matrix"
+        },
+        {
+          "temp_id": "PROC-039.1",
+          "actor": "[待确认角色]",
+          "reason": "actor not in role matrix"
+        }
+      ],
+      "evidence_truncated": 74,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "prompts/s0_prompt.py",
+        "nodes/s0_topology.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V08",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 7,
+      "evidence": [
+        {
+          "machine": "评审计划",
+          "state": "取消结束",
+          "reason": "terminal state not at max phase",
+          "phase": 0,
+          "max_phase": 5
+        },
+        {
+          "machine": "项目",
+          "transition": "T-PROJ-003",
+          "from": "已选入",
+          "to": "待选入",
+          "reason": "phase regresses along transition"
+        },
+        {
+          "machine": "项目",
+          "transition": "T-PROJ-007a",
+          "from": "待归档",
+          "to": "已选入",
+          "reason": "phase regresses along transition"
+        },
+        {
+          "machine": "项目",
+          "transition": "T-PROJ-007b",
+          "from": "待归档",
+          "to": "待选入",
+          "reason": "phase regresses along transition"
+        },
+        {
+          "machine": "项目",
+          "transition": "T-PROJ-007d",
+          "from": "待归档",
+          "to": "待选入",
+          "reason": "phase regresses along transition"
+        },
+        {
+          "machine": "机构",
+          "transition": "T-ORG-003",
+          "from": "不合格",
+          "to": "试用",
+          "reason": "phase regresses along transition"
+        },
+        {
+          "machine": "打分",
+          "reason": "all states collapsed into one phase; ordering lost"
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s2_sorting.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V09",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V10",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 94,
+      "evidence": [
+        {
+          "clause": "4.3",
+          "topic": "登录与注销",
+          "missing_keyword": "登录成功"
+        },
+        {
+          "clause": "4.3",
+          "topic": "登录与注销",
+          "missing_keyword": "登录失败提示"
+        },
+        {
+          "clause": "4.3",
+          "topic": "登录与注销",
+          "missing_keyword": "注销返回登录界面"
+        },
+        {
+          "clause": "4.3",
+          "topic": "登录与注销",
+          "missing_keyword": "密码修改"
+        },
+        {
+          "clause": "4.3",
+          "topic": "登录与注销",
+          "missing_keyword": "菜单收起展开"
+        },
+        {
+          "clause": "4.4",
+          "topic": "通用功能",
+          "missing_keyword": "排序"
+        },
+        {
+          "clause": "4.4",
+          "topic": "通用功能",
+          "missing_keyword": "分页"
+        },
+        {
+          "clause": "4.4",
+          "topic": "通用功能",
+          "missing_keyword": "上传附件"
+        },
+        {
+          "clause": "4.4",
+          "topic": "通用功能",
+          "missing_keyword": "下载附件"
+        },
+        {
+          "clause": "4.4",
+          "topic": "通用功能",
+          "missing_keyword": "取消/关闭"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "已选入→待评审"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "待评审→评审中"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "评审中→待归档"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "开题合格→已选入"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "开题不合格/差→待选入"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "验收合格→已归档"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "验收不合格/差→待选入"
+        },
+        {
+          "clause": "4.5",
+          "topic": "项目状态流转",
+          "missing_keyword": "评审中项目回到建立前"
+        },
+        {
+          "clause": "4.6",
+          "topic": "项目管理",
+          "missing_keyword": "机构管理员新增项目"
+        },
+        {
+          "clause": "4.6",
+          "topic": "项目管理",
+          "missing_keyword": "删除待选入未评价项目"
+        },
+        {
+          "clause": "4.6",
+          "topic": "项目管理",
+          "missing_keyword": "查看项目详情"
+        },
+        {
+          "clause": "4.6",
+          "topic": "项目管理",
+          "missing_keyword": "按名称/领域查询"
+        },
+        {
+          "clause": "4.6",
+          "topic": "项目管理",
+          "missing_keyword": "附件集中查看"
+        },
+        {
+          "clause": "4.7",
+          "topic": "评审项目准备",
+          "missing_keyword": "选入已选入"
+        },
+        {
+          "clause": "4.7",
+          "topic": "评审项目准备",
+          "missing_keyword": "差不可选入"
+        },
+        {
+          "clause": "4.7",
+          "topic": "评审项目准备",
+          "missing_keyword": "不合格仅 1 次选入"
+        },
+        {
+          "clause": "4.7",
+          "topic": "评审项目准备",
+          "missing_keyword": "选出已选入"
+        },
+        {
+          "clause": "4.8.1",
+          "topic": "评审计划基本要求",
+          "missing_keyword": "评审组 5/7/9 人"
+        },
+        {
+          "clause": "4.8.1",
+          "topic": "评审计划基本要求",
+          "missing_keyword": "1 名组长"
+        },
+        {
+          "clause": "4.8.1",
+          "topic": "评审计划基本要求",
+          "missing_keyword": "一时段一计划"
+        },
+        {
+          "clause": "4.8.1",
+          "topic": "评审计划基本要求",
+          "missing_keyword": "不连续 3 天晚上"
+        },
+        {
+          "clause": "4.9.1 ~ 4.9.2",
+          "topic": "打分项及专家打分",
+          "missing_keyword": "开题 6 打分项"
+        },
+        {
+          "clause": "4.9.1 ~ 4.9.2",
+          "topic": "打分项及专家打分",
+          "missing_keyword": "验收 6 打分项"
+        },
+        {
+          "clause": "4.9.1 ~ 4.9.2",
+          "topic": "打分项及专家打分",
+          "missing_keyword": "打分提交"
+        },
+        {
+          "clause": "4.9.1 ~ 4.9.2",
+          "topic": "打分项及专家打分",
+          "missing_keyword": "全零不可提交"
+        },
+        {
+          "clause": "4.9.1 ~ 4.9.2",
+          "topic": "打分项及专家打分",
+          "missing_keyword": "已提交不可修改"
+        },
+        {
+          "clause": "4.9.3",
+          "topic": "实施情况",
+          "missing_keyword": "打分进度比例"
+        },
+        {
+          "clause": "4.9.3",
+          "topic": "实施情况",
+          "missing_keyword": "各专家打分记录"
+        },
+        {
+          "clause": "4.9.3",
+          "topic": "实施情况",
+          "missing_keyword": "得分统计"
+        },
+        {
+          "clause": "4.9.3",
+          "topic": "实施情况",
+          "missing_keyword": "评价结果展示"
+        },
+        {
+          "clause": "4.9.4 ~ 4.9.5",
+          "topic": "分数限值与结果汇总",
+          "missing_keyword": "大于等于限值项目汇总"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "合格降 3 差"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "合格降 1 差 +3 不合格"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "合格降 5 不合格"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "试用升 10 优"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "试用降 2 差"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "试用降 1 差 +2 不合格"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "试用降 4 不合格"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "升降同时满足→降"
+        },
+        {
+          "clause": "4.9.7",
+          "topic": "机构评价",
+          "missing_keyword": "3 次不合格禁止提试用"
+        }
+      ],
+      "evidence_truncated": 44,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "prompts/s0_prompt.py"
+      ],
+      "note": ""
+    }
+  ],
+  "metrics": {
+    "case_total": 404,
+    "dedup_ratio": 1.0,
+    "guard_violations": 0,
+    "dangling_deps": 470,
+    "invalid_combos": 0,
+    "builtin_misuse": 0,
+    "coverage_misses": 94
+  },
+  "signature": "d095d4fda21f"
+}

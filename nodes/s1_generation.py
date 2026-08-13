@@ -2474,9 +2474,9 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
         if entity == primary:
             primary_dim_map = phase_table["state_to_phase"].get(phase_table["primary_dimension"], {})
             if primary_dim_map:
-                # 锚定第一个状态,产成两段式 phase_table.<维度>.<状态>,渲染层
-                # _PHASE_TABLE_RE 与 _derive_primary_eid 都依赖 .状态 后缀解析
-                # (单段 phase_table.<维度> 匹配不上,落到"第N阶段"兜底)。
+                # 锚定第一个状态,产成两段式 phase_table.<维度>.<状态>。该字符串是
+                # 引擎的相位追溯记录(JSON 内),渲染层不再解析它取模块名/状态——
+                # 模块名用 proc.entity,目标状态用 proc.post_state。
                 anchor_state, first_phase = next(iter(primary_dim_map.items()), (None, 0))
                 phase = first_phase if first_phase is not None else 0
                 phase_basis = f"phase_table.{phase_table['primary_dimension']}.{anchor_state}"

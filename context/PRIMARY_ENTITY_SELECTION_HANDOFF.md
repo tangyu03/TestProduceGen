@@ -191,3 +191,18 @@ primary 从基础数据（E-USER）翻成受管实体（E-CAR）后，`_detect_d
   T-013 / EO-CRU-001 / EO-CRU-026 / RO-IT-001 —— review 项目基线未随当前代码再生的历史欠账，单独立项处理。
 - §5 开放问题 5（改选影响面）已由校验器 0/0 + V10 全覆盖实证回答：S1 锚定/C04 镜像/S2 排序/C05 分支维度均无违规。
 - §5 开放问题 6（B+D 语义）：E-CAR 钉 level 2、E-USER 在 level 0 的"主实体=基础数据"设计本身是**选错的表现**，非刻意——本轮已修正为 E-CAR。
+
+### 8.6 已取代（2026-08-14）：§8.2 改动 3 的 CRUD≥4 豁免 → 路线 C
+
+§8.2 改动 3（CRUD≥4 排除豁免 `transition` 信号）已被**路线 C** 取代并删除：
+
+- **判据改为第一性原理**：`_detect_dependent_entities` Step 3 从属判定只认
+  `strong`（composition 所有权）∪ `transition`（transition_relations→primary，驱动主
+  实体状态机）。medium/weak/desc 路径 + CRUD≥4 启发式一并删除。
+- **为什么 CRUD 能被删**（实测支撑）：reference 边（PT017 全部 18 条都是 reference，
+  relation_type 零区分度）给的 medium 信号是噪声——golden 从属实体全部是 strong 或
+  transition；CRUD≥4 阈值不敏感（t∈[1,7] 结果逐字节一致），它只是"自管理资源"的代理，
+  而 `entity_details.type=='managed'` 也替换不了（漏排除 core CRUD 富任务、误杀 strong 从属）。
+- **验证**：PT017 681 procs temp_id +0/-0、engine_state 12/12 0 diff；review 768 procs
+  与 HEAD 原始代码重跑对比 temp_id 全同、结构 0 diff、engine_state 12/12 0 diff。
+- **相关代码**：`nodes/s0_topology.py` Step 3 + docstring、`prompts/s0_prompt.py` §6 已同步。

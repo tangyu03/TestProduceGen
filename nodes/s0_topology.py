@@ -2423,13 +2423,13 @@ def _detect_dependent_entities(
 ) -> tuple[list[str], dict, dict]:
     """S0.4: Detect dependent_entities, entity_parent, dependency_depth.
 
-    V4: Implements 4-level signal classification:
-      - strong: composition high + 1:N cardinality
-      - medium: composition high + 1:1, or composition medium + 1:N
-      - transition: transition_relations to=primary from-side, evidence_points to parent
-      - weak: non-high structural
-
-    F/V/D判定 per-candidate, with transitivity.
+    路线 C (2026-08-14): 从属 = strong ∪ transition (第一性原理, 无启发式阈值).
+      - strong: composition 所有权 (主实体拥有该实体)
+      - transition: transition_relations → primary (实体驱动主实体状态机)
+      - reference 边仅产生 weak/medium, 不再构成从属证据——它表达"引用/使用"而非
+        "生命周期从属"。
+    原 4 级分类的 medium/weak/desc 路径与 CRUD≥4 排除已删除 (见 Step 3); 实测两
+    黄金项目 (PT017/review) dependent 集合与删除前逐字节一致。transitivity 保留。
     """
     entity_parent: dict[str, str] = {}
 
@@ -2485,55 +2485,19 @@ def _detect_dependent_entities(
                 signal_strength[f] = 'transition'
                 signal_parent[f] = primary
 
-    # Step 3: F/V/D判定
+    # Step 3: F/V/D判定 — 路线 C (2026-08-14): 从属只由第一性原理信号决定
+    #   strong     = composition 所有权 (主实体拥有它)
+    #   transition = transition_relations → primary (驱动主实体状态机)
+    # reference 边仅给 weak/medium, 单独不足以构成从属——它表达"引用/使用"而非
+    # "生命周期从属"。原 medium/weak/desc 路径 + CRUD≥4 排除(自管理资源的启发式
+    # 代理)已一并删除; 实测两黄金项目 dependent 集合与删除前逐字节一致。
     dependent: list[str] = []
 
     for entity in list(signal_strength.keys()):
         if entity == primary:
             continue
-
         sig = signal_strength[entity]
-        parent = signal_parent.get(entity, '')
-        has_state_machine = bool(entity_tos.get(entity))
-
-        # V (从属) criteria:
-        is_dependent = False
-
-        # strong signal → dependent
-        if sig == 'strong':
-            is_dependent = True
-        # medium signal → dependent
-        elif sig == 'medium':
-            is_dependent = True
-        # transition signal → dependent
-        elif sig == 'transition':
-            is_dependent = True
-        # weak signal + has state machine + parent is primary/dependent
-        elif sig == 'weak' and has_state_machine:
-            if parent == primary or parent in dependent:
-                is_dependent = True
-        # desc contains dependency hints
-        elif has_state_machine:
-            for rel in structural:
-                if rel.get('to') == entity:
-                    desc = rel.get('desc', '') or rel.get('description', '')
-                    if any(kw in desc for kw in ['归属', '属于', '依赖', '从属', '包含', '关联']):
-                        is_dependent = True
-                        signal_parent.setdefault(entity, rel.get('from', primary))
-                        break
-
-        # F (非从属) criteria:
-        if is_dependent:
-            # Check exclusions
-            entity_details = []  # We don't have direct access to _context here
-            # configurable + no transitions → F
-            crud_count = sum(1 for eo in eos if eo.get('entity') == entity and eo.get('type') == 'crud_operation')
-            if crud_count >= 4 and sig not in ('strong', 'transition'):
-                # CRUD≥4 without high-confidence signal → F (skip).
-                # transition signal exempt: "drives the primary's state machine"
-                # is the strongest dependent evidence (Step 2) — a CRUD-rich
-                # flow driver (e.g. PT017 载体归档任务 → E-CAR) is still V.
-                continue
+        if sig in ('strong', 'transition'):
             dependent.append(entity)
 
     # Step 4: entity_parent assignment

@@ -777,7 +777,7 @@ def _generate_markdown(
         type_label = s2.get("type_label", "")
         source_ids = proc.get("source_ids", [])
 
-        # 业务定位：类型 + 阶段，全部中文化（标签来自 context.render_registry）
+        # 业务定位：类型 + 阶段（阶段 = 模块名，phase_label 内嵌相位号+落段依据）
         type_cn = TYPE_LABEL_CN.get(type_label, type_label) or "—"
         lines.append(f"**业务定位**：{type_cn} ｜ {phase_label(proc)}")
 

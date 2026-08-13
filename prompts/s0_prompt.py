@@ -135,20 +135,17 @@ for each (from→to) in E's transitions:
 ### 6. dependent_entities (S0.4)
 从属实体列表，通过structural_relations和transition_relations信号检测。
 
-**候选收集**（满足任一）：
-| 信号 | 强度 | 来源 | 条件 |
-|------|------|------|------|
-| 基数 | 强 | structural_relations | high+1:N的to侧 |
-| 弱基数 | 中 | structural_relations | high+1:1或medium+1:N的to侧 |
-| Transition | 中 | transition_relations | to=主实体的from端；evidence_transitions指向父实体 |
-| 弱基数 | 弱 | structural_relations | 非high的to侧 |
-
-**逐候选判定**：
-| 判定 | 条件 | 结论 |
+**第一性原理判据（路线 C 2026-08-14，无启发式阈值）**：
+| 信号 | 判定 | 条件 |
 |------|------|------|
-| F | 即主实体/configurable且无转换/独立路径/CRUD≥4且无高置信从属信号 | 非从属 |
-| V | 高置信1:N的to侧/upstream指向父/side_effects→父/父=主实体且子有转换/desc含归属 | 从属 |
-| D | F和V均不满足 | 非从属 |
+| strong | V（从属） | structural_relations composition 所有权：high + 1:N 的 to 侧 |
+| transition | V（从属） | transition_relations to=主实体 的 from 侧（驱动主实体状态机） |
+| reference/弱基数 | F（非从属） | 仅 weak/medium 弱证据——引用/使用 ≠ 生命周期从属，单独不构成从属 |
+
+原 F/V/D 三分类中的 medium/weak/desc 路径及 **CRUD≥4 排除**已删除：CRUD 计数是原始 EO 数
+（非去重操作类别）、阈值不敏感（实测 t∈[1,7] 结果不变），reference 边在 PT017 全部为
+reference（relation_type 无区分度）——它只是"自管理资源"的启发式代理。从属判定只认
+**所有权（composition→strong）+ 状态机驱动（transition）** 两条第一性原理证据。
 
 **传递性从属检测（第二轮）**：对structural_relations执行传递性扫描——实体C是已检测从属实体D的structural子实体且有状态机 → 标记为从属(parent=D)。循环执行直到不产生新从属实体。
 
