@@ -23,6 +23,7 @@ Type9(field_validation)特判——实体级,而非豁免：
 缺 --model 时跳过(无法推导矩阵,不退回 case_spec)。
 """
 from .base import CheckResult, get_procedures, normalize_text
+from models.schema import ObligationType
 from context.entity_operators import entity_operator_set
 
 CHECK_ID = "V07"
@@ -93,7 +94,7 @@ def check(output: dict, spec: dict) -> CheckResult:
         otype = p.get("obligation_type")
 
         # 1. 迁移型用例 actor 必须非空
-        if otype == 1 and not actor:
+        if otype == ObligationType.TRANSITION and not actor:
             empty_actor += 1
             res.fail({"temp_id": p.get("temp_id"),
                       "reason": "transition case (obligation_type=1) has empty actor",

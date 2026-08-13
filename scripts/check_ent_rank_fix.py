@@ -18,7 +18,7 @@ from nodes.s2_sorting import _entity_order_rank
 from tools.graph_algo import topological_sort_procedures
 
 ROOT = Path(__file__).resolve().parents[1]
-CM_PATH = ROOT / "PT_017_coverage_obligations.json"
+CM_PATH = ROOT / "PT017_coverage_obligations.json"
 OUT_PATH = ROOT / "PT017_output.json"
 
 

@@ -11,6 +11,7 @@ Implements:
 import re
 
 from models.state import AgentState
+from models.schema import ObligationType
 from tools.graph_algo import break_cycles, topological_sort_procedures
 from context.domain_precondition import object_existence
 
@@ -415,7 +416,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                     # field-validation (Type9) describe business rules, not
                     # state changes — they should not be weak-dep targets of
                     # side_effect chains.
-                    if other.get("obligation_type") in (7, 8, 9):
+                    if other.get("obligation_type") in (
+                            ObligationType.INVALID, ObligationType.RULE,
+                            ObligationType.FIELD_VALIDATION):
                         continue
                     # Exclude rejection variants from weak-dep targets
                     if other.get("risk_trait") == "audit_rejection":
@@ -430,7 +433,7 @@ def s3_dependency_node(state: AgentState) -> dict:
                     weak_origins[other["temp_id"]] = "weak_side_effect"
 
         # Independent Type7: weak dep to non-primary entity's closest phase proc
-        if proc.get("obligation_type") == 8:
+        if proc.get("obligation_type") == ObligationType.RULE:
             # BUGFIX #20: hoist cm.get out of the source_ids loop
             ros_raw = cm.get("constraint_obligations", [])
             if isinstance(ros_raw, dict):
@@ -458,7 +461,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                                 # Exclude Type7/8/9 (rule/field validation).
                                 candidates = [
                                     p for p in proc_by_entity[be]
-                                    if p.get("obligation_type") not in (7, 8, 9)
+                                    if p.get("obligation_type") not in (
+                                            ObligationType.INVALID, ObligationType.RULE,
+                                            ObligationType.FIELD_VALIDATION)
                                 ]
                                 if candidates:
                                     closest = min(candidates,
@@ -693,7 +698,7 @@ def _apply_temporal_guards(
                 _record(tid, "guard1_state_pred")
 
         # Guard 2: Constraint gate (Type4a) before Type1
-        if proc.get("obligation_type") == 1:
+        if proc.get("obligation_type") == ObligationType.TRANSITION:
             # BDD: read precondition text from givens[0].description
             s_input = ""
             givens = proc.get("givens", [])
@@ -703,7 +708,8 @@ def _apply_temporal_guards(
                 # BDD: Type4a no longer generated — this guard is a no-op now.
                 # CO ordering is handled by the CO enabler dependency (section 3).
                 # Kept for documentation; will never match since ot=4 procs don't exist.
-                if other.get("obligation_type") == 4 and other["temp_id"] != proc["temp_id"]:
+                if (other.get("obligation_type") == ObligationType.CONSTRAINT
+                        and other["temp_id"] != proc["temp_id"]):
                     co = co_by_id.get(other.get("source_ids", [""])[0]) if other.get("source_ids") else None
                     if co and co.get("dependent_condition") and co.get("dependent_condition") in s_input:
                         deps.add(other["temp_id"])
@@ -731,7 +737,7 @@ def _apply_temporal_guards(
                     # I25-fix: Type4b lifecycle procedures are side-effects of the
                     # enabler transition, not prerequisites. The architecture says
                     # "创建后同步创建" — lifecycle creation happens AFTER, not before.
-                    if other.get("obligation_type") == 5:  # Type4b = lifecycle
+                    if other.get("obligation_type") == ObligationType.LIFECYCLE:  # Type4b = lifecycle
                         continue
                     deps.add(other["temp_id"])
                     _record(other["temp_id"], "guard5_create_use")
@@ -919,7 +925,7 @@ def _apply_temporal_guards(
         # context.domain_precondition 派生对象存在性前置 (topology_level>0 的
         # 业务生命周期对象), 依赖边连到对象创建转换 (from=None) 的过程。
         # 管理类实体不派生 → 保持 "=存在", 不引入依赖。
-        if state and proc.get("obligation_type") == 6 and proc.get("entity"):
+        if state and proc.get("obligation_type") == ObligationType.CRUD and proc.get("entity"):
             dp_ref = object_existence(cm, state, proc["entity"])
             if dp_ref:
                 for cid in dp_ref["creation_to_ids"]:

@@ -14,6 +14,7 @@ from pathlib import Path
 
 from graph import compile_p3_graph
 from models.state import AgentState
+from models.schema import obligation_type_label
 from tools.llm_client import TitleGenerator
 from tools.llm.http_utils import call_llm_api, parse_llm_response
 from context.render_registry import TYPE_LABEL_CN, build_phase_labeler
@@ -133,14 +134,9 @@ def run_p3_pipeline(
     
     # Type breakdown
     type_counts = {}
-    type_labels = {
-        1: "Type1(Transition)", 3: "Type3(Attribute)", 
-        4: "Type4a(Constraint)", 5: "Type4b(Lifecycle)",
-        6: "Type5(CRUD)", 7: "Type6(Invalid)", 8: "Type7(BR)"
-    }
     for proc in procedures:
         ot = proc.get("obligation_type", 0)
-        label = type_labels.get(ot, f"Type{ot}")
+        label = obligation_type_label(ot)
         type_counts[label] = type_counts.get(label, 0) + 1
     
     print("\n      By Type:")
@@ -333,6 +329,54 @@ def _display_id(tid) -> str:
     return re.sub(r"\.\d+$", "", s)
 
 
+def _correct_branch_titles(procedures: list[dict]) -> None:
+    """Fix-2: 分支感知标题修正（确定性、幂等、数据驱动）。
+
+    分支用例（givens 含 given_type='branch'）的标题曾在 LLM 生成/归档回放时
+    锚定基准分支取值——C 级分支继承 B 级标题（如"级别为B级时"、PROC-165 系列）。
+
+    层级取值不从常量表硬编码（[A-C]级 曾致非 A/B/C 分级的需求失配），而全部
+    从该用例自己的 givens 推导：
+      - 权威分支值 = branch given 的 state（如 "C级"）；
+      - 候选层级值 = 各 given 描述里跟在分隔符（为/=//或 等）后的 "<设计符>级"
+        记号（如约束行 "任务级别为B级或C级" → {B级, C级}），以及 given state
+        自身（"C级"）。"<设计符>" 只认表面形态（拉丁/数字/中文数字，≤2 字符），
+        是表层语法，不是业务分级表。
+    然后用分支值覆盖标题中所有 ≠ 分支值的候选（= 兄弟分支的取值）。无 branch
+    given、标题无候选则原样保留（幂等：已正确标题不受影响）。
+
+    与 TITLE_SYSTEM_PROMPT 第 8 条规则配套：前者约束 LLM 源头，后者兜底
+    覆盖 LLM 走偏或归档回放（确定性路径不跑 LLM）产出的标题。
+    """
+    # 表层语法：设计符（拉丁/数字/中文数字 1-2 字符）+ "级"。识别仅依赖
+    # 形态，字母表内容由数据给定，禁止在此枚举业务分级名。
+    _DESIGNATOR = r"[A-Za-z0-9一二三四五六七八九十]{1,2}"
+    _SEP = r"(?:为|＝|=|或|，|；|:|：)"
+    for proc in procedures:
+        givens = proc.get("givens") or []
+        branch_val = ""
+        candidates: set[str] = set()
+        for g in givens:
+            if g.get("given_type") == "branch":
+                branch_val = (g.get("state") or "").strip()
+            desc = g.get("description") or ""
+            for m in re.finditer(rf"{_SEP}\s*({_DESIGNATOR})级", desc):
+                candidates.add(m.group(1) + "级")
+            state = (g.get("state") or "").strip()
+            if re.fullmatch(rf"{_DESIGNATOR}级", state):
+                candidates.add(state)
+        if not branch_val:
+            continue
+        title = proc.get("title") or ""
+        if not title:
+            continue
+        new_title = title
+        for tok in sorted(candidates - {branch_val}):
+            new_title = new_title.replace(tok, branch_val)
+        if new_title != title:
+            proc["title"] = new_title
+
+
 def _generate_titles(procedures: list[dict],
                      batch_size: int = 20,
                      max_concurrency: int = 3) -> list[dict]:
@@ -382,6 +426,9 @@ def _generate_titles(procedures: list[dict],
                     break
             # Title: "{condition}时，{action}，验证{expectation}"
             proc['title'] = f"{condition}时，{action}，验证{then_exp}"
+
+    # Fix-2: 确定性分支标题修正——在无 LLM 路径下先兜底一次
+    _correct_branch_titles(procedures)
 
     generator = TitleGenerator()
 
@@ -450,6 +497,9 @@ def _generate_titles(procedures: list[dict],
     with_title = sum(1 for p in procedures if p.get("title"))
     without_title = len(procedures) - with_title
     print(f"      [TITLE] Done: {with_title} generated, {without_title} fallback to post_state")
+
+    # Fix-2: LLM 标题落地后，再确定性覆盖分支取值，保证正确性不依赖 LLM
+    _correct_branch_titles(procedures)
 
     return procedures
 

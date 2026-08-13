@@ -13,6 +13,7 @@ transition_obligations 的 action,天然入目录,无需 indirect_via 豁免。
 缺 --model 时跳过(无法推导目录,不退回 case_spec)。
 """
 from .base import CheckResult, entity_alias, get_procedures, normalize_text
+from models.schema import ObligationType
 
 CHECK_ID = "V03"
 
@@ -73,7 +74,7 @@ def check(output: dict, spec: dict) -> CheckResult:
         return res
 
     for p in get_procedures(output):
-        if p.get("obligation_type") != 1:
+        if p.get("obligation_type") != ObligationType.TRANSITION:
             continue
         ent = entity_alias(p.get("entity", ""), set(catalog))
         if ent not in catalog:

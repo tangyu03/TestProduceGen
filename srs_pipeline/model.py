@@ -6,15 +6,14 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from .builders import N
+from .constants import LOCAL_LABEL as _LOCAL
 from .escape import esc
 from .schema import validate_llm
 
 SCHEMA_VERSION = "19.2"
 
-# 局部标签(铁律14: 编号一律局部标签, 框架统一改写为正式编号)。
-# 匹配形如 t01 / t07a / tp01 / p04 / u01 / o01 / s01 / x01 / b01 / i01 的
-# 交叉引用 token。中文需求文本中"小写字母+数字"几乎必是标签, 误伤可忽略。
-_LOCAL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
+# 局部标签(铁律14: 编号一律局部标签, 框架统一改写为正式编号)。形态单一事实源
+# 在 constants.LOCAL_LABEL（模型/校验器共享），此处仅复引。
 
 def _esc_note(note):
     """note 统一转义：数据文件可直接传原始 dict（{comment/conflict/branch_dimension}）
@@ -432,3 +431,20 @@ class DomainModel:
             for o in e["operations"]:
                 if o["note"].get("comment"):
                     o["note"]["comment"] = rw(o["note"]["comment"])
+        # note 全域改写：结构/因果/BR note 与 invalid reason 补上，避免输出残留
+        # 局部标签（如"XC x10"）与正式号不一致（INV-4 依赖此一致性）。
+        for rel in self.structural_relations:
+            note = rel.get("note")
+            if isinstance(note, dict) and note.get("comment"):
+                note["comment"] = rw(note["comment"])
+        for r in self.transition_relations:
+            note = r.get("note")
+            if isinstance(note, dict) and note.get("comment"):
+                note["comment"] = rw(note["comment"])
+        for b in self.business_rules:
+            note = b.get("note")
+            if isinstance(note, dict) and note.get("comment"):
+                note["comment"] = rw(note["comment"])
+        for i in self.invalid_transitions:
+            if i.get("reason"):
+                i["reason"] = rw(i["reason"])

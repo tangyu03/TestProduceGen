@@ -19,6 +19,7 @@ import os
 import sys
 import time
 from pathlib import Path
+from models.schema import ObligationType
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_DIR))
@@ -160,7 +161,7 @@ def test_4_title_generation():
             "temp_id": "PROC-001",
             "entity": "E-PRJ",
             "dimension": "项目状态",
-            "obligation_type": 1,
+            "obligation_type": ObligationType.TRANSITION,
             "givens": [{"target": "E-PRJ.项目状态", "state": "待开始", "description": "项目处于待开始状态"}],
             "when": {"target": "E-PRJ.项目状态", "event": "立项批准", "actor": "项目经理", "action": "批准立项"},
             "thens": [{"target": "E-PRJ.项目状态", "expectation": "项目进入报名中", "kind": "state"}],
@@ -170,7 +171,7 @@ def test_4_title_generation():
             "temp_id": "PROC-002",
             "entity": "E-REG",
             "dimension": "报名状态",
-            "obligation_type": 1,
+            "obligation_type": ObligationType.TRANSITION,
             "givens": [{"target": "E-REG.报名状态", "state": "待审核", "description": "报名记录待审核"}],
             "when": {"target": "E-REG.报名状态", "event": "管理员审核", "actor": "管理员", "action": "审核报名"},
             "thens": [{"target": "E-REG.报名状态", "expectation": "报名记录已审核", "kind": "state"}],

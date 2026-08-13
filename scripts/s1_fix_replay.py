@@ -42,10 +42,12 @@ from main import (  # noqa: E402
     _build_clause_coverage,
     _build_time_sensitive_metadata,
     _build_transition_phase_metadata,
+    _correct_branch_titles,
     _generate_markdown,
     _translate_procedures,
 )
 from models.state import AgentState  # noqa: E402
+from models.schema import ObligationType, obligation_type_label  # noqa: E402
 from nodes.s0_topology import _compute_s0_deterministic  # noqa: E402
 from nodes.s1_generation import s1_generation_node  # noqa: E402
 from nodes.s2_sorting import s2_sorting_node  # noqa: E402
@@ -183,22 +185,84 @@ def _overlay(procedures: list[dict], archived_procs: list[dict],
     return hit, miss
 
 
+def _partial_key(p: dict) -> tuple:
+    """放松的结构键 — content-key 失配但语义孪生仍可匹配。
+
+    Fix 3/4 改变 thens/embedded_brs 后 content-key 失配, 但 source_ids +
+    obligation_type + entity + when.action + 首条 then 期望 不变的用例
+    （如 PROC-014/026）仍可对回归档的语义孪生标题。
+    """
+    srcs = tuple(sorted(
+        re.sub(r"\[[a-z]\]$", "", s) for s in (p.get("source_ids") or [])
+    ))
+    w = p.get("when") or {}
+    first_then = ""
+    for t in (p.get("thens") or []):
+        e = t.get("expectation", "") if isinstance(t, dict) else (t or "")
+        if e:
+            first_then = e
+            break
+    return (
+        srcs,
+        p.get("obligation_type"),
+        p.get("entity"),
+        _norm_event(w.get("event")),
+        w.get("action"),
+        first_then,
+    )
+
+
+def _fill_missing_titles(procedures: list[dict], archived_procs: list[dict],
+                         id_to_name: dict[str, str]) -> int:
+    """对 overlay 失配的空标题用例兜底：放松结构键语义孪生 + 确定性构建。
+
+    只填 (p.get("title") 为空) 的用例, 不覆盖已命中标题。
+    """
+    idx: dict[tuple, list] = defaultdict(list)
+    for ap in archived_procs:
+        if ap.get("title"):
+            idx[_partial_key(ap)].append(ap)
+    for group in idx.values():
+        group.sort(key=_instance_no)
+
+    filled = 0
+    for p in procedures:
+        if p.get("title"):
+            continue
+        pt = copy.deepcopy(p)
+        _translate_procedures([pt], id_to_name)
+        group = idx.get(_partial_key(pt))
+        if group:
+            n = _instance_no(p)
+            target = next((c for c in group if _instance_no(c) == n), group[0])
+            p["title"] = target.get("title")
+            filled += 1
+            continue
+        # 确定性构建：首条 then 期望去 [BR-xxx] 前缀
+        exp = ""
+        for t in (p.get("thens") or []):
+            e = t.get("expectation", "") if isinstance(t, dict) else (t or "")
+            e = re.sub(r"^\[[A-Z0-9-]+\]\s*", "", (e or "").strip())
+            if e:
+                exp = e
+                break
+        if exp:
+            p["title"] = f"验证{exp}"
+            filled += 1
+    return filled
+
+
 def _build_output(state: AgentState, cm: dict, es_orig: dict,
                   id_to_name: dict[str, str]) -> dict:
     procedures = _translate_procedures(copy.deepcopy(state["procedures"]), id_to_name)
 
     # 与 main.py 真实流水线同构: type_counts 按 obligation_type 映射
     # (非 type_label), 保证提升为 canonical 后 statistics 结构一致。
-    type_labels = {
-        1: "Type1(Transition)", 3: "Type3(Attribute)",
-        4: "Type4a(Constraint)", 5: "Type4b(Lifecycle)",
-        6: "Type5(CRUD)", 7: "Type6(Invalid)", 8: "Type7(BR)"
-    }
     type_counts: dict[str, int] = {}
     phase_counts: dict[str, int] = {}
     for p in procedures:
         ot = p.get("obligation_type", 0)
-        label = type_labels.get(ot, f"Type{ot}")
+        label = obligation_type_label(ot)
         type_counts[label] = type_counts.get(label, 0) + 1
         ph = p.get("_S2_fields", {}).get("phase_name", "?")
         phase_counts[ph] = phase_counts.get(ph, 0) + 1
@@ -273,6 +337,24 @@ def main() -> int:
     id_to_name = _build_id_to_name(cm)
     hit, miss = _overlay(replayed, archived["procedures"], id_to_name)
     print(f"[OVERLAY] title overlay (content-keyed): {hit} hit, {miss} miss")
+
+    # Type9 确定性标题兜底: overlay 按结构键匹配, Type9 的 then 增删会改变内容
+    # 键导致失配 (标题 None)。字段校验用例标题由模板确定性补全 (不依赖 LLM),
+    # entity 取中文名与渲染一致。
+    filled = 0
+    for p in replayed:
+        if p.get("obligation_type") == ObligationType.FIELD_VALIDATION and not p.get("title"):
+            ent = id_to_name.get(p.get("entity"), p.get("entity", ""))
+            p["title"] = f"{ent}信息录入页面打开时，提交含违规值表单，验证校验失败并提示"
+            filled += 1
+    print(f"[TYPE9] filled {filled} deterministic Type9 titles")
+
+    # 空标题兜底: overlay 失配(语义孪生) + 确定性构建, 补 Fix 3/4 变更用例
+    filled2 = _fill_missing_titles(replayed, archived["procedures"], id_to_name)
+    print(f"[FILL] filled {filled2} missing titles (relaxed-key + deterministic)")
+
+    # Fix-2: 分支标题确定性修正 (B级/C级 取值覆盖 LLM 标题中的级别字样)
+    _correct_branch_titles(replayed)
 
     output = _build_output(state, cm, archived_es, id_to_name)
 

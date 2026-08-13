@@ -17,29 +17,26 @@ E-EXP 为上传时用户确定文件级别，均为用户选定）；且多数�
 误伤同名字段（同名在不同实体可编辑性不同）。
 """
 import fnmatch
-import re
 
 from .base import CheckResult, entity_names_of, get_procedures
+from context.sysfields import is_sys_maintained
 
 CHECK_ID = "V04"
 FORBIDDEN_TYPES = {3, 9}
 
-# 系统维护字段标记: 由系统设置/自动派生,非用户可编辑输入
-_SYS_MAINTAINED_MARKERS = re.compile(
-    r"自动继承|自动生成|自动设置|自动获取|系统维护|由系统|自动记录|"
-    r"根据.*计算|计算所得|系统自动|不可编辑且自动")
-
 
 def _sysfields_from_model(model: dict) -> list:
     """从 _context.entity_details[].attributes 推导系统维护字段,
-    格式 '实体名.字段名'(与用例 Then 目标一致)。"""
+    格式 '实体名.字段名'(与用例 Then 目标一致)。
+
+    单一真相源在 context/sysfields.py (与 Type9 生成器共享同一推导, 防止
+    生成器/校验器两套正则漂移 —— 曾致生成器用 is_config 过滤误杀用户字段)。"""
     fields = []
     for e in (model.get("_context") or {}).get("entity_details", []) or []:
         ename = e.get("name", "")
         for a in e.get("attributes", []) or []:
-            desc = a.get("desc", "")
             aname = a.get("name", "")
-            if aname and _SYS_MAINTAINED_MARKERS.search(desc):
+            if aname and is_sys_maintained(a.get("desc", "")):
                 fields.append(f"{ename}.{aname}")
     return fields
 

@@ -9,6 +9,7 @@ import json
 import re
 from typing import Any
 from models.state import AgentState
+from models.schema import ObligationType
 from nodes.s0_topology import (
     _build_entity_name_map, _build_role_map, _build_managed_entities,
     TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS,
@@ -16,6 +17,7 @@ from nodes.s0_topology import (
 from nodes.field_validation import parse_entity_constraints, enrich_procedure_steps
 from nodes.signal_validation import generate_signal_v_steps
 from context.entity_operators import form_operator_roles
+from context.sysfields import sys_maintained_pairs
 from context.time_control import needs_time_control_ids
 from context.constraint_fields import predicate_phase_lower_bound, get_state_phase
 from context.domain_precondition import base_data_entity_ids, object_existence
@@ -885,10 +887,16 @@ def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentSt
 
 # Non-transition obligation types that are DATA MAINTENANCE (setup semantics):
 # EO-ATC(3), EO-CRU(5/6), FIELD-VAL(9). RO-IT(7)/RO-BR(8) are rules (constraints).
-_NON_TRANSITION_SETUP_TYPES = (3, 5, 6, 9)
+_NON_TRANSITION_SETUP_TYPES = (
+    ObligationType.ATTRIBUTE_CONFIG,
+    ObligationType.LIFECYCLE,
+    ObligationType.CRUD,
+    ObligationType.FIELD_VALIDATION,
+)
 
 
-def _resolve_phase_for_non_transition(state: dict, entity: str, obligation_type: int = 7) -> dict:
+def _resolve_phase_for_non_transition(state: dict, entity: str,
+                                      obligation_type: ObligationType = ObligationType.INVALID) -> dict:
     """Derive a phase for non-transition procedures (Type3/5/6/7/8/9).
 
     Behavior decided at the OBLIGATION-TYPE layer (domain-agnostic, NOT entity
@@ -1235,15 +1243,15 @@ def _get_dimension_priority(entity: str, dimension: str | None, state: AgentStat
 
 def _get_type_label(risk_trait: str, obligation_type: int) -> str:
     """Map obligation_type to type label per S1.0 type table."""
-    if obligation_type == 4:
+    if obligation_type == ObligationType.CONSTRAINT:
         return "constraint"          # Type4a
-    if obligation_type == 5:
+    if obligation_type == ObligationType.LIFECYCLE:
         return "lifecycle"           # Type4b
-    if obligation_type == 6:
+    if obligation_type == ObligationType.CRUD:
         return "crud"                # Type5
-    if obligation_type == 7:
+    if obligation_type == ObligationType.INVALID:
         return "invalid"             # Type6
-    if obligation_type == 8:
+    if obligation_type == ObligationType.RULE:
         return "rule"                # Type7 standalone
     if risk_trait in ("audit", "audit_rejection"):
         return "audit"
@@ -1260,17 +1268,17 @@ def _get_type_label(risk_trait: str, obligation_type: int) -> str:
 
 def _get_type_priority(risk_trait: str, obligation_type: int) -> int:
     """Map obligation_type to type_priority per sort_key spec."""
-    if obligation_type == 4:
+    if obligation_type == ObligationType.CONSTRAINT:
         return TYPE_PRIORITY_MAP.get("constraint", 3)   # Type4a
-    if obligation_type == 5:
+    if obligation_type == ObligationType.LIFECYCLE:
         return TYPE_PRIORITY_MAP.get("lifecycle", 7)    # Type4b
-    if obligation_type == 6:
+    if obligation_type == ObligationType.CRUD:
         return TYPE_PRIORITY_MAP.get("crud", 5)          # Type5
-    if obligation_type == 7:
+    if obligation_type == ObligationType.INVALID:
         return TYPE_PRIORITY_MAP.get("invalid", 9)       # Type6
-    if obligation_type == 8:
+    if obligation_type == ObligationType.RULE:
         return TYPE_PRIORITY_MAP.get("rule", 6)          # Type7
-    if obligation_type == 3:
+    if obligation_type == ObligationType.ATTRIBUTE_CONFIG:
         return TYPE_PRIORITY_MAP.get("happy", 1)         # Type3
     return TYPE_PRIORITY_MAP.get(risk_trait, 1)
 
@@ -1630,7 +1638,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     if not any(c and c in _givens_text for c in _chunks):
                         continue
                     if (_br_ops and any(op in action_core_clean for op in _br_ops)) or \
-                       (action_core_clean[:2] and action_core_clean[:2] in _br_desc):
+                       (len(action_core_clean) >= 4 and action_core_clean in _br_desc):
                         is_negative_branch = True
                         _guard_br_id = br.get("constraint_id") or br.get("id", "")
                         break
@@ -1720,7 +1728,12 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
             # Side effects as additional Thens (Type2 embedding) — I20: ≤1 hop
             cos = cm.get("cross_entity_obligations", [])
             side_effects = to.get("side_effects") or []
+            # Fix 3b: 负向分支（操作被拒绝）不追加副作用断言——操作被拒时副作用
+            # 不生效，否则与拒绝断言自相矛盾（PROC-013：操作被拒绝 + 系统自动
+            # 锁定）。副作用只描述成功迁移的落盘效果。
             for se in side_effects:
+                if _negative_branch_flag:
+                    break
                 target = se.get('target_entity', '')
                 se_target_dim = se.get('target_dimension') or dimension
                 se_loc = f"{target}.{se_target_dim}"
@@ -1818,7 +1831,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 "source_ids": [to["id"]],
                 "entity": te["entity"],
                 "dimension": dimension,
-                "obligation_type": 1,
+                "obligation_type": ObligationType.TRANSITION,
                 "risk_trait": ("negative_test" if _negative_branch_flag else proc_risk_trait),
                 "givens": givens,
                 "when": when,
@@ -1927,7 +1940,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "source_ids": [to["id"]],
                     "entity": te["entity"],
                     "dimension": dimension,
-                    "obligation_type": 1,
+                    "obligation_type": ObligationType.TRANSITION,
                     "risk_trait": proc_risk_trait,
                     # Marker: this is the positive-path sibling of a negative_test
                     # procedure. Its givens contain restrictive BR text
@@ -2091,7 +2104,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "source_ids": [to["id"]],
                     "entity": te["entity"],
                     "dimension": dimension,
-                    "obligation_type": 1,
+                    "obligation_type": ObligationType.TRANSITION,
                     "risk_trait": "audit_rejection",
                     "givens": reject_givens,
                     "when": reject_when,
@@ -2136,7 +2149,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "source_ids": [to["id"]],
                     "entity": te["entity"],
                     "dimension": dimension,
-                    "obligation_type": 1,
+                    "obligation_type": ObligationType.TRANSITION,
                     "risk_trait": "time_sensitive",
                     "givens": boundary_givens,
                     "when": boundary_when,
@@ -2178,7 +2191,7 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                     "source_ids": [to["id"]],
                     "entity": te["entity"],
                     "dimension": dimension,
-                    "obligation_type": 1,
+                    "obligation_type": ObligationType.TRANSITION,
                     "risk_trait": "time_sensitive",
                     "givens": expired_givens,
                     "when": expired_when,
@@ -2289,7 +2302,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                 # (PROC-002 基础数据-文件导出任务)一致。_resolve_phase 面向
                 # 状态锚定,配置属性(任务级别)非状态维度会落到 L0 debug 标记
                 # "P6: topology_level L0 → P0"(渲染层不识别→"第N阶段"兜底)。
-                phase_info = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=3)
+                phase_info = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=ObligationType.ATTRIBUTE_CONFIG)
                 dim_priority = _get_dimension_priority(eo["entity"], attr, state)
 
                 val = branch['value']
@@ -2320,7 +2333,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                     "source_ids": [eo["id"]],
                     "entity": eo["entity"],
                     "dimension": attr,
-                    "obligation_type": 3,
+                    "obligation_type": ObligationType.ATTRIBUTE_CONFIG,
                     "risk_trait": "",
                     "givens": givens,
                     "when": when,
@@ -2343,7 +2356,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                 procedures.append(proc)
         else:
             tl = topo.get(eo["entity"], 0)
-            phase_res = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=3)
+            phase_res = _resolve_phase_for_non_transition(state, eo["entity"], obligation_type=ObligationType.ATTRIBUTE_CONFIG)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
             dim_priority = _get_dimension_priority(eo["entity"], attr, state)
@@ -2373,7 +2386,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
                 "source_ids": [eo["id"]],
                 "entity": eo["entity"],
                 "dimension": attr,
-                "obligation_type": 3,
+                "obligation_type": ObligationType.ATTRIBUTE_CONFIG,
                 "risk_trait": "",
                 "givens": givens,
                 "when": when,
@@ -2474,14 +2487,14 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                 phase_basis = f"dep_state_phase_map.{entity}.min_phase"
             else:
                 # Empty dep_map (stateless) — setup precedes the flow → P0
-                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=5)
+                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.LIFECYCLE)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity in ves:
             phase = ves[entity].get("resolved_phase", 0)
             phase_basis = f"VE.{entity}.resolved_phase"
         else:
-            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=5)
+            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.LIFECYCLE)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -2548,7 +2561,7 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                     "source_ids": [eo["id"]],
                     "entity": ve_name,
                     "dimension": None,
-                    "obligation_type": 6,
+                    "obligation_type": ObligationType.CRUD,
                     "risk_trait": "",
                     "givens": givens,
                     "when": when,
@@ -2630,7 +2643,7 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                 "source_ids": [eo["id"]],
                 "entity": entity,
                 "dimension": None,
-                "obligation_type": 6,
+                "obligation_type": ObligationType.CRUD,
                 "risk_trait": "",
                 "givens": givens,
                 "when": when,
@@ -2697,12 +2710,12 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
                     break
             # If dep_map exists but is empty or state not found, fall through
             if phase == 0 and not phase_basis:
-                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=7)
+                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.INVALID)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity not in dep_map:
             # Entity absent from dep_map — try parent chain via helper
-            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=7)
+            phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.INVALID)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -2717,7 +2730,7 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
             "source_ids": [ro["id"]],
             "entity": entity,
             "dimension": None,
-            "obligation_type": 7,
+            "obligation_type": ObligationType.INVALID,
             "risk_trait": "",
             "givens": [_make_given(
                 target=entity, state=ro.get('from', ''),
@@ -3271,7 +3284,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         primary_br_entity = br_entities[0] if br_entities else state.get("primary_entity", "")
 
         tl = topo.get(primary_br_entity, 0)
-        phase_res = _resolve_phase_for_non_transition(state, primary_br_entity, obligation_type=8)
+        phase_res = _resolve_phase_for_non_transition(state, primary_br_entity, obligation_type=ObligationType.RULE)
         phase = phase_res["phase"]
         phase_basis = phase_res["basis"]
 
@@ -3398,7 +3411,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
             "source_ids": [br.get("id", br.get("constraint_id", ""))],
             "entity": primary_br_entity,
             "dimension": None,
-            "obligation_type": 8,
+            "obligation_type": ObligationType.RULE,
             "risk_trait": "",
             "givens": givens,
             "when": when,
@@ -3458,37 +3471,39 @@ def _generate_type9_field_validation(
 
     procedures: list[dict] = []
 
-    # Build non_editable_attrs set (same as Type3) to filter out
-    # non-configurable fields from Type9 field_validation procs.
-    # Only uses is_config=False (structural signal, no keyword matching).
+    # 系统维护字段过滤: 只剔"系统自动生成/自动获取"的真系统字段, 保留全部
+    # 用户可编辑字段的校验。判据与 V04 校验器共享 context/sysfields.py (desc
+    # 标记正则) —— 不用 is_config: attr() 默认 is_config=False (builders.py),
+    # 会把所有非配置下拉字段误当"不可编辑", 曾致登记字段校验缺失 (PROC-029/
+    # PROC-039 只剩载体类别/级别两条)。
     cm = state.get("coverage_model", {})
-    non_editable_attrs: set[tuple[str, str]] = set()
-    for ed in cm.get("_context", {}).get("entity_details", []):
-        ent_id = ed.get("id", "")
-        for attr in ed.get("attributes", []) or []:
-            if isinstance(attr, dict):
-                attr_name = attr.get("name", "")
-                if attr.get("is_config") is False and ent_id and attr_name:
-                    non_editable_attrs.add((ent_id, attr_name))
+    sys_pairs = sys_maintained_pairs(cm.get("_context", {}).get("entity_details", []))
 
     for entity_id, field_thens in constraint_steps.items():
         if not field_thens:
             continue
 
-        # Filter out thens that target non-editable (system-maintained) fields
+        # 操作者门禁: 无表单操作者的只读实体 (如 E-ROLE/E-LOG, operator 集为空)
+        # 不生成 Type9 —— 否则兜底「系统管理员」会触发 V07 actor 失败。
+        pick = form_operator_roles(cm, entity_id)
+        if not pick:
+            continue
+
+        # Filter out thens that target system-maintained fields. 全限定精确匹配:
+        # 目标 "实体.字段" 的 (实体, 字段) 对命中共享推导集合才剔除。不能用子串
+        # 匹配 —— 中文实体名/字段名互相是子串 (E-CAR 载体.载体编号 vs E-REG
+        # 载体登记任务.原载体编号), 子串会把用户可编辑字段跨实体误伤。
+        sys_field_set = {(k, a) for k, a in sys_pairs}
         filtered_thens = []
         for t in field_thens:
             tgt = t.get("target", "") or ""
-            # Check if target matches any non_editable_attr (format: "entity.attr" or "E-XXX.attr")
-            for ent_id, attr_name in non_editable_attrs:
-                # Match both "E-ORG.机构类型" and "机构.机构类型" formats
-                if attr_name in tgt and (ent_id in tgt or ent_id.replace("E-", "") in tgt):
-                    break
-            else:
-                filtered_thens.append(t)
+            ent_part, _, attr_part = tgt.rpartition(".")
+            if attr_part and (ent_part, attr_part) in sys_field_set:
+                continue  # system-maintained field — drop
+            filtered_thens.append(t)
 
         if not filtered_thens:
-            continue  # All fields were non-editable, skip this entity
+            continue  # All fields were system-maintained, skip this entity
         field_thens = filtered_thens
 
         # Resolve phase for this entity (same logic as Type5)
@@ -3510,14 +3525,14 @@ def _generate_type9_field_validation(
                 phase = min(first_dim.values())
                 phase_basis = f"dep_state_phase_map.{entity_id}.min_phase"
             else:
-                phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=9)
+                phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=ObligationType.FIELD_VALIDATION)
                 phase = phase_res["phase"]
                 phase_basis = phase_res["basis"]
         elif entity_id in ves:
             phase = ves[entity_id].get("resolved_phase", 0)
             phase_basis = f"VE.{entity_id}.resolved_phase"
         else:
-            phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=9)
+            phase_res = _resolve_phase_for_non_transition(state, entity_id, obligation_type=ObligationType.FIELD_VALIDATION)
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
@@ -3541,9 +3556,8 @@ def _generate_type9_field_validation(
         # 系统管理员 / 校验器查 action 子串"两套逻辑漂移(见 co_derivation.py
         # 立下的 single-source-of-truth 原则)。兜底仅当实体确实无法从模型
         # 派生时(如 E-ROLE/E-LOG 这类只读实体,模型无其表单操作)。
-        cm = state.get("coverage_model", {})
-        pick = form_operator_roles(cm, entity_id)
-        inferred_actor = pick[0] if pick else "系统管理员"
+        # pick 已在循环顶部门禁算出 (空集实体已 continue), 首角色即表单操作者
+        inferred_actor = pick[0]
 
         # Build BDD clauses
         givens = [_make_given(
@@ -3568,7 +3582,7 @@ def _generate_type9_field_validation(
             "source_ids": [f"FIELD-VAL-{entity_id}"],
             "entity": entity_id,
             "dimension": None,
-            "obligation_type": 9,  # Type9 = field_validation
+            "obligation_type": ObligationType.FIELD_VALIDATION,  # Type9 = field_validation
             "risk_trait": "field_validation",
             "givens": givens,
             "when": when,
@@ -3619,7 +3633,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
         if bc["category"] == "attribute_effect":
             host_eo_ids = bc.get("host_eo_ids", [])
             host_procs = [p for p in procedures
-                          if p["obligation_type"] == 3
+                          if p["obligation_type"] == ObligationType.ATTRIBUTE_CONFIG
                           and any(sid in host_eo_ids for sid in p.get("source_ids", []))]
 
         elif bc["category"] == "transition_constraint":
@@ -3627,19 +3641,19 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
             host_co_id = bc.get("host_co_id")
             if host_to_id:
                 host_procs = [p for p in procedures
-                              if p["obligation_type"] == 1
+                              if p["obligation_type"] == ObligationType.TRANSITION
                               and host_to_id in p.get("source_ids", [])
                               and p.get("risk_trait") != "audit_rejection"]
             if host_co_id:
                 host_procs.extend([p for p in procedures
-                                   if p["obligation_type"] == 4
+                                   if p["obligation_type"] == ObligationType.CONSTRAINT
                                    and host_co_id in p.get("source_ids", [])])
 
         elif bc["category"] == "crud_constraint":
             host_eo_id = bc.get("host_eo_id")
             if host_eo_id:
                 host_procs = [p for p in procedures
-                              if p["obligation_type"] == 6
+                              if p["obligation_type"] == ObligationType.CRUD
                               and host_eo_id in p.get("source_ids", [])]
 
         elif bc["category"] == "br_embed":
@@ -3647,17 +3661,25 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
             host_to_id = bc.get("host_to_id")
             if host_to_id:
                 host_procs = [p for p in procedures
-                              if p["obligation_type"] == 1
+                              if p["obligation_type"] == ObligationType.TRANSITION
                               and host_to_id in p.get("source_ids", [])
                               and p.get("risk_trait") != "audit_rejection"]
 
         elif bc["category"] == "negative_test":
             entities_raw = br.get("entities_involved", br.get("entities", ""))
             br_entities = _resolve_entity_names(entities_raw, entity_name_map)
-            # Find existing Type6 proc for same entity
+            # Fix 4: 语义化宿主选择。负向 BR 的禁止操作动词（_extract_negative_op
+            # 从描述 + action_verbs 提取，如 "不可回收"→回收）必须出现在宿主动作
+            # 中（IT/guard 负向 proc 的 when.action 为 "尝试执行从X到Y的操作"），
+            # 否则仅实体命中即嵌入会污染语义无关宿主（曾致 RO-IT-004 锁定→正常
+            # 混入 BR-019 账号不可修改、BR-032 角色不可更改删除）。无对齐宿主时
+            # 走下方"新建独立 Type7"分支。
+            _neg_op = _extract_negative_op(br_desc, _get_action_verbs(state["coverage_model"]))
             host_procs = [p for p in procedures
-                          if p["obligation_type"] == 7
-                          and br_entities and p["entity"] in br_entities]
+                          if p["obligation_type"] == ObligationType.INVALID
+                          and br_entities and p["entity"] in br_entities
+                          and _neg_op
+                          and _neg_op in ((p.get("when") or {}).get("action") or p.get("action") or "")]
 
             if not host_procs:
                 # Create new Type6 variant procedure (negative_test BR with no existing Type6)
@@ -3690,7 +3712,7 @@ def _embed_brs(procedures: list[dict], br_classifications: list[dict],
                     "source_ids": [br.get("id", br.get("constraint_id", ""))],
                     "entity": primary_br_entity,
                     "dimension": None,
-                    "obligation_type": 7,
+                    "obligation_type": ObligationType.INVALID,
                     "risk_trait": "negative",
                     "givens": [_make_given(
                         target=primary_br_entity,
@@ -3952,6 +3974,16 @@ def _dedup_procedures(procedures: list[dict], cos: list[dict], warnings: list[st
 
             # ── Branch C: cross-entity causal merge ──
             if not same_entity and similar_action:
+                # Type9 (field-validation) procs are INDEPENDENT per-entity BDD
+                # scenarios — each asserts one entity's form rejects invalid
+                # values. They share the generic scaffold action "提交含违规值的
+                # 表单", so CO-linked pairs (如 E-ARC↔E-CAR) would normalize
+                # equal and get causally merged, producing a proc whose Thens
+                # target another entity's fields (E-ARC 用例断言 E-CAR.载体名称).
+                # Field validation must stay per-entity: never merge a Type9.
+                if (p1.get("obligation_type") == ObligationType.FIELD_VALIDATION
+                        or p2.get("obligation_type") == ObligationType.FIELD_VALIDATION):
+                    continue
                 has_co = any(
                     co.get('enabler_entity') == p1['entity'] and co.get('dependent_entity') == p2['entity']
                     or co.get('enabler_entity') == p2['entity'] and co.get('dependent_entity') == p1['entity']

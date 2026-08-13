@@ -348,7 +348,9 @@ def _identify_primary_entity(
 
     v29 #19 algorithm: multi-signal fusion with 5 normalized scores:
       1. structural_driver_freq  — from-side freq in structural_relations
-      2. causal_driver_freq     — from-side freq in transition_relations
+      2. causal_driver_freq     — direction-agnostic degree in
+                                  transition_relations (from + to, self-once):
+                                  "causal graph center" = flow carrier
       3. dependee_score         — to-side freq in structural_relations
                                    (being depended ON = main entity)
       4. lifecycle_completeness — initial+terminal+states+transitions
@@ -356,7 +358,7 @@ def _identify_primary_entity(
 
     Each signal normalized to [0, 1], then weighted sum:
       score = 0.20 * structural_driver_freq
-            + 0.25 * causal_driver_freq       # causal chain source is key
+            + 0.25 * causal_driver_freq       # causal center is key
             + 0.20 * dependee_score           # being depended on = main
             + 0.20 * lifecycle_completeness   # full lifecycle = main
             + 0.15 * container_degree         # container role
@@ -392,19 +394,29 @@ def _identify_primary_entity(
         if f and rel.get('relation_type') == 'composition':
             container_count[f] += 1
 
-    # ── Signal 2: causal_driver_freq (transition_relations from-side) ──
+    # ── Signal 2: causal_driver_freq (transition_relations → causal center) ──
+    # v30: from-only undervalues a "flow carrier" that is the causal SINK.
+    #   PT017: E-CAR receives 6 task→CAR causal edges (REG/ARC/TRF/RET/RCY/OUT
+    #   drive its state machine) yet emits only CAR→USER → from-only gives it
+    #   the same 1-edge count as every task, so the carrier ties with tasks.
+    #   review: E-PLAN is the causal SOURCE (PLAN→PROJ/ORG, SCORE→PLAN).
+    # Direction-agnostic degree (count each endpoint of every causal edge,
+    # self-edge counted once) = "who is at the center of the causal graph" =
+    # the business-flow carrier.  PT017 → E-CAR (6 in + 1 out);  review →
+    # E-PLAN (2 out + 1 in).  Weights/other signals unchanged.
     causal_freq: dict[str, float] = defaultdict(float)
     causal_entities: set[str] = set()
     for tr in (transition or []):
         f = tr.get('from', '')
-        if not f:
+        t = tr.get('to', '')
+        if not f and not t:
             continue
         w = weight_map.get(tr.get('confidence', 'low'), 0.5)
-        causal_freq[f] += w
-        causal_entities.add(f)
-        # Also count to-side (the dependent in causal relation)
-        t = tr.get('to', '')
-        if t:
+        if f:
+            causal_freq[f] += w
+            causal_entities.add(f)
+        if t and t != f:
+            causal_freq[t] += w
             causal_entities.add(t)
 
     # ── Signal 4: lifecycle_completeness ──
@@ -426,13 +438,19 @@ def _identify_primary_entity(
             entity_dims[e].add(dim)
         lifecycle[e]['transition_count'] += 1
 
-    # Populate state counts from state_info
+    # Populate state counts from state_info.
+    # state_info 存在三种形态（与 _get_explicit_phase_mapping 一致）：
+    #   Layout A: state_info[ent][dim] = {states, initial, terminal, ...}
+    #   Layout B: state_info[ent] = {entity_name, dimensions: [{dimension_name, states, ...}]}
+    #   Layout C: state_info[ent].dimensions = {dim: {states, ...}} (legacy)
+    # 直接 dims.items() 只认 Layout A——对 Layout B 会迭代到 entity_name(字符串)/dimensions(list)
+    # 而读不到 states，导致 lifecycle 信号对 Layout B 数据全平（PT017 实测全实体 0.25）。
+    # 统一经 _normalize_dim_list 归一为 {dim_name: dim_info} 再统计。
     for ent_id, dims in state_info.items():
         if not isinstance(dims, dict):
             continue
-        for dim_name, dim_info in dims.items():
-            if not isinstance(dim_info, dict):
-                continue
+        dim_field = dims.get('dimensions') if isinstance(dims.get('dimensions'), (list, dict)) else dims
+        for dim_name, dim_info in _normalize_dim_list(dim_field).items():
             states = dim_info.get('states', []) or []
             lifecycle[ent_id]['state_count'] += len(states)
             if dim_info.get('initial'):
@@ -906,7 +924,9 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
     if state_info and isinstance(state_info, dict):
         si_ent = state_info.get(primary, {})
         if isinstance(si_ent, dict):
-            si_dim = si_ent.get(primary_dimension, {})
+            # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 initial
+            dim_field = si_ent.get('dimensions') if isinstance(si_ent.get('dimensions'), (list, dict)) else si_ent
+            si_dim = _normalize_dim_list(dim_field).get(primary_dimension, {})
             if isinstance(si_dim, dict):
                 declared_initial_state = (si_dim.get('initial') or '').strip()
 
@@ -982,7 +1002,9 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
         si_ent = state_info.get(primary, {})
         if isinstance(si_ent, dict):
             # Only get terminals from primary_dimension (already selected above)
-            dim_info = si_ent.get(primary_dimension, {})
+            # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 terminal
+            dim_field = si_ent.get('dimensions') if isinstance(si_ent.get('dimensions'), (list, dict)) else si_ent
+            dim_info = _normalize_dim_list(dim_field).get(primary_dimension, {})
             if isinstance(dim_info, dict):
                 term = dim_info.get('terminal', [])
                 if isinstance(term, list):
@@ -996,15 +1018,20 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
         t = t.strip() if isinstance(t, str) else (t if t else '')
         return _classify_edge_type(to_obj, f, t, _primary_terminals)
 
-    # Build state order from state_info states list, if available
+    # Build state order from state_info states list, if available.
+    # state_info 三形态统一经 _normalize_dim_list 归一——否则 Layout B 的
+    # dimensions 列表读不到 states，state_order 恒空，回归边剔除(G0.3/I14)
+    # 与背边检测全部退化为空序兜底。只取 primary_dimension。
     state_order: dict[str, int] = {}
     if state_info and primary in state_info:
-        for dim_name, dim_data in state_info[primary].items():
-            if dim_name == primary_dimension:
-                for idx, s in enumerate(dim_data.get('states', []) or []):
-                    if s not in state_order:
+        si_ent = state_info.get(primary, {})
+        if isinstance(si_ent, dict):
+            dim_field = si_ent.get('dimensions') if isinstance(si_ent.get('dimensions'), (list, dict)) else si_ent
+            dim_info = _normalize_dim_list(dim_field).get(primary_dimension)
+            if isinstance(dim_info, dict):
+                for idx, s in enumerate(dim_info.get('states', []) or []):
+                    if isinstance(s, str) and s and s not in state_order:
                         state_order[s] = idx
-                break
 
     # Build forward graph (excluding rollback AND resubmit edges) and rollback list
     forward_graph: dict[str, list[str]] = defaultdict(list)
@@ -1091,11 +1118,14 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
         if state_info and primary in state_info:
             si_for_order = state_info[primary]
         if isinstance(si_for_order, dict):
-            # Only use primary_dimension's states for ordering
-            dim_info_order = si_for_order.get(primary_dimension, {})
+            # Only use primary_dimension's states for ordering.
+            # 同上方 Spot：Layout B 的 dimensions 列表必须归一，否则 state_order
+            # 恒空 → 环形主状态机背边检测退化为 (cyc[-1], cyc[0]) 兜底（空序退化）。
+            dim_field = si_for_order.get('dimensions') if isinstance(si_for_order.get('dimensions'), (list, dict)) else si_for_order
+            dim_info_order = _normalize_dim_list(dim_field).get(primary_dimension, {})
             if isinstance(dim_info_order, dict):
                 for i, s in enumerate(dim_info_order.get('states', []) or []):
-                    if s not in state_order:
+                    if isinstance(s, str) and s and s not in state_order:
                         state_order[s] = i
 
         for cyc in cycles:
@@ -1848,7 +1878,9 @@ def _derive_dep_state_phase_map(
             # of keyword-only check. Structured signals (terminal, risk_traits,
             # branch_path) take priority over keyword fallback.
             si_ent = state_info.get(entity, {}) if isinstance(state_info, dict) else {}
-            si_dim_info = si_ent.get(dim, {}) if isinstance(si_ent, dict) else {}
+            # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 terminal
+            dim_field = si_ent.get('dimensions') if isinstance(si_ent.get('dimensions'), (list, dict)) else si_ent
+            si_dim_info = _normalize_dim_list(dim_field).get(dim, {})
             _dim_terminals: set[str] = set()
             if isinstance(si_dim_info, dict):
                 term = si_dim_info.get('terminal', [])
@@ -1898,7 +1930,9 @@ def _derive_dep_state_phase_map(
             # richer state_info.stages data to fully fix, documented as a
             # known limitation.
             si_ent = state_info.get(entity, {}) if isinstance(state_info, dict) else {}
-            si_dim = si_ent.get(dim, {}) if isinstance(si_ent, dict) else {}
+            # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 terminal
+            dim_field = si_ent.get('dimensions') if isinstance(si_ent.get('dimensions'), (list, dict)) else si_ent
+            si_dim = _normalize_dim_list(dim_field).get(dim, {})
             terminal_states: set[str] = set()
             if isinstance(si_dim, dict):
                 term = si_dim.get('terminal', [])
@@ -2055,8 +2089,10 @@ def _derive_dep_state_phase_map(
                         # Also include any states declared in state_info but
                         # not in sub_s2p (e.g. 未打分 declared as initial but
                         # never a transition's from/to)
-                        si_dim_sub = (state_info.get(entity, {}).get(dim, {})
-                                      if isinstance(state_info, dict) else {})
+                        si_ent_sub = state_info.get(entity, {}) if isinstance(state_info, dict) else {}
+                        # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 initial
+                        dim_field_sub = si_ent_sub.get('dimensions') if isinstance(si_ent_sub.get('dimensions'), (list, dict)) else si_ent_sub
+                        si_dim_sub = _normalize_dim_list(dim_field_sub).get(dim, {})
                         if isinstance(si_dim_sub, dict):
                             init_s = si_dim_sub.get('initial', '')
                             if init_s and init_s not in state_phase:
@@ -2248,8 +2284,11 @@ def _derive_dep_state_phase_map(
             # determined by causal bindings (e.g. E-REG.报名待审核 is bound
             # to E-PROJ.报名中=P1 via transition_relation, NOT P0).
             si = state_info.get(entity, {}) if isinstance(state_info, dict) else {}
-            if isinstance(si, dict) and dim in si:
-                init_state = si[dim].get('initial', '') if isinstance(si[dim], dict) else ''
+            # state_info 三形态统一归一（Layout B dimensions 列表），否则读不到 initial
+            dim_field = si.get('dimensions') if isinstance(si.get('dimensions'), (list, dict)) else si
+            si_dim = _normalize_dim_list(dim_field).get(dim, {})
+            if isinstance(si_dim, dict):
+                init_state = si_dim.get('initial', '')
                 if init_state and state_phase.get(init_state, UNASSIGNED) == UNASSIGNED:
                     state_phase[init_state] = 0
 
@@ -2265,8 +2304,8 @@ def _derive_dep_state_phase_map(
             # resolved (because the bound entity was processed later).
             anchor_phase_val = _get_anchor_phase_for_entity(anchor, phase_table, dep_map)
             si_term_states: set[str] = set()
-            if isinstance(si, dict) and dim in si and isinstance(si[dim], dict):
-                term = si[dim].get('terminal', [])
+            if isinstance(si_dim, dict):
+                term = si_dim.get('terminal', [])
                 if isinstance(term, list):
                     si_term_states = {s.strip() for s in term if isinstance(s, str) and s.strip()}
 
@@ -2433,12 +2472,18 @@ def _detect_dependent_entities(
             signal_parent[t] = f
 
     # Step 2: Transition_relations signals
+    # A causal edge f→primary means "f drives the primary's state machine" —
+    # the strongest dependent evidence. Upgrade over weaker structural signals
+    # (transition rank == medium, so `>=` flips medium→transition; strong=3 stays).
+    # Was: `f not in signal_strength` — blocked when Step 1 already gave f a
+    # weaker structural 'medium' (e.g. PT017: E-CAR primary, E-CAR→E-ARC ref).
     for tr in transition:
         f = tr.get('from', '')
         t = tr.get('to', '')
-        if t == primary and f not in signal_strength:
-            signal_strength[f] = 'transition'
-            signal_parent[f] = primary
+        if t == primary and f and f != primary:
+            if _signal_rank('transition') >= _signal_rank(signal_strength.get(f, '')):
+                signal_strength[f] = 'transition'
+                signal_parent[f] = primary
 
     # Step 3: F/V/D判定
     dependent: list[str] = []
@@ -2483,8 +2528,11 @@ def _detect_dependent_entities(
             entity_details = []  # We don't have direct access to _context here
             # configurable + no transitions → F
             crud_count = sum(1 for eo in eos if eo.get('entity') == entity and eo.get('type') == 'crud_operation')
-            if crud_count >= 4 and sig != 'strong':
-                # CRUD≥4 without high-confidence signal → F (skip)
+            if crud_count >= 4 and sig not in ('strong', 'transition'):
+                # CRUD≥4 without high-confidence signal → F (skip).
+                # transition signal exempt: "drives the primary's state machine"
+                # is the strongest dependent evidence (Step 2) — a CRUD-rich
+                # flow driver (e.g. PT017 载体归档任务 → E-CAR) is still V.
                 continue
             dependent.append(entity)
 
@@ -2601,8 +2649,27 @@ def _compute_topology_levels(
     """
     levels: dict[str, int] = {}
 
-    # Primary is L1 — main state machine comes before reference entities
-    levels[primary] = 1
+    if managed_entities is None:
+        managed_entities = set()
+
+    # Base-data-primary mode: when the primary is itself base data (managed),
+    # it belongs at L0 (not L1) and its managed→core edges are actor-action
+    # (the primary "performs" tasks), not structural prerequisites. Drop those
+    # edges so core tasks sort by their own reference_dependency structure.
+    base_data_primary = primary in managed_entities
+    if base_data_primary:
+        core_entities = set(all_entities) - managed_entities
+        structural = [r for r in structural if not (
+            r.get('from', '') in managed_entities and r.get('to', '') in core_entities
+        )]
+
+    # Core entities demote to L0 only under the legacy reference-child rule;
+    # in base-data-primary mode they are tasks and settle at L1.
+    def _unassigned_level(eid: str) -> int:
+        return 0 if (eid in managed_entities or not base_data_primary) else 1
+
+    # Primary level: managed (base data) → L0, core (main state machine) → L1
+    levels[primary] = 0 if base_data_primary else 1
 
     # Assign dependent entities based on depth
     for e in dependent_entities:
@@ -2630,7 +2697,7 @@ def _compute_topology_levels(
             if rel.get('relation_type') == 'composition':
                 levels[f] = 2
             else:
-                levels[f] = 0  # reference/other → L0, foundational config data
+                levels[f] = _unassigned_level(f)  # reference/other → L0, foundational config data
 
     # BFS backtracking (1.7)
     # L3+ entities with unassigned structural upstream → L0
@@ -2639,7 +2706,7 @@ def _compute_topology_levels(
         t = rel.get('to', '')
         if f not in levels and t in levels and levels[t] >= 3:
             if rel.get('relation_type') in ('composition', 'reference'):
-                levels[f] = 0  # L0
+                levels[f] = _unassigned_level(f)  # L0
 
     # transition_relations to=primary from端 → L2
     for tr in transition:
@@ -2663,10 +2730,10 @@ def _compute_topology_levels(
                     if r.get('relation_type') == 'composition' and parent_level >= 1:
                         levels[e] = parent_level + 1
                     else:
-                        levels[e] = 0
+                        levels[e] = _unassigned_level(e)
                     break
         else:
-            levels[e] = 0
+            levels[e] = _unassigned_level(e)
 
     # Conflict resolution: take smaller level if already assigned non-L0
     for e in list(levels.keys()):
@@ -2680,8 +2747,6 @@ def _compute_topology_levels(
                         levels[e] = alt
 
     # Managed entities → L0 override
-    if managed_entities is None:
-        managed_entities = set()
     for e in managed_entities:
         if e not in levels:
             levels[e] = 0

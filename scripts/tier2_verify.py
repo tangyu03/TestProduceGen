@@ -18,6 +18,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 from graph import compile_p3_graph
 import scripts.s3_probe as probe
 from context.domain_precondition import lifecycle_entity_ids, object_existence
+from models.schema import ObligationType
 
 
 def main(cm_path: str):
@@ -65,7 +66,7 @@ def main(cm_path: str):
     mism = []
     n_lc = n_mgmt = 0
     for p in procs:
-        if p.get("obligation_type") != 6:
+        if p.get("obligation_type") != ObligationType.CRUD:
             continue
         ent = p.get("entity")
         g0 = (p.get("givens") or [{}])[0]
@@ -115,7 +116,7 @@ def main(cm_path: str):
     print("\n=== 量化: lifecycle Type5 procs Given 分布 ===")
     cnt = Counter()
     for p in procs:
-        if p.get("obligation_type") == 6:
+        if p.get("obligation_type") == ObligationType.CRUD:
             st = (p.get("givens") or [{}])[0].get("state")
             cnt[("lifecycle" if p["entity"] in lc_ids else "mgmt", st)] += 1
     print(f"  判别器 (topology_levels>0) = {sorted(lc_ids)}")

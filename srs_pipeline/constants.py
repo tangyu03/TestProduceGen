@@ -1,4 +1,5 @@
 """全部枚举常量集中于此。prompt 修订（如新增 trait、direction）时只改本文件。"""
+import re
 
 OP_CATEGORIES = ("session", "ui", "file", "query", "crud", "config")
 PRECOND_TYPES = ("state_ref", "event_ref", "constraint")
@@ -25,3 +26,11 @@ TRIGGER_PRIORITY = {name: i for i, name in enumerate(TRIGGER_SOURCES)}
 # Step 2 联动约束：composition↔business_ownership，reference↔configuration_source
 OWNERSHIP_BY_RELATION = {"composition": "business_ownership",
                          "reference": "configuration_source"}
+
+# 铁律14：局部标签形态（t01/t07a/tp01/p04/u01/o01/s01/x01/b01/i01 等），
+# 编号移交前数据文件统一用此形态；编号移交（_assign_ids）按此改写交叉引用。
+# 中文需求文本中"小写字母+数字"几乎必是标签，误伤可忽略。
+LOCAL_LABEL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
+
+# Step 5 XC desc 四来源前缀约定（分类由 desc 前缀承载，INV-8 只认此集）
+XC_DESC_PREFIXES = ("镜像", "由 Step 4.5", "联动", "分支[")

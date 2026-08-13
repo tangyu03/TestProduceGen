@@ -10,9 +10,50 @@ makes invariant violations fail fast with a clear error message.
 
 from __future__ import annotations
 
+from enum import IntEnum
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+# ── 义务类型 (S1.0 类型总表, 单一事实源) ────────────────────────────────
+# 语义表原文见 prompts/s1_prompt.py §类型总表。值是输出 JSON obligation_type
+# 字段的数值契约, 校验器/排序/回放均按数值读取 — 故用 IntEnum (序列化值 =
+# 裸 int, 双跑 SHA-256 字节不变), 禁止改成 str Enum。
+
+class ObligationType(IntEnum):
+    """Procedure.obligation_type 的取值域 (Type1-Type7 + Type9)。"""
+
+    UNSPECIFIED = 0         # 缺失兜底 (get 默认 / 未分类)
+    TRANSITION = 1          # Type1 transition_obligations (状态转换规程)
+    SIDE_EFFECT = 2         # Type2 TO.side_effects (嵌入 Type1 的 V 步, 不独立生成)
+    ATTRIBUTE_CONFIG = 3    # Type3 EO(attribute_config) 配置属性分支覆盖
+    CONSTRAINT = 4          # Type4a CO(constraint) 前置门禁规程
+    LIFECYCLE = 5           # Type4b CO(lifecycle) 生命周期绑定规程
+    CRUD = 6                # Type5 EO(crud_operation) CRUD 操作规程
+    INVALID = 7             # Type6 RO(invalid_transition) 非法转换验证
+    RULE = 8                # Type7 RO(business_rule) 重分类 — 独立业务规则规程
+    FIELD_VALIDATION = 9    # Type9 field_validation
+
+
+_TYPE_LABELS = {
+    ObligationType.TRANSITION: "Type1(Transition)",
+    ObligationType.ATTRIBUTE_CONFIG: "Type3(Attribute)",
+    ObligationType.CONSTRAINT: "Type4a(Constraint)",
+    ObligationType.LIFECYCLE: "Type4b(Lifecycle)",
+    ObligationType.CRUD: "Type5(CRUD)",
+    ObligationType.INVALID: "Type6(Invalid)",
+    ObligationType.RULE: "Type7(BR)",
+}
+
+
+def obligation_type_label(ot: int) -> str:
+    """Type 展示名, 替代 main.py / s1_fix_replay.py 各自重复的 type_labels 字典。"""
+    try:
+        member = ObligationType(ot)
+    except ValueError:
+        return f"Type{ot}"
+    return _TYPE_LABELS.get(member, f"Type{ot}")
 
 
 # ── S0 Models ────────────────────────────────────────────────────────────

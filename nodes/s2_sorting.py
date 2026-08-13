@@ -12,6 +12,7 @@ import copy
 from typing import Any
 from context.domain_precondition import base_data_entity_ids
 from models.state import AgentState
+from models.schema import ObligationType
 
 
 def _entity_order_rank(cm: dict, topology_levels: dict, dependency_depth: dict) -> dict:
@@ -247,7 +248,7 @@ def s2_sorting_node(state: AgentState) -> dict:
         # sort_key is ONLY a tiebreaker among procedures at the same
         # topological level (whose deps are all satisfied). It must NOT
         # duplicate what the DAG already enforces.
-        ot = proc.get("obligation_type", 0)
+        ot = proc.get("obligation_type", ObligationType.UNSPECIFIED)
 
         proc_entity = proc.get("entity", "") or ""
         # Fix B/C1: entity dependency order (基础数据 → 主业务流 → 系统配置尾部).

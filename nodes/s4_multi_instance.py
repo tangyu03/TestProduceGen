@@ -13,6 +13,7 @@ import copy
 import re
 
 from models.state import AgentState
+from models.schema import ObligationType
 
 
 # Reverse the entity_name_map (name -> id) that S0/S1 build from
@@ -142,11 +143,11 @@ def s4_multi_instance_node(state: AgentState) -> dict:
     for proc in procedures:
         s4 = proc.get("_S4_fields", {})
         entity = proc["entity"]
-        ot = proc.get("obligation_type", 0)
+        ot = proc.get("obligation_type", ObligationType.UNSPECIFIED)
 
         # Determine instance count
         count = 1
-        if ot == 8:  # Type7 standalone: use BR.entities_involved[0]
+        if ot == ObligationType.RULE:  # Type7 standalone: use BR.entities_involved[0]
             first_entity = entity
             ros_raw = cm.get("constraint_obligations", [])
             if isinstance(ros_raw, dict):

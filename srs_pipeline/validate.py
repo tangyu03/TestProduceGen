@@ -5,9 +5,9 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from .constants import (DIRECTIONS, OP_CATEGORIES, OWNERSHIP_BY_RELATION,
-                        PRECOND_TYPES, RESERVED_ROLES, TRIGGER_PRIORITY,
-                        TRIGGER_SOURCES)
+from .constants import (BR_SIGNALS, DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
+                        OWNERSHIP_BY_RELATION, PRECOND_TYPES, RESERVED_ROLES,
+                        TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_DESC_PREFIXES)
 from .escape import find_forbidden, find_unescaped
 
 @dataclass
@@ -80,7 +80,10 @@ class Validator:
                   self.c09_cross_module, self.c10_char_safety,
                   self.c11_null_spec, self.c12_operations, self.c13_direction,
                   self.c14_expected_direction, self.c16_state_whitelist,
-                  self.c17_structural_cd_review):
+                  self.c17_structural_cd_review, self.c18_inv_operations_role,
+                  self.c19_inv_signal_type, self.c20_inv_branch_br_coverage,
+                  self.c21_inv_label_refs, self.c22_inv_role_coverage,
+                  self.c23_inv_xc_desc_prefix):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -462,3 +465,125 @@ class Validator:
                             "C16", f"{e['id']}.{d['dimension_name']} states 顺序"
                                    f"与原文枚举不一致：{d['states']} ≠ {ordered}",
                             e["id"])
+
+    # ============ C18-C23：glm5pr §6 全局不变量机器化 ============
+    # 吸收自 validate_srs.py（C11/C8/C6/C2/C1/C7）。豁免集只含 RESERVED_ROLES，
+    # 不追加项目角色名（项目角色一律进 add_role 声明）；标签形态与 XC 前缀取自
+    # constants 单一事实源，不内联硬编码。
+    # 正式号（编号移交后形态）：T-065 / XC-010 / BR-023 / IT-002
+    _FORMAL_LABEL = re.compile(r"\b(?:T|XC|BR|IT)-\d{3}[a-z]?\b")
+
+    @staticmethod
+    def _flatten(obj):
+        """递归展平 note/comment 为文本，用于局部标签扫描。"""
+        if obj is None:
+            return ""
+        if isinstance(obj, str):
+            return obj
+        if isinstance(obj, dict):
+            return " ".join(Validator._flatten(v) for v in obj.values())
+        if isinstance(obj, list):
+            return " ".join(Validator._flatten(v) for v in obj)
+        return str(obj)
+
+    def c18_inv_operations_role(self):
+        """INV-6/R-OPROLE：每条 operation 的 note 必须含 role（单角色字符串或
+        多角色列表），且逐一命中已声明角色或保留角色。缺失 → entity_obligations
+        actor 为空，静默退化。"""
+        declared = {r["name"] for r in self.m.roles} | set(RESERVED_ROLES)
+        for e in self.m.entities:
+            for o in e["operations"]:
+                ref = f"{e['id']}.{o['name']}"
+                note = o.get("note")
+                if not isinstance(note, dict) or "role" not in note:
+                    self.report.error(
+                        "C18", "operation 缺 note.role —— entity_obligations "
+                               "actor 将为空（INV-6）", ref)
+                    continue
+                roles = note["role"]
+                for r in ([roles] if isinstance(roles, str) else roles):
+                    if r not in declared:
+                        self.report.error(
+                            "C18", f"note.role 引用未声明角色 {r!r}（INV-6）", ref)
+
+    def c19_inv_signal_type(self):
+        """INV-8/BR 信号：signal_type ∈ BR_SIGNALS。"""
+        for b in self.m.business_rules:
+            if b.get("signal_type") not in BR_SIGNALS:
+                self.report.error(
+                    "C19", f"signal_type={b.get('signal_type')!r} 不在 "
+                           f"{BR_SIGNALS}（INV-8）", b["id"])
+
+    def c20_inv_branch_br_coverage(self):
+        """INV-7：每个分支维度须在 ≥1 条 BR 的 note.branch_dimension 出现。"""
+        br_dims = {b["note"].get("branch_dimension")
+                   for b in self.m.business_rules
+                   if isinstance(b.get("note"), dict)}
+        for d in self.m.branch_dimensions:
+            if d["dimension"] not in br_dims:
+                self.report.error(
+                    "C20", f"分支维度[{d['dimension']}]无任何 BR 的 "
+                           f"note.branch_dimension 承载（INV-7）", d["entity"])
+
+    def c21_inv_label_refs(self):
+        """INV-4：note/comment 中的标签引用须指向已存在条目。正式号（T-xxx…
+        编号移交后形态）直查 valid；残存局部标签 = 未映射/已删除条目的引用
+        （_assign_ids 已全域改写，残留即失联），报错。扫描面含 operation
+        comment（C12 回填引用所在）。"""
+        valid = ({t["id"] for t in self.m.transitions}
+                 | {x["id"] for x in self.m.cross_entity}
+                 | {b["id"] for b in self.m.business_rules}
+                 | {i["id"] for i in self.m.invalid_transitions})
+        scanned = []
+        for t in self.m.transitions:
+            scanned.append((t["id"], self._flatten(t.get("note"))))
+        for e in self.m.entities:
+            for o in e["operations"]:
+                scanned.append((f"{e['id']}.{o['name']}",
+                                self._flatten(o.get("note"))))
+        for x in self.m.cross_entity:
+            scanned.append((x["id"], self._flatten(x.get("desc"))))
+        for b in self.m.business_rules:
+            scanned.append((b["id"], self._flatten(b.get("note"))))
+        for i in self.m.invalid_transitions:
+            scanned.append((i["id"], self._flatten(i.get("reason"))))
+        for rel in self.m.transition_relations + self.m.structural_relations:
+            scanned.append((f"rel:{rel['from']}→{rel['to']}",
+                            self._flatten(rel.get("note"))))
+        for src, text in scanned:
+            text = text or ""
+            for ref in self._FORMAL_LABEL.findall(text):
+                if ref not in valid:
+                    self.report.error(
+                        "C21", f"{src} 引用不存在的正式号 {ref!r}（INV-4）")
+            for ref in LOCAL_LABEL.findall(text):
+                if ref not in valid:
+                    self.report.error(
+                        "C21", f"{src} 引用未映射的局部标签 {ref!r}（INV-4）")
+
+    def c22_inv_role_coverage(self):
+        """INV-1：承担转换型职责的角色须在 transitions.role ≥1 次。转换型语义
+        用项目自声明的 action_verbs 判定（角色名含动词且 0 次 → 强警告），零内联
+        硬编码；note 说明无转换职责可豁免，故不升 error。"""
+        verbs = list(self.m.prohibition_config.get("action_verbs") or [])
+        used = {t["role"] for t in self.m.transitions}
+        for r in self.m.roles:
+            if r["name"] in RESERVED_ROLES or r["readonly"]:
+                continue
+            if r["name"] not in used:
+                if any(v in r["name"] for v in verbs):
+                    self.report.warn(
+                        "C22", f"角色[{r['name']}]名含转换动词但 transitions.role "
+                               f"0 次（INV-1）——若确无转换职责请在相关 note 说明理由")
+                else:
+                    self.report.warn(
+                        "C22", f"角色[{r['name']}]在 transitions.role 0 次"
+                               f"（crud-only 可接受，INV-1）")
+
+    def c23_inv_xc_desc_prefix(self):
+        """INV-8/XC：desc 须带四来源前缀之一（分类约定承载，非机器解析）。"""
+        for x in self.m.cross_entity:
+            if not x.get("desc", "").startswith(XC_DESC_PREFIXES):
+                self.report.warn(
+                    "C23", f"XC desc 缺来源前缀: {x['desc'][:40]!r}（INV-8）",
+                    x["id"])

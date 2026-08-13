@@ -22,6 +22,7 @@ import json
 import sys
 import subprocess
 from pathlib import Path
+from models.schema import ObligationType
 
 
 PROJECT_DIR = Path("/home/z/my-project/project_v28")
@@ -135,7 +136,8 @@ def run_baseline_checks(output: dict) -> tuple[int, int]:
 
     # ── Check 5: Type1 procedures have non-empty post_state ──
     empty_post = [p["temp_id"] for p in procs
-                  if p.get("obligation_type") == 1 and not p.get("post_state")]
+                  if (p.get("obligation_type") == ObligationType.TRANSITION
+                      and not p.get("post_state"))]
     check("5. Type1 procedures have non-empty post_state",
           len(empty_post) == 0,
           f"empty={empty_post[:3]}" if empty_post else "")

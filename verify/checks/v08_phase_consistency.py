@@ -21,6 +21,7 @@ T-PLAN-004 的相位错误）。方向必须由 spec 显式标注才可审计。
 from collections import deque
 
 from .base import CheckResult, get_procedures
+from models.schema import ObligationType
 
 CHECK_ID = "V08"
 
@@ -276,7 +277,7 @@ def check(output: dict, spec: dict) -> CheckResult:
 
     # 4. Type1 用例 post_state 非空
     for p in get_procedures(output):
-        if p.get("obligation_type") == 1 and not (p.get("post_state") or "").strip():
+        if p.get("obligation_type") == ObligationType.TRANSITION and not (p.get("post_state") or "").strip():
             res.fail({"temp_id": p.get("temp_id"), "reason": "Type1 empty post_state"})
 
     if hygiene:
