@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import warnings
 from datetime import datetime, timedelta, timezone
 
 from .builders import N
@@ -448,3 +449,18 @@ class DomainModel:
         for i in self.invalid_transitions:
             if i.get("reason"):
                 i["reason"] = rw(i["reason"])
+        # 防御性校验（编号移交完成后）：branch_dimension 的 target_transition 须为
+        # 正式号形态（与 renumber 的判据同源）。语义描述不经 _LOCAL 改写 → 残留即
+        # P2 精确匹配(target_transition == tid)失配，落入 all-values 兜底。
+        # 仅警告不报错：兼容旧数据文件仍以语义描述作文档。prompt 侧已禁语义描述
+        # （前向引用直接写局部标签），此处兜底拦截残旧数据。
+        for d in self.branch_dimensions:
+            for br in d["branches"]:
+                tt = br.get("target_transition", "")
+                if tt and not re.fullmatch(r"[A-Z]+-\d{3}[a-z]?", tt):
+                    warnings.warn(
+                        f"branch target_transition={tt!r} "
+                        f"(dimension={d['dimension']!r}, entity={d['entity']!r}) "
+                        f"非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）",
+                        stacklevel=2,
+                    )

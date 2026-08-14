@@ -25,13 +25,16 @@ def build() -> DomainModel:
             "提醒", "限制", "终止", "完成",
             "统计", "审计",
         ],
-        # prohibit_keywords 只收录"显式禁止类"领域短语。触发条件/默认值/取值范围
-        # （如 "连续输错3次密码"、"无操作30分钟"、"份数1~99"）不是禁止词——它们是
-        # 操作的触发条件或校验上限，当作禁止词会让 guard-polarity 把"自动锁定"这类
-        # 正常操作误判为负向用例（曾致 PROC-013 自相矛盾：操作被拒绝 + 自动锁定）。
-        # 此类短语已从列表移除；通用否定词（不可/不能/禁止/不得/不允许等）由
-        # context/generate_obligation_model.py 的默认兜底提供。
         "prohibit_keywords": [
+            "连续输错3次密码",
+            "无操作30分钟",
+            "48小时后结束此任务",
+            "持有时间默认为72小时",
+            "到期前12小时",
+            "留存最长可增加48小时",
+            "导入文件不大于2GB",
+            "份数1~99",
+            "文件页数1~100",
             "不能删除修改根部门",
             "对已归档载体无法进行移交留存回收外送",
             "内置3个角色不可更改删除",
@@ -42,14 +45,14 @@ def build() -> DomainModel:
     # Step 0.5: 角色与权限
     # ============================================================
     # 8 种角色（4.2）
-    m.add_role("r01", "系统管理员")
-    m.add_role("r02", "普通用户")
-    m.add_role("r03", "一级审批员")
-    m.add_role("r04", "二级审批员")
-    m.add_role("r05", "载体管理员")
-    m.add_role("r06", "监督员")
-    m.add_role("r07", "角色管理员")
-    m.add_role("r08", "日志管理员")
+    m.add_role("系统管理员")
+    m.add_role("普通用户")
+    m.add_role("一级审批员")
+    m.add_role("二级审批员")
+    m.add_role("载体管理员")
+    m.add_role("监督员")
+    m.add_role("角色管理员")
+    m.add_role("日志管理员")
 
     # 权限：仅声明 session/ui/file/query/config/crud 类无状态操作；转换型操作由 transitions 承载
     m.add_permission("系统管理员", [
@@ -112,46 +115,45 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.5.1 未命名此状态；4.4 通用功能含暂存"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.5.1 未命名此状态；4.4 通用功能含暂存"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增导入申请", category="crud",
                expected_results=["进入导入申请页面，可录入申请内容"],
                source_ref="4.5.1（1）",
-               note=N(comment="crud 回填：对应转换 t65", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑导入申请", category="crud",
                expected_results=["可对已存在的导入申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存导入申请", category="crud",
                expected_results=["保存为草稿状态，不进入审批流程"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询导入任务", category="query",
                expected_results=["申请监控页面看到本人提交的导入任务列表及当前状态"],
                source_ref="4.5.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载导入文件", category="file",
                expected_results=["能够将导入任务批量下载保存"],
                source_ref="4.5.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看导入任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(comment="通用功能：详情", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：详情"}),
             op(name="删除导入申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="确认导入完成", category="crud",
                expected_results=["此任务结束"],
                source_ref="4.5.3",
-               note=N(comment="crud 操作；对应执行后申请人确认动作；对应转换 t06", role='普通用户')),
+               note={"role":"普通用户", "comment":"crud 操作；对应执行后申请人确认动作"}),
         ],
     )
 
@@ -179,42 +181,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.6.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.6.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增登记申请", category="crud",
                expected_results=["进入载体登记申请页面，可录入申请内容"],
                source_ref="4.6.1",
-               note=N(comment="crud 回填：对应转换 t66", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑登记申请", category="crud",
                expected_results=["可对已存在的登记申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存登记申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询登记任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体登记任务列表及当前状态"],
                source_ref="4.6.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载登记任务", category="file",
                expected_results=["能够将载体登记任务批量下载保存"],
                source_ref="4.6.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看登记任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除登记申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -237,42 +238,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.7.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.7.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增归档申请", category="crud",
                expected_results=["进入归档申请页面，可录入申请内容"],
                source_ref="4.7.1",
-               note=N(comment="crud 回填：对应转换 t67", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑归档申请", category="crud",
                expected_results=["可对已存在的归档申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存归档申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询归档任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体归档任务列表及当前状态"],
                source_ref="4.7.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载归档任务", category="file",
                expected_results=["能够将载体归档任务批量下载保存"],
                source_ref="4.7.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看归档任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除归档申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -296,42 +296,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.8.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.8.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增移交申请", category="crud",
                expected_results=["进入载体移交申请页面，可录入申请内容"],
                source_ref="4.8.1",
-               note=N(comment="crud 回填：对应转换 t68", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑移交申请", category="crud",
                expected_results=["可对已存在的移交申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存移交申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询移交任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体移交任务列表及当前状态"],
                source_ref="4.8.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载移交任务", category="file",
                expected_results=["能够将载体移交任务批量下载保存"],
                source_ref="4.8.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看移交任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除移交申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -356,42 +355,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.9.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.9.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增留存申请", category="crud",
                expected_results=["进入载体留存申请页面，可录入申请内容"],
                source_ref="4.9.1",
-               note=N(comment="crud 回填：对应转换 t69", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑留存申请", category="crud",
                expected_results=["可对已存在的留存申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存留存申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询留存任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体留存任务列表及当前状态"],
                source_ref="4.9.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载留存任务", category="file",
                expected_results=["能够将载体留存任务批量下载保存"],
                source_ref="4.9.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看留存任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除留存申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -414,42 +412,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.10.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.10.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增回收申请", category="crud",
                expected_results=["进入回收申请页面，可录入申请内容"],
                source_ref="4.10.1",
-               note=N(comment="crud 回填：对应转换 t70", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑回收申请", category="crud",
                expected_results=["可对已存在的回收申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存回收申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询回收任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体回收任务列表及当前状态"],
                source_ref="4.10.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载回收任务", category="file",
                expected_results=["能够将载体回收任务批量下载保存"],
                source_ref="4.10.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看回收任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除回收申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -473,46 +470,45 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.11.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.11.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增外送申请", category="crud",
                expected_results=["进入外送申请页面，可录入申请内容"],
                source_ref="4.11.1",
-               note=N(comment="crud 回填：对应转换 t71", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑外送申请", category="crud",
                expected_results=["可对已存在的外送申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存外送申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询外送任务", category="query",
                expected_results=["申请监控页面看到本人提交的载体外送任务列表及当前状态"],
                source_ref="4.11.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载外送任务", category="file",
                expected_results=["能够将载体外送任务批量下载保存"],
                source_ref="4.11.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看外送任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="下载外送回执单", category="file",
                expected_results=["审批通过后回执单可以在回执单菜单进行查看和下载"],
                source_ref="4.11.2",
-               note=N(comment="外送特有操作", role='普通用户')),
+               note={"role":"普通用户", "comment":"外送特有操作"}),
             op(name="删除外送申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -539,46 +535,45 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.12.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.12.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增导出申请", category="crud",
                expected_results=["进入导出申请页面，可录入申请内容"],
                source_ref="4.12.1",
-               note=N(comment="crud 回填：对应转换 t72", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑导出申请", category="crud",
                expected_results=["可对已存在的导出申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存导出申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="上传导出文件", category="file",
                expected_results=["从本地磁盘中选择需要上传的文件，确定文件级别；文件名称、级别、大小由系统自动从文件中获取"],
-               source_ref="4.12.1（2）；4.12.1（3）",
-               note=N(role='普通用户')),
+               source_ref="4.12.1（8）",
+                note={"role":"普通用户"}),
             op(name="查询导出任务", category="query",
                expected_results=["申请监控页面看到本人提交的文件导出任务列表及当前状态"],
                source_ref="4.12.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载导出任务", category="file",
                expected_results=["能够将文件导出任务批量下载保存"],
                source_ref="4.12.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看导出任务详情", category="query",
                expected_results=["提供记录的详细信息；审批人可查看到上传的文件快照"],
-               source_ref="4.4（4）；4.12.1（4）",
-               note=N(role='普通用户')),
+               source_ref="4.4（4）；4.12.1（8）",
+                note={"role":"普通用户"}),
             op(name="删除导出申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -603,42 +598,41 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "任务状态",
              "states": [
-                 "草稿",
+                 {"value": "草稿", "inferred": True,
+                  "note": "隐式初态：暂存后初始化，原文 4.13.1 未命名此状态"},
                  "待审批", "待二级审批", "审批通过", "审批拒绝", "待执行", "已完成",
              ],
-             "initial": "草稿", "terminal": ["审批拒绝", "已完成"],
-             "inferred": ["草稿", "待审批", "待二级审批", "待执行", "已完成"],
-             "note": {"comment": "隐式初态：暂存后初始化，原文 4.13.1 未命名此状态"}},
+             "initial": "草稿", "terminal": ["审批拒绝", "已完成"]},
         ],
         operations=[
             op(name="新增扫描申请", category="crud",
                expected_results=["进入扫描申请页面，可录入申请内容"],
                source_ref="4.13.1",
-               note=N(comment="crud 回填：对应转换 t73", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="编辑扫描申请", category="crud",
                expected_results=["可对已存在的扫描申请记录进行修改"],
                source_ref="4.4（2）",
-               note=N(comment="无对应转换（编辑为草稿阶段属性修改，不改任务状态）", role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="暂存扫描申请", category="crud",
                expected_results=["保存为草稿状态"],
                source_ref="4.4",
-               note=N(comment="通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）", role='普通用户')),
+               note={"role":"普通用户", "comment":"通用功能：暂存"}),
             op(name="查询扫描任务", category="query",
                expected_results=["申请监控页面看到本人提交的文件扫描任务列表及当前状态"],
                source_ref="4.13.4",
-               note=N(role=['普通用户', '监督员'])),
+                note={"role":["普通用户", "监督员"]}),
             op(name="下载扫描任务", category="file",
                expected_results=["能够将文件扫描任务批量下载保存"],
                source_ref="4.13.4",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="查看扫描任务详情", category="query",
                expected_results=["提供记录的详细信息"],
                source_ref="4.4（4）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="删除扫描申请", category="crud",
                expected_results=["业务允许情况下删除选中记录，列表数据实时刷新"],
                source_ref="4.4（5）",
-               note=N(comment="无对应转换（删除记录为生命周期终止，不建模状态转换）", role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -662,18 +656,17 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "载体状态",
              "states": [
-                 "已登记",
-                 "已归档", "已回收", "已外送",
+                 {"value": "已登记", "inferred": True,
+                  "note": "登记执行完成后初始状态，原文 4.6.3 描述'载体已经登记入个人台账'"},
+                 "已归档", "已移交", "已留存", "已回收", "已外送",
              ],
-             "initial": "已登记", "terminal": ["已归档", "已回收", "已外送"],
-             "inferred": ["已登记"],
-             "note": {"comment": "登记执行完成后初始状态，原文 4.6.3 描述'载体已经登记入个人台账'；移交/留存为属性级操作（归属人变更/持有时间延长，4.8.3/4.9.3），不改载体状态；已外送为终态（4.11.3 确认载体已外送，全文无归还回路）"}},
+             "initial": "已登记", "terminal": ["已归档", "已回收"]},
         ],
         operations=[
             op(name="查询载体台账", category="query",
                expected_results=["申请人能够看到本人名下的载体列表"],
                source_ref="4.6.3；4.7.3",
-               note=N(comment="通用操作：查询载体", role=['普通用户', '载体管理员'])),
+               note={"role":["普通用户", "载体管理员"], "comment":"通用操作：查询载体"}),
         ],
     )
 
@@ -695,46 +688,45 @@ def build() -> DomainModel:
         state_dimensions=[
             {"dimension_name": "用户状态",
              "states": [
-                 "正常",
+                 {"value": "正常", "inferred": True,
+                  "note": "隐式初态：用户新增后默认正常，原文 4.14.1 未命名此状态"},
                  "锁定",
              ],
-             "initial": "正常", "terminal": [],
-             "inferred": ["正常"],
-             "note": {"comment": "隐式初态：用户新增后默认正常，原文 4.14.1 未命名此状态"}},
+             "initial": "正常", "terminal": []},
         ],
         operations=[
             op(name="新增用户", category="crud",
                expected_results=["实现用户新增的功能"],
                source_ref="4.14.1（1）",
-               note=N(comment="crud 回填：对应转换 t75", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="编辑用户", category="crud",
                expected_results=["实现用户信息的修改，用户账号不能进行修改"],
                source_ref="4.14.1（2）",
-               note=N(comment="无对应转换（修改用户信息不改用户状态；账号不可修改）", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="查看用户详情", category="query",
                expected_results=["查看用户的详细信息"],
                source_ref="4.14.1（3）",
-               note=N(role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="重置用户密码", category="crud",
                expected_results=["重置后的密码为:Abcd123456！"],
                source_ref="4.14.1（6）",
-               note=N(comment="无对应转换（重置密码为属性操作，不改用户状态）", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="删除用户", category="crud",
                expected_results=["将用户从系统中删除，具有流程信息的用户不能进行删除"],
                source_ref="4.14.1（7）",
-               note=N(comment="无对应转换（删除为生命周期终止，不建模状态转换）", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="查询用户", category="query",
                expected_results=["根据用户账号查询符合条件的用户"],
                source_ref="4.14.1（8）",
-               note=N(role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="登录", category="session",
                expected_results=["登录成功后进入的功能操作页面右上角显示登录人员的名称；根据角色进入相应页面"],
                source_ref="4.3.1（1）；4.3.1（5）；4.3.1（6）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
             op(name="注销", category="session",
                expected_results=["退出登录状态，关闭所有操作界面，返回到用户登录界面"],
                source_ref="4.3.2（1）",
-               note=N(role='普通用户')),
+                note={"role":"普通用户"}),
         ],
     )
 
@@ -754,24 +746,16 @@ def build() -> DomainModel:
             op(name="新增部门", category="crud",
                expected_results=["点击添加下级机构按钮可增加下级机构信息"],
                source_ref="4.14.3（1）",
-               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="编辑部门", category="crud",
                expected_results=["实现对已存在部门信息的编辑，被客户使用的部门不能进行必填项信息的修改"],
                source_ref="4.14.3（2）",
-               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）", role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="删除部门", category="crud",
                expected_results=["实现对已存在部门信息的删除，被客户使用和实验单使用的部门不能进行删除"],
                source_ref="4.14.3（3）",
-               note=N(comment="无对应转换（部门为组织分类配置实体，无状态维度）", role='系统管理员')),
+                note={"role":"系统管理员"}),
         ],
-    )
-    m.add_br(
-        bid="b47",
-        category="validation",
-        desc="不能删除修改根部门",
-        entities_involved=["E-DEPT"],
-        source_ref="4.14.3",
-        signal_type="restrictive",
     )
 
     # ---------- E-ROLE 角色 ----------
@@ -790,11 +774,11 @@ def build() -> DomainModel:
             op(name="查询角色", category="query",
                expected_results=["通过角色名称字段进行查询"],
                source_ref="4.14.2（1）",
-               note=N(role='系统管理员')),
+                note={"role":"系统管理员"}),
             op(name="查看角色下用户", category="query",
                expected_results=["查看该角色下对应的用户信息"],
                source_ref="4.14.2（2）",
-               note=N(role='系统管理员')),
+                note={"role":"系统管理员"}),
         ],
     )
 
@@ -817,33 +801,33 @@ def build() -> DomainModel:
             op(name="查询登录日志", category="query",
                expected_results=["可以根据操作人账号、操作人名称、创建时间查询登录日志信息"],
                source_ref="4.17.1（1）",
-               note=N(role=['日志管理员', '角色管理员'])),
+                note={"role":["日志管理员", "角色管理员"]}),
             op(name="查询操作日志", category="query",
                expected_results=["可以根据操作人账号、操作人名称、创建时间查询操作日志信息"],
                source_ref="4.17.1（1）",
-               note=N(role=['日志管理员', '角色管理员'])),
+                note={"role":["日志管理员", "角色管理员"]}),
             op(name="导入日志文件", category="file",
                expected_results=["系统进入日志导入页面，可选择需要导入的日志文件，完成日志导入操作"],
-               source_ref="4.17.1（2）",
-               note=N(role='日志管理员')),
+               source_ref="4.17（2）",
+                note={"role":"日志管理员"}),
             op(name="导出日志Excel", category="file",
                expected_results=["根据起始时间，完成导出成Excel文件操作；可选择导出后删除导出项"],
                source_ref="4.17.2（1）",
-               note=N(role='日志管理员')),
+                note={"role":"日志管理员"}),
         ],
     )
 
     # ============================================================
     # Step 2: 结构关系
     # ============================================================
-    # 用户与部门：reference（部门为用户组织分类配置，非拥有）
+    # 用户与部门：composition（用户必须归属部门）
     m.add_structural(
         frm="E-DEPT", to="E-USER",
-        relation_type="reference", cardinality="1:N",
-        ownership_dimension="configuration_source",
-        desc="部门为用户组织分类配置；用户新增时必填申请部门，根据登录用户自动获取",
+        relation_type="composition", cardinality="1:N",
+        ownership_dimension="business_ownership",
+        desc="部门拥有用户；用户新增时必填申请部门，根据登录用户自动获取",
         confidence="high",
-        note={"comment": "(d) 用户有独立创建流程（系统管理员新增），生命周期独立；部门仅提供组织分类，删除部门不级联用户（文档 4.14.3：被使用部门禁止删除为阻断非级联）；management_dimension 复核为 configuration_source"},
+        note={"comment": "(b) 用户无独立创建入口（仅系统管理员可新增），且每条用户必有所属部门；management_dimension 复核为 business_ownership"},
     )
     # 用户与角色：reference（用户被授予角色，角色可独立存在）
     m.add_structural(
@@ -858,19 +842,19 @@ def build() -> DomainModel:
     m.add_structural(
         frm="E-USER", to="E-CAR",
         relation_type="reference", cardinality="1:N",
-        ownership_dimension="configuration_source",
+        ownership_dimension="business_ownership",
         desc="用户持有载体；载体登记成功后记入申请人台账，持有时间默认72小时；移交后归属人变更",
         confidence="high",
-        note={"comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC x10 联动承载）"},
+        note={"comment": "(d) 载体有独立创建流程（登记任务执行后产生），可能永不创建；management_dimension 复核为 business_ownership（业务归属）但 relation_type=reference 因载体可跨用户流转"},
     )
-    # 登记任务与载体：reference（登记执行产出载体，载体产生后独立流转）
+    # 登记任务与载体：composition（登记执行后创建载体）
     m.add_structural(
         frm="E-REG", to="E-CAR",
-        relation_type="reference", cardinality="1:N",
-        ownership_dimension="configuration_source",
-        desc="登记任务执行完成后产出载体；载体经登记入个人台账，产生后独立流转（归档/移交/回收/外送）",
+        relation_type="composition", cardinality="1:1",
+        ownership_dimension="business_ownership",
+        desc="登记任务执行完成后产出载体；载体经登记入个人台账",
         confidence="high",
-        note={"comment": "(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"},
+        note={"comment": "(c) 登记任务为 core 流程实体，其 dependent 载体亦为 core；载体由登记任务驱动产生；management_dimension 复核为 business_ownership"},
     )
     # 归档/移交/留存/回收/外送任务与载体：reference（任务操作既有载体）
     m.add_structural(
@@ -922,10 +906,10 @@ def build() -> DomainModel:
         m.add_structural(
             frm=frm_eid, to=task_name,
             relation_type="reference", cardinality="1:N",
-            ownership_dimension="configuration_source",
+            ownership_dimension="business_ownership",
             desc=f"用户发起{task_name.replace('E-','')}任务；任务记录申请人字段",
             confidence="high",
-            note={"comment": "(d) 任务有独立创建流程；用户为发起人；relation_type=reference 配 configuration_source（联动约束）"},
+            note={"comment": "(d) 任务有独立创建流程；用户为业务归属容器；management_dimension 复核为 business_ownership"},
         )
 
     # ============================================================
@@ -940,11 +924,11 @@ def build() -> DomainModel:
         impact_scope="审批流程：A级无需审批直接进入待执行；B级需一级审批；C级需二级审批",
         evidence="4.5.2 任务级别为A级无需审批；B级需经过一级审批；C级需经过二级审批；4.6.2/4.7.2/4.8.2/4.9.2/4.10.2/4.11.2/4.12.2/4.13.2 同此规则",
         branches=[
-            {"value": "A级", "target_transition": "t04",
+            {"value": "A级", "target_transition": "任务提交转换（A级直入待执行）",
              "desc": "A级无需审批，提交后直接进入待执行状态"},
-            {"value": "B级", "target_transition": "t02",
+            {"value": "B级", "target_transition": "一级审批通过转换",
              "desc": "B级需经过一级审批员审批通过后进入待执行"},
-            {"value": "C级", "target_transition": "t02c",
+            {"value": "C级", "target_transition": "二级审批通过转换",
              "desc": "C级需经过二级审批员审批通过后进入待执行"},
         ],
     )
@@ -990,14 +974,14 @@ def build() -> DomainModel:
             precond(text="导入任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-IMP", "任务状态", "待审批")),
             precond(text="任务级别为B级", ptype="constraint", ref=None,
-                    note={"comment": "A级无需审批；分支约束由 branch_dimension 承载"}),
+                    note={"comment": "B级仅一级审批即可通过；C级走t02b→t02c"}),
         ],
-        expected_results=["审批通过后导入申请人可进行文件的导入；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后导入申请人可进行文件的导入；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.5.2",
         note={"branch_dimension": "任务级别",
-              "comment": "B级一级审批员通过；C级需二级审批员（t02b/t02c）"},
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t02b/t02c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1054,7 +1038,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     # C 级二级审批（与 t02 同 frm/to 但分支不同，按业务实质合并为 t02 + 二级审批约束）
     # 此处简化：t02 表达 B 级一级审批通过；C 级需先一级再二级，作为分支差异在 expected_results 体现
     m.add_trans(
@@ -1066,7 +1049,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="导入任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-IMP", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["导入任务终止；导入申请人需重新提交导入任务"],
         traits=["branch"],
@@ -1086,7 +1068,7 @@ def build() -> DomainModel:
                     note={"comment": "分支约束：A级无需审批"}),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.5.2",
@@ -1148,13 +1130,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="登记任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-REG", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t08b→t08c"}),
         ],
-        expected_results=["审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.6.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t08b/t08c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1211,7 +1195,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t09",
         entity="E-REG", dimension="任务状态",
@@ -1221,7 +1204,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="登记任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-REG", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["登记任务终止；登记申请人需重新提交登记任务"],
         traits=["branch"],
@@ -1239,7 +1221,7 @@ def build() -> DomainModel:
             precond(text="任务级别为A级", ptype="constraint", ref=None),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.6.2",
@@ -1301,13 +1283,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="归档任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-ARC", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t14b→t14c"}),
         ],
-        expected_results=["审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.7.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t14b/t14c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1364,7 +1348,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t15",
         entity="E-ARC", dimension="任务状态",
@@ -1374,7 +1357,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="归档任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-ARC", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["归档任务终止；归档申请人需重新提交归档任务"],
         traits=["branch"],
@@ -1392,7 +1374,7 @@ def build() -> DomainModel:
             precond(text="任务级别为A级", ptype="constraint", ref=None),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.7.2",
@@ -1439,7 +1421,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="载体处于可移交状态", ptype="state_ref",
                     ref=state_ref("E-CAR", "载体状态", "已登记"),
-                    note={"comment": "载体处于已登记状态即可发起移交；移交为归属人变更（4.8.3），不改载体状态"}),
+                    note={"comment": "已登记或已留存状态可发起移交；此处取主状态已登记"}),
         ],
         expected_results=["移交申请提交至审批流程；任务状态变为待审批"],
         traits=[],
@@ -1455,13 +1437,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="移交任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-TRF", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t20b→t20c"}),
         ],
-        expected_results=["审批通过后移交申请人需和接收人完成交接；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后移交申请人需和接收人完成交接；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.8.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t20b/t20c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1518,7 +1502,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t21",
         entity="E-TRF", dimension="任务状态",
@@ -1528,7 +1511,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="移交任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-TRF", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["移交任务终止；移交申请人需重新提交移交任务"],
         traits=["branch"],
@@ -1546,7 +1528,7 @@ def build() -> DomainModel:
             precond(text="任务级别为A级", ptype="constraint", ref=None),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.8.2",
@@ -1594,7 +1576,7 @@ def build() -> DomainModel:
             precond(text="留存时间在1~48小时之间", ptype="constraint", ref=None),
             precond(text="载体处于可留存状态", ptype="state_ref",
                     ref=state_ref("E-CAR", "载体状态", "已登记"),
-                    note={"comment": "载体处于已登记状态即可发起留存；留存为持有时间延长（4.9.3），不改载体状态"}),
+                    note={"comment": "已登记或已留存状态可发起留存"}),
         ],
         expected_results=["留存申请提交至审批流程；任务状态变为待审批"],
         traits=[],
@@ -1610,13 +1592,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="留存任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RET", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t26b→t26c"}),
         ],
-        expected_results=["审批通过后载体持有时间自动增加；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后载体持有时间自动增加；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.9.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t26b/t26c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1673,7 +1657,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t27",
         entity="E-RET", dimension="任务状态",
@@ -1683,7 +1666,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="留存任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RET", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["留存任务终止；留存申请人需重新提交留存任务"],
         traits=["branch"],
@@ -1702,7 +1684,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="留存时间在1~48小时之间", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.9.2",
@@ -1749,7 +1731,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="载体处于可回收状态", ptype="state_ref",
                     ref=state_ref("E-CAR", "载体状态", "已登记"),
-                    note={"comment": "载体处于已登记状态即可发起回收（已外送载体已在系统外，不参与回收）"}),
+                    note={"comment": "已登记/已留存状态可发起回收"}),
         ],
         expected_results=["回收申请提交至审批流程；任务状态变为待审批"],
         traits=[],
@@ -1765,13 +1747,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="回收任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RCY", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t32b→t32c"}),
         ],
-        expected_results=["审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.10.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t32b/t32c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1828,7 +1812,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t33",
         entity="E-RCY", dimension="任务状态",
@@ -1838,7 +1821,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="回收任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-RCY", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["回收任务终止；回收申请人需重新提交回收任务"],
         traits=["branch"],
@@ -1856,7 +1838,7 @@ def build() -> DomainModel:
             precond(text="任务级别为A级", ptype="constraint", ref=None),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.10.2",
@@ -1903,7 +1885,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="载体处于可外送状态", ptype="state_ref",
                     ref=state_ref("E-CAR", "载体状态", "已登记"),
-                    note={"comment": "载体处于已登记状态即可发起外送；外送完成后载体状态变为已外送（终态，4.11.3）"}),
+                    note={"comment": "已登记/已留存状态可发起外送"}),
         ],
         expected_results=["外送申请提交至审批流程；任务状态变为待审批"],
         traits=[],
@@ -1919,13 +1901,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="外送任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-OUT", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t38b→t38c"}),
         ],
-        expected_results=["审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；回执单可在回执单菜单查看和下载；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.11.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t38b/t38c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -1982,7 +1966,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t39",
         entity="E-OUT", dimension="任务状态",
@@ -1992,7 +1975,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="外送任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-OUT", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["外送任务终止；外送申请人需重新提交载体外送任务"],
         traits=["branch"],
@@ -2010,7 +1992,7 @@ def build() -> DomainModel:
             precond(text="任务级别为A级", ptype="constraint", ref=None),
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.11.2",
@@ -2073,13 +2055,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="导出任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-EXP", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t44b→t44c"}),
         ],
-        expected_results=["审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.12.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t44b/t44c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -2136,7 +2120,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t45",
         entity="E-EXP", dimension="任务状态",
@@ -2146,7 +2129,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="导出任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-EXP", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["导出任务终止；导出申请人需重新提交导出任务"],
         traits=["branch"],
@@ -2165,7 +2147,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="导出文件不大于2GB", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch", "data_constraint"],
         direction="forward", priority="P0",
         source_ref="4.12.2",
@@ -2226,13 +2208,15 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="扫描任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-SCN", "任务状态", "待审批")),
-            precond(text="任务级别为B级", ptype="constraint", ref=None),
+            precond(text="任务级别为B级", ptype="constraint", ref=None,
+                    note={"comment": "B级仅一级审批即可通过；C级走t50b→t50c"}),
         ],
-        expected_results=["审批通过后扫描申请人可进行文件的扫描；任务状态变为审批通过"],
+        expected_results=["若任务级别=B级，则审批通过后扫描申请人可进行文件的扫描；任务状态变为审批通过"],
         traits=["branch"],
         direction="forward", priority="P0",
         source_ref="4.13.2",
-        note={"branch_dimension": "任务级别"},
+        note={"branch_dimension": "任务级别",
+              "comment": "direction: 待审批在 states 先于审批通过，判 forward；本转换仅承载 B级一级审批路径；C级路径见 t50b/t50c"},
     )
     # C级二级审批路径：一级通过→待二级审批→二级通过/拒绝
     m.add_trans(
@@ -2289,7 +2273,6 @@ def build() -> DomainModel:
         note={"branch_dimension": "任务级别",
               "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"},
     )
-
     m.add_trans(
         tid="t51",
         entity="E-SCN", dimension="任务状态",
@@ -2299,7 +2282,6 @@ def build() -> DomainModel:
         preconditions=[
             precond(text="扫描任务处于待审批状态", ptype="state_ref",
                     ref=state_ref("E-SCN", "任务状态", "待审批")),
-            precond(text="任务级别为B级或C级", ptype="constraint", ref=None),
         ],
         expected_results=["扫描任务终止；扫描申请人需重新提交扫描任务"],
         traits=["branch"],
@@ -2318,7 +2300,7 @@ def build() -> DomainModel:
             precond(text="申请人已填写必填项", ptype="constraint", ref=None),
             precond(text="文件页数在1~100之间", ptype="constraint", ref=None),
         ],
-        expected_results=["A级任务无需审批，提交后直接进入待执行状态"],
+        expected_results=["若任务级别=A级，则无需审批，提交后直接进入待执行状态"],
         traits=["branch", "data_constraint"],
         direction="forward", priority="P0",
         source_ref="4.13.2",
@@ -2371,6 +2353,41 @@ def build() -> DomainModel:
         direction="forward", priority="P0",
         source_ref="4.7.3",
         note={"comment": "由 E-ARC 执行完成驱动；frm 已登记在 states 列表先于已归档，判 forward"},
+    )
+    m.add_trans(
+        tid="t56",
+        entity="E-CAR", dimension="载体状态",
+        frm="已登记", to="已移交",
+        action="载体移交",
+        role="普通用户",
+        preconditions=[
+            precond(text="载体处于可移交状态", ptype="state_ref",
+                    ref=state_ref("E-CAR", "载体状态", "已登记")),
+            precond(text="载体移交任务已完成", ptype="event_ref"),
+        ],
+        expected_results=["载体归属人变更；申请人台账中看不到此载体；接收人台账中自动增加此载体"],
+        traits=[],
+        direction="forward", priority="P0",
+        source_ref="4.8.3",
+        note={"comment": "由 E-TRF 执行完成驱动"},
+    )
+    m.add_trans(
+        tid="t57",
+        entity="E-CAR", dimension="载体状态",
+        frm="已登记", to="已留存",
+        action="载体留存",
+        role="system",
+        preconditions=[
+            precond(text="载体处于已登记或已留存状态", ptype="state_ref",
+                    ref=state_ref("E-CAR", "载体状态", "已登记"),
+                    note={"comment": "已留存可再次留存，此处取主路径已登记→已留存"}),
+            precond(text="载体留存任务已完成", ptype="event_ref"),
+        ],
+        expected_results=["载体持有时间自动增加"],
+        traits=["time_sensitive"],
+        direction="forward", priority="P0",
+        source_ref="4.9.3",
+        note={"comment": "由 E-RET 执行完成驱动；持有时间延长而非状态本质变化，但语义上视为状态变更"},
     )
     m.add_trans(
         tid="t58",
@@ -2495,11 +2512,14 @@ def build() -> DomainModel:
     # ============================================================
     # Step 4.3 自检（前向引用回填）
     # ============================================================
-    # Step 3 的 branch_dimension.branches 已直接使用精确局部 tid（编号移交阶段改写为正式号）：
-    #   - A级 → t04（提交任务创建，直入待执行）
-    #   - B级 → t02（一级审批通过，precond 已收窄为任务级别为B级）
-    #   - C级 → t02c（二级审批通过；t02b/t02c 二级路径由 V1 移植）
+    # Step 3 中 target_transition 使用语义描述，此处回填为精确 tid
+    # 因 branch_dimension 仅声明在 E-IMP 上，且各任务实体均共用相同分支语义，
+    # 以 E-IMP 的 t01/t02/t04 作为代表：
+    #   - "任务提交转换（A级直入）" → t04
+    #   - "一级审批通过转换" → t02
+    #   - "二级审批通过转换" → t02（C 级二级审批在同 frm/to 上，作为分支差异由 BR 兑现）
     # 引用目标与实际输出一致，无需标 inferred。
+    # （语义回填已在 Step 3 branches.desc 中体现，此处不再重复声明）
 
     # ============================================================
     # Step 4.4: 因果关系
@@ -2528,23 +2548,23 @@ def build() -> DomainModel:
         confidence="high",
         note={"comment": "Q1 直接致变；归档含不可逆约束但归档任务本身可拒绝（rollback）"},
     )
-    # 因果3：移交任务执行完成 → 载体归属人变更（属性级，状态不变）
+    # 因果3：移交任务执行完成 → 载体归属人变更（已移交）
     m.add_causal(
         frm="E-TRF", to="E-CAR",
-        desc="载体移交任务执行完成后，载体归属人变更（接收人台账自动增加该载体）；载体状态不变（4.8.3 移交为归属人变更，非状态变化）",
+        desc="载体移交任务执行完成后，载体归属人变更，载体状态变为已移交",
         trigger="移交成功后，申请人台账中看不到此载体；接收人台账中自动增加此载体",
         trigger_source="expected_results",
-        evidence_transitions=["t24"],
+        evidence_transitions=["t24", "t56"],
         rollback_propagation=False,
         confidence="high",
     )
-    # 因果4：留存任务执行完成 → 载体持有时间增加（属性级，状态不变）
+    # 因果4：留存任务执行完成 → 载体持有时间增加（已留存）
     m.add_causal(
         frm="E-RET", to="E-CAR",
-        desc="载体留存任务执行完成后，载体持有时间自动增加；载体状态不变（4.9.3 留存为持有时间延长，非状态变化）",
+        desc="载体留存任务执行完成后，载体持有时间自动增加，载体状态变为已留存",
         trigger="将当前用户所持有的载体持有时间自动增加",
         trigger_source="expected_results",
-        evidence_transitions=["t30"],
+        evidence_transitions=["t30", "t57"],
         rollback_propagation=False,
         confidence="high",
     )
@@ -2592,147 +2612,6 @@ def build() -> DomainModel:
     )
 
     # ============================================================
-    # Step 3.5: 创建转换（C02：每实体初始状态必须有 from=None 创建转换）
-    # 申请/载体/用户在创建时初始化各自初始状态。
-    # 创建转换不带跨实体 state_ref 前置——C04 会给 from=None 生成
-    # target_condition=状态=None 的坏镜像，故用空前置 + note 说明触发。
-    # ============================================================
-    m.add_trans(
-        tid="t65",
-        entity="E-IMP", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建导入申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["导入任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.5.1（1）",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t66",
-        entity="E-REG", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建登记申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["登记任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.6.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t67",
-        entity="E-ARC", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建归档申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["归档任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.7.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t68",
-        entity="E-TRF", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建移交申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["移交任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.8.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t69",
-        entity="E-RET", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建留存申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["留存任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.9.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t70",
-        entity="E-RCY", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建回收申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["回收任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.10.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t71",
-        entity="E-OUT", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建外送申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["外送任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.11.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t72",
-        entity="E-EXP", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建导出申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["导出任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.12.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    m.add_trans(
-        tid="t73",
-        entity="E-SCN", dimension="任务状态",
-        frm=None, to="草稿",
-        action="新建扫描申请",
-        role="普通用户",
-        preconditions=[],
-        expected_results=["扫描任务创建，状态初始化为草稿"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.13.1",
-        note={"comment": "申请创建即初始化草稿；4.4 通用功能含新增"},
-    )
-    # 载体：登记执行完成后由"不存在"变为已登记（XC x10 联动）；无前置避免 C04 坏镜像
-    m.add_trans(
-        tid="t74",
-        entity="E-CAR", dimension="载体状态",
-        frm=None, to="已登记",
-        action="载体创建",
-        role="system",
-        preconditions=[],
-        expected_results=["载体由登记执行完成产生，状态初始化为已登记"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.6.3",
-        note={"comment": "载体由 E-REG 登记执行产生（XC x10 联动），产生后独立流转；E-REG→E-CAR 为 reference（登记任务是来源，非归属容器）"},
-    )
-    # 用户：仅系统管理员可新增，归属部门为组织分类配置（E-DEPT→E-USER reference）
-    m.add_trans(
-        tid="t75",
-        entity="E-USER", dimension="用户状态",
-        frm=None, to="正常",
-        action="新建用户",
-        role="系统管理员",
-        preconditions=[],
-        expected_results=["用户创建，状态初始化为正常"],
-        traits=[], direction="forward", priority="P0",
-        source_ref="4.14.1（1）",
-        note={"comment": "仅系统管理员可新增用户；必填申请部门（E-DEPT→E-USER reference 提供组织分类）"},
-    )
-
-    # ============================================================
     # Step 5: 约束补充
     # ============================================================
     # ---------- XC 跨实体约束 ----------
@@ -2742,7 +2621,7 @@ def build() -> DomainModel:
         xid="x01",
         source_entity="E-ARC", source_transition="t13", source_state="待审批",
         target_entity="E-CAR", target_dimension="载体状态",
-        target_condition="状态=已登记",
+        category="precondition", type="state",
         desc="镜像T-t13 precondition'载体处于已登记状态'",
         source_ref="4.7.1；4.7.3",
     )
@@ -2751,7 +2630,7 @@ def build() -> DomainModel:
         xid="x02",
         source_entity="E-ARC", source_transition="t18", source_state="已完成",
         target_entity="E-TRF", target_dimension="任务状态",
-        target_condition="载体已归档时禁止发起移交任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起移交任务（载体状态为已归档时禁止移交）",
         source_ref="4.7.3",
     )
@@ -2759,7 +2638,7 @@ def build() -> DomainModel:
         xid="x03",
         source_entity="E-ARC", source_transition="t18", source_state="已完成",
         target_entity="E-RET", target_dimension="任务状态",
-        target_condition="载体已归档时禁止发起留存任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起留存任务",
         source_ref="4.7.3",
     )
@@ -2767,7 +2646,7 @@ def build() -> DomainModel:
         xid="x04",
         source_entity="E-ARC", source_transition="t18", source_state="已完成",
         target_entity="E-RCY", target_dimension="任务状态",
-        target_condition="载体已归档时禁止发起回收任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起回收任务",
         source_ref="4.7.3",
     )
@@ -2775,7 +2654,7 @@ def build() -> DomainModel:
         xid="x05",
         source_entity="E-ARC", source_transition="t18", source_state="已完成",
         target_entity="E-OUT", target_dimension="任务状态",
-        target_condition="载体已归档时禁止发起外送任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起外送任务",
         source_ref="4.7.3",
     )
@@ -2784,7 +2663,7 @@ def build() -> DomainModel:
         xid="x06",
         source_entity="E-CAR", source_transition="t60", source_state="已登记",
         target_entity="E-REG", target_dimension="任务状态",
-        target_condition="载体到期持有人不处理时禁止发起登记任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：载体到期持有人不处理，用户不能发起登记任务",
         source_ref="4.6.5；4.9.3",
     )
@@ -2792,7 +2671,7 @@ def build() -> DomainModel:
         xid="x07",
         source_entity="E-CAR", source_transition="t60", source_state="已登记",
         target_entity="E-IMP", target_dimension="任务状态",
-        target_condition="载体到期持有人不处理时禁止发起导入任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：载体到期持有人不处理，用户不能发起导入任务",
         source_ref="4.6.5；4.9.3",
     )
@@ -2800,7 +2679,7 @@ def build() -> DomainModel:
         xid="x08",
         source_entity="E-CAR", source_transition="t60", source_state="已登记",
         target_entity="E-EXP", target_dimension="任务状态",
-        target_condition="载体到期持有人不处理时禁止发起导出任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：载体到期持有人不处理，用户不能发起导出任务",
         source_ref="4.6.5；4.9.3",
     )
@@ -2808,7 +2687,7 @@ def build() -> DomainModel:
         xid="x09",
         source_entity="E-CAR", source_transition="t60", source_state="已登记",
         target_entity="E-SCN", target_dimension="任务状态",
-        target_condition="载体到期持有人不处理时禁止发起扫描任务",
+        category="precondition", type="state",
         desc="由 Step 4.5 约束-因果鉴别确认：载体到期持有人不处理，用户不能发起扫描任务",
         source_ref="4.6.5；4.9.3",
     )
@@ -2817,14 +2696,44 @@ def build() -> DomainModel:
         xid="x10",
         source_entity="E-REG", source_transition="t12", source_state="已完成",
         target_entity="E-CAR", target_dimension="载体状态",
-        target_condition="由未创建变为已登记",
+        category="effect", type="state",
         desc="联动:T-t12执行后E-CAR.载体状态由未创建变为已登记",
         source_ref="4.6.3",
     )
-    # 联动 XC：移交/留存 为属性级操作（归属人变更/持有时间延长），不改载体状态，
-    # 效果经因果边 E-TRF→E-CAR / E-RET→E-CAR 表达（4.8.3 / 4.9.3），无 XC 联动。
+    # 联动 XC：移交执行后载体归属人变更
+    m.add_xc(
+        xid="x11",
+        source_entity="E-TRF", source_transition="t24", source_state="已完成",
+        target_entity="E-CAR", target_dimension="载体状态",
+        category="effect", type="state",
+        desc="联动:T-t24执行后E-CAR.载体状态由已登记变为已移交",
+        source_ref="4.8.3",
+    )
+    # 联动 XC：留存执行后载体持有时间增加
+    m.add_xc(
+        xid="x12",
+        source_entity="E-RET", source_transition="t30", source_state="已完成",
+        target_entity="E-CAR", target_dimension="载体状态",
+        category="effect", type="state",
+        desc="联动:T-t30执行后E-CAR.载体状态由已登记变为已留存",
+        source_ref="4.9.3",
+    )
 
     # ---------- IT 无效转换 ----------
+    m.add_invalid(
+        iid="i01",
+        entity="E-CAR",
+        frm="已归档", to="已移交",
+        reason="对已归档载体，无法进行移交操作",
+        source_ref="4.7.3",
+    )
+    m.add_invalid(
+        iid="i02",
+        entity="E-CAR",
+        frm="已归档", to="已留存",
+        reason="对已归档载体，无法进行留存操作",
+        source_ref="4.7.3",
+    )
     m.add_invalid(
         iid="i03",
         entity="E-CAR",
@@ -2929,15 +2838,85 @@ def build() -> DomainModel:
         source_ref="4.19（4）；4.4（8）；4.4（9）",
         signal_type="usability",
     )
-    # 任务级别分支约束（4.5.2/4.6.2/…/4.13.2 同文重复，是一个规则适用于全部 9 类任务实体）
-    # 曾拆成 9 条相同文本 BR（每实体一条），被 _backfill_branch_coverage 全部挂进 E-IMP 分支维度
-    # → EO-ATC-001 配置用例 Then 重复 9 次（PROC-013/014/015）。合并为一条，source_ref 并列全条款。
+    # 任务级别分支约束（每个任务实体至少一条 BR 含 branch_dimension）
     m.add_br(
         bid="b10",
         category="authorization",
         desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
-        entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
-        source_ref="4.5.2；4.6.2；4.7.2；4.8.2；4.9.2；4.10.2；4.11.2；4.12.2；4.13.2",
+        entities_involved=["E-IMP"],
+        source_ref="4.5.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b11",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-REG"],
+        source_ref="4.6.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b12",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-ARC"],
+        source_ref="4.7.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b13",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-TRF"],
+        source_ref="4.8.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b14",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-RET"],
+        source_ref="4.9.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b15",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-RCY"],
+        source_ref="4.10.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b16",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-OUT"],
+        source_ref="4.11.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b17",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-EXP"],
+        source_ref="4.12.2",
+        signal_type="restrictive",
+        note={"branch_dimension": "任务级别"},
+    )
+    m.add_br(
+        bid="b18",
+        category="authorization",
+        desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
+        entities_involved=["E-SCN"],
+        source_ref="4.13.2",
         signal_type="restrictive",
         note={"branch_dimension": "任务级别"},
     )
@@ -2983,7 +2962,7 @@ def build() -> DomainModel:
         category="validation",
         desc="导出文件不大于2GB；份数输入1~99数字；上传文件名中必须标明文件级别，例如:导出文件(A级)；级别可以使用中英文圆括号和中括号标记",
         entities_involved=["E-EXP"],
-        source_ref="4.12.1（5）；4.12.1（2）",
+        source_ref="4.12.1（8）；4.12.1（9）",
         signal_type="field_constraint",
     )
     # 扫描文件约束
@@ -2992,7 +2971,7 @@ def build() -> DomainModel:
         category="validation",
         desc="文件页数只能填入1~100之间的数字",
         entities_involved=["E-SCN"],
-        source_ref="4.13.1（2）",
+        source_ref="4.13.1（7）",
         signal_type="field_constraint",
     )
     # 登记纸张页数约束
@@ -3001,7 +2980,7 @@ def build() -> DomainModel:
         category="validation",
         desc="载体类别为纸质时，纸张页数必填；数值范围1-9999",
         entities_involved=["E-REG"],
-        source_ref="4.6.1（1）；4.6.1（2）",
+        source_ref="4.6.1（11）",
         signal_type="field_constraint",
     )
     # 用户账号约束

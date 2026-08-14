@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "19.2",
-    "generated_at": "2026-08-14T16:39:17+08:00",
+    "generated_at": "2026-08-12T08:51:32+08:00",
     "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
     "document_scope": "载体管理系统 V1.00 的功能、易用性、安全需求；覆盖导入管理、载体登记、归档、移交、留存、回收、外送、文件导出、文件扫描、系统管理、监督管理、角色管理、日志管理等模块（4.x 章节）",
     "has_critical_ambiguity": false,
@@ -11,7 +11,7 @@
         "amb_id": "AMB-FIX-001",
         "severity": "minor",
         "concept": "Step6 自动修复",
-        "description": "C04: 补镜像 XC-011（源自 T-028 的跨实体前置条件）",
+        "description": "C04: 补镜像 XC-011（源自 T-019 的跨实体前置条件）",
         "assumption": "",
         "suggestion": ""
       },
@@ -19,7 +19,7 @@
         "amb_id": "AMB-FIX-002",
         "severity": "minor",
         "concept": "Step6 自动修复",
-        "description": "C04: 补镜像 XC-012（源自 T-037 的跨实体前置条件）",
+        "description": "C04: 补镜像 XC-012（源自 T-025 的跨实体前置条件）",
         "assumption": "",
         "suggestion": ""
       },
@@ -27,7 +27,7 @@
         "amb_id": "AMB-FIX-003",
         "severity": "minor",
         "concept": "Step6 自动修复",
-        "description": "C04: 补镜像 XC-013（源自 T-046 的跨实体前置条件）",
+        "description": "C04: 补镜像 XC-013（源自 T-031 的跨实体前置条件）",
         "assumption": "",
         "suggestion": ""
       },
@@ -35,7 +35,7 @@
         "amb_id": "AMB-FIX-004",
         "severity": "minor",
         "concept": "Step6 自动修复",
-        "description": "C04: 补镜像 XC-014（源自 T-055 的跨实体前置条件）",
+        "description": "C04: 补镜像 XC-014（源自 T-037 的跨实体前置条件）",
         "assumption": "",
         "suggestion": ""
       }
@@ -59,15 +59,15 @@
       ],
       "step2_structural_relations": 18,
       "step3_branch_dimensions": 1,
-      "step4_transitions": 100,
+      "step4_transitions": 73,
       "step4_transition_relations": 8,
       "step4_roles": 8,
       "step4_precondition_stats": {
-        "total_preconditions": 159,
-        "state_ref_count": 64,
+        "total_preconditions": 105,
+        "state_ref_count": 37,
         "event_ref_count": 13,
-        "constraint_count": 82,
-        "state_ref_resolved_count": 64,
+        "constraint_count": 55,
+        "state_ref_resolved_count": 37,
         "state_ref_unresolved_count": 0
       },
       "step5_invalid_transitions": 4,
@@ -88,17 +88,17 @@
         "branches": [
           {
             "value": "A级",
-            "target_transition": "T-007",
+            "target_transition": "任务提交转换（A级直入待执行）",
             "desc": "A级无需审批，提交后直接进入待执行状态"
           },
           {
             "value": "B级",
-            "target_transition": "T-002",
+            "target_transition": "一级审批通过转换",
             "desc": "B级需经过一级审批员审批通过后进入待执行"
           },
           {
             "value": "C级",
-            "target_transition": "T-004",
+            "target_transition": "二级审批通过转换",
             "desc": "C级需经过二级审批员审批通过后进入待执行"
           }
         ],
@@ -107,57 +107,30 @@
             "T-002",
             "T-003",
             "T-004",
-            "T-005",
-            "T-006",
-            "T-007",
-            "T-011",
-            "T-012",
-            "T-013",
+            "T-008",
+            "T-009",
+            "T-010",
             "T-014",
             "T-015",
             "T-016",
             "T-020",
             "T-021",
             "T-022",
-            "T-023",
-            "T-024",
-            "T-025",
-            "T-029",
-            "T-030",
-            "T-031",
+            "T-026",
+            "T-027",
+            "T-028",
             "T-032",
             "T-033",
             "T-034",
             "T-038",
             "T-039",
             "T-040",
-            "T-041",
-            "T-042",
-            "T-043",
-            "T-047",
-            "T-048",
-            "T-049",
+            "T-044",
+            "T-045",
+            "T-046",
             "T-050",
             "T-051",
-            "T-052",
-            "T-056",
-            "T-057",
-            "T-058",
-            "T-059",
-            "T-060",
-            "T-061",
-            "T-065",
-            "T-066",
-            "T-067",
-            "T-068",
-            "T-069",
-            "T-070",
-            "T-074",
-            "T-075",
-            "T-076",
-            "T-077",
-            "T-078",
-            "T-079"
+            "T-052"
           ],
           "cross_entity": [],
           "business_rules": [
@@ -382,7 +355,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -399,7 +371,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -415,8 +386,7 @@
             "source_ref": "4.5.1（1）",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-090",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-063"
             }
           },
           {
@@ -428,8 +398,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -441,8 +410,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -453,11 +421,7 @@
             ],
             "source_ref": "4.5.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -468,8 +432,7 @@
             ],
             "source_ref": "4.5.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -481,8 +444,7 @@
             "source_ref": "4.4（4）",
             "note": {
               "inferred": false,
-              "comment": "通用功能：详情",
-              "role": "普通用户"
+              "comment": "通用功能：详情"
             }
           },
           {
@@ -494,8 +456,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           },
           {
@@ -507,8 +468,7 @@
             "source_ref": "4.5.3",
             "note": {
               "inferred": false,
-              "comment": "crud 操作；对应执行后申请人确认动作；对应转换 T-009",
-              "role": "普通用户"
+              "comment": "crud 操作；对应执行后申请人确认动作；对应转换 T-006"
             }
           }
         ]
@@ -590,7 +550,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -607,7 +566,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -623,8 +581,7 @@
             "source_ref": "4.6.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-091",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-064"
             }
           },
           {
@@ -636,8 +593,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -649,8 +605,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -661,11 +616,7 @@
             ],
             "source_ref": "4.6.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -676,8 +627,7 @@
             ],
             "source_ref": "4.6.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -688,8 +638,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -701,8 +650,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -759,7 +707,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -776,7 +723,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -792,8 +738,7 @@
             "source_ref": "4.7.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-092",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-065"
             }
           },
           {
@@ -805,8 +750,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -818,8 +762,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -830,11 +773,7 @@
             ],
             "source_ref": "4.7.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -845,8 +784,7 @@
             ],
             "source_ref": "4.7.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -857,8 +795,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -870,8 +807,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -933,7 +869,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -950,7 +885,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -966,8 +900,7 @@
             "source_ref": "4.8.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-093",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-066"
             }
           },
           {
@@ -979,8 +912,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -992,8 +924,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1004,11 +935,7 @@
             ],
             "source_ref": "4.8.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1019,8 +946,7 @@
             ],
             "source_ref": "4.8.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1031,8 +957,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1044,8 +969,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1113,7 +1037,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -1130,7 +1053,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -1146,8 +1068,7 @@
             "source_ref": "4.9.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-094",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-067"
             }
           },
           {
@@ -1159,8 +1080,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1172,8 +1092,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1184,11 +1103,7 @@
             ],
             "source_ref": "4.9.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1199,8 +1114,7 @@
             ],
             "source_ref": "4.9.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1211,8 +1125,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1224,8 +1137,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1282,7 +1194,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -1299,7 +1210,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -1315,8 +1225,7 @@
             "source_ref": "4.10.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-095",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-068"
             }
           },
           {
@@ -1328,8 +1237,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1341,8 +1249,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1353,11 +1260,7 @@
             ],
             "source_ref": "4.10.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1368,8 +1271,7 @@
             ],
             "source_ref": "4.10.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1380,8 +1282,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1393,8 +1294,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1456,7 +1356,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -1473,7 +1372,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -1489,8 +1387,7 @@
             "source_ref": "4.11.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-096",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-069"
             }
           },
           {
@@ -1502,8 +1399,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1515,8 +1411,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1527,11 +1422,7 @@
             ],
             "source_ref": "4.11.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1542,8 +1433,7 @@
             ],
             "source_ref": "4.11.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1554,8 +1444,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1567,8 +1456,7 @@
             "source_ref": "4.11.2",
             "note": {
               "inferred": false,
-              "comment": "外送特有操作",
-              "role": "普通用户"
+              "comment": "外送特有操作"
             }
           },
           {
@@ -1580,8 +1468,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1658,7 +1545,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -1675,7 +1561,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -1691,8 +1576,7 @@
             "source_ref": "4.12.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-097",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-070"
             }
           },
           {
@@ -1704,8 +1588,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1717,8 +1600,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1729,8 +1611,7 @@
             ],
             "source_ref": "4.12.1（2）；4.12.1（3）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1741,11 +1622,7 @@
             ],
             "source_ref": "4.12.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1756,8 +1633,7 @@
             ],
             "source_ref": "4.12.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1768,8 +1644,7 @@
             ],
             "source_ref": "4.4（4）；4.12.1（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1781,8 +1656,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -1849,7 +1723,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -1866,7 +1739,6 @@
             "inferred": [
               "草稿",
               "待审批",
-              "待二级审批",
               "待执行",
               "已完成"
             ]
@@ -1882,8 +1754,7 @@
             "source_ref": "4.13.1",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-098",
-              "role": "普通用户"
+              "comment": "crud 回填：对应转换 T-071"
             }
           },
           {
@@ -1895,8 +1766,7 @@
             "source_ref": "4.4（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）",
-              "role": "普通用户"
+              "comment": "无对应转换（编辑为草稿阶段属性修改，不改任务状态）"
             }
           },
           {
@@ -1908,8 +1778,7 @@
             "source_ref": "4.4",
             "note": {
               "inferred": false,
-              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）",
-              "role": "普通用户"
+              "comment": "通用功能：暂存；无对应转换（暂存保存草稿，不改变任务状态）"
             }
           },
           {
@@ -1920,11 +1789,7 @@
             ],
             "source_ref": "4.13.4",
             "note": {
-              "inferred": false,
-              "role": [
-                "普通用户",
-                "监督员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -1935,8 +1800,7 @@
             ],
             "source_ref": "4.13.4",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1947,8 +1811,7 @@
             ],
             "source_ref": "4.4（4）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -1960,8 +1823,7 @@
             "source_ref": "4.4（5）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）",
-              "role": "普通用户"
+              "comment": "无对应转换（删除记录为生命周期终止，不建模状态转换）"
             }
           }
         ]
@@ -2050,11 +1912,7 @@
             "source_ref": "4.6.3；4.7.3",
             "note": {
               "inferred": false,
-              "comment": "通用操作：查询载体",
-              "role": [
-                "普通用户",
-                "载体管理员"
-              ]
+              "comment": "通用操作：查询载体"
             }
           }
         ]
@@ -2129,8 +1987,7 @@
             "source_ref": "4.14.1（1）",
             "note": {
               "inferred": false,
-              "comment": "crud 回填：对应转换 T-100",
-              "role": "系统管理员"
+              "comment": "crud 回填：对应转换 T-073"
             }
           },
           {
@@ -2142,8 +1999,7 @@
             "source_ref": "4.14.1（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（修改用户信息不改用户状态；账号不可修改）",
-              "role": "系统管理员"
+              "comment": "无对应转换（修改用户信息不改用户状态；账号不可修改）"
             }
           },
           {
@@ -2154,8 +2010,7 @@
             ],
             "source_ref": "4.14.1（3）",
             "note": {
-              "inferred": false,
-              "role": "系统管理员"
+              "inferred": false
             }
           },
           {
@@ -2167,8 +2022,7 @@
             "source_ref": "4.14.1（6）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（重置密码为属性操作，不改用户状态）",
-              "role": "系统管理员"
+              "comment": "无对应转换（重置密码为属性操作，不改用户状态）"
             }
           },
           {
@@ -2180,8 +2034,7 @@
             "source_ref": "4.14.1（7）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（删除为生命周期终止，不建模状态转换）",
-              "role": "系统管理员"
+              "comment": "无对应转换（删除为生命周期终止，不建模状态转换）"
             }
           },
           {
@@ -2192,8 +2045,7 @@
             ],
             "source_ref": "4.14.1（8）",
             "note": {
-              "inferred": false,
-              "role": "系统管理员"
+              "inferred": false
             }
           },
           {
@@ -2204,8 +2056,7 @@
             ],
             "source_ref": "4.3.1（1）；4.3.1（5）；4.3.1（6）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           },
           {
@@ -2216,8 +2067,7 @@
             ],
             "source_ref": "4.3.2（1）",
             "note": {
-              "inferred": false,
-              "role": "普通用户"
+              "inferred": false
             }
           }
         ]
@@ -2256,8 +2106,7 @@
             "source_ref": "4.14.3（1）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）",
-              "role": "系统管理员"
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           },
           {
@@ -2269,8 +2118,7 @@
             "source_ref": "4.14.3（2）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）",
-              "role": "系统管理员"
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           },
           {
@@ -2282,8 +2130,7 @@
             "source_ref": "4.14.3（3）",
             "note": {
               "inferred": false,
-              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）",
-              "role": "系统管理员"
+              "comment": "无对应转换（部门为组织分类配置实体，无状态维度）"
             }
           }
         ]
@@ -2321,8 +2168,7 @@
             ],
             "source_ref": "4.14.2（1）",
             "note": {
-              "inferred": false,
-              "role": "系统管理员"
+              "inferred": false
             }
           },
           {
@@ -2333,8 +2179,7 @@
             ],
             "source_ref": "4.14.2（2）",
             "note": {
-              "inferred": false,
-              "role": "系统管理员"
+              "inferred": false
             }
           }
         ]
@@ -2387,11 +2232,7 @@
             ],
             "source_ref": "4.17.1（1）",
             "note": {
-              "inferred": false,
-              "role": [
-                "日志管理员",
-                "角色管理员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -2402,11 +2243,7 @@
             ],
             "source_ref": "4.17.1（1）",
             "note": {
-              "inferred": false,
-              "role": [
-                "日志管理员",
-                "角色管理员"
-              ]
+              "inferred": false
             }
           },
           {
@@ -2417,8 +2254,7 @@
             ],
             "source_ref": "4.17.1（2）",
             "note": {
-              "inferred": false,
-              "role": "日志管理员"
+              "inferred": false
             }
           },
           {
@@ -2429,8 +2265,7 @@
             ],
             "source_ref": "4.17.2（1）",
             "note": {
-              "inferred": false,
-              "role": "日志管理员"
+              "inferred": false
             }
           }
         ]
@@ -2512,7 +2347,7 @@
         "desc": "用户持有载体；载体登记成功后记入申请人台账，持有时间默认72小时；移交后归属人变更",
         "confidence": "high",
         "note": {
-          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC XC-010 联动承载）"
+          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC x10 联动承载）"
         }
       },
       {
@@ -2524,7 +2359,7 @@
         "desc": "登记任务执行完成后产出载体；载体经登记入个人台账，产生后独立流转（归档/移交/回收/外送）",
         "confidence": "high",
         "note": {
-          "comment": "(d) 载体由登记任务驱动产生（创建联动经 XC XC-010），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"
+          "comment": "(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"
         }
       },
       {
@@ -2704,7 +2539,7 @@
         "trigger": "登记完成后，申请人能够看到本人名下的载体；载体记入申请人台账",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-018"
+          "T-012"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2719,8 +2554,8 @@
         "trigger": "申请人能够看到本人名下的载体状态为已归档",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-027",
-          "T-082"
+          "T-018",
+          "T-055"
         ],
         "rollback_propagation": true,
         "confidence": "high",
@@ -2735,7 +2570,7 @@
         "trigger": "移交成功后，申请人台账中看不到此载体；接收人台账中自动增加此载体",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-036"
+          "T-024"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2750,7 +2585,7 @@
         "trigger": "将当前用户所持有的载体持有时间自动增加",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-045"
+          "T-030"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2765,8 +2600,8 @@
         "trigger": "载体状态变为已回收",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-054",
-          "T-083"
+          "T-036",
+          "T-056"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2781,8 +2616,8 @@
         "trigger": "载体管理员在线确认载体已外送",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-063",
-          "T-084"
+          "T-042",
+          "T-057"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2797,8 +2632,8 @@
         "trigger": "如果持有人到期不进行处理，系统会自动将此载体持有人用户进行功能限制，不能发起登记、导入、导出、扫描流程",
         "trigger_source": "desc",
         "evidence_transitions": [
-          "T-085",
-          "T-089"
+          "T-058",
+          "T-062"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2813,7 +2648,7 @@
         "trigger": "用户连续输错3次密码，系统自动将此用户锁定",
         "trigger_source": "desc",
         "evidence_transitions": [
-          "T-088"
+          "T-061"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -2851,7 +2686,7 @@
         "priority": "P0",
         "source_ref": "4.5.1；4.4（3）",
         "note": {
-          "comment": "direction: 草稿在 states 列表先于待审批，判 forward；仅 B/C 级任务走此路径，A 级走 T-007"
+          "comment": "direction: 草稿在 states 列表先于待审批，判 forward；仅 B/C 级任务走此路径，A 级走 T-004"
         }
       },
       {
@@ -2873,7 +2708,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null,
             "note": {
@@ -2892,125 +2727,11 @@
         "source_ref": "4.5.2",
         "note": {
           "branch_dimension": "任务级别",
-          "comment": "B级一级审批员通过；C级需二级审批员（T-003/T-004）"
+          "comment": "B级一级审批员通过；C级需二级审批员（t02b）"
         }
       },
       {
         "id": "T-003",
-        "entity": "E-IMP",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "导入任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-IMP",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.5.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-004",
-        "entity": "E-IMP",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "导入任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-IMP",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后导入申请人可进行文件的导入；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.5.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-005",
-        "entity": "E-IMP",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "导入任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-IMP",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则导入任务终止；导入申请人需重新提交导入任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.5.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-006",
         "entity": "E-IMP",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3048,7 +2769,7 @@
         }
       },
       {
-        "id": "T-007",
+        "id": "T-004",
         "entity": "E-IMP",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3084,7 +2805,7 @@
         }
       },
       {
-        "id": "T-008",
+        "id": "T-005",
         "entity": "E-IMP",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -3114,7 +2835,7 @@
         }
       },
       {
-        "id": "T-009",
+        "id": "T-006",
         "entity": "E-IMP",
         "dimension": "任务状态",
         "from": "待执行",
@@ -3142,7 +2863,7 @@
         }
       },
       {
-        "id": "T-010",
+        "id": "T-007",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3164,11 +2885,11 @@
         "priority": "P0",
         "source_ref": "4.6.1；4.4（3）",
         "note": {
-          "comment": "仅 B/C 级走此路径，A 级走 T-016"
+          "comment": "仅 B/C 级走此路径，A 级走 T-010"
         }
       },
       {
-        "id": "T-011",
+        "id": "T-008",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3186,7 +2907,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -3205,121 +2926,7 @@
         }
       },
       {
-        "id": "T-012",
-        "entity": "E-REG",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "登记任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-REG",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.6.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-013",
-        "entity": "E-REG",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "登记任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-REG",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.6.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-014",
-        "entity": "E-REG",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "登记任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-REG",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则登记任务终止；登记申请人需重新提交登记任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.6.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-015",
+        "id": "T-009",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3356,7 +2963,7 @@
         }
       },
       {
-        "id": "T-016",
+        "id": "T-010",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3389,7 +2996,7 @@
         }
       },
       {
-        "id": "T-017",
+        "id": "T-011",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -3419,7 +3026,7 @@
         }
       },
       {
-        "id": "T-018",
+        "id": "T-012",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": "待执行",
@@ -3445,7 +3052,7 @@
         }
       },
       {
-        "id": "T-019",
+        "id": "T-013",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3480,7 +3087,7 @@
         }
       },
       {
-        "id": "T-020",
+        "id": "T-014",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3498,7 +3105,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -3517,121 +3124,7 @@
         }
       },
       {
-        "id": "T-021",
-        "entity": "E-ARC",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "归档任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-ARC",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.7.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-022",
-        "entity": "E-ARC",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "归档任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-ARC",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.7.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-023",
-        "entity": "E-ARC",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "归档任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-ARC",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则归档任务终止；归档申请人需重新提交归档任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.7.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-024",
+        "id": "T-015",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3668,7 +3161,7 @@
         }
       },
       {
-        "id": "T-025",
+        "id": "T-016",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3701,7 +3194,7 @@
         }
       },
       {
-        "id": "T-026",
+        "id": "T-017",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -3731,7 +3224,7 @@
         }
       },
       {
-        "id": "T-027",
+        "id": "T-018",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": "待执行",
@@ -3757,7 +3250,7 @@
         }
       },
       {
-        "id": "T-028",
+        "id": "T-019",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "草稿",
@@ -3795,7 +3288,7 @@
         }
       },
       {
-        "id": "T-029",
+        "id": "T-020",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3813,7 +3306,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -3832,121 +3325,7 @@
         }
       },
       {
-        "id": "T-030",
-        "entity": "E-TRF",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "移交任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-TRF",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.8.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-031",
-        "entity": "E-TRF",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "移交任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-TRF",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后移交申请人需和接收人完成交接；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.8.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-032",
-        "entity": "E-TRF",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "移交任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-TRF",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则移交任务终止；移交申请人需重新提交移交任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.8.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-033",
+        "id": "T-021",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "待审批",
@@ -3983,7 +3362,7 @@
         }
       },
       {
-        "id": "T-034",
+        "id": "T-022",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4016,7 +3395,7 @@
         }
       },
       {
-        "id": "T-035",
+        "id": "T-023",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -4046,7 +3425,7 @@
         }
       },
       {
-        "id": "T-036",
+        "id": "T-024",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": "待执行",
@@ -4072,7 +3451,7 @@
         }
       },
       {
-        "id": "T-037",
+        "id": "T-025",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4115,7 +3494,7 @@
         }
       },
       {
-        "id": "T-038",
+        "id": "T-026",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4133,7 +3512,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -4152,121 +3531,7 @@
         }
       },
       {
-        "id": "T-039",
-        "entity": "E-RET",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "留存任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RET",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.9.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-040",
-        "entity": "E-RET",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "留存任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RET",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后载体持有时间自动增加；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.9.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-041",
-        "entity": "E-RET",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "留存任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RET",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则留存任务终止；留存申请人需重新提交留存任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.9.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-042",
+        "id": "T-027",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4303,7 +3568,7 @@
         }
       },
       {
-        "id": "T-043",
+        "id": "T-028",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4341,7 +3606,7 @@
         }
       },
       {
-        "id": "T-044",
+        "id": "T-029",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -4371,7 +3636,7 @@
         }
       },
       {
-        "id": "T-045",
+        "id": "T-030",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": "待执行",
@@ -4399,7 +3664,7 @@
         }
       },
       {
-        "id": "T-046",
+        "id": "T-031",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4437,7 +3702,7 @@
         }
       },
       {
-        "id": "T-047",
+        "id": "T-032",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4455,7 +3720,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -4474,121 +3739,7 @@
         }
       },
       {
-        "id": "T-048",
-        "entity": "E-RCY",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "回收任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RCY",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.10.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-049",
-        "entity": "E-RCY",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "回收任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RCY",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.10.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-050",
-        "entity": "E-RCY",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "回收任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-RCY",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则回收任务终止；回收申请人需重新提交回收任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.10.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-051",
+        "id": "T-033",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4625,7 +3776,7 @@
         }
       },
       {
-        "id": "T-052",
+        "id": "T-034",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4658,7 +3809,7 @@
         }
       },
       {
-        "id": "T-053",
+        "id": "T-035",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -4688,7 +3839,7 @@
         }
       },
       {
-        "id": "T-054",
+        "id": "T-036",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": "待执行",
@@ -4714,7 +3865,7 @@
         }
       },
       {
-        "id": "T-055",
+        "id": "T-037",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4752,7 +3903,7 @@
         }
       },
       {
-        "id": "T-056",
+        "id": "T-038",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4770,7 +3921,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -4789,121 +3940,7 @@
         }
       },
       {
-        "id": "T-057",
-        "entity": "E-OUT",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "外送任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-OUT",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.11.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-058",
-        "entity": "E-OUT",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "外送任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-OUT",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.11.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-059",
-        "entity": "E-OUT",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "外送任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-OUT",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则外送任务终止；外送申请人需重新提交载体外送任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.11.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-060",
+        "id": "T-039",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "待审批",
@@ -4940,7 +3977,7 @@
         }
       },
       {
-        "id": "T-061",
+        "id": "T-040",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "草稿",
@@ -4973,7 +4010,7 @@
         }
       },
       {
-        "id": "T-062",
+        "id": "T-041",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -5008,7 +4045,7 @@
         }
       },
       {
-        "id": "T-063",
+        "id": "T-042",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": "待执行",
@@ -5034,7 +4071,7 @@
         }
       },
       {
-        "id": "T-064",
+        "id": "T-043",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "草稿",
@@ -5072,7 +4109,7 @@
         }
       },
       {
-        "id": "T-065",
+        "id": "T-044",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "待审批",
@@ -5090,7 +4127,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -5109,121 +4146,7 @@
         }
       },
       {
-        "id": "T-066",
-        "entity": "E-EXP",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "导出任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-EXP",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.12.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-067",
-        "entity": "E-EXP",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "导出任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-EXP",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.12.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-068",
-        "entity": "E-EXP",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "导出任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-EXP",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则导出任务终止；导出申请人需重新提交导出任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.12.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-069",
+        "id": "T-045",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "待审批",
@@ -5260,7 +4183,7 @@
         }
       },
       {
-        "id": "T-070",
+        "id": "T-046",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "草稿",
@@ -5299,7 +4222,7 @@
         }
       },
       {
-        "id": "T-071",
+        "id": "T-047",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -5329,7 +4252,7 @@
         }
       },
       {
-        "id": "T-072",
+        "id": "T-048",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": "待执行",
@@ -5355,7 +4278,7 @@
         }
       },
       {
-        "id": "T-073",
+        "id": "T-049",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "草稿",
@@ -5388,7 +4311,7 @@
         }
       },
       {
-        "id": "T-074",
+        "id": "T-050",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "待审批",
@@ -5406,7 +4329,7 @@
             }
           },
           {
-            "text": "任务级别为B级",
+            "text": "任务级别为B级或C级",
             "type": "constraint",
             "ref": null
           }
@@ -5425,121 +4348,7 @@
         }
       },
       {
-        "id": "T-075",
-        "entity": "E-SCN",
-        "dimension": "任务状态",
-        "from": "待审批",
-        "to": "待二级审批",
-        "action": "一级审批通过（C级送二级）",
-        "role": "一级审批员",
-        "preconditions": [
-          {
-            "text": "扫描任务处于待审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-SCN",
-              "dimension": "任务状态",
-              "state": "待审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.13.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径"
-        }
-      },
-      {
-        "id": "T-076",
-        "entity": "E-SCN",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批通过",
-        "action": "二级审批通过",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "扫描任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-SCN",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级，则二级审批员通过后审批通过后扫描申请人可进行文件的扫描；任务状态变为审批通过"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "forward",
-        "priority": "P0",
-        "source_ref": "4.13.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点"
-        }
-      },
-      {
-        "id": "T-077",
-        "entity": "E-SCN",
-        "dimension": "任务状态",
-        "from": "待二级审批",
-        "to": "审批拒绝",
-        "action": "二级审批拒绝",
-        "role": "二级审批员",
-        "preconditions": [
-          {
-            "text": "扫描任务处于待二级审批状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-SCN",
-              "dimension": "任务状态",
-              "state": "待二级审批"
-            }
-          },
-          {
-            "text": "任务级别为C级",
-            "type": "constraint",
-            "ref": null
-          }
-        ],
-        "expected_results": [
-          "若任务级别=C级且二级审批员拒绝，则扫描任务终止；扫描申请人需重新提交扫描任务"
-        ],
-        "traits": [
-          "branch"
-        ],
-        "direction": "lateral",
-        "priority": "P1",
-        "source_ref": "4.13.2",
-        "note": {
-          "branch_dimension": "任务级别",
-          "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径"
-        }
-      },
-      {
-        "id": "T-078",
+        "id": "T-051",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "待审批",
@@ -5576,7 +4385,7 @@
         }
       },
       {
-        "id": "T-079",
+        "id": "T-052",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "草稿",
@@ -5615,7 +4424,7 @@
         }
       },
       {
-        "id": "T-080",
+        "id": "T-053",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "审批通过",
@@ -5645,7 +4454,7 @@
         }
       },
       {
-        "id": "T-081",
+        "id": "T-054",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": "待执行",
@@ -5671,7 +4480,7 @@
         }
       },
       {
-        "id": "T-082",
+        "id": "T-055",
         "entity": "E-CAR",
         "dimension": "载体状态",
         "from": "已登记",
@@ -5706,7 +4515,7 @@
         }
       },
       {
-        "id": "T-083",
+        "id": "T-056",
         "entity": "E-CAR",
         "dimension": "载体状态",
         "from": "已登记",
@@ -5741,7 +4550,7 @@
         }
       },
       {
-        "id": "T-084",
+        "id": "T-057",
         "entity": "E-CAR",
         "dimension": "载体状态",
         "from": "已登记",
@@ -5776,7 +4585,7 @@
         }
       },
       {
-        "id": "T-085",
+        "id": "T-058",
         "entity": "E-CAR",
         "dimension": "载体状态",
         "from": "已登记",
@@ -5807,7 +4616,7 @@
         }
       },
       {
-        "id": "T-086",
+        "id": "T-059",
         "entity": "E-USER",
         "dimension": "用户状态",
         "from": "正常",
@@ -5837,7 +4646,7 @@
         }
       },
       {
-        "id": "T-087",
+        "id": "T-060",
         "entity": "E-USER",
         "dimension": "用户状态",
         "from": "锁定",
@@ -5867,7 +4676,7 @@
         }
       },
       {
-        "id": "T-088",
+        "id": "T-061",
         "entity": "E-USER",
         "dimension": "用户状态",
         "from": "正常",
@@ -5895,7 +4704,7 @@
         }
       },
       {
-        "id": "T-089",
+        "id": "T-062",
         "entity": "E-USER",
         "dimension": "用户状态",
         "from": "正常",
@@ -5921,7 +4730,7 @@
         }
       },
       {
-        "id": "T-090",
+        "id": "T-063",
         "entity": "E-IMP",
         "dimension": "任务状态",
         "from": null,
@@ -5941,7 +4750,7 @@
         }
       },
       {
-        "id": "T-091",
+        "id": "T-064",
         "entity": "E-REG",
         "dimension": "任务状态",
         "from": null,
@@ -5961,7 +4770,7 @@
         }
       },
       {
-        "id": "T-092",
+        "id": "T-065",
         "entity": "E-ARC",
         "dimension": "任务状态",
         "from": null,
@@ -5981,7 +4790,7 @@
         }
       },
       {
-        "id": "T-093",
+        "id": "T-066",
         "entity": "E-TRF",
         "dimension": "任务状态",
         "from": null,
@@ -6001,7 +4810,7 @@
         }
       },
       {
-        "id": "T-094",
+        "id": "T-067",
         "entity": "E-RET",
         "dimension": "任务状态",
         "from": null,
@@ -6021,7 +4830,7 @@
         }
       },
       {
-        "id": "T-095",
+        "id": "T-068",
         "entity": "E-RCY",
         "dimension": "任务状态",
         "from": null,
@@ -6041,7 +4850,7 @@
         }
       },
       {
-        "id": "T-096",
+        "id": "T-069",
         "entity": "E-OUT",
         "dimension": "任务状态",
         "from": null,
@@ -6061,7 +4870,7 @@
         }
       },
       {
-        "id": "T-097",
+        "id": "T-070",
         "entity": "E-EXP",
         "dimension": "任务状态",
         "from": null,
@@ -6081,7 +4890,7 @@
         }
       },
       {
-        "id": "T-098",
+        "id": "T-071",
         "entity": "E-SCN",
         "dimension": "任务状态",
         "from": null,
@@ -6101,7 +4910,7 @@
         }
       },
       {
-        "id": "T-099",
+        "id": "T-072",
         "entity": "E-CAR",
         "dimension": "载体状态",
         "from": null,
@@ -6121,7 +4930,7 @@
         }
       },
       {
-        "id": "T-100",
+        "id": "T-073",
         "entity": "E-USER",
         "dimension": "用户状态",
         "from": null,
@@ -6181,18 +4990,18 @@
       {
         "id": "XC-001",
         "source_entity": "E-ARC",
-        "source_transition": "T-019",
+        "source_transition": "T-013",
         "source_state": "待审批",
         "target_entity": "E-CAR",
         "target_dimension": "载体状态",
         "target_condition": "状态=已登记",
-        "desc": "镜像T-T-019 precondition'载体处于已登记状态'",
+        "desc": "镜像T-T-013 precondition'载体处于已登记状态'",
         "source_ref": "4.7.1；4.7.3"
       },
       {
         "id": "XC-002",
         "source_entity": "E-ARC",
-        "source_transition": "T-027",
+        "source_transition": "T-018",
         "source_state": "已完成",
         "target_entity": "E-TRF",
         "target_dimension": "任务状态",
@@ -6203,7 +5012,7 @@
       {
         "id": "XC-003",
         "source_entity": "E-ARC",
-        "source_transition": "T-027",
+        "source_transition": "T-018",
         "source_state": "已完成",
         "target_entity": "E-RET",
         "target_dimension": "任务状态",
@@ -6214,7 +5023,7 @@
       {
         "id": "XC-004",
         "source_entity": "E-ARC",
-        "source_transition": "T-027",
+        "source_transition": "T-018",
         "source_state": "已完成",
         "target_entity": "E-RCY",
         "target_dimension": "任务状态",
@@ -6225,7 +5034,7 @@
       {
         "id": "XC-005",
         "source_entity": "E-ARC",
-        "source_transition": "T-027",
+        "source_transition": "T-018",
         "source_state": "已完成",
         "target_entity": "E-OUT",
         "target_dimension": "任务状态",
@@ -6236,7 +5045,7 @@
       {
         "id": "XC-006",
         "source_entity": "E-CAR",
-        "source_transition": "T-085",
+        "source_transition": "T-058",
         "source_state": "已登记",
         "target_entity": "E-REG",
         "target_dimension": "任务状态",
@@ -6247,7 +5056,7 @@
       {
         "id": "XC-007",
         "source_entity": "E-CAR",
-        "source_transition": "T-085",
+        "source_transition": "T-058",
         "source_state": "已登记",
         "target_entity": "E-IMP",
         "target_dimension": "任务状态",
@@ -6258,7 +5067,7 @@
       {
         "id": "XC-008",
         "source_entity": "E-CAR",
-        "source_transition": "T-085",
+        "source_transition": "T-058",
         "source_state": "已登记",
         "target_entity": "E-EXP",
         "target_dimension": "任务状态",
@@ -6269,7 +5078,7 @@
       {
         "id": "XC-009",
         "source_entity": "E-CAR",
-        "source_transition": "T-085",
+        "source_transition": "T-058",
         "source_state": "已登记",
         "target_entity": "E-SCN",
         "target_dimension": "任务状态",
@@ -6280,7 +5089,7 @@
       {
         "id": "XC-010",
         "source_entity": "E-REG",
-        "source_transition": "T-018",
+        "source_transition": "T-012",
         "source_state": "已完成",
         "target_entity": "E-CAR",
         "target_dimension": "载体状态",
@@ -6291,45 +5100,45 @@
       {
         "id": "XC-011",
         "source_entity": "E-CAR",
-        "source_transition": "T-028",
+        "source_transition": "T-019",
         "source_state": "已登记",
         "target_entity": "E-TRF",
         "target_dimension": "任务状态",
         "target_condition": "状态=草稿",
-        "desc": "镜像 T-028 precondition '载体处于可移交状态'",
+        "desc": "镜像 T-019 precondition '载体处于可移交状态'",
         "source_ref": "4.8.1"
       },
       {
         "id": "XC-012",
         "source_entity": "E-CAR",
-        "source_transition": "T-037",
+        "source_transition": "T-025",
         "source_state": "已登记",
         "target_entity": "E-RET",
         "target_dimension": "任务状态",
         "target_condition": "状态=草稿",
-        "desc": "镜像 T-037 precondition '载体处于可留存状态'",
+        "desc": "镜像 T-025 precondition '载体处于可留存状态'",
         "source_ref": "4.9.1"
       },
       {
         "id": "XC-013",
         "source_entity": "E-CAR",
-        "source_transition": "T-046",
+        "source_transition": "T-031",
         "source_state": "已登记",
         "target_entity": "E-RCY",
         "target_dimension": "任务状态",
         "target_condition": "状态=草稿",
-        "desc": "镜像 T-046 precondition '载体处于可回收状态'",
+        "desc": "镜像 T-031 precondition '载体处于可回收状态'",
         "source_ref": "4.10.1"
       },
       {
         "id": "XC-014",
         "source_entity": "E-CAR",
-        "source_transition": "T-055",
+        "source_transition": "T-037",
         "source_state": "已登记",
         "target_entity": "E-OUT",
         "target_dimension": "任务状态",
         "target_condition": "状态=草稿",
-        "desc": "镜像 T-055 precondition '载体处于可外送状态'",
+        "desc": "镜像 T-037 precondition '载体处于可外送状态'",
         "source_ref": "4.11.1"
       }
     ],

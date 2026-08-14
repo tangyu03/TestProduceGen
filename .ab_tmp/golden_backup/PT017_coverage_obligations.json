@@ -1360,7 +1360,7 @@
       "priority": "P0",
       "source_ref": "4.5.1；4.4（3）",
       "note": {
-        "comment": "direction: 草稿在 states 列表先于待审批，判 forward；仅 B/C 级任务走此路径，A 级走 T-007"
+        "comment": "direction: 草稿在 states 列表先于待审批，判 forward；仅 B/C 级任务走此路径，A 级走 T-004"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -1375,12 +1375,12 @@
       }
     },
     {
-      "id": "T-002",
+      "id": "T-002[a]",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -1393,7 +1393,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -1409,7 +1414,7 @@
       "source_ref": "4.5.2",
       "note": {
         "branch_dimension": "任务级别",
-        "comment": "B级一级审批员通过；C级需二级审批员（T-003/T-004）; 分支无实质差异(单组合)"
+        "comment": "B级一级审批员通过；C级需二级审批员（t02b）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -1431,18 +1436,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-003",
+      "id": "T-002[b]",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -1455,13 +1470,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后导入申请人可进行文件的导入；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -1471,7 +1491,7 @@
       "source_ref": "4.5.2",
       "note": {
         "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "comment": "B级一级审批员通过；C级需二级审批员（t02b）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -1493,137 +1513,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-004",
-      "entity": "E-IMP",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "导入任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-IMP",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后导入申请人可进行文件的导入；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.5.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-IMP",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "导入任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-005",
-      "entity": "E-IMP",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "导入任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-IMP",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则导入任务终止；导入申请人需重新提交导入任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.5.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-IMP",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "导入任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-006[a]",
+      "id": "T-003[a]",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "待审批",
@@ -1700,7 +1606,7 @@
       }
     },
     {
-      "id": "T-006[b]",
+      "id": "T-003[b]",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "待审批",
@@ -1777,7 +1683,7 @@
       }
     },
     {
-      "id": "T-007",
+      "id": "T-004",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "草稿",
@@ -1837,7 +1743,7 @@
       }
     },
     {
-      "id": "T-008",
+      "id": "T-005",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -1888,7 +1794,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-009",
+      "id": "T-006",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": "待执行",
@@ -1923,7 +1829,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-010",
+      "id": "T-007",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "草稿",
@@ -1945,7 +1851,7 @@
       "priority": "P0",
       "source_ref": "4.6.1；4.4（3）",
       "note": {
-        "comment": "仅 B/C 级走此路径，A 级走 T-016"
+        "comment": "仅 B/C 级走此路径，A 级走 T-010"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -1960,12 +1866,12 @@
       }
     },
     {
-      "id": "T-011",
+      "id": "T-008[a]",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -1978,7 +1884,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -1993,8 +1904,7 @@
       "priority": "P0",
       "source_ref": "4.6.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -2022,18 +1932,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-012",
+      "id": "T-008[b]",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -2046,13 +1966,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -2061,13 +1986,18 @@
       "priority": "P0",
       "source_ref": "4.6.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -2084,143 +2014,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-013",
-      "entity": "E-REG",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "登记任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-REG",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.6.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后登记申请人可看到载体已经登记入个人台账；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-REG",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "登记任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-014",
-      "entity": "E-REG",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "登记任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-REG",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则登记任务终止；登记申请人需重新提交登记任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.6.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-REG",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "登记任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-015[a]",
+      "id": "T-009[a]",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "待审批",
@@ -2296,7 +2106,7 @@
       }
     },
     {
-      "id": "T-015[b]",
+      "id": "T-009[b]",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "待审批",
@@ -2372,7 +2182,7 @@
       }
     },
     {
-      "id": "T-016",
+      "id": "T-010",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "草稿",
@@ -2432,7 +2242,7 @@
       }
     },
     {
-      "id": "T-017",
+      "id": "T-011",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -2483,7 +2293,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-018",
+      "id": "T-012",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": "待执行",
@@ -2527,7 +2337,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-019",
+      "id": "T-013",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "草稿",
@@ -2581,12 +2391,12 @@
       }
     },
     {
-      "id": "T-020",
+      "id": "T-014[a]",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -2599,7 +2409,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -2614,8 +2429,7 @@
       "priority": "P0",
       "source_ref": "4.7.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -2643,18 +2457,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-021",
+      "id": "T-014[b]",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -2667,13 +2491,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -2682,13 +2511,18 @@
       "priority": "P0",
       "source_ref": "4.7.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -2705,143 +2539,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-022",
-      "entity": "E-ARC",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "归档任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-ARC",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.7.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后归档申请人需将载体交到载体管理员处；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-ARC",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "归档任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-023",
-      "entity": "E-ARC",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "归档任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-ARC",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则归档任务终止；归档申请人需重新提交归档任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.7.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-ARC",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "归档任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-024[a]",
+      "id": "T-015[a]",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "待审批",
@@ -2917,7 +2631,7 @@
       }
     },
     {
-      "id": "T-024[b]",
+      "id": "T-015[b]",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "待审批",
@@ -2993,7 +2707,7 @@
       }
     },
     {
-      "id": "T-025",
+      "id": "T-016",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "草稿",
@@ -3053,7 +2767,7 @@
       }
     },
     {
-      "id": "T-026",
+      "id": "T-017",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -3104,7 +2818,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-027",
+      "id": "T-018",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": "待执行",
@@ -3143,7 +2857,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-028",
+      "id": "T-019",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "草稿",
@@ -3197,12 +2911,12 @@
       }
     },
     {
-      "id": "T-029",
+      "id": "T-020[a]",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -3215,7 +2929,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -3230,8 +2949,7 @@
       "priority": "P0",
       "source_ref": "4.8.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3253,18 +2971,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-030",
+      "id": "T-020[b]",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -3277,13 +3005,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后移交申请人需和接收人完成交接；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -3292,8 +3025,7 @@
       "priority": "P0",
       "source_ref": "4.8.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3315,137 +3047,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-031",
-      "entity": "E-TRF",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "移交任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-TRF",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后移交申请人需和接收人完成交接；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.8.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-TRF",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "移交任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-032",
-      "entity": "E-TRF",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "移交任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-TRF",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则移交任务终止；移交申请人需重新提交移交任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.8.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-TRF",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "移交任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-033[a]",
+      "id": "T-021[a]",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "待审批",
@@ -3521,7 +3139,7 @@
       }
     },
     {
-      "id": "T-033[b]",
+      "id": "T-021[b]",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "待审批",
@@ -3597,7 +3215,7 @@
       }
     },
     {
-      "id": "T-034",
+      "id": "T-022",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "草稿",
@@ -3657,7 +3275,7 @@
       }
     },
     {
-      "id": "T-035",
+      "id": "T-023",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -3708,7 +3326,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-036",
+      "id": "T-024",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": "待执行",
@@ -3752,7 +3370,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-037",
+      "id": "T-025",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "草稿",
@@ -3821,12 +3439,12 @@
       }
     },
     {
-      "id": "T-038",
+      "id": "T-026[a]",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -3839,7 +3457,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -3854,8 +3477,7 @@
       "priority": "P0",
       "source_ref": "4.9.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3883,18 +3505,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-039",
+      "id": "T-026[b]",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -3907,13 +3539,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后载体持有时间自动增加；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -3922,13 +3559,18 @@
       "priority": "P0",
       "source_ref": "4.9.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后载体持有时间自动增加；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -3945,143 +3587,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-040",
-      "entity": "E-RET",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "留存任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-RET",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后载体持有时间自动增加；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.9.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后载体持有时间自动增加；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-RET",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "留存任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-041",
-      "entity": "E-RET",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "留存任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-RET",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则留存任务终止；留存申请人需重新提交留存任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.9.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-RET",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "留存任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-042[a]",
+      "id": "T-027[a]",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "待审批",
@@ -4157,7 +3679,7 @@
       }
     },
     {
-      "id": "T-042[b]",
+      "id": "T-027[b]",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "待审批",
@@ -4233,7 +3755,7 @@
       }
     },
     {
-      "id": "T-043",
+      "id": "T-028",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "草稿",
@@ -4303,7 +3825,7 @@
       }
     },
     {
-      "id": "T-044",
+      "id": "T-029",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -4354,7 +3876,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-045",
+      "id": "T-030",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": "待执行",
@@ -4400,7 +3922,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-046",
+      "id": "T-031",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "草稿",
@@ -4454,12 +3976,12 @@
       }
     },
     {
-      "id": "T-047",
+      "id": "T-032[a]",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -4472,7 +3994,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -4487,8 +4014,7 @@
       "priority": "P0",
       "source_ref": "4.10.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -4516,18 +4042,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-048",
+      "id": "T-032[b]",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -4540,13 +4076,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -4555,13 +4096,18 @@
       "priority": "P0",
       "source_ref": "4.10.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -4578,143 +4124,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-049",
-      "entity": "E-RCY",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "回收任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-RCY",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.10.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后回收申请人将载体移交给载体管理员进行回收；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-RCY",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "回收任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-050",
-      "entity": "E-RCY",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "回收任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-RCY",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则回收任务终止；回收申请人需重新提交回收任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.10.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-RCY",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "回收任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-051[a]",
+      "id": "T-033[a]",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "待审批",
@@ -4790,7 +4216,7 @@
       }
     },
     {
-      "id": "T-051[b]",
+      "id": "T-033[b]",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "待审批",
@@ -4866,7 +4292,7 @@
       }
     },
     {
-      "id": "T-052",
+      "id": "T-034",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "草稿",
@@ -4926,7 +4352,7 @@
       }
     },
     {
-      "id": "T-053",
+      "id": "T-035",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -4977,7 +4403,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-054",
+      "id": "T-036",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": "待执行",
@@ -5016,7 +4442,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-055",
+      "id": "T-037",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "草稿",
@@ -5070,12 +4496,12 @@
       }
     },
     {
-      "id": "T-056",
+      "id": "T-038[a]",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -5088,7 +4514,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -5103,8 +4534,7 @@
       "priority": "P0",
       "source_ref": "4.11.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -5132,18 +4562,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-057",
+      "id": "T-038[b]",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -5156,13 +4596,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；回执单可在回执单菜单查看和下载；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -5171,13 +4616,18 @@
       "priority": "P0",
       "source_ref": "4.11.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；回执单可在回执单菜单查看和下载；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -5194,149 +4644,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-058",
-      "entity": "E-OUT",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "外送任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-OUT",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.11.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后外送申请人需打印载体外送交接单并将回执交给载体管理员；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-OUT",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "外送任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-059",
-      "entity": "E-OUT",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "外送任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-OUT",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则外送任务终止；外送申请人需重新提交载体外送任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.11.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级且二级审批员拒绝，则外送任务终止；外送申请人需重新提交载体外送任务"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-OUT",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "外送任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-060[a]",
+      "id": "T-039[a]",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "待审批",
@@ -5418,7 +4742,7 @@
       }
     },
     {
-      "id": "T-060[b]",
+      "id": "T-039[b]",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "待审批",
@@ -5500,7 +4824,7 @@
       }
     },
     {
-      "id": "T-061",
+      "id": "T-040",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "草稿",
@@ -5560,7 +4884,7 @@
       }
     },
     {
-      "id": "T-062",
+      "id": "T-041",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -5616,7 +4940,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-063",
+      "id": "T-042",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": "待执行",
@@ -5655,7 +4979,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-064",
+      "id": "T-043",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "草稿",
@@ -5719,12 +5043,12 @@
       }
     },
     {
-      "id": "T-065",
+      "id": "T-044[a]",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -5737,7 +5061,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -5752,8 +5081,7 @@
       "priority": "P0",
       "source_ref": "4.12.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -5781,18 +5109,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-066",
+      "id": "T-044[b]",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -5805,13 +5143,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -5820,13 +5163,18 @@
       "priority": "P0",
       "source_ref": "4.12.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
       "repeat_condition": null,
-      "side_effects": [],
+      "side_effects": [
+        {
+          "target_entity": "E-CAR",
+          "target_dimension": "载体状态",
+          "effect_desc": "审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"
+        }
+      ],
       "branch_path": [
         {
           "dimension": "任务级别",
@@ -5843,143 +5191,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-067",
-      "entity": "E-EXP",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "导出任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-EXP",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.12.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [
-        {
-          "target_entity": "E-CAR",
-          "target_dimension": "载体状态",
-          "effect_desc": "若任务级别=C级，则二级审批员通过后审批通过后导出申请人可进行载体的导出；任务状态变为审批通过"
-        }
-      ],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-EXP",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "导出任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-068",
-      "entity": "E-EXP",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "导出任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-EXP",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则导出任务终止；导出申请人需重新提交导出任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.12.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-EXP",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "导出任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-069[a]",
+      "id": "T-045[a]",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "待审批",
@@ -6055,7 +5283,7 @@
       }
     },
     {
-      "id": "T-069[b]",
+      "id": "T-045[b]",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "待审批",
@@ -6131,7 +5359,7 @@
       }
     },
     {
-      "id": "T-070",
+      "id": "T-046",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "草稿",
@@ -6202,7 +5430,7 @@
       }
     },
     {
-      "id": "T-071",
+      "id": "T-047",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -6253,7 +5481,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-072",
+      "id": "T-048",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": "待执行",
@@ -6286,7 +5514,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-073",
+      "id": "T-049",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "草稿",
@@ -6340,12 +5568,12 @@
       }
     },
     {
-      "id": "T-074",
+      "id": "T-050[a]",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "待审批",
       "to": "审批通过",
-      "action": "审批通过",
+      "action": "审批通过 [任务级别=B级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -6358,7 +5586,12 @@
           }
         },
         {
-          "text": "任务级别为B级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=B级",
           "type": "constraint",
           "ref": null
         }
@@ -6373,8 +5606,7 @@
       "priority": "P0",
       "source_ref": "4.13.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -6396,18 +5628,28 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为B级",
-        "reason": "type 未实现(v1)"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
+          }
+        ]
       }
     },
     {
-      "id": "T-075",
+      "id": "T-050[b]",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "待审批",
-      "to": "待二级审批",
-      "action": "一级审批通过（C级送二级）",
+      "to": "审批通过",
+      "action": "审批通过 [任务级别=C级]",
       "role": "一级审批员",
       "preconditions": [
         {
@@ -6420,13 +5662,18 @@
           }
         },
         {
-          "text": "任务级别为C级",
+          "text": "任务级别为B级或C级",
+          "type": "constraint",
+          "ref": null
+        },
+        {
+          "text": "任务级别=C级",
           "type": "constraint",
           "ref": null
         }
       ],
       "expected_results": [
-        "若任务级别=C级，则一级审批员通过后任务进入待二级审批状态，待二级审批员审批"
+        "审批通过后扫描申请人可进行文件的扫描；任务状态变为审批通过"
       ],
       "risk_traits": [
         "branch"
@@ -6435,8 +5682,7 @@
       "priority": "P0",
       "source_ref": "4.13.2",
       "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待审批在 states 先于待二级审批，判 forward；C级一级审批通过送二级路径; 分支无实质差异(单组合)"
+        "branch_dimension": "任务级别"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -6458,137 +5704,23 @@
         }
       ],
       "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-076",
-      "entity": "E-SCN",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批通过",
-      "action": "二级审批通过",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "扫描任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-SCN",
-            "dimension": "任务状态",
-            "state": "待二级审批"
+        "type": "conjunction",
+        "parts": [
+          {
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
+          },
+          {
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级，则二级审批员通过后审批通过后扫描申请人可进行文件的扫描；任务状态变为审批通过"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "forward",
-      "priority": "P0",
-      "source_ref": "4.13.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 待二级审批在 states 先于审批通过，判 forward；C级二级审批通过路径；二级审批员在 transitions 层的出现点; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "high",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-SCN",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "扫描任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
+        ]
       }
     },
     {
-      "id": "T-077",
-      "entity": "E-SCN",
-      "dimension": "任务状态",
-      "from": "待二级审批",
-      "to": "审批拒绝",
-      "action": "二级审批拒绝",
-      "role": "二级审批员",
-      "preconditions": [
-        {
-          "text": "扫描任务处于待二级审批状态",
-          "type": "state_ref",
-          "ref": {
-            "entity": "E-SCN",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          }
-        },
-        {
-          "text": "任务级别为C级",
-          "type": "constraint",
-          "ref": null
-        }
-      ],
-      "expected_results": [
-        "若任务级别=C级且二级审批员拒绝，则扫描任务终止；扫描申请人需重新提交扫描任务"
-      ],
-      "risk_traits": [
-        "branch"
-      ],
-      "direction": "lateral",
-      "priority": "P1",
-      "source_ref": "4.13.2",
-      "note": {
-        "branch_dimension": "任务级别",
-        "comment": "direction: 审批拒绝为终态侧挂，判 lateral；C级二级审批拒绝路径; 分支无实质差异(单组合)"
-      },
-      "coverage_priority": "critical",
-      "is_repeatable": false,
-      "repeat_condition": null,
-      "side_effects": [],
-      "branch_path": [
-        {
-          "dimension": "任务级别",
-          "value": "C级"
-        }
-      ],
-      "precondition_state_refs": [
-        {
-          "entity": "E-SCN",
-          "dimension": "任务状态",
-          "state": "待二级审批",
-          "raw_text": "扫描任务处于待二级审批状态",
-          "pattern": "p1_inherited"
-        }
-      ],
-      "constraint_predicate": {
-        "type": "unparsed",
-        "text": "任务级别为C级",
-        "reason": "type 未实现(v1)"
-      }
-    },
-    {
-      "id": "T-078[a]",
+      "id": "T-051[a]",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "待审批",
@@ -6664,7 +5796,7 @@
       }
     },
     {
-      "id": "T-078[b]",
+      "id": "T-051[b]",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "待审批",
@@ -6740,7 +5872,7 @@
       }
     },
     {
-      "id": "T-079",
+      "id": "T-052",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "草稿",
@@ -6811,7 +5943,7 @@
       }
     },
     {
-      "id": "T-080",
+      "id": "T-053",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "审批通过",
@@ -6856,7 +5988,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-081",
+      "id": "T-054",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": "待执行",
@@ -6889,7 +6021,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-082",
+      "id": "T-055",
       "entity": "E-CAR",
       "dimension": "载体状态",
       "from": "已登记",
@@ -6939,7 +6071,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-083",
+      "id": "T-056",
       "entity": "E-CAR",
       "dimension": "载体状态",
       "from": "已登记",
@@ -6989,7 +6121,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-084",
+      "id": "T-057",
       "entity": "E-CAR",
       "dimension": "载体状态",
       "from": "已登记",
@@ -7039,7 +6171,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-085",
+      "id": "T-058",
       "entity": "E-CAR",
       "dimension": "载体状态",
       "from": "已登记",
@@ -7084,7 +6216,7 @@
       }
     },
     {
-      "id": "T-086",
+      "id": "T-059",
       "entity": "E-USER",
       "dimension": "用户状态",
       "from": "正常",
@@ -7129,7 +6261,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-087",
+      "id": "T-060",
       "entity": "E-USER",
       "dimension": "用户状态",
       "from": "锁定",
@@ -7174,7 +6306,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-088",
+      "id": "T-061",
       "entity": "E-USER",
       "dimension": "用户状态",
       "from": "正常",
@@ -7219,7 +6351,7 @@
       }
     },
     {
-      "id": "T-089",
+      "id": "T-062",
       "entity": "E-USER",
       "dimension": "用户状态",
       "from": "正常",
@@ -7262,7 +6394,7 @@
       }
     },
     {
-      "id": "T-090",
+      "id": "T-063",
       "entity": "E-IMP",
       "dimension": "任务状态",
       "from": null,
@@ -7289,7 +6421,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-091",
+      "id": "T-064",
       "entity": "E-REG",
       "dimension": "任务状态",
       "from": null,
@@ -7316,7 +6448,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-092",
+      "id": "T-065",
       "entity": "E-ARC",
       "dimension": "任务状态",
       "from": null,
@@ -7343,7 +6475,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-093",
+      "id": "T-066",
       "entity": "E-TRF",
       "dimension": "任务状态",
       "from": null,
@@ -7370,7 +6502,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-094",
+      "id": "T-067",
       "entity": "E-RET",
       "dimension": "任务状态",
       "from": null,
@@ -7397,7 +6529,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-095",
+      "id": "T-068",
       "entity": "E-RCY",
       "dimension": "任务状态",
       "from": null,
@@ -7424,7 +6556,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-096",
+      "id": "T-069",
       "entity": "E-OUT",
       "dimension": "任务状态",
       "from": null,
@@ -7451,7 +6583,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-097",
+      "id": "T-070",
       "entity": "E-EXP",
       "dimension": "任务状态",
       "from": null,
@@ -7478,7 +6610,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-098",
+      "id": "T-071",
       "entity": "E-SCN",
       "dimension": "任务状态",
       "from": null,
@@ -7505,7 +6637,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-099",
+      "id": "T-072",
       "entity": "E-CAR",
       "dimension": "载体状态",
       "from": null,
@@ -7532,7 +6664,7 @@
       "constraint_predicate": null
     },
     {
-      "id": "T-100",
+      "id": "T-073",
       "entity": "E-USER",
       "dimension": "用户状态",
       "from": null,
@@ -7568,10 +6700,10 @@
       "enabler_entity": "E-ARC",
       "enabler_dimension": "任务状态",
       "enabler_state": "已完成",
-      "enabler_transition_id": "T-027",
+      "enabler_transition_id": "T-018",
       "enabler_role": "载体管理员",
       "dependent_entity": "E-CAR",
-      "dependent_transition_id": "T-082",
+      "dependent_transition_id": "T-055",
       "dependent_dimension": "载体状态",
       "dependent_condition": "已归档",
       "dependent_role": "载体管理员",
@@ -7595,10 +6727,10 @@
       "enabler_entity": "E-RCY",
       "enabler_dimension": "任务状态",
       "enabler_state": "已完成",
-      "enabler_transition_id": "T-054",
+      "enabler_transition_id": "T-036",
       "enabler_role": "载体管理员",
       "dependent_entity": "E-CAR",
-      "dependent_transition_id": "T-083",
+      "dependent_transition_id": "T-056",
       "dependent_dimension": "载体状态",
       "dependent_condition": "已回收",
       "dependent_role": "载体管理员",
@@ -7622,10 +6754,10 @@
       "enabler_entity": "E-OUT",
       "enabler_dimension": "任务状态",
       "enabler_state": "已完成",
-      "enabler_transition_id": "T-063",
+      "enabler_transition_id": "T-042",
       "enabler_role": "载体管理员",
       "dependent_entity": "E-CAR",
-      "dependent_transition_id": "T-084",
+      "dependent_transition_id": "T-057",
       "dependent_dimension": "载体状态",
       "dependent_condition": "已外送",
       "dependent_role": "载体管理员",
@@ -7649,10 +6781,10 @@
       "enabler_entity": "E-CAR",
       "enabler_dimension": "载体状态",
       "enabler_state": "已登记",
-      "enabler_transition_id": "T-085",
+      "enabler_transition_id": "T-058",
       "enabler_role": null,
       "dependent_entity": "E-USER",
-      "dependent_transition_id": "T-089",
+      "dependent_transition_id": "T-062",
       "dependent_dimension": "用户状态",
       "dependent_condition": "正常",
       "dependent_role": null,
@@ -7676,10 +6808,10 @@
       "enabler_entity": "E-USER",
       "enabler_dimension": "用户状态",
       "enabler_state": "锁定",
-      "enabler_transition_id": "T-088",
+      "enabler_transition_id": "T-061",
       "enabler_role": null,
       "dependent_entity": "E-USER",
-      "dependent_transition_id": "T-088",
+      "dependent_transition_id": "T-061",
       "dependent_dimension": "用户状态",
       "dependent_condition": "锁定",
       "dependent_role": null,
@@ -8445,7 +7577,7 @@
       ],
       "category": "validation",
       "signal_type": null,
-      "description": "[来源于XC-001] 状态=已登记; 镜像T-T-019 precondition'载体处于已登记状态'",
+      "description": "[来源于XC-001] 状态=已登记; 镜像T-T-013 precondition'载体处于已登记状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
@@ -8615,7 +7747,7 @@
       ],
       "category": "validation",
       "signal_type": null,
-      "description": "[来源于XC-011] 状态=草稿; 镜像 T-028 precondition '载体处于可移交状态'",
+      "description": "[来源于XC-011] 状态=草稿; 镜像 T-019 precondition '载体处于可移交状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "high",
@@ -8632,7 +7764,7 @@
       ],
       "category": "validation",
       "signal_type": null,
-      "description": "[来源于XC-012] 状态=草稿; 镜像 T-037 precondition '载体处于可留存状态'",
+      "description": "[来源于XC-012] 状态=草稿; 镜像 T-025 precondition '载体处于可留存状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "high",
@@ -8649,7 +7781,7 @@
       ],
       "category": "validation",
       "signal_type": null,
-      "description": "[来源于XC-013] 状态=草稿; 镜像 T-046 precondition '载体处于可回收状态'",
+      "description": "[来源于XC-013] 状态=草稿; 镜像 T-031 precondition '载体处于可回收状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "high",
@@ -8666,7 +7798,7 @@
       ],
       "category": "validation",
       "signal_type": null,
-      "description": "[来源于XC-014] 状态=草稿; 镜像 T-055 precondition '载体处于可外送状态'",
+      "description": "[来源于XC-014] 状态=草稿; 镜像 T-037 precondition '载体处于可外送状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "high",
@@ -8676,7 +7808,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-14T16:39:23.060091+08:00",
+    "generated_at": "2026-08-14T10:13:51.746425+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
@@ -8688,7 +7820,7 @@
           "amb_id": "AMB-FIX-001",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-011（源自 T-028 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-011（源自 T-019 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -8696,7 +7828,7 @@
           "amb_id": "AMB-FIX-002",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-012（源自 T-037 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-012（源自 T-025 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -8704,7 +7836,7 @@
           "amb_id": "AMB-FIX-003",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-013（源自 T-046 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-013（源自 T-031 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -8712,7 +7844,7 @@
           "amb_id": "AMB-FIX-004",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-014（源自 T-055 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-014（源自 T-037 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         }
@@ -8736,15 +7868,15 @@
         ],
         "step2_structural_relations": 18,
         "step3_branch_dimensions": 1,
-        "step4_transitions": 100,
+        "step4_transitions": 73,
         "step4_transition_relations": 8,
         "step4_roles": 8,
         "step4_precondition_stats": {
-          "total_preconditions": 159,
-          "state_ref_count": 64,
+          "total_preconditions": 105,
+          "state_ref_count": 37,
           "event_ref_count": 13,
-          "constraint_count": 82,
-          "state_ref_resolved_count": 64,
+          "constraint_count": 55,
+          "state_ref_resolved_count": 37,
           "state_ref_unresolved_count": 0
         },
         "step5_invalid_transitions": 4,
@@ -8766,17 +7898,17 @@
         "branches": [
           {
             "value": "A级",
-            "target_transition": "T-007",
+            "target_transition": "任务提交转换（A级直入待执行）",
             "desc": "A级无需审批，提交后直接进入待执行状态"
           },
           {
             "value": "B级",
-            "target_transition": "T-002",
+            "target_transition": "一级审批通过转换",
             "desc": "B级需经过一级审批员审批通过后进入待执行"
           },
           {
             "value": "C级",
-            "target_transition": "T-004",
+            "target_transition": "二级审批通过转换",
             "desc": "C级需经过二级审批员审批通过后进入待执行"
           }
         ],
@@ -8785,57 +7917,30 @@
             "T-002",
             "T-003",
             "T-004",
-            "T-005",
-            "T-006",
-            "T-007",
-            "T-011",
-            "T-012",
-            "T-013",
+            "T-008",
+            "T-009",
+            "T-010",
             "T-014",
             "T-015",
             "T-016",
             "T-020",
             "T-021",
             "T-022",
-            "T-023",
-            "T-024",
-            "T-025",
-            "T-029",
-            "T-030",
-            "T-031",
+            "T-026",
+            "T-027",
+            "T-028",
             "T-032",
             "T-033",
             "T-034",
             "T-038",
             "T-039",
             "T-040",
-            "T-041",
-            "T-042",
-            "T-043",
-            "T-047",
-            "T-048",
-            "T-049",
+            "T-044",
+            "T-045",
+            "T-046",
             "T-050",
             "T-051",
-            "T-052",
-            "T-056",
-            "T-057",
-            "T-058",
-            "T-059",
-            "T-060",
-            "T-061",
-            "T-065",
-            "T-066",
-            "T-067",
-            "T-068",
-            "T-069",
-            "T-070",
-            "T-074",
-            "T-075",
-            "T-076",
-            "T-077",
-            "T-078",
-            "T-079"
+            "T-052"
           ],
           "cross_entity": [],
           "business_rules": [
@@ -8843,108 +7948,126 @@
           ]
         },
         "affected_obligations": [
-          "T-002",
-          "T-003",
+          "T-002[a]",
+          "T-002[b]",
+          "T-003[a]",
+          "T-003[b]",
           "T-004",
-          "T-005",
-          "T-006[a]",
-          "T-006[b]",
-          "T-007",
-          "T-011",
-          "T-012",
-          "T-013",
-          "T-014",
+          "T-008[a]",
+          "T-008[b]",
+          "T-009[a]",
+          "T-009[b]",
+          "T-010",
+          "T-014[a]",
+          "T-014[b]",
           "T-015[a]",
           "T-015[b]",
           "T-016",
-          "T-020",
-          "T-021",
+          "T-020[a]",
+          "T-020[b]",
+          "T-021[a]",
+          "T-021[b]",
           "T-022",
-          "T-023",
-          "T-024[a]",
-          "T-024[b]",
-          "T-025",
-          "T-029",
-          "T-030",
-          "T-031",
-          "T-032",
+          "T-026[a]",
+          "T-026[b]",
+          "T-027[a]",
+          "T-027[b]",
+          "T-028",
+          "T-032[a]",
+          "T-032[b]",
           "T-033[a]",
           "T-033[b]",
           "T-034",
-          "T-038",
-          "T-039",
+          "T-038[a]",
+          "T-038[b]",
+          "T-039[a]",
+          "T-039[b]",
           "T-040",
-          "T-041",
-          "T-042[a]",
-          "T-042[b]",
-          "T-043",
-          "T-047",
-          "T-048",
-          "T-049",
-          "T-050",
+          "T-044[a]",
+          "T-044[b]",
+          "T-045[a]",
+          "T-045[b]",
+          "T-046",
+          "T-050[a]",
+          "T-050[b]",
           "T-051[a]",
           "T-051[b]",
-          "T-052",
-          "T-056",
-          "T-057",
-          "T-058",
-          "T-059",
-          "T-060[a]",
-          "T-060[b]",
-          "T-061",
-          "T-065",
-          "T-066",
-          "T-067",
-          "T-068",
-          "T-069[a]",
-          "T-069[b]",
-          "T-070",
-          "T-074",
-          "T-075",
-          "T-076",
-          "T-077",
-          "T-078[a]",
-          "T-078[b]",
-          "T-079"
+          "T-052"
         ]
       }
     ],
     "transition_splits": {
-      "T-006": [
-        "T-006[a]",
-        "T-006[b]"
+      "T-002": [
+        "T-002[a]",
+        "T-002[b]"
+      ],
+      "T-003": [
+        "T-003[a]",
+        "T-003[b]"
+      ],
+      "T-008": [
+        "T-008[a]",
+        "T-008[b]"
+      ],
+      "T-009": [
+        "T-009[a]",
+        "T-009[b]"
+      ],
+      "T-014": [
+        "T-014[a]",
+        "T-014[b]"
       ],
       "T-015": [
         "T-015[a]",
         "T-015[b]"
       ],
-      "T-024": [
-        "T-024[a]",
-        "T-024[b]"
+      "T-020": [
+        "T-020[a]",
+        "T-020[b]"
+      ],
+      "T-021": [
+        "T-021[a]",
+        "T-021[b]"
+      ],
+      "T-026": [
+        "T-026[a]",
+        "T-026[b]"
+      ],
+      "T-027": [
+        "T-027[a]",
+        "T-027[b]"
+      ],
+      "T-032": [
+        "T-032[a]",
+        "T-032[b]"
       ],
       "T-033": [
         "T-033[a]",
         "T-033[b]"
       ],
-      "T-042": [
-        "T-042[a]",
-        "T-042[b]"
+      "T-038": [
+        "T-038[a]",
+        "T-038[b]"
+      ],
+      "T-039": [
+        "T-039[a]",
+        "T-039[b]"
+      ],
+      "T-044": [
+        "T-044[a]",
+        "T-044[b]"
+      ],
+      "T-045": [
+        "T-045[a]",
+        "T-045[b]"
+      ],
+      "T-050": [
+        "T-050[a]",
+        "T-050[b]"
       ],
       "T-051": [
         "T-051[a]",
         "T-051[b]"
-      ],
-      "T-060": [
-        "T-060[a]",
-        "T-060[b]"
-      ],
-      "T-069": [
-        "T-069[a]",
-        "T-069[b]"
-      ],
-      "T-078": [
-        "T-078[a]",
-        "T-078[b]"
       ]
     },
     "structural_relations": [
@@ -8981,7 +8104,7 @@
         "desc": "用户持有载体；载体登记成功后记入申请人台账，持有时间默认72小时；移交后归属人变更",
         "confidence": "high",
         "note": {
-          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC XC-010 联动承载）"
+          "comment": "(d) 载体有独立创建流程（登记任务执行后产生），可跨用户流转；relation_type=reference 配 configuration_source（联动约束；载体创建语义由 XC x10 联动承载）"
         }
       },
       {
@@ -8993,7 +8116,7 @@
         "desc": "登记任务执行完成后产出载体；载体经登记入个人台账，产生后独立流转（归档/移交/回收/外送）",
         "confidence": "high",
         "note": {
-          "comment": "(d) 载体由登记任务驱动产生（创建联动经 XC XC-010），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"
+          "comment": "(d) 载体由登记任务驱动产生（创建联动经 XC x10），产生后独立于登记任务流转；登记任务为来源非归属容器，删除登记任务不级联载体；management_dimension 复核为 configuration_source"
         }
       },
       {
@@ -9173,7 +8296,7 @@
         "trigger": "登记完成后，申请人能够看到本人名下的载体；载体记入申请人台账",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-018"
+          "T-012"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9188,8 +8311,8 @@
         "trigger": "申请人能够看到本人名下的载体状态为已归档",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-027",
-          "T-082"
+          "T-018",
+          "T-055"
         ],
         "rollback_propagation": true,
         "confidence": "high",
@@ -9204,7 +8327,7 @@
         "trigger": "移交成功后，申请人台账中看不到此载体；接收人台账中自动增加此载体",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-036"
+          "T-024"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9219,7 +8342,7 @@
         "trigger": "将当前用户所持有的载体持有时间自动增加",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-045"
+          "T-030"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9234,8 +8357,8 @@
         "trigger": "载体状态变为已回收",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-054",
-          "T-083"
+          "T-036",
+          "T-056"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9250,8 +8373,8 @@
         "trigger": "载体管理员在线确认载体已外送",
         "trigger_source": "expected_results",
         "evidence_transitions": [
-          "T-063",
-          "T-084"
+          "T-042",
+          "T-057"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9266,8 +8389,8 @@
         "trigger": "如果持有人到期不进行处理，系统会自动将此载体持有人用户进行功能限制，不能发起登记、导入、导出、扫描流程",
         "trigger_source": "desc",
         "evidence_transitions": [
-          "T-085",
-          "T-089"
+          "T-058",
+          "T-062"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9282,7 +8405,7 @@
         "trigger": "用户连续输错3次密码，系统自动将此用户锁定",
         "trigger_source": "desc",
         "evidence_transitions": [
-          "T-088"
+          "T-061"
         ],
         "rollback_propagation": false,
         "confidence": "high",
@@ -9300,7 +8423,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9314,11 +8436,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9331,7 +8452,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9345,11 +8465,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9362,7 +8481,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9376,11 +8494,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9393,7 +8510,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9407,11 +8523,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9424,7 +8539,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9438,11 +8552,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9455,7 +8568,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9469,11 +8581,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9486,7 +8597,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9500,11 +8610,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9517,7 +8626,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9531,11 +8639,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -9548,7 +8655,6 @@
             "states": [
               "草稿",
               "待审批",
-              "待二级审批",
               "审批通过",
               "审批拒绝",
               "待执行",
@@ -9562,11 +8668,10 @@
             "phase_mapping": {
               "草稿": 0,
               "待审批": 1,
-              "待执行": 4,
-              "审批通过": 3,
-              "待二级审批": 2,
-              "已完成": 5,
-              "审批拒绝": 5
+              "待执行": 3,
+              "审批通过": 2,
+              "已完成": 4,
+              "审批拒绝": 4
             }
           }
         ]
@@ -10549,67 +9654,99 @@
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-003: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-003: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-005: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-005: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-006: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-002: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "branch split delete base",
-        "desc": "T-006: 删除原TO(主TO不再输出),生成2个分支TO"
+        "desc": "T-002: 删除原TO(主TO不再输出),生成2个分支TO"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-006[a]: 分支值 B级 非法于 E-IMP.任务级别，降级 constraint"
+        "desc": "T-002[a]: 分支值 B级 非法于 E-IMP.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-006[b]: 分支值 C级 非法于 E-IMP.任务级别，降级 constraint"
+        "desc": "T-002[b]: 分支值 C级 非法于 E-IMP.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-011: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-003: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "branch split delete base",
+        "desc": "T-003: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-003[a]: 分支值 B级 非法于 E-IMP.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-003[b]: 分支值 C级 非法于 E-IMP.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-011: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-004: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-012: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-004: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-012: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-008: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "branch split delete base",
+        "desc": "T-008: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-008[a]: 分支值 B级 非法于 E-REG.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-008[b]: 分支值 C级 非法于 E-REG.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-013: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-009: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "branch split delete base",
+        "desc": "T-009: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-009[a]: 分支值 B级 非法于 E-REG.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-009[b]: 分支值 C级 非法于 E-REG.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-013: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-010: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-010: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-014: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-014: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-014: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-014[a]: 分支值 B级 非法于 E-ARC.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-014[b]: 分支值 C级 非法于 E-ARC.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10621,11 +9758,11 @@
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-015[a]: 分支值 B级 非法于 E-REG.任务级别，降级 constraint"
+        "desc": "T-015[a]: 分支值 B级 非法于 E-ARC.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-015[b]: 分支值 C级 非法于 E-REG.任务级别，降级 constraint"
+        "desc": "T-015[b]: 分支值 C级 非法于 E-ARC.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10640,20 +9777,32 @@
         "desc": "T-020: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-020: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-020: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-020[a]: 分支值 B级 非法于 E-TRF.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-020[b]: 分支值 C级 非法于 E-TRF.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-021: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-021: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-021: 删除原TO(主TO不再输出),生成2个分支TO"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-022: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch_injected invalid",
+        "desc": "T-021[a]: 分支值 B级 非法于 E-TRF.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-021[b]: 分支值 C级 非法于 E-TRF.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10661,67 +9810,63 @@
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-023: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-022: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-023: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-024: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-026: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "branch split delete base",
-        "desc": "T-024: 删除原TO(主TO不再输出),生成2个分支TO"
+        "desc": "T-026: 删除原TO(主TO不再输出),生成2个分支TO"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-024[a]: 分支值 B级 非法于 E-ARC.任务级别，降级 constraint"
+        "desc": "T-026[a]: 分支值 B级 非法于 E-RET.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-024[b]: 分支值 C级 非法于 E-ARC.任务级别，降级 constraint"
+        "desc": "T-026[b]: 分支值 C级 非法于 E-RET.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-025: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-027: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "branch split delete base",
+        "desc": "T-027: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-027[a]: 分支值 B级 非法于 E-RET.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-027[b]: 分支值 C级 非法于 E-RET.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-025: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-028: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-029: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-029: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-030: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-030: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-031: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-031: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-028: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-032: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-032: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-032: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-032[a]: 分支值 B级 非法于 E-RCY.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-032[b]: 分支值 C级 非法于 E-RCY.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10733,11 +9878,11 @@
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-033[a]: 分支值 B级 非法于 E-TRF.任务级别，降级 constraint"
+        "desc": "T-033[a]: 分支值 B级 非法于 E-RCY.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-033[b]: 分支值 C级 非法于 E-TRF.任务级别，降级 constraint"
+        "desc": "T-033[b]: 分支值 C级 非法于 E-RCY.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10752,20 +9897,32 @@
         "desc": "T-038: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-038: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-038: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-038[a]: 分支值 B级 非法于 E-OUT.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-038[b]: 分支值 C级 非法于 E-OUT.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-039: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-039: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-039: 删除原TO(主TO不再输出),生成2个分支TO"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-040: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch_injected invalid",
+        "desc": "T-039[a]: 分支值 B级 非法于 E-OUT.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-039[b]: 分支值 C级 非法于 E-OUT.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10773,67 +9930,63 @@
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-041: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-040: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-041: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-042: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-044: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "branch split delete base",
-        "desc": "T-042: 删除原TO(主TO不再输出),生成2个分支TO"
+        "desc": "T-044: 删除原TO(主TO不再输出),生成2个分支TO"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-042[a]: 分支值 B级 非法于 E-RET.任务级别，降级 constraint"
+        "desc": "T-044[a]: 分支值 B级 非法于 E-EXP.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-042[b]: 分支值 C级 非法于 E-RET.任务级别，降级 constraint"
+        "desc": "T-044[b]: 分支值 C级 非法于 E-EXP.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-043: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-045: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "branch split delete base",
+        "desc": "T-045: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-045[a]: 分支值 B级 非法于 E-EXP.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-045[b]: 分支值 C级 非法于 E-EXP.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-043: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-046: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
-        "desc": "T-047: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-047: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-048: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-048: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-049: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-049: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "desc": "T-046: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-050: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-050: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+        "category": "branch split delete base",
+        "desc": "T-050: 删除原TO(主TO不再输出),生成2个分支TO"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-050[a]: 分支值 B级 非法于 E-SCN.任务级别，降级 constraint"
+      },
+      {
+        "category": "branch_injected invalid",
+        "desc": "T-050[b]: 分支值 C级 非法于 E-SCN.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10845,11 +9998,11 @@
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-051[a]: 分支值 B级 非法于 E-RCY.任务级别，降级 constraint"
+        "desc": "T-051[a]: 分支值 B级 非法于 E-SCN.任务级别，降级 constraint"
       },
       {
         "category": "branch_injected invalid",
-        "desc": "T-051[b]: 分支值 C级 非法于 E-RCY.任务级别，降级 constraint"
+        "desc": "T-051[b]: 分支值 C级 非法于 E-SCN.任务级别，降级 constraint"
       },
       {
         "category": "R5 combo filtered",
@@ -10860,188 +10013,20 @@
         "desc": "T-052: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
-        "category": "R5 combo filtered",
-        "desc": "T-056: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-056: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-057: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-057: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-058: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-058: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-059: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-059: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-060: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "branch split delete base",
-        "desc": "T-060: 删除原TO(主TO不再输出),生成2个分支TO"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-060[a]: 分支值 B级 非法于 E-OUT.任务级别，降级 constraint"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-060[b]: 分支值 C级 非法于 E-OUT.任务级别，降级 constraint"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-061: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-061: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-065: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-065: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-066: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-066: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-067: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-067: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-068: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-068: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-069: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "branch split delete base",
-        "desc": "T-069: 删除原TO(主TO不再输出),生成2个分支TO"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-069[a]: 分支值 B级 非法于 E-EXP.任务级别，降级 constraint"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-069[b]: 分支值 C级 非法于 E-EXP.任务级别，降级 constraint"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-070: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-070: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-074: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-074: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-075: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-075: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-076: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-076: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-077: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-077: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-078: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "branch split delete base",
-        "desc": "T-078: 删除原TO(主TO不再输出),生成2个分支TO"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-078[a]: 分支值 B级 非法于 E-SCN.任务级别，降级 constraint"
-      },
-      {
-        "category": "branch_injected invalid",
-        "desc": "T-078[b]: 分支值 C级 非法于 E-SCN.任务级别，降级 constraint"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-079: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
-      },
-      {
-        "category": "R5 combo filtered",
-        "desc": "T-079: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+        "category": "CO R4 constraint fail",
+        "desc": "XC-011: dependent T-066 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
       },
       {
         "category": "CO R4 constraint fail",
-        "desc": "XC-011: dependent T-093 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
+        "desc": "XC-012: dependent T-067 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
       },
       {
         "category": "CO R4 constraint fail",
-        "desc": "XC-012: dependent T-094 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
+        "desc": "XC-013: dependent T-068 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
       },
       {
         "category": "CO R4 constraint fail",
-        "desc": "XC-013: dependent T-095 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
-      },
-      {
-        "category": "CO R4 constraint fail",
-        "desc": "XC-014: dependent T-096 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
+        "desc": "XC-014: dependent T-069 preconditions 无 state_ref 指向 enabler E-CAR.已登记，转 BR"
       },
       {
         "category": "CO auto dependent missing",
@@ -11061,39 +10046,39 @@
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-IMP.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-IMP.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-REG.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-REG.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-ARC.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-ARC.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-TRF.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-TRF.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-RET.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-RET.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-RCY.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-RCY.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-OUT.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-OUT.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-EXP.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-EXP.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
-        "desc": "E-SCN.任务状态: derived 7 phases, terminals pinned to 5"
+        "desc": "E-SCN.任务状态: derived 6 phases, terminals pinned to 4"
       },
       {
         "category": "phase_mapping_derived",
@@ -11106,7 +10091,7 @@
     ],
     "warnings": [],
     "snapshot": {
-      "to_index_size": 118,
+      "to_index_size": 109,
       "co_list_size": 5,
       "xc_status_summary": {
         "total_xc": 14,
@@ -11114,11 +10099,11 @@
         "as_br": 14
       },
       "precondition_state_refs_coverage": {
-        "total_preconditions": 195,
-        "total_state_refs_expected": 73,
-        "total_state_refs_resolved": 73,
+        "total_preconditions": 177,
+        "total_state_refs_expected": 55,
+        "total_state_refs_resolved": 55,
         "unresolved_count": 0,
-        "p1_inherited_count": 73,
+        "p1_inherited_count": 55,
         "p2_filled_count": 0
       },
       "phase_mapping_coverage": {

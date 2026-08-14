@@ -15,7 +15,7 @@
 
 **source_ref 契约**：一律非空，须能定位原文位置。子项号即原文 `（N）`/`(N)` 编号，必须真实存在，禁止编造；复合引用用 `；` 分隔。XC 继承宿主 source_ref（镜像/联动继承 `source_transition` 指向的转换；4.5 判约束继承含对应 precondition 的转换）。XC/IT 无 `note` 字段。
 
-**前向引用**：Step 3 的 `target_transition` 允许前向引用 Step 4 尚未输出的转换，引用时用**语义描述**（如 `"项目选入转换"`）而非局部标签；4.3 自检时回填为精确 tid，若不匹配则标 `inferred` 并在 comment 写明偏差。
+**前向引用**：Step 3 的 `target_transition` 引用 Step 4 尚未输出的转换时，直接写**局部标签**（如 `t02c`）。动笔前通盘规划全部局部标签，禁止使用语义描述。
 
 **复杂文档定位**：可酌情在 `build()` 之前以注释形式输出结构概览供自身定位，格式不限，非必须。
 
@@ -119,17 +119,17 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 
 ### Step 3：分支维度 → `m.add_branch_dimension()`
 
-**三型**：配置型（`is_config` 属性，创建时定、互斥、影响后续）/ 运行时选择型（"根据…选择/分为…情况"）/ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。`coverage` 不填。每个分支维度在 Step 5 需 ≥1 条 BR 含 `branch_dimension`。`target_transition` 允许前向引用（语义描述），4.3 回填为 tid。
+**三型**：配置型（`is_config` 属性，创建时定、互斥、影响后续）/ 运行时选择型（"根据…选择/分为…情况"）/ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。`coverage` 不填。每个分支维度在 Step 5 需 ≥1 条 BR 含 `branch_dimension`。`target_transition` 用局部标签引用目标转换（见 全局约束·前向引用），框架编号移交时改写为正式号。
 
 ```python
 m.add_branch_dimension(
     dimension="...", entity="E-XXX", values=[...],
     impact_scope="...", evidence="...",
-    branches=[{"value": "...", "target_transition": "项目选入转换", "desc": "..."}],
+    branches=[{"value": "...", "target_transition": "t02", "desc": "..."}],
 )
 ```
 
-□ 每维度是否将在 Step 5 有 ≥1 条 BR 含 `branch_dimension`？□ 隐式分支 `evidence` 是否可定位原文？□ `target_transition` 是否用语义描述？
+□ 每维度是否将在 Step 5 有 ≥1 条 BR 含 `branch_dimension`？□ 隐式分支 `evidence` 是否可定位原文？□ `target_transition` 是否为局部 tid 且对应 `add_trans` 存在？
 
 ### Step 4：转换与因果
 
@@ -164,7 +164,7 @@ m.add_branch_dimension(
 
 #### 4.3 自检（写入前完成）
 
-局部检查（当前转换/实体范围内可判定）：非终态有出边；`frm` 必须非终态；分支覆盖（受分支影响的转换标 `branch` + 填 `branch_dimension`）；crud 操作 `note.comment` 回填对应局部标签（多个 `;` 分隔），无对应转换注明"无对应转换"及理由；前向引用回填（Step 3 的 `target_transition` 语义描述回填为精确 tid，不匹配标 inferred + comment）；回写特权扩展至 `action_verbs` 和 `permission`。
+局部检查（当前转换/实体范围内可判定）：非终态有出边；`frm` 必须非终态；分支覆盖（受分支影响的转换标 `branch` + 填 `branch_dimension`）；crud 操作 `note.comment` 回填对应局部标签（多个 `;` 分隔），无对应转换注明"无对应转换"及理由；前向引用一致性校验（Step 3 的 `target_transition` 局部 tid 必须在 Step 4有对应 `add_trans` 定义；引用了不存在的 tid → 补定义或修正引用）；回写特权扩展至 `action_verbs` 和 `permission`。
 
 #### 4.4 因果 → `m.add_causal()`
 
@@ -263,7 +263,8 @@ m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=N
 **辅助构造**：
 
 ```python
-N(inferred=False, comment="", conflict="", branch_dimension="")
+N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
+# role: op note 必填（C18），对齐 add_role 的 name 或 "system"；多角色用 list；推断标 inferred
 attr(name, desc, is_config=False)
 op(name, category, expected_results, source_ref, note=None)
 precond(text, ptype, ref=None, note=None)

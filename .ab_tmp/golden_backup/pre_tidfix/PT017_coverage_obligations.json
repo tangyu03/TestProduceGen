@@ -8676,7 +8676,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-14T16:39:23.060091+08:00",
+    "generated_at": "2026-08-14T14:54:54.741675+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
@@ -8766,17 +8766,17 @@
         "branches": [
           {
             "value": "A级",
-            "target_transition": "T-007",
+            "target_transition": "任务提交转换（A级直入待执行）",
             "desc": "A级无需审批，提交后直接进入待执行状态"
           },
           {
             "value": "B级",
-            "target_transition": "T-002",
+            "target_transition": "一级审批通过转换",
             "desc": "B级需经过一级审批员审批通过后进入待执行"
           },
           {
             "value": "C级",
-            "target_transition": "T-004",
+            "target_transition": "二级审批通过转换",
             "desc": "C级需经过二级审批员审批通过后进入待执行"
           }
         ],
@@ -10549,11 +10549,27 @@
       },
       {
         "category": "R5 combo filtered",
+        "desc": "T-002: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-002: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
         "desc": "T-003: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
         "desc": "T-003: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-004: 组合 ('A级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-004: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
@@ -10578,6 +10594,14 @@
       {
         "category": "branch_injected invalid",
         "desc": "T-006[b]: 分支值 C级 非法于 E-IMP.任务级别，降级 constraint"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-007: 组合 ('B级',) 与 precondition 约束矛盾，过滤"
+      },
+      {
+        "category": "R5 combo filtered",
+        "desc": "T-007: 组合 ('C级',) 与 precondition 约束矛盾，过滤"
       },
       {
         "category": "R5 combo filtered",
