@@ -6,12 +6,12 @@ v29 Engineering Optimization — Gap 1: Fallback Observability
 Problem (from critic's review of v29):
     v29 added structured-field consumption with keyword fallback "for backward
     compat". But fallback is SILENT — when P1 LLM doesn't emit `is_approve` /
-    `valid_combinations` / `causal_pairs` / `preconditions[].type` /
+    `valid_combinations` / `preconditions[].type` /
     `operations[].is_special` / `action_keywords`, the engine silently
     falls back to the legacy keyword path. The 33/33 regression tests are
     happy-path only — they don't detect this silent degradation. In production
     (verified by inspecting production_coverage_model.json): is_approve=0/53,
-    valid_combinations=0/4, causal_pairs=0/12 → fallback fires for every TO.
+    valid_combinations=0/4 → fallback fires for every TO.
 
 Solution:
     A single shared fallback-event collector. Every site in the engine that
@@ -62,11 +62,9 @@ FALLBACK_SITES = (
     # s0_topology.py
     "s0.classify_edge_type.action_keywords",          # _classify_edge_type keyword fallback
     "s0.classify_edge_type.default_keywords",         # _DEFAULT_*_KW used (no _context.action_keywords)
-    "s0.causal_pairs.index_pairing_fallback",         # 修复 2: causal_pairs absent → index-based pairing (可见)
 
     # s1_generation.py
     "s1.is_approve.keyword_fallback",                 # transition.is_approve absent → keyword detect (旧路径, 保留)
-    "s1.is_approve.derived_fallback",                 # 修复 1: declared 0/29 死刑 → derived 多信号推算
     "s1.type5_special_ops.generic_fallback",          # operations[].is_special absent → _TYPE5_SPECIAL_OPS_GENERIC
     "s1.precondition_type.keyword_split",             # preconditions[].type absent → keyword split
 
@@ -76,7 +74,6 @@ FALLBACK_SITES = (
     # build_obligations.py (P2)
     "p2.valid_combinations.action_text_fallback",     # valid_combinations absent → action text filter
     "p2.is_special.generic_fallback",                 # operations[].is_special absent → _TYPE5_SPECIAL_OPS_GENERIC
-    "p2.causal_pairs.index_pairing_fallback",         # causal_pairs absent → index-based pairing
 
     # build_obligations.py (P2) — _context.action_keywords
     "p2.action_keywords.default",                     # _meta.action_keywords absent → use generic defaults

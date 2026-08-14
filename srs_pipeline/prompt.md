@@ -181,6 +181,8 @@ m.add_branch_dimension(
 
 `evidence_transitions`：除 `desc`/`business_rule` 可空（comment 注明位置）外，其余必填局部标签。`rollback_propagation`：驱动方含 rollback 或文本含"退/撤销/驳回/拒绝"且被驱动方回退 → True。`confidence`：显式 high，推导 medium，修补产物不得 high。
 
+> 跨实体因果不在此声明：由 P2 依据本条因果派生 CO（enabler→dependent）确定性表达，`add_causal` 无 `causal_pairs` 参数。
+
 □ 同 `(frm,to)` 是否已存在？→ 命中则仅升级字段，不新增。□ 每条因果是否过 4.5 鉴别？
 
 #### 4.5 鉴别（每条因果写入前必过）

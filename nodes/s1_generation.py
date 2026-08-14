@@ -2037,15 +2037,9 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
                 _is_approve_action = bool(_is_approve_structured)
             else:
                 # 修复 1: derived 路径 (替代 keyword 路径)
-                _record_fallback(
-                    "s1.is_approve.derived_fallback",
-                    transition_id=to.get('id', '') or '',
-                    detail=(
-                        f"to.id={to.get('id', '')} has no is_approve field (LLM 0/29 不产出); "
-                        f"using derived multi-signal"
-                    ),
-                    fallback_used="derived_multi_signal",
-                )
+                # 2026-08-14: derived 是主路径 (LLM 0/29 系统性不产 declared),
+                # 非降级。不再记录 fallback (s1.is_approve.derived_fallback 已删,
+                # 91 次常量噪声, 让 is_clean_run 永久 false)。
                 _is_approve_action, _derived_conf, _derived_ev = _derive_is_approve(
                     to, action
                 )
@@ -4115,6 +4109,37 @@ def _classify_actions_via_llm(actions: list[str]) -> dict[str, str]:
 # Main node function
 # ---------------------------------------------------------------------------
 
+def _inject_co_ids(proc_dicts: list[dict], cos: list[dict]) -> None:
+    """Inject CO ids into dependent procedures' source_ids (in place).
+
+    A procedure is a CO's dependent when its source TO id equals the CO's
+    dependent_transition_id (branch-suffix variants "T-055a" strip to "T-055").
+    This makes procs CARRY the CO id so S3's co_enabler binding can fire —
+    S1:3650 already expects `host_co_id in p["source_ids"]`. Deterministic:
+    COs appended in coverage-model order, dict.fromkeys dedup preserves order.
+    """
+    if not cos:
+        return
+    dep_tid_to_co: dict[str, list[str]] = {}
+    for co in cos:
+        dt = co.get("dependent_transition_id")
+        cid = co.get("id")
+        if dt and cid:
+            dep_tid_to_co.setdefault(dt, []).append(cid)
+    if not dep_tid_to_co:
+        return
+    for p in proc_dicts:
+        sids = p.get("source_ids") or []
+        add = []
+        for sid in sids:
+            add.extend(dep_tid_to_co.get(sid, []))
+            base = re.sub(r'[a-z]$', '', sid)  # branch variant "T-055a" → "T-055"
+            if base != sid:
+                add.extend(dep_tid_to_co.get(base, []))
+        if add:
+            p["source_ids"] = list(dict.fromkeys(list(sids) + add))
+
+
 def s1_generation_node(state: AgentState) -> dict:
     """S1 Procedure Generation node — deterministic, V2-equivalent."""
     global _gen_seq_counter
@@ -4302,10 +4327,14 @@ def s1_generation_node(state: AgentState) -> dict:
     if subsumed_n:
         warnings.append(f"S1 marked {subsumed_n} transition_target Thens subsumed by behavior")
 
+    # CO id 注入: dependent proc 携带其服务的 CO id (source_ids 追加),供
+    # S3 co_enabler 绑定。注入在 model_dump 之后 (dedup/校验都已完成)。
+    proc_dicts = [p.model_dump(by_alias=True) for p in valid_procs]
+    _inject_co_ids(proc_dicts, cos)
     return {
         # BUGFIX #26: removed dead `hasattr(p, 'model_dump')` branch —
         # validate_procedures always returns Pydantic Procedure models.
-        "procedures": [p.model_dump(by_alias=True) for p in valid_procs],
+        "procedures": proc_dicts,
         "br_classifications": br_classifications,
         "type5_filtered": type5_filtered,
         "gen_seq_counter": _gen_seq_counter,

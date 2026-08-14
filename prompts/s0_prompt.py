@@ -269,7 +269,7 @@ if len(unique_contexts) >= 2:
 ---
 
 ### 11. transition_upstream_map (S0.6)
-从三个来源重建：
+从两个来源重建（跨实体因果只由 CO 表达，transition_relations 不参与）：
 
 ```python
 transition_upstream_map = {}  # tid → [upstream_tid, ...]
@@ -283,14 +283,7 @@ for entity E:
         if T2.to == T1.from and T2.id != T1.id:
           transition_upstream_map.setdefault(T1.transition_id, []).append(T2.transition_id)
 
-# 2. 跨实体upstream：从transition_relations提取
-for TR in _context.transition_relations:
-  from_tids = [t for t in TR.evidence_transitions if transition[t].entity == TR.from]
-  to_tids = [t for t in TR.evidence_transitions if transition[t].entity == TR.to]
-  for to_tid in to_tids:
-    transition_upstream_map.setdefault(to_tid, []).extend(from_tids)
-
-# 3. 跨实体upstream：从cross_entity_obligations补充
+# 2. 跨实体upstream：从cross_entity_obligations提取
 for CO in cross_entity_obligations:
   if CO.enabler_transition_id and CO.dependent_transition_id:
     transition_upstream_map.setdefault(CO.dependent_transition_id, []).append(CO.enabler_transition_id)

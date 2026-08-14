@@ -2978,6 +2978,7 @@ _prohibition_config = p1.get("_context", {}).get("prohibition_config", {
     "success_hints": ["状态转换为", "状态变更为"],
 })
 
+
 _context = {
     "source": "P1 v19.2",
     "generated_at": datetime.now(timezone(timedelta(hours=8))).isoformat(),
@@ -2993,6 +2994,8 @@ _context = {
     "branch_dimensions": bd_enriched,
     "transition_splits": transition_splits,
     "structural_relations": p1["domain_model"]["structural_relations"],
+    # 跨实体因果由 CO（enabler→dependent）确定性表达，transition_relations 不再派生
+    # causal_pairs（add_causal API 无此参数，字段已全链移除）。
     "transition_relations": p1["domain_model"]["transition_relations"],
     "state_info": state_info,
     "roles": p1["domain_model"]["roles"],

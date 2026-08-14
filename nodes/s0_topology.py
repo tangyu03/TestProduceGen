@@ -2779,11 +2779,13 @@ def _is_back_edge(t: dict, state_pos: dict) -> bool:
 
 def _rebuild_upstream_map(
     tos: list[dict],
-    transition: list[dict],
     cos: list[dict],
     state_pos: dict | None = None,
 ) -> dict[str, list[str]]:
-    """S0.6: Rebuild transition_upstream_map from three sources."""
+    """S0.6: Rebuild transition_upstream_map from two sources:
+    chain ordering (same entity/dimension) + CO enabler→dependent (cross-entity).
+    transition_relations evidence is NOT a source — causal_pairs was removed
+    (add_causal API has no such param); cross-entity causality lives in COs."""
     upstream_map: dict[str, list[str]] = defaultdict(list)
 
     to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
@@ -2814,38 +2816,9 @@ def _rebuild_upstream_map(
                         continue
                     upstream_map[t1_tid].append(t2['transition_id'])
 
-    # Source 2: transition_relations evidence
-    # v29 #26h: use P1's causal_pairs field (structured) when available.
-    # P1's transition_relations now declares:
-    #   "causal_pairs": [{"from_tid": "T-XXX", "to_tid": "T-YYY"}]
-    # Falls back to #25e index-based pairing when causal_pairs is absent.
-    for tr in transition:
-        # v29 #26h: prefer structured causal_pairs
-        causal_pairs = tr.get('causal_pairs', []) or []
-        if causal_pairs:
-            for pair in causal_pairs:
-                ft = pair.get('from_tid', '')
-                tt = pair.get('to_tid', '')
-                if ft and tt:
-                    upstream_map[tt].append(ft)
-            continue  # skip old evidence-based logic for this tr
-
-        # 修复 2: Fallback 可观测 — causal_pairs 缺失时按索引配对, 但要可见.
-        # 实验 3: 复杂 case 0/8 输出 causal_pairs. 简单 case 2/2. 不稳定.
-        _record_fallback(
-            "s0.causal_pairs.index_pairing_fallback",
-            detail=(
-                f"R({tr.get('from','')}->{tr.get('to','')}) has no causal_pairs; "
-                f"falling back to evidence_transitions index-based pairing"
-            ),
-            fallback_used="index_pairing",
-        )
-        # Fallback: #25e index-based pairing from evidence_transitions
-        ev = tr.get('evidence_transitions', []) or []
-        from_tids = [t for t in ev if t in to_by_tid and to_by_tid[t].get('entity') == tr.get('from')]
-        to_tids = [t for t in ev if t in to_by_tid and to_by_tid[t].get('entity') == tr.get('to')]
-        for i in range(min(len(from_tids), len(to_tids))):
-            upstream_map[to_tids[i]].append(from_tids[i])
+    # Source 2 (removed): transition_relations evidence / causal_pairs.
+    # Cross-entity causality is expressed solely by COs (Source 3 below).
+    # Retained here for reference: the map is chain-ordering + CO fan-out only.
 
     # Source 3: CO enabler → dependent transition
     # Option C: CO refs use the abstract (base) transition id, which for a
@@ -2857,6 +2830,10 @@ def _rebuild_upstream_map(
         if et and dt:
             for dv in _tid_to_concrete_ids(dt, to_by_tid):
                 for ev in _tid_to_concrete_ids(et, to_by_tid):
+                    # 自环防护: enabler == dependent (退化 CO, 如 T-061→T-061)
+                    # 产生 "转换依赖自身" 的无意义边, 跳过
+                    if dv == ev:
+                        continue
                     upstream_map[dv].append(ev)
 
     # Deduplicate
@@ -3496,7 +3473,7 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     # S0.6: Upstream map (state_pos enables back-edge exclusion so cyclic
     # state machines don't reverse lifecycle order in the dependency DAG)
     state_pos = _build_state_pos(state_info)
-    transition_upstream_map = _rebuild_upstream_map(tos, transition, cos, state_pos)
+    transition_upstream_map = _rebuild_upstream_map(tos, cos, state_pos)
     warnings.append(f"S0.6: upstream_map with {len(transition_upstream_map)} entries")
 
     # State type map

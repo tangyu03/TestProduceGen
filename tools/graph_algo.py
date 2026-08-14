@@ -211,10 +211,15 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
     # Confidence map — kept in sync with s3_dependency.DEP_CONFIDENCE.
     # Inlined here to avoid a circular import (s3_dependency imports
     # break_cycles from this module).
+    # 2026-08-14: co_enabler_both_lateral / co_enabler_phase_inversion 必须
+    # 同时注册——缺失任一都会 conf 归 0, break_cycles 优先剪 CO 弱边、恢复
+    # 倒退边 (实测)。双表同步是已知维护陷阱, 详见 DECISIONS。
     DEP_CONFIDENCE = {
         "transition_upstream": 5,
         "guard1_state_pred": 5,
         "co_enabler": 4,
+        "co_enabler_both_lateral": 4,
+        "co_enabler_phase_inversion": 4,
         "ve_co_ids": 4,
         "chain_ordering": 3,
         "guard5_create_use": 3,

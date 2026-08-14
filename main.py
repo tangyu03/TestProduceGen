@@ -909,7 +909,9 @@ def _generate_markdown(
                         g_lines.append(f"- {tgt} {op} {g.get('state', '')}{desc_str}")
                 if g_lines:
                     lines.append("**Given**")
-                    lines.extend(g_lines)
+                    # 与 When 一致的序号列表：g_lines 各条自带 "- " 无序前缀，
+                    # 编号渲染时剥掉该前缀（序号取代无序列表符）。
+                    lines.extend(f"{i}. {ln[2:]}" for i, ln in enumerate(g_lines, 1))
 
             # When clause (single) — [action] 与 event 重复时省略方括号
             if when:
@@ -942,8 +944,8 @@ def _generate_markdown(
 
             # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:
-                _sep_blank(lines)
-                lines.append("**Then**")
+                # 与 When 一致的序号列表（编号取代无序列表符）。
+                then_lines: list[str] = []
                 for t in _dedup_thens(thens):
                     # hide_markers=True 时省略 BR id（[BR: ...]）与 cross 实体标注，
                     # 并剥除期望文本行首的 [BR-NNN] 前缀（保留 正面:/负面: 语义标签）。
@@ -967,7 +969,11 @@ def _generate_markdown(
                     target_str = f"{target_shown} " if target_shown else ""
                     # hide_markers=True 时连同 (behavior)/(state) 等 kind 标签一起省略
                     kind_str = "" if hide_markers else f" ({t.get('kind', 'state')})"
-                    lines.append(f"- {target_str}{exp_shown}{kind_str}{br_str}{xref_str}")
+                    then_lines.append(f"{target_str}{exp_shown}{kind_str}{br_str}{xref_str}")
+                if then_lines:
+                    _sep_blank(lines)
+                    lines.append("**Then**")
+                    lines.extend(f"{i}. {ln}" for i, ln in enumerate(then_lines, 1))
 
         # Cascade chain
         cascade = proc.get("cascade_chain")

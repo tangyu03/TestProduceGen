@@ -46,14 +46,16 @@ for b in blocks:
     coverage = cov.group(1).strip() if cov else ''
     biz = re.search(r'\*\*业务定位\*\*：(.+)', b)
     biz_val = biz.group(1).strip() if biz else ''
-    # 模块 = 最后一个 "｜" 段，剥离 phase_label 内嵌的落段后缀（P{相位}·{原因}）
+    # 模块 = 最后一个 "｜" 段；仅剥离 phase_label 内嵌的落段标记（P{相位}·{原因}），
+    # 保留有意义的任务状态后缀（如（草稿）/（待审批）/（已登记））。不得用宽泛
+    # （…）正则剥掉——那会毁掉 60/80 个去重模块的状态信息。
     for sep in ('｜', '|'):
         if sep in biz_val:
             module = biz_val.split(sep)[-1].strip()
             break
     else:
         module = biz_val
-    module = re.sub(r'（[^（）]*）$', '', module)
+    module = re.sub(r'（P\d+·[^（）]*）$', '', module)
     gsec = re.search(r'\*\*Given\*\*(.*?)(?=\*\*|\Z)', b, re.S)
     given = gsec.group(1).strip() if gsec else ''
     wsec = re.search(r'\*\*When\*\*(.*?)(?=\*\*|\Z)', b, re.S)

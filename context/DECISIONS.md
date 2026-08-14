@@ -5,6 +5,50 @@
 
 ---
 
+## 2026-08-14 ㊼ 正式关闭 transition_upstream_map 双键索引行为变更（正向论证：新方案劣于现状）
+
+**决策**：把 `to_by_tid`/`trans_id_to_proc_ids` 改按 `id`（双键）索引的待定项**正式关闭，不做**。S3「1. Transition upstream」块保持按 transition_id 索引的惰性 no-op，加显式守卫注释 + 重新激活路径（s3_dependency.py:241-262）。
+
+**正向论证（回应「已经被替代」≠「替代得对」，非负推理）**：id-keyed 模拟实测——upstream_map 会物化 **112 条边 = Source1 同实体链 107 + Source2 CO 5**（80 keys）：
+
+1. **107 条同实体链边 = 纯冗余**。它们来自 S0.6 Source 1（同维度 T2.to==T1.from），是**无语义**的文本态链匹配。Guard 1（`guard1_state_pred`）与 `chain_ordering` 已按语义（状态链匹配、创建根跳过、相位守卫）派生同类 deps——上游图路径再加一遍零信息增量，只增 break_cycles 全图 churn（实测过的 54 proc 级联）。
+2. **5 条 CO 边已被 co_enabler 绑定以更优语义物化**。co_enabler 绑定产出 weak + `co_enabler_both_lateral`/`co_enabler_phase_inversion` 标签（带 ㊻ lateral 定谳）；而上游图路径会给 CO-004（T-058/T-062 双 lateral）标 `transition_upstream` conf-5 **HARD**——与 ㊻「lateral 下 hard 语义不成立」**直接矛盾**。该路径对 CO 边不是冗余，是**语义错误**。
+3. **可观察空索引（激活路径保持）**：coverage TO 0/91 有 transition_id → `trans_id_to_proc_ids` 恒空 → 本块文档化 no-op。若上游某日回填 transition_id，本块自动复活——守卫注释明示复活前须先解决上述 1/2 两条（去重 + lateral hard 语义）。
+
+**验证结果**：仅注释变更，零逻辑差异（s3_dependency.py 解析通过，无代码路径改动）；PT017_output 无需重生成。
+
+**判据速记**：物化的边要么冗余（同实体链已被 Guard1/chain_ordering 语义化覆盖）、要么语义错误（CO 边 hard 与 ㊻ 矛盾）。上游图路径不携带任何新信息 → 双键索引劣于现状。
+
+---
+
+## 2026-08-14 ㊻ CO-004 hard-vs-weak 定谳：lateral 转换下 hard 语义不成立 → 双 lateral 规则落地 + 双表注册陷阱
+
+**决策**（用户定调「选 1，但不是倾向 weak，而是 hard 在状态机模型里语义不成立」）：S3 co_enabler 块按**双 lateral 规则**分流：
+
+```
+en_to = to_by_id[enabler_transition_id]（或 to_by_tid）
+dep_to = to_by_id[dependent_transition_id]（或 to_by_tid）
+both_lateral = en_to.from==en_to.to AND dep_to.from==dep_to.to
+
+both_lateral            → weak_dependencies + origin "co_enabler_both_lateral"
+dep_phase > my_phase    → weak_dependencies + origin "co_enabler_phase_inversion"
+dep_phase <= my_phase   → dependencies（HARD）+ origin "co_enabler"
+```
+
+CO-004（E-CAR T-058 已登记→已登记 提醒，enabler；E-USER T-062 正常→正常 功能限制，dependent）**双方都 lateral** → weak。CO-001/002/003（E-ARC/RCY/OUT T-018/036/042 执行中→已归档/已回收/已外送，enabler；E-CAR T-055/056/057 已登记→…，dependent）→ 相位反转 → weak。
+
+**决定性论证（唯一判据，非多条之一）**：hard 依赖的语义前置是「前驱的**状态推进**是后继的前置条件」——前驱转换让状态机前进到某状态，后继才有资格执行。而 **lateral 转换（from==to）不推进任何状态**，状态机层面没有「前置被满足」这回事 → hard 在状态机模型里**结构性不成立**，不是「倾向 weak」而是「hard 语义失效」。辅助证据：① 时间先后（提醒 12h 前触发）是业务时序差，非因果门控——系统宕机时提醒没发出、限制照样执行（条件=已到期未处理，非「提醒已执行」）；② 限制真正的前置是状态条件（载体到期未处理），不是「提醒转换已执行」。
+
+**双表注册陷阱（用户判「规则被否决的理由是实现 bug」）**：co_enabler_phase_inversion/co_enabler_both_lateral 只注册进 `s3_dependency.DEP_CONFIDENCE` 时，实测 `_exp_rule2` 仍 22 dep 差异（CO 弱边被剪、倒退边恢复）——因为 `tools/graph_algo.py` 内联了一份**独立** DEP_CONFIDENCE（注释「kept in sync」，circular import 规避），缺新 tag → conf 归 0 → break_cycles 按低 conf 优先剪 CO 边。**两表都必须注册新 origin**。注册后 `_exp_rule3`：dep 集合 0 差异（方向正确、CO 边保住）+ 10 处 tag-only 差异（语义可区分：CO-004→`co_enabler_both_lateral`，CO-001/002/003→`co_enabler_phase_inversion`）。
+
+**正向推理修正（回应「已经被替代」≠「替代得对」）**：此前主张「CO 绑定替代 upstream map → 弱化不必验证」用的是**负推理**（冲突/级联），用户正确指出这混淆了替换场景与叠加场景。最终结论（全 weak + CO 方向正确）以**正论证**重新确立：lateral 下 hard 语义不成立是构造性证据，非行为后果。upstream map 双键索引行为变更仍待定（CO 绑定已实现同批弱边，见 [[transition-upstream-map-inert]]）。
+
+**验证结果**：`_exp_rule3` 双跑 SHA-256 字节一致；与合入 PT017_output.json 的 dep 集合（dependencies/weak_dependencies）逐 proc 零差异；仅 10 处 `weak_origins` 标签变更外科合入（PROC-051.1/.2←PROC-076/077 → `co_enabler_both_lateral`；PROC-103/104/105 .1/.2←PROC-225/231/228 → `co_enabler_phase_inversion`）；681 标题保留、dep 不变、CRLF+无尾换行保持；V01-V10 全 PASS（case_total 681，全零）。
+
+**判据速记**：hard 依赖的前置=前驱状态**推进**；lateral（from==to）无推进 → hard 结构失效，非倾向。任何新 origin tag **必须双表注册**（s3_dependency.DEP_CONFIDENCE + graph_algo.py 内联表），缺一即 conf 0 剪错边（实测）。
+
+---
+
 ## 2026-08-12 ㊺ 删除 time_sensitive 用例的触发方式 hint 行：`scheduler_manual_trigger:/clock_injection:/db_time_update:` 不再作为 When 编号步骤注入
 
 **决策**（用户判「添加的位置和实际需求的不一样。如无必要可以删除」→ 删除）：S1 `_build_timeout_hints()` 不再把 3 种触发机制描述（`clock_injection: 测试时注入时钟到边界值` 等，AI 措辞）注入 `operation_hints`。time_sensitive 用例的 When 块恢复为只有真实执行事件（如 PROC-197 `1. 确认导入完成 by 普通用户`）；触发机制保留在 JSON `time_control.mechanism`（V06 协议字段，机器可读）。删除函数 `_build_timeout_hints`/`_TRIGGER_HINT_TEMPLATES`/`_ALLOWED_TRIGGER_METHODS`，保留 `_derive_time_mechanism`（仍供 `time_control.mechanism` 推导，3 处调用）。
