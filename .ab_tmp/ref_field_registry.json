@@ -1,0 +1,293 @@
+{
+ "E-PROJ.评级": {
+  "entity": "E-PROJ",
+  "name": "评级",
+  "kind": "attribute",
+  "value_type": "str",
+  "ref_state_dimension": null,
+  "aliases": [
+   "评价结果"
+  ],
+  "count_aliases": [
+   "评级",
+   "项目阶段评价结果"
+  ],
+  "value_normalization": {
+   "优": "优秀",
+   "良": "良好",
+   "合": "合格",
+   "不": "不合格",
+   "不合": "不合格"
+  },
+  "strip_suffix": null,
+  "values": [
+   "优秀",
+   "良好",
+   "合格",
+   "不合格",
+   "差"
+  ],
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-PROJ",
+    "dimension": "项目状态",
+    "state": "待归档"
+   }
+  ]
+ },
+ "E-PLAN.评审组人数": {
+  "entity": "E-PLAN",
+  "name": "评审组人数",
+  "kind": "config",
+  "value_type": "int",
+  "ref_state_dimension": null,
+  "aliases": [
+   "评审组"
+  ],
+  "count_aliases": [],
+  "value_normalization": {},
+  "strip_suffix": null,
+  "values": [
+   5,
+   7,
+   9
+  ],
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "已建立"
+   }
+  ]
+ },
+ "E-PLAN.暂停前计划状态": {
+  "entity": "E-PLAN",
+  "name": "暂停前计划状态",
+  "kind": "state_snapshot",
+  "value_type": "str",
+  "ref_state_dimension": "E-PLAN.计划状态",
+  "aliases": [],
+  "count_aliases": [],
+  "value_normalization": {
+   "待": "待评审",
+   "待评": "待评审",
+   "评": "评审中",
+   "评审": "评审中",
+   "已": "已完成",
+   "已完": "已完成"
+  },
+  "strip_suffix": null,
+  "values": null,
+  "value_closed_set": [
+   "待评审",
+   "评审中",
+   "已完成"
+  ],
+  "populated_anchors": [
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "待评审"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "评审中"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "已完成"
+   }
+  ]
+ },
+ "E-PLAN.评审计划超时类型": {
+  "entity": "E-PLAN",
+  "name": "评审计划超时类型",
+  "kind": "attribute",
+  "value_type": "str",
+  "ref_state_dimension": null,
+  "aliases": [],
+  "count_aliases": [],
+  "value_normalization": {
+   "下": "下发超时",
+   "下发": "下发超时",
+   "下发超": "下发超时",
+   "启": "启动超时",
+   "启动": "启动超时",
+   "启动超": "启动超时",
+   "评": "评审超时",
+   "评审": "评审超时",
+   "评审超": "评审超时",
+   "归": "归档超时",
+   "归档": "归档超时",
+   "归档超": "归档超时"
+  },
+  "strip_suffix": "超时",
+  "values": [
+   "下发超时",
+   "启动超时",
+   "评审超时",
+   "归档超时"
+  ],
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "已完成"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "已建立"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "待启动"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "待评审"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "暂停"
+   },
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "评审中"
+   }
+  ]
+ },
+ "E-PROJ.选入次数": {
+  "entity": "E-PROJ",
+  "name": "选入次数",
+  "kind": "counter",
+  "value_type": "int",
+  "ref_state_dimension": null,
+  "aliases": [],
+  "count_aliases": [],
+  "value_normalization": {},
+  "strip_suffix": null,
+  "values": null,
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-PROJ",
+    "dimension": "项目状态",
+    "state": "待选入"
+   }
+  ]
+ },
+ "E-PLAN.组长专家数": {
+  "entity": "E-PLAN",
+  "name": "组长专家数",
+  "kind": "config",
+  "value_type": "int",
+  "ref_state_dimension": null,
+  "aliases": [
+   "组长专家"
+  ],
+  "count_aliases": [],
+  "value_normalization": {
+   "一": "1"
+  },
+  "strip_suffix": null,
+  "values": [
+   1
+  ],
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-PLAN",
+    "dimension": "计划状态",
+    "state": "已建立"
+   }
+  ]
+ },
+ "E-SCORE.各项打分": {
+  "entity": "E-SCORE",
+  "name": "各项打分",
+  "kind": "attribute",
+  "value_type": "int",
+  "ref_state_dimension": null,
+  "aliases": [],
+  "count_aliases": [],
+  "value_normalization": {},
+  "strip_suffix": null,
+  "values": null,
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-SCORE",
+    "dimension": "打分状态",
+    "state": "已保存"
+   }
+  ]
+ },
+ "E-USER.连续密码错误次数": {
+  "entity": "E-USER",
+  "name": "连续密码错误次数",
+  "kind": "counter",
+  "value_type": "int",
+  "ref_state_dimension": null,
+  "aliases": [],
+  "count_aliases": [
+   "密码错误"
+  ],
+  "value_normalization": {},
+  "strip_suffix": null,
+  "values": null,
+  "value_closed_set": null,
+  "populated_anchors": [
+   {
+    "entity": "E-USER",
+    "dimension": "锁定状态",
+    "state": "未锁定"
+   }
+  ]
+ },
+ "E-PROJ.评价结果": {
+  "entity": "E-PROJ",
+  "name": "评价结果",
+  "kind": "alias",
+  "canonical": "E-PROJ.评级",
+  "values": null,
+  "value_normalization": {},
+  "strip_suffix": null,
+  "populated_anchors": [],
+  "ref_state_dimension": null,
+  "value_closed_set": null
+ },
+ "E-PLAN.评审组": {
+  "entity": "E-PLAN",
+  "name": "评审组",
+  "kind": "alias",
+  "canonical": "E-PLAN.评审组人数",
+  "values": null,
+  "value_normalization": {},
+  "strip_suffix": null,
+  "populated_anchors": [],
+  "ref_state_dimension": null,
+  "value_closed_set": null
+ },
+ "E-PLAN.组长专家": {
+  "entity": "E-PLAN",
+  "name": "组长专家",
+  "kind": "alias",
+  "canonical": "E-PLAN.组长专家数",
+  "values": null,
+  "value_normalization": {},
+  "strip_suffix": null,
+  "populated_anchors": [],
+  "ref_state_dimension": null,
+  "value_closed_set": null
+ }
+}

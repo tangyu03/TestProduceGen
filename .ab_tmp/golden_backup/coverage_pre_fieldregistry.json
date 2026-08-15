@@ -1431,12 +1431,9 @@
         }
       ],
       "constraint_predicate": {
-        "type": "field_equals",
-        "field": {
-          "entity": "E-IMP",
-          "name": "任务级别"
-        },
-        "value": "B级"
+        "type": "unparsed",
+        "text": "任务级别为B级",
+        "reason": "type 未实现(v1)"
       }
     },
     {
@@ -1496,12 +1493,9 @@
         }
       ],
       "constraint_predicate": {
-        "type": "field_equals",
-        "field": {
-          "entity": "E-IMP",
-          "name": "任务级别"
-        },
-        "value": "C级"
+        "type": "unparsed",
+        "text": "任务级别为C级",
+        "reason": "type 未实现(v1)"
       }
     },
     {
@@ -1561,12 +1555,9 @@
         }
       ],
       "constraint_predicate": {
-        "type": "field_equals",
-        "field": {
-          "entity": "E-IMP",
-          "name": "任务级别"
-        },
-        "value": "C级"
+        "type": "unparsed",
+        "text": "任务级别为C级",
+        "reason": "type 未实现(v1)"
       }
     },
     {
@@ -1626,12 +1617,9 @@
         }
       ],
       "constraint_predicate": {
-        "type": "field_equals",
-        "field": {
-          "entity": "E-IMP",
-          "name": "任务级别"
-        },
-        "value": "C级"
+        "type": "unparsed",
+        "text": "任务级别为C级",
+        "reason": "type 未实现(v1)"
       }
     },
     {
@@ -1699,23 +1687,14 @@
         "type": "conjunction",
         "parts": [
           {
-            "type": "field_in",
-            "field": {
-              "entity": "E-IMP",
-              "name": "任务级别"
-            },
-            "values": [
-              "B级",
-              "C级"
-            ]
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
           },
           {
-            "type": "field_equals",
-            "field": {
-              "entity": "E-IMP",
-              "name": "任务级别"
-            },
-            "value": "B级"
+            "type": "unparsed",
+            "text": "任务级别=B级",
+            "reason": "type 未实现(v1)"
           }
         ]
       }
@@ -1785,23 +1764,14 @@
         "type": "conjunction",
         "parts": [
           {
-            "type": "field_in",
-            "field": {
-              "entity": "E-IMP",
-              "name": "任务级别"
-            },
-            "values": [
-              "B级",
-              "C级"
-            ]
+            "type": "unparsed",
+            "text": "任务级别为B级或C级",
+            "reason": "type 未实现(v1)"
           },
           {
-            "type": "field_equals",
-            "field": {
-              "entity": "E-IMP",
-              "name": "任务级别"
-            },
-            "value": "C级"
+            "type": "unparsed",
+            "text": "任务级别=C级",
+            "reason": "type 未实现(v1)"
           }
         ]
       }
@@ -1854,12 +1824,9 @@
         "type": "conjunction",
         "parts": [
           {
-            "type": "field_equals",
-            "field": {
-              "entity": "E-IMP",
-              "name": "任务级别"
-            },
-            "value": "A级"
+            "type": "unparsed",
+            "text": "任务级别为A级",
+            "reason": "type 未实现(v1)"
           },
           {
             "type": "unparsed",
@@ -7246,19 +7213,9 @@
       "branch_path": [],
       "precondition_state_refs": [],
       "constraint_predicate": {
-        "type": "aggregate_count",
-        "subject": {
-          "entity": "E-USER",
-          "state": "正常",
-          "count_scope": "subject_instance"
-        },
-        "counter": {
-          "entity": "E-USER",
-          "name": "连续输错次数"
-        },
-        "threshold": 3,
-        "consecutive": true,
-        "window": "all_time"
+        "type": "unparsed",
+        "text": "用户连续输错3次密码",
+        "reason": "type 未实现(v1)"
       }
     },
     {
@@ -8719,7 +8676,7 @@
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-08-15T09:35:33.427437+08:00",
+    "generated_at": "2026-08-14T16:49:11.048427+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "CASC-STEC-PT017能力验证软件需求规格说明.md",
@@ -11178,68 +11135,6 @@
       "p1_root_nodes_complete": true,
       "all_skipped_xc_have_br": true,
       "precondition_state_refs_complete": true
-    },
-    "field_registry": {
-      "E-IMP.任务级别": {
-        "entity": "E-IMP",
-        "name": "任务级别",
-        "kind": "attribute",
-        "value_type": "str",
-        "ref_state_dimension": null,
-        "aliases": [],
-        "count_aliases": [],
-        "value_normalization": {
-          "A": "A级",
-          "B": "B级",
-          "C": "C级"
-        },
-        "strip_suffix": null,
-        "values": [
-          "A级",
-          "B级",
-          "C级"
-        ],
-        "value_closed_set": null,
-        "populated_anchors": [
-          {
-            "entity": "E-IMP",
-            "dimension": "任务状态",
-            "state": "待二级审批"
-          },
-          {
-            "entity": "E-IMP",
-            "dimension": "任务状态",
-            "state": "待审批"
-          },
-          {
-            "entity": "E-IMP",
-            "dimension": "任务状态",
-            "state": "草稿"
-          }
-        ]
-      },
-      "E-USER.连续输错次数": {
-        "entity": "E-USER",
-        "name": "连续输错次数",
-        "kind": "counter",
-        "value_type": "int",
-        "ref_state_dimension": null,
-        "aliases": [],
-        "count_aliases": [
-          "输错"
-        ],
-        "value_normalization": {},
-        "strip_suffix": null,
-        "values": null,
-        "value_closed_set": null,
-        "populated_anchors": [
-          {
-            "entity": "E-USER",
-            "dimension": "用户状态",
-            "state": "正常"
-          }
-        ]
-      }
     }
   }
 }

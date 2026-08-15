@@ -82,6 +82,14 @@ if not os.path.exists(P1_PATH):
 with open(P1_PATH, "r", encoding="utf-8") as f:
     p1 = json.load(f)
 
+# ============ 字段注册表：由本次 P1 派生，不硬编码任何 SRS 域 ============
+# 事实源 = 本次运行的 P1 输入（model_view 适配 domain_model/state_and_flow/_meta）。
+# P2 内部（_resolve_field_from_text / _parse_occurrence_when /
+# _resolve_counter_from_text / _normalize_constraint_value）用它解析字段；
+# 并经 coverage_model._context.field_registry 序列化给 S1 的
+# predicate_phase_lower_bound 用。
+_FIELD_REGISTRY = _cf.build_registry(_cf.model_view(p1))
+
 
 # ============ LLM infrastructure (optional, for classification fallback) ============
 # P2 is fully deterministic by default. LLM is used ONLY as a fallback when
@@ -688,7 +696,7 @@ def _resolve_counter_from_text(text, ctx):
     对照 values 校验；无 为 前缀（如 密码错误）→ 不带 counted_value。"""
     own = ctx.get("entity")
     cands = []
-    for r in _cf.FIELD_REGISTRY.values():
+    for r in _FIELD_REGISTRY.values():
         for alias in r.get("count_aliases") or []:
             if alias in text:
                 cands.append((len(alias), 0 if r.get("entity") == own else 1,
@@ -918,7 +926,7 @@ def _parse_occurrence_when(when, ctx):
     """occurrence_limit 的 when 条件：<前缀><值><字段名> 反序表层
     （如 本阶段不合格评价结果 → 评级=不合格）。值从字段记录 values 子串最长匹配
     （不合格 优先于 合格）。"""
-    for r in _cf.FIELD_REGISTRY.values():
+    for r in _FIELD_REGISTRY.values():
         if r.get("kind") == "alias" or r.get("entity") != ctx.get("entity"):
             continue
         for nm in [r["name"]] + (r.get("aliases") or []):
@@ -1082,7 +1090,7 @@ def _resolve_field_from_text(field_str, entity):
     returning the canonical record. Returns None when unregistered.
     """
     cands = []
-    for r in _cf.FIELD_REGISTRY.values():
+    for r in _FIELD_REGISTRY.values():
         if r.get("kind") == "alias" or r.get("entity") != entity:
             continue
         cands.append((r["name"], r))
@@ -1104,7 +1112,7 @@ def _resolve_field_by_value(value_str, ctx=None):
     """
     v = value_str.strip()
     matches = []
-    for r in _cf.FIELD_REGISTRY.values():
+    for r in _FIELD_REGISTRY.values():
         if r.get("kind") == "alias":
             continue
         vals = r.get("values") or []
@@ -3016,7 +3024,10 @@ _context = {
     "judgments": judgments,
     "warnings": warnings,
     "snapshot": snapshot,
-    "self_check": self_check
+    "self_check": self_check,
+    # 本次 P1 派生的字段注册表。S1 的 predicate_phase_lower_bound 据此算
+    # 字段谓词相位下界；PT017 无字段引用谓词 → 空 dict（注册表对它是惰性的）。
+    "field_registry": _FIELD_REGISTRY
 }
 
 # ============ Final output ============

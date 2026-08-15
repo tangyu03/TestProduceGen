@@ -6,8 +6,9 @@ P2 的 constraint 前提引用若干领域字段（评级/评审组人数/组长
 状态/评审计划超时类型/各项打分/选入次数/连续密码错误次数）。本模块是这些字段的
 唯一注册表，且**不手抄任何领域数据**——字段集合、值域、kind、value_type、
 strip_suffix、aliases、count_aliases、value_normalization、anchors、
-ref_state_dimension 全部从结构化 SRS（`srs_data/struct_srs.py` 的 DomainModel）
-**派生**。
+ref_state_dimension 全部从**本次运行的 P1 输入**（`model_view(p1)` 适配的
+domain_model/state_and_flow/_meta）**派生**。本模块不再硬编码任何 SRS 域，
+跑哪个项目注册表就由哪个项目的 P1 生成。
 
 旧架构是 `srs_data/constraint_field_overlay.py` 手写 8 条语义增量 + 本模块派生
 值域。用户裁定：overlay 是第二份手抄源，删掉，全部改从真源推导（决策 A/B 见
@@ -72,7 +73,7 @@ context/DECISIONS.md）。
 
 消费方（不变）：
   - P2 constraint 谓词解析器（context/generate_obligation_model.py）三处迭代
-    FIELD_REGISTRY：_resolve_field_from_text（name+aliases 最长子串）、
+    build_registry 产物：_resolve_field_from_text（name+aliases 最长子串）、
     _parse_occurrence_when（值在名前的反序表层）、_resolve_counter_from_text
     （count_aliases）；_normalize_constraint_value 读 value_normalization/
     value_type/strip_suffix。
@@ -86,6 +87,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 # repo root 显式入 sys.path：兼容 `python context/generate_obligation_model.py`
 # （script-dir 模式，sys.path[0]=context/）与 `python -m ...` 两种调用。
@@ -114,17 +116,21 @@ def _is_int_str(v):
     return isinstance(v, str) and v.strip().isdigit()
 
 
-# ── 结构化 SRS：唯一机器可读事实源 ─────────────────────────────────────
-def _load_domain_model():
-    """加载 `struct_srs.build()` 的 DomainModel（值域/存在性的唯一事实源）。"""
-    try:
-        from srs_data.struct_srs import build
-    except ImportError as e:
-        raise ImportError(
-            "constraint_fields 无法导入 srs_data.struct_srs（字段注册表的事实源）。"
-            "请从仓库根目录运行：python -m context.generate_obligation_model"
-        ) from e
-    return build()
+# ── 本次 P1 输入：唯一机器可读事实源 ─────────────────────────────────
+def model_view(p1: dict) -> SimpleNamespace:
+    """把 P1 JSON 的三条路径适配为派生函数需要的 `.entities/.transitions/
+    .branch_dimensions` 视图。元素仍是 dict，派生函数用 `.get()/[]` 访问，
+    与 DomainModel 的 transition/entity 形状完全同构（P1 JSON 即 build() 序列化）。
+
+    三者与 DomainModel 同源：`domain_model.entities`、
+    `state_and_flow.transitions`、`_meta.branch_dimensions`（model.py 序列化
+    时 meta["branch_dimensions"] = self.branch_dimensions 是同一对象）。
+    """
+    return SimpleNamespace(
+        entities=p1["domain_model"]["entities"],
+        transitions=p1["state_and_flow"]["transitions"],
+        branch_dimensions=p1["_meta"].get("branch_dimensions", []),
+    )
 
 
 def _entity(model, eid):
@@ -168,10 +174,10 @@ def _branch_values(model, ent, dim):
             vals = list(d.get("values") or [])
             if not vals:
                 raise ValueError(
-                    f"分支维度 {ent}.{dim} 存在但 values 为空（struct_srs.py 数据源）")
+                    f"分支维度 {ent}.{dim} 存在但 values 为空（数据源）")
             return vals
     raise ValueError(
-        f"分支维度 {ent}.{dim} 不在 struct_srs.py（检查名称或删除/改源对应字段）")
+        f"分支维度 {ent}.{dim} 不在 P1 输入（检查名称或删除/改源对应字段）")
 
 
 def _precondition_texts(transition):
@@ -197,6 +203,21 @@ def _common_suffix(strings):
     if not s or any(x == s for x in strings if x != s):
         return ""
     return s
+
+
+def _stem_referenced_independently(txt, v, suffix):
+    """值 v（剥公共后缀 suffix 得词干）在文本中被**独立引用**（词干后跟的不是
+    后缀本身）。纯数据驱动、无领域词：struct_srs "下发时限超时" 里词干"下发"后
+    跟"时限超时"（非"超时"开头）→ 独立引用；PT017 "任务级别为A级" 里词干"A"
+    后正是后缀"级"（值本体）→ 非独立引用。词干后无内容（文本末尾）也非独立。"""
+    stem = v[:-len(suffix)]
+    i = txt.find(stem)
+    while i >= 0:
+        tail = txt[i + len(stem):]
+        if tail and not tail.startswith(suffix):
+            return True
+        i = txt.find(stem, i + 1)
+    return False
 
 
 # ── 字段发现 ────────────────────────────────────────────────────────────
@@ -448,14 +469,16 @@ def _anchor_state_for(model, spec, t):
             elif vals and all(isinstance(v, str) for v in vals):
                 suffix = _common_suffix([v for v in vals if isinstance(v, str)])
                 if suffix:
-                    # 超时型：剥后缀值 + "时限超时" 触发 transition → 写点 from
+                    # 超时型：词干在文本中被独立引用（"下发"+"时限超时"）→ 写点
+                    # from。公共后缀是值本体（A级/B级/C级 的"级"）时非独立引用。
                     for v in vals:
-                        if v.endswith(suffix) and f"{v[:-len(suffix)]}时限超时" in txt:
+                        if v.endswith(suffix) and _stem_referenced_independently(txt, v, suffix):
                             return t.get("from")
-                else:
-                    # 普通属性（评级）：引用 canonical 名（不含别名/值 → 不误收读点）
-                    if spec["name"] in txt:
-                        return t.get("from")
+                # 普通属性（评级/任务级别）：引用 canonical 名（不含别名/值 →
+                # 不误收读点）。公共后缀（如"级"）非超时语义时不得挡住普通属性
+                # 判定——超时分支未命中仍回落到这里（A级/B级/C级 → "任务级别"）。
+                if spec["name"] in txt:
+                    return t.get("from")
     return None
 
 
@@ -511,6 +534,24 @@ def _derive_kind_value_type(model, spec):
     return "attribute", "str", None                      # 评级 / 评审计划超时类型
 
 
+def _is_timeout_field(model, ent, vals):
+    """超时型字段判据：某值的词干（剥公共后缀）在 transition 前提中被独立引用
+    （词干后跟的不是后缀本身，见 _stem_referenced_independently）。纯数据驱动、
+    无领域词。只有超时型设置 strip_suffix——普通 attribute（评级、任务级别）
+    值域的公共后缀（A级/B级/C级 的"级"）是值本体的一部分，不得剥。"""
+    suffix = _common_suffix([v for v in vals if isinstance(v, str)])
+    if not suffix:
+        return False
+    for t in model.transitions:
+        if t.get("entity") != ent:
+            continue
+        for txt in _precondition_texts(t):
+            for v in vals:
+                if v.endswith(suffix) and _stem_referenced_independently(txt, v, suffix):
+                    return True
+    return False
+
+
 def _build_record(model, key, spec) -> dict:
     """从发现 spec 派生完整记录。派生失败 → raise（fail-fast，数据源已漂移）。"""
     ent, name = key.split(".", 1)
@@ -535,9 +576,11 @@ def _build_record(model, key, spec) -> dict:
             rec["values"] = [int(v) for v in vals]
         else:
             rec["values"] = vals
-            suffix = _common_suffix([v for v in vals if isinstance(v, str)])
-            if suffix:
-                rec["strip_suffix"] = suffix
+            if _is_timeout_field(model, ent, vals):
+                # 仅超时型 attribute 可剥公共后缀（下发超时→下发）；
+                # 普通 attribute（评级/任务级别）值域是完整值本体，不剥。
+                rec["strip_suffix"] = _common_suffix(
+                    [v for v in vals if isinstance(v, str)])
     if kind == "config" and not rec["values"]:
         rec["values"] = [1]  # singleton（组长专家数）无分支维度，恒 1
     rec["populated_anchors"] = _derive_anchors(model, spec)
@@ -571,7 +614,7 @@ def _validate_registry(model, registry: dict) -> None:
                 errors.append(f"别名键 {key} 的 canonical 缺失: {rec.get('canonical')}")
             continue
         if _entity(model, rec["entity"]) is None:
-            errors.append(f"[{key}] 实体 {rec['entity']} 不存在于 struct_srs.py")
+            errors.append(f"[{key}] 实体 {rec['entity']} 不存在于 P1 输入")
         for a in rec.get("populated_anchors") or []:
             sts = _dim_states(model, a["entity"], a["dimension"])
             if sts is None:
@@ -601,12 +644,15 @@ def _validate_registry(model, registry: dict) -> None:
                     errors.append(f"[{key}] value_type=int 但值非数值: {v!r}")
     if errors:
         raise ValueError(
-            "constraint_fields 注册表与 struct_srs.py 不一致（数据源已漂移）:\n  "
+            "constraint_fields 注册表与 P1 输入不一致（数据源已漂移）:\n  "
             + "\n  ".join(errors))
 
 
-def _build_registry():
-    model = _load_domain_model()
+def build_registry(model) -> dict:
+    """从 P1 适配视图派生完整注册表（canonical 记录 + 别名键 + fail-fast 校验）。
+
+    事实源是本次运行的 P1 输入；每次运行由 P2 调用一次并序列化进 coverage_model。
+    """
     fields = _discover_fields(model)
     registry: dict[str, dict] = {}
     for key, spec in fields.items():
@@ -620,21 +666,19 @@ def _build_registry():
     return registry
 
 
-FIELD_REGISTRY: dict[str, dict] = _build_registry()
-
-
-def resolve_field(field_ref: dict) -> dict | None:
+def resolve_field(field_ref: dict, registry: dict | None) -> dict | None:
     """按 {entity, name} 解析字段记录；别名（评价结果→评级、评审组→评审组人数）
-    归一化到 canonical 记录。返回 None 表示未注册。"""
+    归一化到 canonical 记录。返回 None 表示未注册（含 registry 未传入 = 保守
+    「不可解析」，与字段确实未注册语义一致）。"""
     entity = (field_ref or {}).get("entity")
     name = (field_ref or {}).get("name")
-    if not entity or not name:
+    if not registry or not entity or not name:
         return None
-    rec = FIELD_REGISTRY.get(f"{entity}.{name}")
+    rec = registry.get(f"{entity}.{name}")
     if rec is None:
         return None
     if rec.get("kind") == "alias":
-        rec = FIELD_REGISTRY.get(rec.get("canonical"))
+        rec = registry.get(rec.get("canonical"))
     return rec
 
 
@@ -666,19 +710,23 @@ def get_state_phase(entity: str, dimension: str, state: str,
 
 def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None,
                             phase_table: dict | None = None,
-                            value: str | None = None) -> int | None:
+                            value: str | None = None,
+                            registry: dict | None = None) -> int | None:
     """字段 phase 下界 = min(各 populated_anchor 的 phase)，对照**当前**
     （Step 1 shift 之后）的相位表解析。
 
     语义规则（schema 第 4 节映射表）：谓词下界从字段生命周期推导，不存进字段。
     任一锚点不可解析 → 返回 None（消费方回退保守 P0，见 PREDICATE_RULES）。
 
+    registry 为本次运行的字段注册表（P2 派生、经 coverage_model 序列化到 S1）；
+    未传 → resolve_field 返回 None（保守「不可解析」）。
+
     value 参数为 value-level override 预留：超时类型这种"同字段多值、各值写入
     时点不同"的情况，未来可接一张 {(field_key, value): phase} 覆盖表，避免
     field-level min 丢失精度。当前未实现，默认走 field-level；接口先留好，
     解析器现在不必传 value。
     """
-    rec = resolve_field(field_ref)
+    rec = resolve_field(field_ref, registry)
     if rec is None:
         return None
     anchors = rec.get("populated_anchors") or []
@@ -695,7 +743,8 @@ def field_phase_lower_bound(field_ref: dict, dep_state_phase_map: dict | None,
 
 
 def predicate_phase_lower_bound(pred: dict | None, dep_state_phase_map: dict | None,
-                                phase_table: dict | None = None) -> int | None:
+                                phase_table: dict | None = None,
+                                registry: dict | None = None) -> int | None:
     """谓词 phase 下界：谓词类型 → 字段/状态锚点的映射规则（schema 第 4 节映射表）。
 
     与 field_phase_lower_bound 正交解耦：字段表回答"这个字段什么时候有值"，
@@ -707,21 +756,24 @@ def predicate_phase_lower_bound(pred: dict | None, dep_state_phase_map: dict | N
     always_true → 0；negation → operand 下界；conjunction → max(parts)；
     disjunction → min(parts)；disjunction_ref → PREDICATE_RULES 保守 P0，resolved=False。
     下界缺失的 part 按 0 处理（保守不抬升）；整体 None = 完全不可解析。
+
+    registry 为本次运行的字段注册表；透传给 field_phase_lower_bound。
     """
     if pred is None:
         return None
     t = pred.get("type")
 
     def _safe(p):
-        lb = predicate_phase_lower_bound(p, dep_state_phase_map, phase_table)
+        lb = predicate_phase_lower_bound(p, dep_state_phase_map, phase_table,
+                                         registry=registry)
         return lb if lb is not None else 0
 
     if t in ("field_equals", "field_range", "field_in"):
         return field_phase_lower_bound(pred.get("field"), dep_state_phase_map, phase_table,
-                                       value=pred.get("value"))
+                                       value=pred.get("value"), registry=registry)
     if t == "aggregate_count":
         return field_phase_lower_bound(pred.get("counter"), dep_state_phase_map, phase_table,
-                                       value=pred.get("value"))
+                                       value=pred.get("value"), registry=registry)
     if t == "time_limit":
         st = pred.get("start_state") or {}
         return get_state_phase(st.get("entity"), st.get("dimension"), st.get("state"),

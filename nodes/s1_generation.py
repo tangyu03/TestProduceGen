@@ -1052,8 +1052,12 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
     if constraint_predicate:
         dep_map = state.get("dep_state_phase_map", {})
         pt = state.get("phase_table", {})
+        # 字段注册表 = P2 按本次 P1 派生的（coverage_model._context.field_registry）。
+        # S1 是独立进程、不加载 P1，从序列化上下文读；缺失 → 保守（字段谓词不抬升）。
+        field_registry = (state.get("coverage_model", {})
+                          .get("_context", {}).get("field_registry") or {})
         pred_phase = predicate_phase_lower_bound(
-            constraint_predicate, dep_map, pt)
+            constraint_predicate, dep_map, pt, registry=field_registry)
         if pred_phase is not None and pred_phase > best_phase:
             best_phase = pred_phase
             best_basis = f"{base_basis} → bumped to P{pred_phase} (predicate {constraint_predicate.get('type')})"
