@@ -43,9 +43,8 @@
 适用 `action_verbs`（Step 0）与 `permission`（Step 0.5）。Step 1–5 中发现新动词/新角色/操作归属时，在当前 Step 位置插入一条追加调用（注释标明来源 Step），无需回到原 Step 修改。合并语义：`action_verbs` 追加去重；`permission` 同角色多次调用 operations 取并集。
 
 ```python
-# Step 4 发现新动词"归档"，回写 action_verbs
+# Step 4 发现新动词/新操作归属，在当前位置追加
 m.add_action_verbs(["归档"])
-# Step 4 发现新操作归属，回写 permission
 m.add_permission("机构管理员", ["归档项目"])
 ```
 
@@ -56,6 +55,8 @@ m.add_permission("机构管理员", ["归档项目"])
 ### Step 0：动词种子词表 → `m.set_prohibition_config()`
 
 `action_verbs`（必填）：去宾语、去重后的动词词根，同义簇只录代表词。禁止收录"操作/处理/进行/相关"等无判别力动词（会让粗筛失效）。`prohibit_keywords`（可选）：仅收录带量化/条件/复合动词组合的复杂否定短语，简单否定由框架自动派生。其余配置项（`negation_prefixes`/`transition_indicators`/`success_hints`）框架默认，通常无需设置。
+
+以下为词表**形态**示例，实际词表须从当前文档的转换动词提取：
 
 ```python
 m.set_prohibition_config({
@@ -70,15 +71,13 @@ m.set_prohibition_config({
 
 收录文档中全部角色，用 `add_role(id, name, readonly=False)` 登记。`id` 为局部标签 `r01…`（框架不重编号、直接落盘）；`name` 逐字取原文，即引用键。未作文档执行者的角色标 `readonly=True`。`system` 保留角色不入 `roles`，`role` 参数可直接引用字符串 `"system"`。转换 `role` 与 `add_permission` 的 `role` 一律用角色 `name`。
 
-`add_permission` 仅声明 `session/ui/file/query/config` 及不改状态的 crud；转换型操作由 `transitions.role` 承载，此处不声明。范围约束由授权类 BR 承载。
-
-□ `role` 名是否与用例 actor 一致？□ `operations` 中是否有转换型操作？（有则移除）
+`add_permission` 仅声明 `session/ui/file/query/config` 及不改状态的 crud；转换型操作由 `transitions.role` 承载，混入即移除。范围约束由授权类 BR 承载。
 
 ```python
 m.add_role("r01", "机构管理员")
 m.add_role("r02", "评审管理员")
 m.add_role("r03", "系统管理员", readonly=True)
-m.add_permission("机构管理员", ["编辑项目", "查看项目", "查询项目", "查看项目附件", "upload附件", "下载附件"])
+m.add_permission("机构管理员", ["编辑项目", "查看项目", "查询项目", "查看项目附件", "上传附件", "下载附件"])
 m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项目设置"])
 ```
 
@@ -96,7 +95,7 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 
 **operations**：扫描全部用户可执行操作（含通用功能/易用性章节）。`category` ∈ `session/ui/file/query/crud/config`。`expected_results` ≥1 逐字取原文可观察结果（含提示语）；原文未述以操作名短语补 + `inferred`。跨实体通用操作仅在最相关实体登记一次，`note.comment` 注"通用操作"。
 
-□ 操作的动词词根是否在 `action_verbs` 中？不在→回写。□ `expected_results` 是否逐字取原文？□ 同名操作是否已登记？跨实体通用操作是否仅登记一次？
+实体写完即扫：跨实体通用操作确认仅在最相关实体登记一次（无框架兜底，唯一防线）。
 
 ### Step 2：结构关系 → `m.add_structural()`
 
@@ -108,14 +107,12 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 |---|---|---|
 | **(a)** A 为 B 提供配置/模板/分类，B 独立创建 | reference | configuration_source |
 | **(b)** B 无独立创建，A 创建时 B 自动入 initial，每条 A 必有 B | composition | business_ownership |
-| **(c)** B 有独立创建流程，但 B 是 core 流程实体（`type=core` 且自身有 dependent），A 为其业务归属容器 | composition | business_ownership |
+| **(c)** B 有独立创建流程，B 是 core 流程实体（`type=core`），且 A 为其业务归属容器（容器证据：B 的归属字段继承自 A / 删除 A 须校验 B 存在性 / B 的生命周期挂靠 A 侧管理） | composition | business_ownership |
 | **(d)** B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source |
 
-**(c) 必须先于 (d) 判定**——两者前提相同（B 有独立创建流程），区别仅在于 B 是否为 core 流程实体（`type=core` 在 Step 1 已定，B 是否有 dependent 通读可查）。排除：A 仅为 B 的发起人/申请人/持有人/操作对象（B 生命周期独立、删除 A 不级联 B）→ 不构成"A 为其业务归属容器"，降判 (d)。
+**(c) 必须先于 (d) 判定**——两者前提相同（B 有独立创建流程），区别在于是否满足 (c)（`type=core` 在 Step 1 已定；容器证据从 B 的归属/删除约束条款可查）。排除：A 仅为 B 的发起人/申请人/持有人/操作对象（B 生命周期独立、删除 A 不级联 B）→ 不构成"A 为其业务归属容器"，降判 (d)。
 
 联动约束为**成套规则**：`composition ↔ business_ownership`、`reference ↔ configuration_source`，禁止拆分直觉。语义为"A 拥有 B"但 B 可独立创建、A 非容器 → 整行判 (d)。B 核心产出属第三方 C → 改 C→B（以 C 为 `frm`）。判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B→归 (d)。`management_dimension` 必须复核并在 `comment` 写结论。不确定标 `confidence=medium`。
-
-□ (c) 是否先于 (d) 判定？□ `relation_type` 与 `ownership_dimension` 是否成套取自同一行？□ `management_dimension` 是否已复核写 comment？□ M:N 方向是否按叙述顺序并注明？
 
 ### Step 3：分支维度 → `m.add_branch_dimension()`
 
@@ -129,8 +126,6 @@ m.add_branch_dimension(
 )
 ```
 
-□ 每维度是否将在 Step 5 有 ≥1 条 BR 含 `branch_dimension`？□ 隐式分支 `evidence` 是否可定位原文？□ `target_transition` 是否为局部 tid 且对应 `add_trans` 存在？
-
 ### Step 4：转换与因果
 
 #### 4.1 转换 → `m.add_trans()`
@@ -143,11 +138,19 @@ m.add_branch_dimension(
 
 **priority**：P0＝主流程必经（核心生命周期推进）；P1＝分支/回退/驳回等非主路径但业务必需；P2＝辅助性/低频/纯易用性；无法判定取 P1 + inferred。
 
-**direction（首条命中）**：①文档含"回退/返回/暂停/重启"→ 按文档；②`to` 或 `frm` 为侧挂状态 → lateral/resume；③`frm` 在 states 列表先于 `to` → forward；④后于 → backward；⑤均不满足 → inferred + comment 写依据。
+**direction（按序首条命中；comment 必注走了哪级判定）**：
 
-**分支穿透**：受分支维度影响的转换，`traits` 须含 `branch`，`note.branch_dimension` 填维度名，`expected_results` 用"若{维度}={值}，则{结果}"句式；对应 XC 的 desc 用 `分支[{维度}={值}]:{约束差异}` 前缀。
+⓪ `frm=None`（创建转换）→ `forward`，不再判其余各级。
 
-□ 每维度 `initial` 是否有 `frm=None` 创建转换？□ `action` 动词词根是否在 `action_verbs` 中？不在→回写。□ `direction` 走了哪级判定？（comment 注明）□ `frm` 是否为终态？□ 该转换是状态变化还是属性操作？（属性操作不得建状态转换）□ 受分支影响是否标 `branch` + 填 `branch_dimension`？
+① 文档以显式措辞描述本转换的方向语义 → 按语义类取值：回退至先前状态→backward；挂起至主线外→lateral；自挂起恢复→resume。按语义类归类文档措辞（不依赖具体词形）；措辞须描述本转换，文档他处出现的同类词不影响判定。
+
+② 侧挂只传播、不发明：`to` 为本维度已锚定侧挂状态 → lateral；`frm` 为 → resume（to 侧先判）。已锚定＝该状态在文档中被挂起/恢复类措辞直接命名，或本维度已有 lateral 转换指向它。语义近似侧挂但无锚点 → 默认走③④；确需侧挂语义 → 标 lateral + note 注明 inferred（无锚点推断，依据…），由 C13 对账兜底。
+
+③ `frm` 在 states 列表中先于 `to` → forward；④ 后于 → backward。序判与业务语义冲突（states 索引顺序不表达业务推进方向，如环形/循环状态机）→ 语义优先，comment 注明"序判{③|④}，语义{取值}（{冲突理由}）"。
+
+⑤ 均不满足（仅自环 frm==to 可达）→ forward + inferred，注明无状态迁移。
+
+**分支穿透**：受分支维度影响的转换，`traits` 须含 `branch`，`note.branch_dimension` 填维度名，`expected_results` 用"若{维度}={值}，则{结果}"句式；对应 XC 取 `xc_source="分支差异"`，desc 写约束差异内容。
 
 #### 4.2 preconditions → `precond(text, ptype, ref, note)`
 
@@ -162,15 +165,15 @@ m.add_branch_dimension(
 
 `state_ref` 的 ref 必填；`event_ref`/`constraint` 的 ref 必须缺省 `null`，禁止传对象。降级为 constraint 须在 note 注明理由。
 
-#### 4.3 自检（写入前完成）
+#### 4.3 自检（Step 4 收尾）
 
-局部检查（当前转换/实体范围内可判定）：非终态有出边；`frm` 必须非终态；分支覆盖（受分支影响的转换标 `branch` + 填 `branch_dimension`）；crud 操作 `note.comment` 回填对应局部标签（多个 `;` 分隔），无对应转换注明"无对应转换"及理由；前向引用一致性校验（Step 3 的 `target_transition` 局部 tid 必须在 Step 4有对应 `add_trans` 定义；引用了不存在的 tid → 补定义或修正引用）；回写特权扩展至 `action_verbs` 和 `permission`。
+写入前扫描：Step 3 的 `target_transition` 局部 tid 均有对应 `add_trans`（残缺即补定义或修正引用）；crud 操作 comment 已回填对应转换标签或注明"无对应转换"及理由。其余结构性检查（终态出边、frm 终态、分支覆盖）由框架校验承接。
 
 #### 4.4 因果 → `m.add_causal()`
 
 约束 ≠ 因果，门禁/前置不是因果，跨实体因果必过 4.5 鉴别。写入前扫描已添加的 `add_causal`，同 `(frm,to)` 去重仅升级：`desc/trigger` 以 `;` 合并，`evidence_transitions` 并集，`rollback` 取或。
 
-**来源（trigger_source 优先级：cross_entity > action > expected_results > desc > business_rule > bidi_coupling）**：
+**来源（trigger_source 优先级：cross_entity > action > expected_results > desc > business_rule > bidi_coupling；同 (frm,to) 多来源并存时，取优先级高者作为 trigger_source）**：
 
 | 来源 | trigger_source | trigger |
 |---|---|---|
@@ -183,30 +186,32 @@ m.add_branch_dimension(
 
 > 跨实体因果不在此声明：由 P2 依据本条因果派生 CO（enabler→dependent）确定性表达，`add_causal` 无 `causal_pairs` 参数。
 
-□ 同 `(frm,to)` 是否已存在？→ 命中则仅升级字段，不新增。□ 每条因果是否过 4.5 鉴别？
-
 #### 4.5 鉴别（每条因果写入前必过）
 
 - **Q1**：X 变是否直接致 Y 变？（Y 需额外操作→约束）
 - **Q2**：Y 侧 precondition 或 XC 已表达？→ 门禁不写入
 - **Q3**：上级作下级门禁→约束；下级全完成上级自动推进→因果
 
-判约束 → 标记 `[待写入: Step5 XC]`，`desc="由 Step 4.5 约束-因果鉴别确认…"`，Step 5 兑现。
+判约束 → 标记 `[待写入: Step5 XC]`，Step 5 以 `xc_source="4.5判"` 兑现。
 
 ### Step 5：约束补充
 
-`invalid_transitions`：仅文档明确禁止时生成。XC 四来源（分类由 desc 前缀约定承载，框架按前缀分类处理）：
+动笔前全文检索 `[待写入`，将 4.5 判约束逐条兑现为 XC。
 
-| 来源 | desc 前缀约定 |
-|---|---|
-| 镜像 | `镜像T-xxx precondition'…'` |
-| 4.5 判约束 | `由 Step 4.5 约束-因果鉴别确认…` |
-| 联动 | `联动:T-xxx执行后{实体}.{维度}由{旧值}变为{新值}` |
-| 分支差异 | `分支[{维度}={值}]:{约束差异}` |
+**invalid_transitions → `m.add_invalid()`**：仅文档明确禁止时生成。逐节扫描否定表述。
 
-框架对遗漏镜像自动补，但你应写全。
+**XC → `m.add_xc()`**：四来源，`xc_source` 必填；desc 只写语义内容，**不含来源前缀**（前缀由框架按 xc_source 生成并注入正式标签，此处出现正式编号即违规）：
 
-**BR 信号映射（两步独立判定）**：
+| xc_source | 触发 | target_transition |
+|---|---|---|
+| `镜像` | 转换持有跨实体 state_ref 前置条件 | 必填：持有该前置条件的转换 |
+| `4.5判` | 4.5 鉴别判为约束 | 可空；desc 须含承载该约束的 BR 局部标签 |
+| `联动` | 转换执行后联动实体状态变化（含初始化） | 必填：该实体上旧值→新值的转换 |
+| `分支差异` | 分支维度导致的约束差异 | 可缺省 |
+
+**XC 双向引用**：`source_transition`＝生产者（source_entity 上到达 `source_state` 的转换）；`target_transition`＝消费者，取值见上表。均用局部标签。框架对遗漏镜像自动补全，但应写全。
+
+**BR → `m.add_br()`**：两步独立判定。
 
 第一步 signal_type（优先级 field_constraint > restrictive > display > usability；无命中则不生成 BR）：`field_constraint`＝长度/格式/必填/唯一/默认值/取值范围；`restrictive`＝必须/不得/仅当/禁止/不能/不可/不超过；`display`＝显示/展示/页面提示；`usability`＝应提供/应支持/可。
 
@@ -214,7 +219,13 @@ m.add_branch_dimension(
 
 > 两步独立。例如"页面提示信息不能含有系统后台"→ signal_type=restrictive + category=display。
 
-□ 4.5 判约束的 `[待写入: Step5 XC]` 是否已兑现？□ 每维度是否 ≥1 条 BR 含 `branch_dimension`？□ 每条 BR 的 `signal_type` ∈ `{restrictive, usability, display, field_constraint}`？□ 每条 XC 的 desc 是否带来源前缀约定？□ 每条 BR 的 `signal_type` 与 `desc` 措辞是否对应？
+**constrained_entity（约束主体实体，按序首条命中；多实体 BR 必填）**＝谁的增删改被门禁：
+
+| 序 | BR 形态 | 取值 |
+|---|---|---|
+| ① | 增删改门禁（desc 含删除/修改/撤销/下发/归档/选入等操作 + 条件） | 操作的**对象实体**："专家有待评审项目时不可删除"→`E-ZJ`；"对不合格机构所属项目…从计划中去掉"→`E-PSJH`（去掉是计划侧操作） |
+| ② | 对称规则（UI/结构/通知，无操作主体） | 任一 involved 实体，note.comment 注明"代表实体" |
+| ③ | 单实体 BR | 不填，`add_br` 自动派生唯一元素 |
 
 ---
 
@@ -244,7 +255,7 @@ m.add_permission(role, operations)         # role 用 name
 m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, operations)
 # id: E-{2~6字母缩写}（核心词拼音首字母大写，冲突追加序号）
 # dims 元素: {"dimension_name","states","initial","terminal","inferred"?,"note"?}
-#   states 元素: 一律纯字符串；推断状态列入维度级 "inferred"，依据写入维度级 "note"
+#   states 一律纯字符串；推断状态列入 "inferred"，依据写入 "note"
 m.add_structural(frm, to, relation_type, cardinality, ownership_dimension, desc,
                  confidence="high", note=None)                # frm/to 用实体 id
 m.add_branch_dimension(dimension, entity, values, impact_scope, evidence, branches)
@@ -255,9 +266,13 @@ m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None,
              rollback_propagation=False, confidence="high", note=None)  # frm/to 用实体 id
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity,
-         target_dimension, target_condition, desc, source_ref)  # 分类由 desc 前缀承载
-m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None)
-# enforcement 由框架推导，此处不传
+         target_dimension, target_condition, desc, source_ref,
+         target_transition=None, xc_source="镜像")
+# xc_source ∈ {镜像, 4.5判, 联动, 分支差异}：来源分类，desc 前缀由框架按此生成
+# target_transition＝消费者转换，必填性见 Step 5 来源表
+m.add_br(bid, category, desc, entities_involved, source_ref, signal_type,
+         note=None, constrained_entity=None)
+# constrained_entity：谁的增删改被门禁（多实体必填，判定见 Step 5）
 ```
 
 **辅助构造**：
@@ -271,7 +286,7 @@ precond(text, ptype, ref=None, note=None)
 state_ref(entity, dimension, state)
 ```
 
-**编号规则**：局部标签 `tid=t01…`、`xc=x01…`、`br=b01…`、`it=i01…`、角色 `id=r01…`（小写无横线）。角色 id 不做编号移交、直接落盘（schema 漂移#2：`R-xxx` 移交未实现），仅 `name` 参与引用。实体 ID `E-{2~6 字母缩写}`。
+**编号规则**：局部标签 `tid=t01…`、`xc=x01…`、`br=b01…`、`it=i01…`、角色 `id=r01…`（小写无横线）。角色 id 不做编号移交、直接落盘，仅 `name` 参与引用。实体 ID `E-{2~6 字母缩写}`。
 
 **inferred 标注**：推断内容必须标 `inferred=True` 并写依据。推断状态值 → 维度级 `inferred` 列表 + 维度级 `note`；其余 → `note={"inferred": True, "comment": "..."}`；`attr`/`op` → `N(inferred=True, comment="...")`。XC/IT 无 note 字段，由源转换/源规则的标注继承。
 
@@ -301,6 +316,7 @@ m.add_trans(
     direction="forward",
     priority="P0",
     source_ref="4.7.1 项目选入",
+    note={"comment": "direction判③frm待选入先于to已选入"},
 )
 
 # 隐式初态标注（add_entity 的 state_dimensions 片段）
@@ -318,8 +334,27 @@ m.add_trans(
                       "若评审方式=简易评审，则直接项目状态变为已评审"],
     traits=["branch"], direction="forward", priority="P0",
     source_ref="4.8.1 评审方式",
-    note={"branch_dimension": "评审方式"},
+    note={"branch_dimension": "评审方式",
+          "comment": "direction判③frm评审中先于to已评审"},
 )
+
+# 多实体 BR 的 constrained_entity（约束主体＝操作对象实体）
+# 文档片段："专家有待评审或者评审中的项目时不可以删除。"
+m.add_br(bid="b09", category="validation",
+         desc="专家有待评审或评审中项目时不可以删除",
+         entities_involved=["E-ZJ", "E-PSJH"],
+         constrained_entity="E-ZJ",            # 删除门禁的对象是专家
+         source_ref="4.10（3）", signal_type="restrictive")
+
+# 镜像 XC：source＝生产者，target＝消费者，分类交 xc_source，前缀框架生成
+m.add_xc(xid="x03", source_entity="E-PSJH",
+         source_transition="t27", source_state="结束",   # t27 使计划到达"结束"
+         target_entity="E-XM", target_dimension="项目状态",
+         target_transition="t07",              # t07 持有指向 E-PSJH 的跨实体前置条件
+         target_condition="待归档",
+         xc_source="镜像",
+         desc="precondition'评审计划状态由已完成变为结束'",   # 只写内容，不写前缀
+         source_ref="4.5（5）")
 ```
 
 ---

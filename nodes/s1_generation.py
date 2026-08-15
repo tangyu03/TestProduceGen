@@ -221,6 +221,9 @@ def _make_given(target: str, state: str, description: str = "",
     - "rule"       → `{desc}`                  （规则上下文，desc=被测 BR 原文）
     - "rule_noise" → 渲染跳过                  （空泛占位 "…相关数据已准备"，无测试价值）
     - "restatement"→ `{desc}`                  （对象实例复述，desc 已含完整句子形态）
+    - "field_data" → 渲染挂 When 事件步子行  （创建/编辑表单字段清单，desc 由 P1
+                                                 entity_details 派生，见 _field_data_given；
+                                                 state 恒为空，非前置条件不在 Given 渲染）
     """
     return {"target": target, "state": state, "description": description,
             "given_type": given_type}
@@ -2443,6 +2446,43 @@ def _creation_proc_phase(creation_to_ids: list | None, prior_procs: list | None)
     return best
 
 
+# 表单录入类 CRUD 动词（领域无关，引擎词汇，定位同 _GENERIC_CRUD_VERBS）。
+# 只有创建/编辑类操作面向表单录入 → 补"字段数据上下文"Given；删除/查询/确认
+# 等无表单，不补。业务特定动词不进此表（由 operation_category/操作名携带）。
+_FORM_ENTRY_CRUD_VERBS = ("新增", "创建", "编辑", "修改")
+
+
+def _field_data_given(cm: dict, entity: str) -> dict | None:
+    """从 entity_details 派生「字段数据上下文」Given（创建/编辑表单的字段清单）。
+
+    数据驱动：字段名与 desc **全文**原样来自 P1 的 entity_details.attributes，
+    无领域词表、无裁剪启发式。系统自动赋值字段（如申请部门 desc"根据登录用户
+    自动获取申请人部门"）同样列入——这正是创建/编辑用例里用户应知晓的字段语义。
+    实体缺失或无 attributes 返回 None（不硬生成空行）。
+
+    ``state`` 置空：字段数据不是业务状态，S3 Guard 1 逐 given 扫 state 做状态
+    前置匹配时不得把它当 from_state（见 s3_dependency.py:706）。
+    """
+    for ed in cm.get("_context", {}).get("entity_details", []) or []:
+        if not isinstance(ed, dict) or ed.get("id") != entity:
+            continue
+        parts: list[str] = []
+        for attr in ed.get("attributes", []) or []:
+            if not isinstance(attr, dict) or not attr.get("name"):
+                continue
+            desc = str(attr.get("desc", "") or "").strip()
+            parts.append(f"{attr['name']}({desc})" if desc else attr["name"])
+        if not parts:
+            return None
+        return _make_given(
+            target=entity,
+            state="",
+            description="；".join(parts),
+            given_type="field_data",
+        )
+    return None
+
+
 def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None = None) -> list[dict]:
     """Generate Type5 (crud_operation) procedures with retention filter.
 
@@ -2526,6 +2566,12 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                     creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
                     if creation_phase is not None and creation_phase > ve_phase:
                         ve_phase = creation_phase
+                # 字段数据上下文（同非 VE 分支）：VE 的字段清单属原实体。
+                if op_name.startswith(_FORM_ENTRY_CRUD_VERBS):
+                    fg = _field_data_given(
+                        state["coverage_model"], ve.get("original_entity") or entity)
+                    if fg:
+                        givens = givens + [fg]
                 when = _make_when(
                     target=ve_name,
                     event=_derive_business_event(op_name),
@@ -2606,6 +2652,14 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                     target=entity, state="存在",
                     description="操作入口可用",
                 )]
+            # 字段数据上下文：创建/编辑表单的字段清单（P1 entity_details 派生）。
+            # 数据驱动、无领域词；系统自动赋值字段（申请部门"根据登录用户自动获
+            # 取…"）一并列入，补全表单语义。删除/查询/确认等无表单操作不补。
+            # 追加在后：保持 givens[0]（状态前置）不变，S3 Guard 依 givens[0]。
+            if op_name.startswith(_FORM_ENTRY_CRUD_VERBS):
+                fg = _field_data_given(state["coverage_model"], entity)
+                if fg:
+                    givens = givens + [fg]
             when = _make_when(
                 target=entity,
                 event=_derive_business_event(op_name),
@@ -2869,6 +2923,8 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
         desc = br.get("description", "")
         entities_raw = br.get("entities_involved", br.get("entities", ""))
         br_entities = _resolve_entity_names(entities_raw, entity_name_map)
+        # 受约束实体声明（C24 保证合法）：crud/negative 宿主选择优先收窄到它
+        constrained = br.get("constrained_entity")
 
         candidates = []
 
@@ -2914,6 +2970,10 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
         br_verbs = _extract_constrained_ops(desc, _get_action_verbs(cm))
         crud_eos = [eo for eo in eo_by_type.get("crud_operation", [])
                     if eo["entity"] in br_entities]
+        # constrained_entity 声明优先：多实体 BR 收窄到受约束实体的 crud EO。
+        # 受约束实体无 crud EO 时保持空集 → 本分支自然不产出候选（不再误挂旁实体）。
+        if constrained and constrained in br_entities:
+            crud_eos = [eo for eo in crud_eos if eo["entity"] == constrained]
         if crud_ops:
             has_crud = any(op in desc for op in crud_ops)
         else:
@@ -2938,8 +2998,11 @@ def _classify_business_rules(state: AgentState, indices: dict) -> list[dict]:
 
         # 4. negative_test
         if re.search(r'不可.*选择|不可.*删除|不可.*修改|不可.*操作|不可.*发布|不允许.*删除|不允许.*操作|不能.*删除|不能.*混合', desc):
-            matching_it = next((ro for ro in ro_by_type.get("invalid_transition", [])
-                                if ro["entity"] in br_entities), None)
+            its = ro_by_type.get("invalid_transition", [])
+            if constrained and constrained in br_entities:
+                matching_it = next((ro for ro in its if ro["entity"] == constrained), None)
+            else:
+                matching_it = next((ro for ro in its if ro["entity"] in br_entities), None)
             candidates.append({
                 "category": "negative_test", "host_proc_type": 6,
                 "host_ro_id": matching_it["id"] if matching_it else None,

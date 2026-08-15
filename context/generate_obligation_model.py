@@ -1733,7 +1733,7 @@ def classify_xc(xc):
     """
     desc = xc.get("desc", "")
     # ── Deterministic keyword matching (primary) ──
-    if desc.startswith("镜像 T-") or desc.startswith("由 Step 4.6 约束-因果鉴别确认"):
+    if desc.startswith("镜像 T-") or desc.startswith("由 Step 4.5 约束-因果鉴别确认"):
         # 镜像默认门禁; 但镜像 desc 若显式带因果触发语义(触发/联动/自动/初始化),
         # 其语义是联动触发而非门禁 —— 与同规则联动对是同一因果的重复建模。
         # 归 auto lane, 让 dedup 按同签名合并, 消除洞4 跨 causal_type 冲突。
@@ -2439,6 +2439,7 @@ for br in p1_br:
         "type": "business_rule",
         "constraint_id": br["id"],
         "entities_involved": br.get("entities_involved", []),
+        "constrained_entity": br.get("constrained_entity"),
         "category": br.get("category"),
         "signal_type": br.get("signal_type"),
         "description": br.get("desc"),
@@ -2492,7 +2493,7 @@ for xc in p1_xc:
             cat = "validation"  # safe default
 
     # coverage_priority: 镜像/Step4.6 确认类 -> high; else medium
-    if desc.startswith("镜像 T-") or desc.startswith("由 Step 4.6 约束-因果鉴别确认"):
+    if desc.startswith("镜像 T-") or desc.startswith("由 Step 4.5 约束-因果鉴别确认"):
         cp = "high"
     else:
         cp = "medium"

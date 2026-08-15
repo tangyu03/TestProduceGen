@@ -5,6 +5,35 @@
 
 ---
 
+## 2026-08-15 ㊽ add_xc 实装 xc_source + assemble 统一 desc 前缀（修双前缀）+ C25 兜底 + 已删清单对照表
+
+**决策**（用户定调：P2 过期判据一并修正；数据迁移只迁 struct_srs，golden 数据文件冻结靠向后兼容）：`add_xc` 加 `xc_source` 参数（枚举 `XC_SOURCES`=镜像/4.5判/联动/分支差异），desc 契约改为**只写语义内容、不含来源前缀**；assemble `_assign_ids` 内 `_rebuild_xc_desc` 按 `xc_source` 用 `XC_DESC_TPL` 重建最终 desc（前缀 + 注入正式标签）。旧数据（golden 冻结）缺省 `xc_source=None` 时用 `XC_LEGACY_RE` 从旧 desc 前缀反推来源并剥掉残留 `T-tXX` 局部标签。
+
+**根治的两个脏数据**：
+- **T-T-019 双前缀**（golden `CASC-STEC-PT017.py:2746` 写 `镜像T-t13 …`）：`_LOCAL` 只匹配 `t13` 留 `T-` → 拼出 `镜像T-T-019`。现在框架剥前缀后按 `镜像 {label} {desc}` 重建 → `镜像 T-019 …`（label 注入 target_transition，与 C04 同源）。
+- **P2 过期前缀判据永不命中**：`由 Step 4.6`（数据一直是 4.5）→ 改 `4.5`；镜像/联动重建后自带空格（`镜像 T-`/`联动: T-`），P2 判据直接命中 → 4.5判 XC 的 coverage_priority 由 medium 升 high。
+
+**C23 改判**：`desc.startswith(XC_DESC_PREFIXES)` → `x.get("xc_source") not in XC_SOURCES`（desc 前缀现由框架生成，不再作为来源判定依据）。
+
+**C25 新增**（改写后盲区闭合）：镜像类 XC 的 `target_transition` 非空——镜像记录「哪个转换持有跨实体前置条件」，空即漏登记。struct x04（评审计划超时结束→待归档）原缺 target_transition，迁移时补 t07（与 x03 同消费者锚）。
+
+**验证结果**：verify_schema SCHEMA/REVERSE OK；struct/golden assemble 0 error、C25 零命中；golden XC-001 双前缀修复且数据文件未动；P2 self-check 全过、4.5判 cp 升 high；grep 无 `T-T-`/`镜像T-`/`联动:T-` 残留。★注意：镜像 desc 的 {label} 取自 `target_transition`（若空回退 source_transition）、联动取 `source_transition`（生产者）——维护 `XC_DESC_TPL`/`XC_LEGACY_RE` 必须三表同步（constants.py + 模板注释）。
+
+**维护对照表（防「已删清单项」的防线静默消失）**：prompt.md 曾把下列清单项从 prompt 内移除，各自有框架兜底校验兜着；裁剪/调整校验前先查此表，缺兜底项明示为唯一防线：
+
+| 已删 prompt 清单项 | 兜底校验 |
+|---|---|
+| frm 不得为终态（Step 4.1 速查） | C02（state_structure）/ C13（direction） |
+| 终态有出边则非终态（Step 4.1 速查） | C02 / C13 |
+| 分支穿透三覆盖（Step 4.3 自检） | C05（branch_penetration）/ C20 |
+| crud 回填对应转换或无对应转换（Step 4.3 自检） | C12 |
+| 同起讫转换动作一致性 | C09 |
+| 跨实体通用操作仅登记一次（Step 1 写完即扫） | **无框架兜底**（唯一防线，明示） |
+
+**判据速记**：desc 前缀=框架产物非 LLM 输入；来源判定只看 `xc_source`；新来源分类必须三表同步（`XC_SOURCES`+`XC_DESC_TPL`+`XC_LEGACY_RE`）否则旧数据反推不到。
+
+---
+
 ## 2026-08-14 ㊼ 正式关闭 transition_upstream_map 双键索引行为变更（正向论证：新方案劣于现状）
 
 **决策**：把 `to_by_tid`/`trans_id_to_proc_ids` 改按 `id`（双键）索引的待定项**正式关闭，不做**。S3「1. Transition upstream」块保持按 transition_id 索引的惰性 no-op，加显式守卫注释 + 重新激活路径（s3_dependency.py:241-262）。

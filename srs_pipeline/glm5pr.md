@@ -338,6 +338,8 @@ m.add_branch_dimension(
 
 框架对遗漏镜像自动补，但你应写全。
 
+**target_transition（XC 消费者侧；镜像/联动必填）**：`source_transition` 一律填**生产者**转换（source_entity 上到达 `source_state` 的转换）；`target_transition` 填**消费者**转换——镜像/4.5 判约束填真正持有该跨实体 state_ref 前置条件的转换，联动填 target_entity 上由旧值变为新值的转换。局部标签前向引用同 `source_transition`。C04 补镜像会自动反查生产者、填当前转换，但手动 XC 应写全。分支差异可缺省。
+
 **BR 信号映射（两步独立判定）**：
 
 第一步 signal_type（优先级 field_constraint > restrictive > display > usability；无命中则不生成 BR）：
@@ -355,7 +357,9 @@ m.add_branch_dimension(
 
 > **authorization 类 BR 的角色维度**：`entities_involved` 仅填实体 ID，无法表达角色。authorization 类 BR（如"机构管理员只能查看本机构的项目"）的角色信息放入 `note.role` 字段（单角色字符串或多角色列表），`entities_involved` 填被操作的业务实体 ID。
 
-□ 4.5 标记的 `[待写入: Step5 XC]` 已全部生成对应 XC；□ 每维度 ≥1 条 BR 含 `note.branch_dimension`；□ authorization 类 BR 的 note 含 role 字段。
+> **constrained_entity（多实体 BR 必填）**：受该规则约束的实体 = 谁的增删改被门禁。增删改类 BR → subject 为增删改操作对象实体（如"专家…不可以删除"→ E-ZJ）；对称规则（UI/结构/通知）→ 取任一 involved 实体作代表，`note.comment` 注明"代表实体"；单实体 BR 由 `add_br` 自动派生，不填。
+
+□ 4.5 标记的 `[待写入: Step5 XC]` 已全部生成对应 XC；□ 每维度 ≥1 条 BR 含 `note.branch_dimension`；□ authorization 类 BR 的 note 含 role 字段；□ 每条多实体 BR 显式填 `constrained_entity`（单实体不填由框架派生）。
 
 ---
 
@@ -425,10 +429,15 @@ m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None,
              rollback_propagation=False, confidence="high", note=None)  # frm/to 用实体 id
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity,
-         target_dimension, target_condition, desc, source_ref)  # 分类由 desc 前缀承载
-m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None)
+         target_dimension, target_condition, desc, source_ref,
+         target_transition=None)  # 分类由 desc 前缀承载；target_transition=消费者转换（持有跨实体前置条件的转换/联动时状态变化转换）
+m.add_br(bid, category, desc, entities_involved, source_ref, signal_type,
+         note=None, constrained_entity=None)
 # enforcement 由框架推导，此处不传
 # authorization 类 BR：note 含 "role" 字段表达角色维度
+# constrained_entity：运行受该规则约束的实体（谁的增删改被门禁）。判定写死：
+#   增删改类 BR → subject 为增删改操作对象实体；对称规则（UI/结构/通知）→ 取任一
+#   involved 实体并在 note.comment 注明"代表实体"；单实体 BR 由 add_br 自动派生。
 ```
 
 **辅助构造**：

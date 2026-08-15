@@ -1,10 +1,11 @@
 """V08 相位一致性（重构版）。
 
 语义约定（case_spec v1.1+）：
-- transitions[*].direction ∈ {forward, backward, lateral, self}
+- transitions[*].direction ∈ {forward, backward, lateral, resume, self}
     forward   主链推进：相位必须严格递增（output 与 spec 派生相位中都成立）
     backward  合法回退（选出/解锁/归档回退/重启/提试用）：豁免相位检查，须携带 note
     lateral   侧挂状态入口（暂停等主链外状态）：豁免相位检查，须携带 note
+    resume    从侧挂状态恢复回主链（重启评审计划/解锁用户等，P1 直出）：豁免相位检查，须携带 note
     self      自环：豁免相位检查
 - 相位派生规则（与 phase_mapping.auto_derived 对齐）：
     forward/lateral 边 BFS 传播深度；backward/self 仅用于可达性补全；
@@ -25,15 +26,19 @@ from models.schema import ObligationType
 
 CHECK_ID = "V08"
 
-_EXEMPT_DIRECTIONS = {"backward", "lateral", "self"}
+_EXEMPT_DIRECTIONS = {"backward", "lateral", "resume", "self"}
 _DYNAMIC_PREFIX = "$"
 STRICT_FORWARD = True          # True: forward 要求严格递增(>)；False: 仅禁止倒退(>=)
 
 
 def _direction_of(t: dict) -> str:
-    """解析迁移方向：显式 direction > 旧字段 regression_allowed > 默认 forward。"""
+    """解析迁移方向：显式 direction > 旧字段 regression_allowed > 默认 forward。
+
+    P1 直出的 direction 含 resume(从侧挂状态恢复回主链，如 重启评审计划/解锁用户)，
+    与 backward 一样豁免相位单调检查。不能识别的取值退回 forward(safe default)。
+    """
     d = str(t.get("direction") or "").strip().lower()
-    if d in {"forward", "backward", "lateral", "self"}:
+    if d in {"forward", "backward", "lateral", "resume", "self"}:
         return d
     if t.get("regression_allowed"):
         return "backward"
@@ -212,7 +217,8 @@ def _machines_from_model(model: dict) -> dict:
                     {"id": t["id"],
                      "from": t.get("from") or "(初始)",
                      "to": t.get("to", ""),
-                     "direction": t.get("direction") or "forward"}
+                     "direction": t.get("direction") or "forward",
+                     "note": t.get("note")}
                     for t in trans],
             }
     return machines
@@ -259,7 +265,7 @@ def check(output: dict, spec: dict) -> CheckResult:
             if t.get("id") in anomaly_fw:
                 hygiene.append(
                     f"{name}.{t.get('id')}: 环状机 forward 边（派生相位不递增），"
-                    f"豁免单调检查，建议补充 note")
+                    f"豁免单调检查" + ("" if t.get("note") else "，建议补充 note"))
                 continue
             if f in pmap and to in pmap:
                 violates = pmap[to] <= pmap[f] if STRICT_FORWARD else pmap[to] < pmap[f]

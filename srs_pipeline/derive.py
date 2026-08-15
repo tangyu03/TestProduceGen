@@ -45,21 +45,37 @@ def infer_direction(dim, frm, to, lateral_states=()):
     return None
 
 def gen_xc_mirrors(model, start_seq=1):
-    """Step5 XC 来源①：跨实体 state_ref 前置条件 → 镜像 XC（纯机械生成）。"""
-    out, covered = [], {x["source_transition"] for x in model.cross_entity}
+    """Step5 XC 来源①：跨实体 state_ref 前置条件 → 镜像 XC（纯机械生成）。
+
+    与 validate.py C04 同源：覆盖判定按 target_transition（消费者）去重，
+    source_transition 反查生产者。本函数当前未被调用，保持与 C04 一致防漂移。
+    """
+    out, covered = [], {x["target_transition"] for x in model.cross_entity
+                        if x.get("target_transition")}
+    covered_refs = {(x["source_entity"], x["source_state"], x["target_entity"])
+                    for x in model.cross_entity}
     for t in model.transitions:
         if t["id"] in covered:
             continue
         for p in t["preconditions"]:
             if p["type"] == "state_ref" and p.get("ref") \
-                    and p["ref"]["entity"] != t["entity"]:
+                    and p["ref"]["entity"] != t["entity"] \
+                    and (p["ref"]["entity"], p["ref"]["state"], t["entity"]) \
+                        not in covered_refs:
+                producer = next((tp["id"] for tp in model.transitions
+                                 if tp["entity"] == p["ref"]["entity"]
+                                 and tp["dimension"] == p["ref"]["dimension"]
+                                 and tp["to"] == p["ref"]["state"]), None)
                 out.append({
                     "id": f"XC-{start_seq + len(out):03d}",
-                    "source_entity": p["ref"]["entity"], "source_transition": t["id"],
+                    "source_entity": p["ref"]["entity"],
+                    "source_transition": producer or t["id"],
                     "source_state": p["ref"]["state"], "target_entity": t["entity"],
+                    "target_transition": t["id"],
                     "target_dimension": t["dimension"],
                     "target_condition": f"状态={t['from']}",
-                    "desc": f"镜像 {t['id']} precondition '{p['text']}'",
+                    "desc": f"precondition'{p['text']}'",
+                    "xc_source": "镜像",
                     "source_ref": t["source_ref"]})           # 输入契约：继承宿主
                 break
     return out

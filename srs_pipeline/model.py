@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from .builders import N
 from .constants import LOCAL_LABEL as _LOCAL
+from .constants import XC_DESC_TPL, XC_LEGACY_RE, XC_SOURCES
 from .escape import esc
 from .schema import validate_llm
 
@@ -194,31 +195,41 @@ class DomainModel:
 
     def add_xc(self, xid, source_entity, source_transition, source_state,
                target_entity, target_dimension, target_condition, desc,
-               source_ref):
+               source_ref, target_transition=None, xc_source=None):
+        # xc_source=None（缺省）＝未显式传：assemble 从旧 desc 前缀反推来源
+        # （golden 冻结兼容）；新数据一律显式传（prompt Step 5 必填）。
         validate_llm("xc", {"xid": xid, "source_entity": source_entity,
                             "source_transition": source_transition,
                             "source_state": source_state,
                             "target_entity": target_entity,
+                            "target_transition": target_transition,
                             "target_dimension": target_dimension,
                             "target_condition": target_condition,
-                            "desc": desc, "source_ref": source_ref})
+                            "desc": desc, "source_ref": source_ref,
+                            "xc_source": xc_source})
         self.cross_entity.append({
             "id": xid, "source_entity": source_entity,
             "source_transition": source_transition, "source_state": source_state,
-            "target_entity": target_entity, "target_dimension": target_dimension,
+            "target_entity": target_entity, "target_transition": target_transition,
+            "target_dimension": target_dimension,
             "target_condition": target_condition, "desc": esc(desc),
+            "xc_source": xc_source,
             "source_ref": esc(source_ref)})     # 输入契约：XC 无 note 字段
         return self
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, note=None):
+               signal_type, note=None, constrained_entity=None):
         validate_llm("br", {"bid": bid, "category": category, "desc": desc,
                             "entities_involved": entities_involved,
                             "source_ref": source_ref, "signal_type": signal_type,
-                            "note": note})
+                            "note": note, "constrained_entity": constrained_entity})
+        # 单实体 BR 的受约束实体是唯一元素：确定性派生（LLM 缺失/多实体时由 C24 兜底）
+        if constrained_entity is None and len(entities_involved) == 1:
+            constrained_entity = entities_involved[0]
         self.business_rules.append({
             "id": bid, "category": category, "desc": esc(desc),
             "entities_involved": list(entities_involved),
+            "constrained_entity": constrained_entity,
             "enforcement": derive_enforcement(signal_type, desc),
             "source_ref": esc(source_ref), "signal_type": signal_type,
             "note": _esc_note(note)})
@@ -418,7 +429,10 @@ class DomainModel:
 
         for x in self.cross_entity:
             x["source_transition"] = rw(x["source_transition"])
-            x["desc"] = rw(x["desc"])
+            x["target_transition"] = rw(x["target_transition"])
+            # desc 不直接 rw：改为按 xc_source 重建（前缀 + 注入正式标签），
+            # 根治手写 "T-tXX" 双前缀（T-T-019）与 desc 残留局部标签。
+            x["desc"] = self._rebuild_xc_desc(x)
         for r in self.transition_relations:
             r["evidence_transitions"] = [rw(e) for e in r["evidence_transitions"]]
             r["desc"], r["trigger"] = rw(r["desc"]), rw(r["trigger"])
@@ -464,3 +478,29 @@ class DomainModel:
                         f"非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）",
                         stacklevel=2,
                     )
+
+    def _rebuild_xc_desc(self, x):
+        """按 xc_source 重建 XC desc：前缀（XC_DESC_TPL）+ 注入正式标签。
+
+        新数据（xc_source 显式传）→ desc 已是纯语义内容；旧数据（None）→ 用
+        XC_LEGACY_RE 从旧 desc 前缀反推来源并剥掉前缀+残留"T-tXX"标签（golden
+        冻结兼容）。label 注入：镜像/分支差异取 target_transition（消费者），
+        联动取 source_transition（生产者）；缺省回退另一侧，再空则无 label。"""
+        src = x.get("xc_source")
+        semantic = x["desc"]
+        if src is None:
+            for cand, pat in XC_LEGACY_RE:
+                if pat.match(semantic):
+                    src, semantic = cand, pat.sub("", semantic)
+                    break
+            src = src or "镜像"                     # 兜底：无可识别前缀按镜像
+        label = x.get("target_transition") or x.get("source_transition") or ""
+        if src == "联动":
+            label = x.get("source_transition") or x.get("target_transition") or ""
+        x["xc_source"] = src
+        tpl = XC_DESC_TPL.get(src)
+        if not tpl:
+            warnings.warn(f"XC {x['id']} xc_source={src!r} 无模板，desc 原样保留",
+                          stacklevel=2)
+            return semantic.strip()
+        return tpl.format(label=label, desc=semantic.strip())

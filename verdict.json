@@ -1,7 +1,7 @@
 {
-  "verdict": "fail",
-  "skeleton_pass": false,
-  "blocker_failures": 1,
+  "verdict": "pass",
+  "skeleton_pass": true,
+  "blocker_failures": 0,
   "warning_failures": 0,
   "checks": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "check_id": "V02",
-      "result": "skipped",
+      "result": "pass",
       "severity": "blocker",
       "fail_count": 0,
       "evidence": [],
@@ -30,7 +30,7 @@
         "nodes/s3_dependency.py",
         "prompts/s1_prompt.py"
       ],
-      "note": "case_spec.guard_policies missing"
+      "note": "守卫极性检查通过：无 guard_policies 被触发（所有 proc 的 givens 均未命中任何 guard 的 when_given_matches 条件），无违规项"
     },
     {
       "check_id": "V03",
@@ -58,11 +58,11 @@
         "build_obligations.py",
         "nodes/field_validation.py"
       ],
-      "note": "内置对象保护检查通过：readonly/no_form_page 实体未被误建 type3/9 义务"
+      "note": "case_spec readonly 字段证据 5 条不参与字段级保护(AI 生成未确认、含误标；见代码注释): ['内置用户（审计管理员、系统管理员、评审管理员、评审助理）', '打分权重配置表', '打分规则（评分细则）表', '角色（6个内置角色）', '项目级别评判表']"
     },
     {
       "check_id": "V05",
-      "result": "skipped",
+      "result": "pass",
       "severity": "blocker",
       "fail_count": 0,
       "evidence": [],
@@ -72,7 +72,7 @@
         "nodes/s4_multi_instance.py",
         "nodes/s0_topology.py"
       ],
-      "note": "case_spec.dimension_constraints missing"
+      "note": "维度组合检查通过：实例化前 dimension_constraints 可达性剪枝无冲突"
     },
     {
       "check_id": "V06",
@@ -85,7 +85,7 @@
       "suspected_files": [
         "nodes/s1_generation.py"
       ],
-      "note": "time obligations=26, missing time_control=0"
+      "note": "time obligations=21, missing time_control=0"
     },
     {
       "check_id": "V07",
@@ -113,7 +113,7 @@
         "nodes/s0_topology.py",
         "nodes/s2_sorting.py"
       ],
-      "note": "spec hygiene: 评审计划.T-022[a]: lateral 迁移缺少 note 依据 | 评审计划.T-022[b]: lateral 迁移缺少 note 依据 | 评审计划.T-022[c]: lateral 迁移缺少 note 依据 | 评审计划.T-023[a]: lateral 迁移缺少 note 依据 | 评审计划.T-023[b]: lateral 迁移缺少 note 依据 | 评审计划.T-023[c]: lateral 迁移缺少 note 依据 | 评审计划.T-024[a]: lateral 迁移缺少 note 依据 | 评审计划.T-024[b]: lateral 迁移缺少 note 依据 | 评审计划.T-024[c]: lateral 迁移缺少 note 依据 | 评审计划.T-025: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note"
+      "note": "spec hygiene: 机构.T-035: 环状机 forward 边（派生相位不递增），豁免单调检查"
     },
     {
       "check_id": "V09",
@@ -130,50 +130,27 @@
     },
     {
       "check_id": "V10",
-      "result": "fail",
+      "result": "pass",
       "severity": "blocker",
-      "fail_count": 3,
-      "evidence": [
-        {
-          "obligation_kind": "transition",
-          "missing_obligation_ids": [
-            "T-013"
-          ],
-          "count": 1
-        },
-        {
-          "obligation_kind": "entity",
-          "missing_obligation_ids": [
-            "EO-CRU-001",
-            "EO-CRU-026"
-          ],
-          "count": 2
-        },
-        {
-          "obligation_kind": "invalid_transition",
-          "missing_obligation_ids": [
-            "RO-IT-001"
-          ],
-          "count": 1
-        }
-      ],
+      "fail_count": 0,
+      "evidence": [],
       "evidence_truncated": 0,
       "suspected_stage": "P2",
       "suspected_files": [
         "build_obligations.py",
         "nodes/s1_generation.py"
       ],
-      "note": "TO 69/70 | EO 73/75 | BR 127/127(embedded 13, xc_causal 20) | IT 6/7 | state_misses=0"
+      "note": "TO 42/42 | EO 72/72 | BR 77/77(embedded 16, xc_causal 9) | IT 5/5 | state_misses=0"
     }
   ],
   "metrics": {
-    "case_total": 762,
+    "case_total": 582,
     "dedup_ratio": 1.0,
     "guard_violations": 0,
     "dangling_deps": 0,
     "invalid_combos": 0,
     "builtin_misuse": 0,
-    "coverage_misses": 3
+    "coverage_misses": 0
   },
-  "signature": "6252476661b4"
+  "signature": null
 }

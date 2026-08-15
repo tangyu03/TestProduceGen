@@ -1,0 +1,181 @@
+{
+  "verdict": "fail",
+  "skeleton_pass": false,
+  "blocker_failures": 3,
+  "warning_failures": 0,
+  "checks": [
+    {
+      "check_id": "V01",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 1,
+      "evidence": [
+        {
+          "kind": "cycle",
+          "detail": "dependency graph contains cycle(s)"
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "tools/graph_algo.py"
+      ],
+      "note": ""
+    },
+    {
+      "check_id": "V02",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "prompts/s1_prompt.py"
+      ],
+      "note": "守卫极性检查通过：无 guard_policies 被触发（所有 proc 的 givens 均未命中任何 guard 的 when_given_matches 条件），无违规项"
+    },
+    {
+      "check_id": "V03",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "动作归属检查通过：跨实体级联均使用 indirect_via，未直接操作从动实体"
+    },
+    {
+      "check_id": "V04",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/field_validation.py"
+      ],
+      "note": "case_spec readonly 字段证据 5 条不参与字段级保护(AI 生成未确认、含误标；见代码注释): ['内置用户（审计管理员、系统管理员、评审管理员、评审助理）', '打分权重配置表', '打分规则（评分细则）表', '角色（6个内置角色）', '项目级别评判表']"
+    },
+    {
+      "check_id": "V05",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py",
+        "nodes/s0_topology.py"
+      ],
+      "note": "维度组合检查通过：实例化前 dimension_constraints 可达性剪枝无冲突"
+    },
+    {
+      "check_id": "V06",
+      "result": "pass",
+      "severity": "warning",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S1",
+      "suspected_files": [
+        "nodes/s1_generation.py"
+      ],
+      "note": "time obligations=21, missing time_control=0"
+    },
+    {
+      "check_id": "V07",
+      "result": "pass",
+      "severity": "warning",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "empty_actor=0, unknown_actor=0, no_permission=0"
+    },
+    {
+      "check_id": "V08",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 1,
+      "evidence": [
+        {
+          "machine": "评审计划",
+          "transition": "T-027",
+          "from": "暂停",
+          "to": "已完成",
+          "direction": "forward",
+          "phase_from": 4,
+          "phase_to": 4,
+          "reason": "forward transition must increase phase"
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s2_sorting.py"
+      ],
+      "note": "spec hygiene: 评审计划.T-022: lateral 迁移缺少 note 依据 | 评审计划.T-023: lateral 迁移缺少 note 依据 | 评审计划.T-024: lateral 迁移缺少 note 依据 | 评审计划.T-025: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 评审计划.T-026: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 机构.T-035: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note | 机构.T-036: backward 迁移缺少 note 依据 | 用户.T-041: lateral 迁移缺少 note 依据 | 用户.T-042: 环状机 forward 边（派生相位不递增），豁免单调检查，建议补充 note"
+    },
+    {
+      "check_id": "V09",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py"
+      ],
+      "note": "去重检查通过：无重复 (givens,when,thens) 合并、单例实体未复制"
+    },
+    {
+      "check_id": "V10",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 1,
+      "evidence": [
+        {
+          "obligation_kind": "entity",
+          "missing_obligation_ids": [
+            "EO-CRU-013",
+            "EO-CRU-037"
+          ],
+          "count": 2
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "TO 42/42 | EO 70/72 | BR 77/77(embedded 16, xc_causal 9) | IT 5/5 | state_misses=0"
+    }
+  ],
+  "metrics": {
+    "case_total": 582,
+    "dedup_ratio": 1.0,
+    "guard_violations": 0,
+    "dangling_deps": 1,
+    "invalid_combos": 0,
+    "builtin_misuse": 0,
+    "coverage_misses": 1
+  },
+  "signature": "a5e7b826b1cd"
+}

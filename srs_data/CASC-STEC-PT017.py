@@ -2745,6 +2745,7 @@ def build() -> DomainModel:
         target_condition="状态=已登记",
         desc="镜像T-t13 precondition'载体处于已登记状态'",
         source_ref="4.7.1；4.7.3",
+        target_transition="t13",
     )
     # 4.5 判约束：归档后无法移交/留存/回收/外送（已归档载体操作门禁）
     m.add_xc(
@@ -2754,6 +2755,7 @@ def build() -> DomainModel:
         target_condition="载体已归档时禁止发起移交任务",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起移交任务（载体状态为已归档时禁止移交）",
         source_ref="4.7.3",
+        target_transition="t19",
     )
     m.add_xc(
         xid="x03",
@@ -2762,6 +2764,7 @@ def build() -> DomainModel:
         target_condition="载体已归档时禁止发起留存任务",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起留存任务",
         source_ref="4.7.3",
+        target_transition="t25",
     )
     m.add_xc(
         xid="x04",
@@ -2770,6 +2773,7 @@ def build() -> DomainModel:
         target_condition="载体已归档时禁止发起回收任务",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起回收任务",
         source_ref="4.7.3",
+        target_transition="t31",
     )
     m.add_xc(
         xid="x05",
@@ -2778,6 +2782,7 @@ def build() -> DomainModel:
         target_condition="载体已归档时禁止发起外送任务",
         desc="由 Step 4.5 约束-因果鉴别确认：已归档载体无法发起外送任务",
         source_ref="4.7.3",
+        target_transition="t37",
     )
     # 4.5 判约束：载体到期不处理 → 用户功能限制（不能发起登记/导入/导出/扫描）
     m.add_xc(
@@ -2820,6 +2825,7 @@ def build() -> DomainModel:
         target_condition="由未创建变为已登记",
         desc="联动:T-t12执行后E-CAR.载体状态由未创建变为已登记",
         source_ref="4.6.3",
+        target_transition="t74",
     )
     # 联动 XC：移交/留存 为属性级操作（归属人变更/持有时间延长），不改载体状态，
     # 效果经因果边 E-TRF→E-CAR / E-RET→E-CAR 表达（4.8.3 / 4.9.3），无 XC 联动。
@@ -2893,6 +2899,7 @@ def build() -> DomainModel:
         category="usability",
         desc="用户登录成功后，应在进入的功能操作页面右上角显示登录人员的名称；根据登录人员被指定的角色进入相应的页面，主菜单/功能操作、子菜单依据角色的不同而显示不同",
         entities_involved=["E-USER", "E-ROLE"],
+        constrained_entity="E-USER",
         source_ref="4.3.1（5）；4.3.1（6）",
         signal_type="display",
     )
@@ -2910,24 +2917,30 @@ def build() -> DomainModel:
         category="usability",
         desc="新增、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示；有约束的必填项，输入不符合约束时应给出提示",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.19（6）；4.19（7）",
         signal_type="field_constraint",
+        note={"comment": "UI 对称规则，取代表实体 E-IMP"},
     )
     m.add_br(
         bid="b08",
         category="usability",
         desc="查询功能中的组合查询支持一个（含）以上字段'与'的模糊查询",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.19（5）；4.4（6）",
         signal_type="usability",
+        note={"comment": "UI 对称规则，取代表实体 E-IMP"},
     )
     m.add_br(
         bid="b09",
         category="usability",
         desc="对操作支持可逆性处理，有取消或者关闭操作",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.19（4）；4.4（8）；4.4（9）",
         signal_type="usability",
+        note={"comment": "UI 对称规则，取代表实体 E-IMP"},
     )
     # 任务级别分支约束（4.5.2/4.6.2/…/4.13.2 同文重复，是一个规则适用于全部 9 类任务实体）
     # 曾拆成 9 条相同文本 BR（每实体一条），被 _backfill_branch_coverage 全部挂进 E-IMP 分支维度
@@ -2937,6 +2950,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="任务级别为A级无需审批，提交后直接进入待执行；B级需经过一级审批；C级需经过二级审批",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.5.2；4.6.2；4.7.2；4.8.2；4.9.2；4.10.2；4.11.2；4.12.2；4.13.2",
         signal_type="restrictive",
         note={"branch_dimension": "任务级别"},
@@ -2956,6 +2970,7 @@ def build() -> DomainModel:
         category="timing",
         desc="载体登记成功之后，载体记入申请人台账中，持有时间默认为72小时；在到期前12小时，系统会自动向持有人发送载体到期提醒",
         entities_involved=["E-CAR", "E-REG"],
+        constrained_entity="E-REG",
         source_ref="4.6.5",
         signal_type="field_constraint",
         note={"comment": "含默认值72小时，按优先级 field_constraint > restrictive"},
@@ -2965,6 +2980,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="如果持有人到期不进行处理，系统会自动将此载体持有人用户进行功能限制，不能发起登记、导入、导出、扫描流程",
         entities_involved=["E-CAR", "E-USER", "E-REG", "E-IMP", "E-EXP", "E-SCN"],
+        constrained_entity="E-USER",
         source_ref="4.6.5",
         signal_type="restrictive",
     )
@@ -2974,6 +2990,7 @@ def build() -> DomainModel:
         category="validation",
         desc="留存时间只能填入1~48之间的整数；留存最长可增加48小时持有时间",
         entities_involved=["E-RET", "E-CAR"],
+        constrained_entity="E-RET",
         source_ref="4.9.1；4.9",
         signal_type="field_constraint",
     )
@@ -3086,6 +3103,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="系统的日志管理只对日志管理员和角色管理员开放；系统日志记录只能由日志管理员和角色管理员查看",
         entities_involved=["E-LOG", "E-ROLE"],
+        constrained_entity="E-LOG",
         source_ref="4.17；4.18（7）",
         signal_type="restrictive",
     )
@@ -3113,6 +3131,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="角色管理员可授权普通用户、一级审批员、二级审批员、载体管理员和监督员；删除角色后用户角色默认为普通用户",
         entities_involved=["E-ROLE", "E-USER"],
+        constrained_entity="E-ROLE",
         source_ref="4.16.1；4.16.2；4.16.3",
         signal_type="field_constraint",
         note={"comment": "含默认值'普通用户'，按优先级 field_constraint > restrictive"},
@@ -3123,6 +3142,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="本样品内置3个角色（系统管理员、监督员、日志管理员），不可对其进行更改、删除；系统管理员角色绑定系统管理员用户(sysadmin_a)、监督员(secadmin_a)和日志管理员(secauditor_a)，不可更改、删除和禁用，也不授予其他用户",
         entities_involved=["E-ROLE", "E-USER"],
+        constrained_entity="E-ROLE",
         source_ref="5；5",
         signal_type="restrictive",
     )
@@ -3149,8 +3169,10 @@ def build() -> DomainModel:
         category="usability",
         desc="日期类数据输入，应提供日历选择功能",
         entities_involved=["E-USER", "E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-USER",
         source_ref="4.19（2）",
         signal_type="usability",
+        note={"comment": "UI 对称规则，取代表实体 E-USER"},
     )
     # 基于角色访问控制
     m.add_br(
@@ -3158,6 +3180,7 @@ def build() -> DomainModel:
         category="authorization",
         desc="实现基于角色的访问控制",
         entities_involved=["E-ROLE", "E-USER"],
+        constrained_entity="E-ROLE",
         source_ref="4.18（1）",
         signal_type="restrictive",
     )
@@ -3167,6 +3190,7 @@ def build() -> DomainModel:
         category="notification",
         desc="在载体里留存时间到期前12小时，系统会自动向持有人发送载体到期提醒，持有人可选择将载体进行归档、移交、回收、留存或者外送",
         entities_involved=["E-CAR", "E-RET"],
+        constrained_entity="E-CAR",
         source_ref="4.9.3",
         signal_type="usability",
         note={"comment": "含'可选择'，匹配 usability；无 restrictive/display/field_constraint 强信号"},
@@ -3177,8 +3201,10 @@ def build() -> DomainModel:
         category="computation",
         desc="流水号系统自动生成，规则为:任务类型+申请时间+流水序号",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.5.1 表4.5-1（3）；4.6.1；4.7.1；4.8.1；4.9.1；4.10.1；4.11.1；4.12.1；4.13.1",
         signal_type="field_constraint",
+        note={"comment": "任务类型对称规则，取代表实体 E-IMP"},
     )
     # 申请人/部门自动获取
     m.add_br(
@@ -3186,8 +3212,10 @@ def build() -> DomainModel:
         category="computation",
         desc="申请人、申请部门根据登录用户自动获取",
         entities_involved=["E-IMP", "E-REG", "E-ARC", "E-TRF", "E-RET", "E-RCY", "E-OUT", "E-EXP", "E-SCN"],
+        constrained_entity="E-IMP",
         source_ref="4.5.1 表4.5-1（1）（2）；4.6.1；4.7.1；4.8.1；4.9.1；4.10.1；4.11.1；4.12.1；4.13.1",
         signal_type="field_constraint",
+        note={"comment": "任务类型对称规则，取代表实体 E-IMP"},
     )
 
     return m

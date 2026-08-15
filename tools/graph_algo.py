@@ -315,10 +315,14 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
 
         if dep_id in proc.get("_S3_fields", {}).get("weak_dependencies", []):
             proc["_S3_fields"]["weak_dependencies"].remove(dep_id)
-            proc["_S3_fields"].get("weak_origins", {}).pop(dep_id, None)
         else:
             proc["_S3_fields"]["dependencies"].remove(dep_id)
-            proc["_S3_fields"].get("dep_origins", {}).pop(dep_id, None)
+        # 同一 dep 可能在两个 origin 表中都登记过: 弱依赖在加入 weak_dependencies
+        # 时经 _record_origin(mid, "weak_side_effect") 双写进 dep_origins(置信降级)。
+        # 只弹本分支的表会留下幽灵键——V01 把 dep_origins 键当硬边读, 残留环因此
+        # 永远剪不干净。故无论从哪个列表剪除, 两个 origin 表都同步 pop。
+        proc["_S3_fields"].get("dep_origins", {}).pop(dep_id, None)
+        proc["_S3_fields"].get("weak_origins", {}).pop(dep_id, None)
 
         warnings.append(
             f"Cycle break: removed {cat_name} dependency {dep_id} from {proc_id} "

@@ -1,318 +1,604 @@
 {
-  "spec_version": "1.2.0",
-  "guard_policies": [
-    {
-      "guard_id": "G-PROJ-SELECT-DIFF",
-      "when_given_matches": "本阶段评价结果为差",
-      "action": "项目选入",
-      "expected": "rejected",
-      "assertion_pattern": "不可选入|状态保持待选入|拒绝|提示",
-      "clause": "4.7.1(3)"
-    },
-    {
-      "guard_id": "G-PROJ-SELECT-FAIL-ONCE",
-      "when_given_matches": "本阶段不合格评价结果且已选入过1次",
-      "action": "项目选入",
-      "expected": "rejected",
-      "assertion_pattern": "仅1次选入机会|不可选入|状态保持待选入|提示",
-      "clause": "4.7.1(2)"
-    },
-    {
-      "guard_id": "G-PROJ-DELETE-STATE",
-      "when_given_matches": "项目状态不为待选入",
-      "action": "项目删除",
-      "expected": "rejected",
-      "assertion_pattern": "不可删除|状态不变|提示",
-      "clause": "4.6(1)b"
-    },
-    {
-      "guard_id": "G-PROJ-DELETE-EVALUATED",
-      "when_given_matches": "已评价过",
-      "action": "项目删除",
-      "expected": "rejected",
-      "assertion_pattern": "不可删除|状态不变|提示",
-      "clause": "4.6(1)b"
-    },
-    {
-      "guard_id": "G-PROJ-EDIT-STATE",
-      "when_given_matches": "项目状态不为待选入",
-      "action": "项目编辑",
-      "expected": "rejected",
-      "assertion_pattern": "仅可编辑附件|不可编辑|提示",
-      "clause": "4.6(1)c"
-    },
-    {
-      "guard_id": "G-PLAN-EDIT-AFTER-ISSUE",
-      "when_given_matches": "计划已下发",
-      "action": "编辑评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "不能编辑|不可编辑|提示",
-      "clause": "4.8.4(3)"
-    },
-    {
-      "guard_id": "G-PLAN-CANCEL-AFTER-ISSUE",
-      "when_given_matches": "计划已下发",
-      "action": "取消评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "不能取消|提示",
-      "clause": "4.8.4(3)"
-    },
-    {
-      "guard_id": "G-PLAN-PROJECT-COUNT",
-      "when_given_matches": "纳入项目数小于1或大于5",
-      "action": "建立评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "1至5个项目|校验失败|提示",
-      "clause": "4.8.1(1)"
-    },
-    {
-      "guard_id": "G-PLAN-EXPERT-COUNT",
-      "when_given_matches": "评审组人数不为5或7或9",
-      "action": "建立评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "5或7或9个专家|校验失败|提示",
-      "clause": "4.8.1(6)a"
-    },
-    {
-      "guard_id": "G-PLAN-LEADER-UNIQUE",
-      "when_given_matches": "组长专家人数不为1",
-      "action": "建立评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "有且只能有一个组长专家|校验失败|提示",
-      "clause": "4.8.1(6)a"
-    },
-    {
-      "guard_id": "G-PLAN-DOMAIN-COVER",
-      "when_given_matches": "专家技术领域未覆盖项目领域",
-      "action": "建立评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "领域应覆盖|校验失败|提示",
-      "clause": "4.8.1(6)b"
-    },
-    {
-      "guard_id": "G-PLAN-AVOID-ORG",
-      "when_given_matches": "专家所属机构为计划项目所属机构",
-      "action": "选入评审组",
-      "expected": "rejected",
-      "assertion_pattern": "默认回避|不可选入评审组|提示",
-      "clause": "4.8.1(6)c①"
-    },
-    {
-      "guard_id": "G-PLAN-AVOID-MANUAL",
-      "when_given_matches": "已人为设置专家回避项目且计划中含该项目",
-      "action": "选入评审组",
-      "expected": "rejected",
-      "assertion_pattern": "回避项目|不可选入评审组|提示",
-      "clause": "4.8.1(6)c②"
-    },
-    {
-      "guard_id": "G-EXPERT-TIMESLOT",
-      "when_given_matches": "专家同一工作时段已被分配其他计划",
-      "action": "分配评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "一个工作时段只能被分配一个评审计划|提示",
-      "clause": "4.8.1(6)d"
-    },
-    {
-      "guard_id": "G-EXPERT-NIGHT-3",
-      "when_given_matches": "专家将被连续3天晚上分配任务",
-      "action": "分配评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "不能被连续3天晚上分配|提示",
-      "clause": "4.8.1(6)e"
-    },
-    {
-      "guard_id": "G-EXPERT-DELETE-BUSY",
-      "when_given_matches": "专家有待评审或评审中的项目",
-      "action": "专家删除",
-      "expected": "rejected",
-      "assertion_pattern": "不可以删除|提示",
-      "clause": "4.10(3)"
-    },
-    {
-      "guard_id": "G-EXPERT-DELETE-MIN5",
-      "when_given_matches": "删除后同一技术领域专家不足5人",
-      "action": "专家删除",
-      "expected": "confirm",
-      "assertion_pattern": "需进行确认|确认提示",
-      "clause": "4.10(3)"
-    },
-    {
-      "guard_id": "G-EXPERT-DELETE-LEADER2",
-      "when_given_matches": "删除后同一技术领域组长专家不足2人",
-      "action": "专家删除",
-      "expected": "confirm",
-      "assertion_pattern": "需进行确认|确认提示",
-      "clause": "4.10(3)"
-    },
-    {
-      "guard_id": "G-EXPERT-EDIT-LOCKED-FIELDS",
-      "when_given_matches": "编辑目标为技术领域或机构或评审身份或手机号",
-      "action": "专家编辑",
-      "expected": "rejected",
-      "assertion_pattern": "不能编辑|字段不可编辑|提示",
-      "clause": "4.10(2)"
-    },
-    {
-      "guard_id": "G-SCORE-ZERO-SUBMIT",
-      "when_given_matches": "项目各项打分全部为零",
-      "action": "提交打分",
-      "expected": "rejected",
-      "assertion_pattern": "不能提交|提示",
-      "clause": "4.9.2(3)"
-    },
-    {
-      "guard_id": "G-SCORE-MODIFY-SUBMITTED",
-      "when_given_matches": "打分状态为已提交",
-      "action": "修改分数",
-      "expected": "rejected",
-      "assertion_pattern": "不能进行分数修改|提示",
-      "clause": "4.9.2(3)"
-    },
-    {
-      "guard_id": "G-SCORE-PAUSED",
-      "when_given_matches": "评审计划状态为暂停",
-      "action": "专家打分",
-      "expected": "rejected",
-      "assertion_pattern": "暂停|不能评审|提示",
-      "clause": "4.8.7(1)"
-    },
-    {
-      "guard_id": "G-PLAN-ARCHIVE-PAUSED",
-      "when_given_matches": "评审计划状态为暂停",
-      "action": "归档评审计划",
-      "expected": "rejected",
-      "assertion_pattern": "不能归档|提示",
-      "clause": "4.8.7(1)"
-    },
-    {
-      "guard_id": "G-ORG-DELETE-NONEMPTY",
-      "when_given_matches": "机构下有项目或用户或子机构 或 为根机构",
-      "action": "机构删除",
-      "expected": "rejected",
-      "assertion_pattern": "才可删除|不可删除|提示",
-      "clause": "4.11.3(3)"
-    },
-    {
-      "guard_id": "G-ORG-PROMOTE-3TIMES",
-      "when_given_matches": "研制机构累计3次评级为不合格",
-      "action": "提为试用",
-      "expected": "rejected",
-      "assertion_pattern": "不能提为试用机构|提示",
-      "clause": "4.9.7(2)d"
-    },
-    {
-      "guard_id": "G-ORG-UNQUALIFIED-REVIEW",
-      "when_given_matches": "机构状态为不合格",
-      "action": "项目进入评审",
-      "expected": "rejected",
-      "assertion_pattern": "不能对不合格研制机构所属项目进行评审|提示",
-      "clause": "4.9.7(2)a"
-    },
-    {
-      "guard_id": "G-USER-BUILTIN-PROTECT",
-      "when_given_matches": "目标用户为内置审计管理员或系统管理员或评审管理员或评审助理",
-      "action": "编辑",
-      "expected": "rejected",
-      "assertion_pattern": "不可对内置操作|提示",
-      "clause": "4.11.1"
-    },
-    {
-      "guard_id": "G-USER-BUILTIN-PROTECT-LOCK",
-      "when_given_matches": "目标用户为内置审计管理员或系统管理员或评审管理员或评审助理",
-      "action": "锁定",
-      "expected": "rejected",
-      "assertion_pattern": "不可对内置操作|提示",
-      "clause": "4.11.1"
-    },
-    {
-      "guard_id": "G-USER-BUILTIN-PROTECT-RESET",
-      "when_given_matches": "目标用户为内置审计管理员或系统管理员或评审管理员或评审助理",
-      "action": "重置密码",
-      "expected": "rejected",
-      "assertion_pattern": "不可对内置操作|提示",
-      "clause": "4.11.1"
-    },
-    {
-      "guard_id": "G-USER-DELETE-UNFINISHED",
-      "when_given_matches": "用户有未完成的任务",
-      "action": "用户删除",
-      "expected": "rejected",
-      "assertion_pattern": "不能删除|提示",
-      "clause": "4.11.1(6)"
-    },
-    {
-      "guard_id": "G-USER-LOCKED-LOGIN",
-      "when_given_matches": "用户状态为锁定",
-      "action": "登录",
-      "expected": "rejected",
-      "assertion_pattern": "锁定后不得登录|提示",
-      "clause": "4.11.1(3)"
-    }
-  ],
-  "built_in_entities": {
-    "readonly": [
-      "打分权重配置",
-      "项目级别评判",
-      "评分细则",
-      "角色"
+    "spec_version":"1.2.0",
+    "guard_policies":[
+        {
+            "guard_id":"G-PROJ-DEL-STATE",
+            "when_given_matches":"已选入、待评审、评审中、待归档、已归档、已评价",
+            "action":"删除项目",
+            "expected":"rejected",
+            "assertion_pattern":"不可删除|无法删除|删除失败|提示",
+            "clause":"4.6"
+        },
+        {
+            "guard_id":"G-PROJ-EDIT-STATE",
+            "when_given_matches":"已选入、待评审、评审中、待归档、已归档、已评价",
+            "action":"编辑项目基本信息（非附件字段）",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|无法编辑|只读|置灰|禁用|提示",
+            "clause":"4.6"
+        },
+        {
+            "guard_id":"G-PROJ-ATTACH-SCOPE",
+            "when_given_matches":"其他机构、非本机构",
+            "action":"机构管理员查看项目附件",
+            "expected":"rejected",
+            "assertion_pattern":"无权限|不可查看|无法查看|仅本机构|提示",
+            "clause":"4.6"
+        },
+        {
+            "guard_id":"G-ATTACH-PROPOSAL-ROLE",
+            "when_given_matches":"评审专家、评审助理、评审管理员",
+            "action":"上传项目建议书附件",
+            "expected":"rejected",
+            "assertion_pattern":"无权限|不可上传|上传失败|提示",
+            "clause":"4.6 表4.6-1"
+        },
+        {
+            "guard_id":"G-ATTACH-RECOMMEND-ROLE",
+            "when_given_matches":"机构管理员、评审专家、评审管理员",
+            "action":"上传评审推荐书附件",
+            "expected":"rejected",
+            "assertion_pattern":"无权限|不可上传|上传失败|提示",
+            "clause":"4.6 表4.6-1"
+        },
+        {
+            "guard_id":"G-ATTACH-SUMMARY-ROLE",
+            "when_given_matches":"评审专家、评审助理、评审管理员",
+            "action":"上传研制总结附件",
+            "expected":"rejected",
+            "assertion_pattern":"无权限|不可上传|上传失败|提示",
+            "clause":"4.6 表4.6-1"
+        },
+        {
+            "guard_id":"G-PROJ-IN-POOR",
+            "when_given_matches":"评价结果为差、评级为差、等级为差",
+            "action":"选入项目",
+            "expected":"rejected",
+            "assertion_pattern":"不可选入|无法选入|选入失败|提示",
+            "clause":"4.7.1"
+        },
+        {
+            "guard_id":"G-PROJ-IN-RETRY",
+            "when_given_matches":"不合格的项目再次选入、不合格项目再次选入、评价为不合格后再次选入、不合格后第二次选入、第二次选入不合格项目",
+            "action":"选入项目",
+            "expected":"rejected",
+            "assertion_pattern":"不可选入|无法选入|已无选入机会|选入失败|提示",
+            "clause":"4.7.1"
+        },
+        {
+            "guard_id":"G-PROJ-OUT-STATE",
+            "when_given_matches":"待选入、待评审、评审中、待归档、已归档",
+            "action":"选出项目",
+            "expected":"rejected",
+            "assertion_pattern":"不可选出|无法选出|选出失败|提示",
+            "clause":"4.7.2"
+        },
+        {
+            "guard_id":"G-PLAN-PROJ-COUNT",
+            "when_given_matches":"6个项目、超过5个项目、6个及以上项目",
+            "action":"建立评审计划时选取项目",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可|超出|最多",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-GROUP-SIZE",
+            "when_given_matches":"4名专家、4个专家、6名专家、6个专家、8名专家、8个专家、10名专家、10个专家",
+            "action":"组建评审组或设置专家人数",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可|人数",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-LEADER-ONE",
+            "when_given_matches":"两个组长、2个组长、2名组长、两名组长、多名组长、无组长、没有组长、0个组长",
+            "action":"组建评审组",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|只能有一个组长|不可",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-EXP-FIELD",
+            "when_given_matches":"技术领域未覆盖、领域未覆盖、技术领域不涵盖、领域不一致",
+            "action":"将专家加入评审组",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可选入|不可加入|不匹配",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-EXP-AVOID",
+            "when_given_matches":"回避项目、设置了回避、回避该专家",
+            "action":"将专家加入评审组",
+            "expected":"rejected",
+            "assertion_pattern":"不可选入|不可加入|回避|提示|失败",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-EXP-SLOT",
+            "when_given_matches":"同一评审时段、相同评审时段、评审时段相同、同一时段、相同时段、时段已占用、时段冲突",
+            "action":"将专家分配到评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可分配|冲突|已占用",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-EXP-NIGHT",
+            "when_given_matches":"连续2天晚上、连续两天晚上、连续两晚、连续3天晚上、连续三天晚上、连续三晚、第三天晚上、第3天晚上",
+            "action":"在晚上时段将专家分配到评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可分配|连续",
+            "clause":"4.8.1"
+        },
+        {
+            "guard_id":"G-PLAN-FIELD-FROZEN",
+            "when_given_matches":"已保存的计划、已建立的计划",
+            "action":"编辑评审计划的计划类型或技术领域",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|只读|置灰|禁用|提示",
+            "clause":"4.8.2"
+        },
+        {
+            "guard_id":"G-PLAN-CANCEL-ISSUED",
+            "when_given_matches":"已下发、待启动、待评审、评审中、已完成、暂停、结束、超时结束",
+            "action":"取消评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"不可取消|无法取消|提示|失败",
+            "clause":"4.8.3、4.8.4"
+        },
+        {
+            "guard_id":"G-PLAN-EDIT-ISSUED",
+            "when_given_matches":"已下发、待启动、待评审、评审中、已完成、暂停、结束、超时结束",
+            "action":"编辑评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|无法编辑|提示|失败",
+            "clause":"4.8.4"
+        },
+        {
+            "guard_id":"G-PLAN-PAUSE-SCORE",
+            "when_given_matches":"暂停状态、暂停中、暂停期间、处于暂停",
+            "action":"评审专家对计划中项目打分或提交",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可评审|暂停中",
+            "clause":"4.8.7"
+        },
+        {
+            "guard_id":"G-PLAN-PAUSE-ARCHIVE",
+            "when_given_matches":"暂停状态、暂停中、暂停期间、处于暂停",
+            "action":"归档评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可归档|暂停中",
+            "clause":"4.8.7"
+        },
+        {
+            "guard_id":"G-SCORE-ZERO-SUBMIT",
+            "when_given_matches":"全部为零、均为零、都为零、各项打分为零",
+            "action":"提交项目打分",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不能提交|失败|为零",
+            "clause":"4.9.2"
+        },
+        {
+            "guard_id":"G-SCORE-SUBMIT-LOCK",
+            "when_given_matches":"已提交",
+            "action":"修改项目打分",
+            "expected":"rejected",
+            "assertion_pattern":"不可修改|无法修改|只读|置灰|提示",
+            "clause":"4.9.2"
+        },
+        {
+            "guard_id":"G-ORG-REVIEW-BLOCK",
+            "when_given_matches":"不合格机构、机构不合格、不合格研制机构",
+            "action":"将不合格机构所属项目选入评审或纳入评审计划",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可评审|不可选入|不合格",
+            "clause":"4.9.7"
+        },
+        {
+            "guard_id":"G-ORG-PROBATION-BLOCK",
+            "when_given_matches":"累计3次不合格、累计三次不合格、3次不合格、三次不合格",
+            "action":"将不合格机构提为试用机构",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可|不能提",
+            "clause":"4.9.7"
+        },
+        {
+            "guard_id":"G-EXP-DEL-BUSY",
+            "when_given_matches":"待评审、评审中",
+            "action":"删除专家",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不可删除|无法删除|失败",
+            "clause":"4.10"
+        },
+        {
+            "guard_id":"G-EXP-DEL-FIELD-CONFIRM",
+            "when_given_matches":"不足5人、少于5人、仅剩4人、只剩4人、剩4名专家",
+            "action":"删除专家",
+            "expected":"confirm",
+            "assertion_pattern":"确认|是否|确定|提示",
+            "clause":"4.10"
+        },
+        {
+            "guard_id":"G-EXP-DEL-LEADER-CONFIRM",
+            "when_given_matches":"组长不足2人、组长少于2人、组长仅剩1人、只剩1名组长、组长剩1人",
+            "action":"删除专家",
+            "expected":"confirm",
+            "assertion_pattern":"确认|是否|确定|提示",
+            "clause":"4.10"
+        },
+        {
+            "guard_id":"G-EXP-EDIT-FROZEN",
+            "when_given_matches":"编辑专家、修改专家信息",
+            "action":"编辑专家的技术领域、机构、评审身份或手机号字段",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|只读|置灰|禁用|无法修改|提示",
+            "clause":"4.10"
+        },
+        {
+            "guard_id":"G-EXP-AVOID-SCOPE",
+            "when_given_matches":"待选入状态的项目、本机构的项目、非已选入",
+            "action":"设置专家回避项目",
+            "expected":"rejected",
+            "assertion_pattern":"提示|失败|不可设置|无法选择|不可选",
+            "clause":"4.10"
+        },
+        {
+            "guard_id":"G-USER-BUILTIN-PROTECT",
+            "when_given_matches":"内置",
+            "action":"编辑、锁定、重置密码或删除内置用户（审计管理员、系统管理员、评审管理员、评审助理）",
+            "expected":"rejected",
+            "assertion_pattern":"不可|无法|禁止|失败|提示",
+            "clause":"4.11.1"
+        },
+        {
+            "guard_id":"G-USER-DEL-BUSY",
+            "when_given_matches":"未完成的任务、有未完成",
+            "action":"删除用户",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不可删除|无法删除|失败",
+            "clause":"4.11.1"
+        },
+        {
+            "guard_id":"G-USER-EDIT-FROZEN",
+            "when_given_matches":"编辑用户、修改用户信息",
+            "action":"编辑用户的账号、手机号、技术领域、所属机构或角色字段",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|只读|置灰|禁用|无法修改|提示",
+            "clause":"4.11.1"
+        },
+        {
+            "guard_id":"G-USER-LOCK-LOGIN",
+            "when_given_matches":"锁定",
+            "action":"使用处于锁定状态的账号登录系统",
+            "expected":"rejected",
+            "assertion_pattern":"锁定|无法登录|登录失败|提示",
+            "clause":"4.11.1、4.13"
+        },
+        {
+            "guard_id":"G-ORG-EDIT-FROZEN",
+            "when_given_matches":"编辑机构、修改机构信息",
+            "action":"编辑机构的上级机构、机构编码、不合格次数或机构状态字段",
+            "expected":"rejected",
+            "assertion_pattern":"不可编辑|只读|置灰|禁用|提示",
+            "clause":"4.11.3"
+        },
+        {
+            "guard_id":"G-ORG-DEL-COND",
+            "when_given_matches":"根机构、有项目、有用户、有子机构",
+            "action":"删除研制机构",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不可删除|无法删除|失败",
+            "clause":"4.11.3"
+        },
+        {
+            "guard_id":"G-HOME-ORG-SCOPE",
+            "when_given_matches":"其他机构、非本机构、全部机构",
+            "action":"机构管理员在首页查看项目统计或得分TOP10",
+            "expected":"rejected",
+            "assertion_pattern":"不显示|仅本机构|仅显示本机构|无权限|提示",
+            "clause":"4.12"
+        },
+        {
+            "guard_id":"G-USER-LOCKOUT3",
+            "when_given_matches":"连续输错3次、连续3次输错、连续三次、密码错误3次、连续3次密码错误",
+            "action":"密码连续错误达到3次后再次登录",
+            "expected":"rejected",
+            "assertion_pattern":"锁定|无法登录|登录失败|提示",
+            "clause":"4.13"
+        },
+        {
+            "guard_id":"G-SESS-DUP-LOGIN",
+            "when_given_matches":"重复登录、再次登录、同时登录、另一会话、第二处登录",
+            "action":"同一用户账号重复登录",
+            "expected":"rejected",
+            "assertion_pattern":"不能重复登录|失败|提示|已登录|强制退出",
+            "clause":"4.13"
+        },
+        {
+            "guard_id":"G-LOGIN-FIRST-PWD",
+            "when_given_matches":"初次登录、首次登录、初始密码、默认密码",
+            "action":"初次登录后不修改密码继续使用系统",
+            "expected":"rejected",
+            "assertion_pattern":"强制|修改密码|提示|跳转|拦截",
+            "clause":"4.13"
+        },
+        {
+            "guard_id":"G-PWD-ORIG-WRONG",
+            "when_given_matches":"原密码错误、原密码不对、旧密码错误",
+            "action":"修改密码时输入错误的原密码",
+            "expected":"rejected",
+            "assertion_pattern":"提示|错误|失败",
+            "clause":"4.13"
+        },
+        {
+            "guard_id":"G-PWD-SAME-OLD",
+            "when_given_matches":"与原密码相同、与原密码一致、新旧密码相同",
+            "action":"修改密码时提交与原密码相同的新密码",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不同|失败|不能相同",
+            "clause":"4.13"
+        },
+        {
+            "guard_id":"G-PWD-CONFIRM-MISMATCH",
+            "when_given_matches":"两次输入不一致、确认密码不一致、两次密码不同、确认密码不同",
+            "action":"修改密码时两次输入的新密码不一致",
+            "expected":"rejected",
+            "assertion_pattern":"提示|不一致|失败",
+            "clause":"4.13"
+        }
     ],
-    "no_form_page": [
-      "系统日志",
-      "打分权重配置",
-      "项目级别评判",
-      "评分细则",
-      "角色"
-    ]
-  },
-  "dimension_constraints": [
-    {
-      "name": "暂停前状态",
-      "rule": "暂停前状态必须等于该计划暂停前的真实状态；当前状态为X时，暂停前状态只能是X可达的暂停入口状态",
-      "invalid_combos": [
-        {
-          "current": "待评审",
-          "pre_pause": "评审中"
-        },
-        {
-          "current": "待评审",
-          "pre_pause": "已完成"
-        },
-        {
-          "current": "评审中",
-          "pre_pause": "已完成"
-        }
-      ]
+    "built_in_entities":{
+        "readonly":[
+            {
+                "entity":"打分规则（评分细则）表",
+                "clause":"4.9.1 表4.9-2",
+                "note":"规则类型与评分细则均为系统内置，无维护入口"
+            },
+            {
+                "entity":"打分权重配置表",
+                "clause":"4.9.6 表4.9-4",
+                "note":"系统内置，按评审组人数5、7、9固定档位"
+            },
+            {
+                "entity":"项目级别评判表",
+                "clause":"4.9.6 表4.9-5",
+                "note":"系统内置，定义优秀、良好、合格、不合格、差判级条件"
+            },
+            {
+                "entity":"角色（6个内置角色）",
+                "clause":"4.11.2、5",
+                "note":"内置六个角色不可编辑，仅提供角色查看"
+            },
+            {
+                "entity":"内置用户（审计管理员、系统管理员、评审管理员、评审助理）",
+                "clause":"4.11.1、5",
+                "note":"不可编辑、锁定、重置密码，各绑定唯一用户"
+            }
+        ],
+        "no_form_page":[
+            {
+                "entity":"系统日志（登录日志、操作日志）",
+                "clause":"4.11.5",
+                "note":"仅查询，无新增、编辑页"
+            },
+            {
+                "entity":"实施情况（打分进度、打分情况）",
+                "clause":"4.9.3",
+                "note":"仅查看，运行期产物"
+            },
+            {
+                "entity":"结果汇总",
+                "clause":"4.9.5",
+                "note":"仅查看达分数限值的项目信息"
+            }
+        ]
     },
-    {
-      "name": "项目评级",
-      "rule": "以评价结果为前置维度时，givens 必须同时声明评价所属阶段(开题或验收)且项目已评价过；首次新增项目无评价结果",
-      "invalid_combos": [
+    "dimension_constraints":[
         {
-          "current": "待选入",
-          "note": "首次新增待选入项目 加 任意评价结果（未评价过）"
-        }
-      ]
-    },
-    {
-      "name": "评审组规模",
-      "rule": "评审组人数维度取值仅限5或7或9，且与权重档一一对应",
-      "invalid_combos": [
-        {
-          "current": "专家人数为6"
+            "name":"计划可暂停状态域与暂停前状态",
+            "rule":"仅待评审、评审中、已完成状态的计划可暂停，重启后返回暂停前状态，且此后只能沿正向迁移",
+            "clause":"4.8.1、4.8.3、4.8.7",
+            "invalid_combos":[
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=已建立",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=待启动",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=暂停",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=结束",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=超时结束",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=暂停",
+                    "pre_pause":"暂停前状态=取消结束",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=待评审",
+                    "pre_pause":"暂停前状态=评审中",
+                    "note":"重启返回暂停前状态，无回退迁移",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=待评审",
+                    "pre_pause":"暂停前状态=已完成",
+                    "note":"重启返回暂停前状态，无回退迁移",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=取消结束",
+                    "pre_pause":"暂停前状态=待评审",
+                    "note":"取消仅发生在已建立状态，此前不可能暂停过",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=取消结束",
+                    "pre_pause":"暂停前状态=评审中",
+                    "note":"取消仅发生在已建立状态，此前不可能暂停过",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划状态=取消结束",
+                    "pre_pause":"暂停前状态=已完成",
+                    "note":"取消仅发生在已建立状态，此前不可能暂停过",
+                    "match_mode":"exact"
+                }
+            ]
         },
         {
-          "current": "专家人数为5",
-          "other_dim": "权重档为25/75"
+            "name":"评审组人数与打分权重档位绑定",
+            "rule":"打分权重仅能取评审组人数对应档位，5人组长百分之40普通专家合计百分之60，7人百分之25与百分之75，9人百分之18与百分之82",
+            "clause":"4.9.6 表4.9-4",
+            "invalid_combos":[
+                {
+                    "current":"评审组人数=5",
+                    "other_dim":"组长专家权重=7人档",
+                    "note":"7人档权重",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审组人数=5",
+                    "other_dim":"组长专家权重=9人档",
+                    "note":"9人档权重",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审组人数=7",
+                    "other_dim":"组长专家权重=5人档",
+                    "note":"5人档权重",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审组人数=7",
+                    "other_dim":"组长专家权重=9人档",
+                    "note":"9人档权重",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审组人数=9",
+                    "other_dim":"组长专家权重=5人档",
+                    "note":"5人档权重",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审组人数=9",
+                    "other_dim":"组长专家权重=7人档",
+                    "note":"7人档权重",
+                    "match_mode":"exact"
+                }
+            ]
+        },
+        {
+            "name":"打分项与评审类型互斥",
+            "rule":"开题与验收打分项集合固定，仅创新性、应用前景为共有项，其余互不交叉",
+            "clause":"4.9.1 表4.9-1",
+            "invalid_combos":[
+                {
+                    "current":"计划类型=开题",
+                    "other_dim":"打分项=技术指标达标情况",
+                    "note":"验收专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=开题",
+                    "other_dim":"打分项=成果及其完成情况",
+                    "note":"验收专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=开题",
+                    "other_dim":"打分项=研制过程",
+                    "note":"验收专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=开题",
+                    "other_dim":"打分项=关键技术",
+                    "note":"验收专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=验收",
+                    "other_dim":"打分项=研究目标及技术指标",
+                    "note":"开题专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=验收",
+                    "other_dim":"打分项=研究基础和保障条件",
+                    "note":"开题专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=验收",
+                    "other_dim":"打分项=成果及考核方式",
+                    "note":"开题专属打分项",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"计划类型=验收",
+                    "other_dim":"打分项=研究方案及技术途径",
+                    "note":"开题专属打分项",
+                    "match_mode":"exact"
+                }
+            ]
+        },
+        {
+            "name":"验收阶段开题评级达标前置",
+            "rule":"开题评审评价结果为合格及以上的项目才能进行验收评审",
+            "clause":"4.9、4.5",
+            "invalid_combos":[
+                {
+                    "current":"项目阶段=验收",
+                    "other_dim":"开题评价结果=不合格",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"项目阶段=验收",
+                    "other_dim":"开题评价结果=差",
+                    "match_mode":"exact"
+                },
+                {
+                    "current":"评审计划类型=验收",
+                    "other_dim":"项目阶段=开题",
+                    "note":"验收计划中项目必处验收阶段",
+                    "match_mode":"exact"
+                }
+            ]
+        },
+        {
+            "name":"已归档仅存在于验收阶段",
+            "rule":"项目状态变为已归档仅发生在验收阶段评级合格及以上时，开题阶段合格及以上转为已选入并进入验收阶段",
+            "clause":"4.5",
+            "invalid_combos":[
+                {
+                    "current":"项目状态=已归档",
+                    "other_dim":"项目阶段=开题",
+                    "match_mode":"exact"
+                }
+            ]
         }
-      ]
+    ],
+    "time_control":{
+        "allowed_mechanisms":[
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+        ]
     }
-  ],
-  "time_control": {
-    "allowed_mechanisms": [
-      "clock_injection",
-      "db_time_update",
-      "scheduler_manual_trigger"
-    ]
-  }
 }

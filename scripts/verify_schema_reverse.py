@@ -142,6 +142,14 @@ def main(build=struct_srs.build) -> int:
         errs.append(f"[enforcement] {len(bad_enf)} 条 BR 与 derive_enforcement "
                     f"不一致: {bad_enf}")
 
+    # 1b. build 期间加工（constrained_entity 单实体派生）值级验证
+    bad_ce = [b["id"] for b in m.business_rules
+              if len(b.get("entities_involved", [])) == 1
+              and b.get("constrained_entity") != b["entities_involved"][0]]
+    if bad_ce:
+        errs.append(f"[constrained_entity] {len(bad_ce)} 条单实体 BR "
+                    f"未派生为唯一元素: {bad_ce}")
+
     # 2. assemble 期间加工：插桩写入点
     trace: list[tuple] = []
 

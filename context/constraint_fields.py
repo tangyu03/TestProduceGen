@@ -487,6 +487,7 @@ def _derive_anchors(model, spec):
     ent = spec["entity"]
     # state_snapshot：锚点 = 闭集（含源态维度）
     dim = spec.get("dimension")
+    vals = []
     if dim:
         try:
             vals = _branch_values(model, ent, dim)
@@ -500,14 +501,40 @@ def _derive_anchors(model, spec):
     # 其余 kind：锚点 = 引用写点 transition 的 from（config 为 to）
     refs = [(t, s) for t in model.transitions
             if (s := _anchor_state_for(model, spec, t)) is not None]
+    if dim:
+        # 分支字段写点常只声明在 note.branch_dimension 上（字段名引用落在
+        # state_ref 前提 / expected_results / note，不在 constraint/when 文本，
+        # _precondition_texts 扫不到）→ 数据驱动兜底，与文本扫描取并集
+        # （防部分打标漏锚；golden 任务级别文本扫描已全覆盖，并集不变）。
+        gated = [t for t in model.transitions
+                 if (t.get("note") or {}).get("branch_dimension") == dim]
+        if gated:
+            is_config = bool(vals) and all(
+                isinstance(v, int) or _is_int_str(v) for v in vals)
+            for t in gated:
+                s = t.get("to") if is_config else t.get("from")
+                if s:
+                    refs.append((t, s))
     if not refs:
         raise ValueError(
             f"[{ent}.{spec['name']}] 找不到锚点引用 transition（数据源已漂移）")
     dims = sorted({t.get("dimension") for t, _ in refs} - {None})
     if not dims:
         raise ValueError(f"[{ent}.{spec['name']}] 锚点维度缺失（引用 transition 无 dimension）")
-    states = sorted({s for _, s in refs} - {None})
-    return [{"entity": ent, "dimension": dims[0], "state": s} for s in states]
+    if len(dims) == 1:
+        # 单维度：保持旧形状（dims[0] + 态名排序），字节级兼容既有基线。
+        states = sorted({s for _, s in refs} - {None})
+        return [{"entity": ent, "dimension": dims[0], "state": s}
+                for s in states]
+    # 分支字段跨态维度（如 项目归档分支=项目状态×项目阶段）：dims[0] 坍缩
+    # 会错锚（开题 挂到 项目状态 → 相位解析落空），按 transition 保留各自维度。
+    anchors, seen = [], set()
+    for t, s in refs:
+        d = t.get("dimension")
+        if d and s and (d, s) not in seen:
+            seen.add((d, s))
+            anchors.append({"entity": ent, "dimension": d, "state": s})
+    return anchors
 
 
 def _derive_kind_value_type(model, spec):

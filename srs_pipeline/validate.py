@@ -7,8 +7,9 @@ from dataclasses import dataclass, field
 
 from .constants import (BR_SIGNALS, DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
                         OWNERSHIP_BY_RELATION, PRECOND_TYPES, RESERVED_ROLES,
-                        TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_DESC_PREFIXES)
+                        TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_SOURCES)
 from .escape import find_forbidden, find_unescaped
+
 
 @dataclass
 class Issue:
@@ -63,8 +64,9 @@ class Validator:
         self.trans = {t["id"]: t for t in model.transitions}
         self.dims = {(e["id"], d["dimension_name"]): d
                      for e in model.entities for d in e["state_dimensions"]}
-        # 侧挂状态 = 任一 lateral 转换的 to（如"暂停"）
-        self.lateral_states = {t["to"] for t in model.transitions
+        # 侧挂状态 = lateral 转换的 to，同时记录来源转换 id 供 C13 定位
+        # （键=状态名，值=标记它的 lateral 转换 id；dict 的 in 默认查 key）
+        self.lateral_states = {t["to"]: t["id"] for t in model.transitions
                                if t["direction"] == "lateral"}
 
     def register_check(self, fn):
@@ -83,7 +85,8 @@ class Validator:
                   self.c17_structural_cd_review, self.c18_inv_operations_role,
                   self.c19_inv_signal_type, self.c20_inv_branch_br_coverage,
                   self.c21_inv_label_refs, self.c22_inv_role_coverage,
-                  self.c23_inv_xc_desc_prefix):
+                  self.c23_inv_xc_desc_prefix, self.c24_inv_br_constrained_entity,
+                  self.c25_inv_mirror_target_transition):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -107,6 +110,9 @@ class Validator:
         for x in self.m.cross_entity:
             if x["source_transition"] not in self.trans:
                 r.error("C01", f"XC 引用不存在的转换 {x['source_transition']}", x["id"])
+            tt = x.get("target_transition")
+            if tt and tt not in self.trans:
+                r.error("C01", f"XC 引用不存在的消费者转换 {tt}", x["id"])
             for eid in (x["source_entity"], x["target_entity"]):
                 if eid not in self.entities:
                     r.error("C01", f"XC 引用未建模实体 {eid}", x["id"])
@@ -175,22 +181,46 @@ class Validator:
     # 4. 镜像完整性（缺失则补）
     def c04_mirror_integrity(self):
         r = self.report
-        covered = {x["source_transition"] for x in self.m.cross_entity}
+        # 覆盖判定按消费者侧去重：target_transition 记录「哪个转换持有跨实体
+        # 前置条件」（手动 XC 与 C04 补全同语义）；source_transition 统一为
+        # 生产者转换。旧版按 source_transition 去重会把手动 XC 的生产者 id
+        # 与消费者 t["id"] 比较，误判每条手动 XC 未覆盖而重复补镜像。
+        covered = {x["target_transition"] for x in self.m.cross_entity
+                   if x.get("target_transition")}
+        # 多消费者天然支持：同一 (source_entity, source_state, target_entity) 的
+        # 消费者共享一个镜像 XC（如 struct x03 覆盖 t07-t10——它们都持有「评审
+        # 计划状态=结束」这一跨实体前置状态）。XC 无 source_dimension 字段，故取
+        # 三元组作最细粒度；golden 反向数据（source=消费者）不命中此集，走上面
+        # 的 target_transition 去重。
+        covered_refs = {(x["source_entity"], x["source_state"], x["target_entity"])
+                        for x in self.m.cross_entity}
         for rel in self.m.transition_relations:
             covered.update(rel["evidence_transitions"])
         seq = len(self.m.cross_entity)
         for t in self.m.transitions:
             for p in t["preconditions"]:
                 if p["type"] == "state_ref" and p.get("ref") \
-                        and p["ref"]["entity"] != t["entity"] and t["id"] not in covered:
+                        and p["ref"]["entity"] != t["entity"] and t["id"] not in covered \
+                        and (p["ref"]["entity"], p["ref"]["state"], t["entity"]) \
+                            not in covered_refs:
                     seq += 1
                     xid = f"XC-{seq:03d}"
+                    # 反查生产者：source_entity 上到达 source_state 的转换
+                    # （与 P2 find_to_by_state 同语义，first-match）。
+                    producer = next((tp["id"] for tp in self.m.transitions
+                                     if tp["entity"] == p["ref"]["entity"]
+                                     and tp["dimension"] == p["ref"]["dimension"]
+                                     and tp["to"] == p["ref"]["state"]), None)
                     self.m.cross_entity.append({
                         "id": xid, "source_entity": p["ref"]["entity"],
-                        "source_transition": t["id"], "source_state": p["ref"]["state"],
-                        "target_entity": t["entity"], "target_dimension": t["dimension"],
+                        "source_transition": producer or t["id"],
+                        "source_state": p["ref"]["state"],
+                        "target_entity": t["entity"],
+                        "target_transition": t["id"],
+                        "target_dimension": t["dimension"],
                         "target_condition": f"状态={t['from']}",
-                        "desc": f"镜像 {t['id']} precondition '{p['text']}'",
+                        "desc": f"precondition'{p['text']}'",
+                        "xc_source": "镜像",
                         "source_ref": t["source_ref"]})   # 输入契约：继承宿主
                     covered.add(t["id"])
                     r.fix(f"C04: 补镜像 {xid}（源自 {t['id']} 的跨实体前置条件）")
@@ -282,13 +312,41 @@ class Validator:
             ids = [x["id"] for x in coll]
             for i in sorted({i for i in ids if ids.count(i) > 1}):
                 r.error("C09", f"编号重复: {i}")
-        sig = {}
+        # 按起讫边分组，组内 action 不一致时做区分性检查
+        by_edge = {}
         for t in self.m.transitions:
             key = (t["entity"], t["dimension"], t["from"], t["to"])
-            if key in sig and sig[key] != t["action"]:
-                r.warn("C09", f"同起讫转换动作不一致：{sig[key]} / {t['action']}", t["id"])
-            sig.setdefault(key, t["action"])
+            by_edge.setdefault(key, []).append(t)
+        for key, ts in by_edge.items():
+            actions = {t["action"] for t in ts}
+            if len(actions) <= 1:
+                continue
+            if not self._variants_distinguishable(ts):
+                r.warn("C09",
+                       f"同起讫转换动作不一致：{' / '.join(sorted(actions))}",
+                       ts[0]["id"])
 
+    @staticmethod
+    def _extract_refs(t):
+        """提取 precondition 中 state_ref 的 (entity, dimension, state) 三元组集合。"""
+        return {(p["ref"]["entity"], p["ref"]["dimension"], p["ref"]["state"])
+                for p in t["preconditions"]
+                if p["type"] == "state_ref" and isinstance(p.get("ref"), dict)}
+
+    def _variants_distinguishable(self, ts):
+        """同起讫多动作转换是否可被 role 或 state_ref 区分为独立路径。"""
+        for i, a in enumerate(ts):
+            for b in ts[i + 1:]:
+                if a["action"] == b["action"]:
+                    continue
+                if a["role"] != b["role"]:
+                    continue              # role 不同 → 可区分，跳过
+                if self._extract_refs(a) != self._extract_refs(b):
+                    continue              # state_ref 不同 → 可区分，跳过
+                return False              # role 和 state_ref 都相同 → 不可区分
+        return True
+
+    
     # 10. 字符安全（铁律4，等效 json.loads 验证）
     def c10_char_safety(self):
         r = self.report
@@ -345,11 +403,35 @@ class Validator:
                     # 铁律14 编号一律局部标签, 或框架改写后的 T-xxx); ②显式注明
                     # "无对应转换"及理由。二者皆满足即视为已回填。
                     comment = o["note"].get("comment", "")
-                    _has_trans_ref = bool(
-                        re.search(r"\bT-\d+\b|\b[tpou][a-z]*\d+\b", comment))
+                    _has_trans_ref = bool(re.search(
+                        r"(?<![A-Za-z])(?:T-\d+|[tpou][a-z]*\d+)(?![A-Za-z])",
+                         comment))
                     _has_explicit_none = "无对应转换" in comment
                     if not _has_trans_ref and not _has_explicit_none:
-                        r.warn("C12", "crud 操作未回填 T-xxx 关联（4.4⑤）", ref)
+                        # 定位提示：候选转换 = 同实体上动作同名 / expected_result
+                        # 与前提文本或结果一致的转换（正式号；P2 侧对应其 TO）。
+                        # 纯数据驱动、无领域词。空 → 属性操作，提示"无对应转换"。
+                        er0 = (o.get("expected_results") or [""])[0]
+                        hits = [t for t in self.m.transitions
+                                if t["entity"] == e["id"]
+                                and (o["name"] == t.get("action")
+                                     or (er0 and (er0 in [p.get("text") or ""
+                                                          for p in t.get(
+                                                              "preconditions")
+                                                          or []]
+                                                  or er0 in (t.get(
+                                                      "expected_results")
+                                                      or []))))]
+                        cands = [t["id"] for t in hits][:3]
+                        cand_s = "、".join(cands) if cands \
+                            else "无匹配转换（属性操作）"
+                        r.warn(
+                            "C12",
+                            f"crud 操作未回填 T-xxx 关联（4.4⑤）；候选转换 "
+                            f"{cand_s}：有状态效果→回填「对应转换 "
+                            f"{cands[0] if cands else 'T-xxx'}」，属性操作→"
+                            f"注明「无对应转换」及理由",
+                            ref)
 
     # 13. direction 完整性
     def c13_direction(self):
@@ -371,8 +453,11 @@ class Validator:
                         r.warn("C13", "backward 但 to 索引不小于 from，"
                                       "且未注明环状机", t["id"])
         resumes = {t["from"] for t in self.m.transitions if t["direction"] == "resume"}
-        for s in self.lateral_states - resumes:
-            r.warn("C13", f"侧挂状态[{s}]无 resume 返回边")
+        for s, src_id in self.lateral_states.items():
+            if s not in resumes:
+                r.warn("C13",
+                       f"侧挂状态[{s}]无 resume 返回边"
+                       f"（由 {src_id} 标记为 lateral）", src_id)
 
     def c14_expected_direction(self):
         """expected_results 中"由X变为Y"与 from/to 对账（抓 T-003 类笔误）。"""
@@ -391,11 +476,16 @@ class Validator:
 
     # 17. structural (c)/(d) 判定一致性复核（4.4 框架兜底窄版）
     def c17_structural_cd_review(self):
-        """composition+business_ownership 的 B 若满足独立创建且非 core/无 dependent
+        """composition+business_ownership 的 B 若满足独立创建且非被持有
         → warning 疑似应判 (d) reference。仅单向：B 属 (b)（创建依赖 A）或 (c)
-        （core 且有 dependent）时豁免。反向（reference 但 B 实为 (c)）依赖"A 为
-        业务归属容器"语义，机械不可判，不做。C08 已处理创建依赖第三方后期状态的
-        另一条降级路径，本检查补充"独立创建"分支。"""
+        （被 A 持有）时豁免。(c) 的"A 为业务归属容器"语义无法直接机械判定，
+        用两个代理信号：① B 自身为某 composition 的 frm（有 dependent）；
+        ② A 的删除约束涉及 B（A 不可在有 B 时删除，如"机构下无项目才可删除"），
+        ② 比 ① 更贴近归属本质，覆盖"叶子实体被容器持有"场景。B 的 core/managed
+        类型不参与豁免——容器信号本身即可判定（如 E-YH 为 managed 但被 E-JG
+        持有且自身也是 E-XTRG 的 frm）。反向（reference 但 B 实为 (c)）同依赖
+        "A 为业务归属容器"语义，机械不可判，不做。C08 已处理创建依赖第三方后期
+        状态的另一条降级路径，本检查补充"独立创建"分支。"""
         r = self.report
         # B 是否有独立创建流程：存在 from=None 且其 precondition 不 state_ref 指向 A
         # （指向 A 说明 B 是 A 的产物，属 (b) composition，豁免）。
@@ -422,12 +512,39 @@ class Validator:
                 continue                                  # 创建依赖 A → (b) 豁免
             be = self.entities.get(b)
             b_type = be["type"] if be else None
-            if b_type == "core" and b in comp_frms:
+            if b in comp_frms or self._a_is_container(a, b):
                 continue                                  # 满足 (c) → 豁免
-            r.warn("C17", f"结构关系 {a}→{b} 为 composition+business_ownership，"
-                          f"但 B 有独立创建流程且不满足 (c)（type={b_type}，"
-                          f"有 dependent={b in comp_frms}），疑似应判 (d) reference"
-                          f"+configuration_source（Step 2）")
+            r.warn("C17",
+                   f"结构关系 {a}→{b} 为 composition+business_ownership，"
+                   f"但 B 有独立创建流程[{', '.join(t['id'] for t in creates_b)}]"
+                   f"且不满足 (c)（type={b_type}，有 dependent={b in comp_frms}，"
+                   f"comp_frms={sorted(comp_frms)}），疑似应判 (d) reference"
+                   f"+configuration_source（Step 2）",
+                   rel.get("desc", f"{a}→{b}"))
+
+    def _a_is_container(self, a, b):
+        """A 是否为 B 的业务归属容器（C17 (c) 豁免代理②）：A 的删除约束涉及 B。
+        首选结构判定——删除类 BR 的 entities_involved 同时含 A 与 B（如 b46
+        "机构下无项目、无用户才可删除" 列 E-JG/E-XM/E-YH），无需文本匹配；
+        兜底——A 的删除类 crud op 的 expected_results 文本含 B 的实体名
+        （覆盖删除 op 尚无配对 BR 的场景）。数据驱动，无硬编码实体名。"""
+        # ① 删除类 BR：entities_involved 结构判定
+        for br in self.m.business_rules:
+            inv = br.get("entities_involved", [])
+            if a in inv and b in inv and "删除" in br.get("desc", ""):
+                return True
+        # ② 删除类 crud op：expected_results 文本兜底
+        b_name = (self.entities.get(b) or {}).get("name", "")
+        if not b_name:
+            return False
+        a_entity = self.entities.get(a)
+        if a_entity:
+            for op in a_entity.get("operations", []):
+                if "删除" not in op.get("name", ""):
+                    continue
+                if any(b_name in text for text in op.get("expected_results", [])):
+                    return True
+        return False
 
     def c16_state_whitelist(self):
         """状态值/顺序与原文枚举对账（铁律2 的机器版，替代一切'禁止改名'补丁）。
@@ -581,9 +698,49 @@ class Validator:
                                f"（crud-only 可接受，INV-1）")
 
     def c23_inv_xc_desc_prefix(self):
-        """INV-8/XC：desc 须带四来源前缀之一（分类约定承载，非机器解析）。"""
+        """INV-8/XC：desc 来源分类须显式（xc_source ∈ 四来源）。desc 前缀现由
+        assemble 按 xc_source 生成，不再作为来源判定依据。"""
         for x in self.m.cross_entity:
-            if not x.get("desc", "").startswith(XC_DESC_PREFIXES):
+            if x.get("xc_source") not in XC_SOURCES:
                 self.report.warn(
-                    "C23", f"XC desc 缺来源前缀: {x['desc'][:40]!r}（INV-8）",
+                    "C23", f"XC 缺来源分类 xc_source（应在 {XC_SOURCES} 内）: "
+                           f"{x['desc'][:40]!r}（INV-8）",
                     x["id"])
+
+    def c25_inv_mirror_target_transition(self):
+        """INV-XC：镜像类 XC 必须持有跨实体前置条件，即 target_transition 非空
+        （记录「哪个转换持有该前置条件」，C04 补全与手动镜像同语义）。"""
+        for x in self.m.cross_entity:
+            if x.get("xc_source") == "镜像" and not x.get("target_transition"):
+                self.report.error(
+                    "C25", "镜像 XC 缺 target_transition（持有跨实体前置条件的"
+                           "消费者转换）", x["id"])
+
+    def c24_inv_br_constrained_entity(self):
+        """INV-BR/constrained_entity：BR 的受约束实体须显式、合法且一致。
+
+        运行受 BR 门禁的实体是确定性宿主选择的基础（S1 crud/negative_test 依赖）。
+        - 缺失：多实体 BR 未填（单实体已由 add_br 派生，恒有值）
+        - 不在 entities_involved：声明了非本 BR 涉及的实体
+        - 未建模：引用不存在的实体 ID
+        - 单实体错位：与唯一元素不一致（防御 add_br 派生逻辑未来的改动）
+        """
+        for b in self.m.business_rules:
+            bid = b["id"]
+            ce = b.get("constrained_entity")
+            inv = b.get("entities_involved", [])
+            if ce in (None, ""):
+                self.report.error(
+                    "C24", f"BR[{bid}] 缺 constrained_entity（单实体应已派生，"
+                           f"多实体须显式填写增删改 subject）")
+            elif ce not in inv:
+                self.report.error(
+                    "C24", f"BR[{bid}] constrained_entity={ce!r} 不在 "
+                           f"entities_involved={inv} 中")
+            elif ce not in self.entities:
+                self.report.error(
+                    "C24", f"BR[{bid}] constrained_entity={ce!r} 引用未建模实体")
+            elif len(inv) == 1 and ce != inv[0]:
+                self.report.error(
+                    "C24", f"BR[{bid}] 单实体 BR constrained_entity={ce!r} "
+                           f"≠ 唯一元素 {inv[0]!r}（add_br 应已派生）")

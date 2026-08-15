@@ -20,7 +20,8 @@ from __future__ import annotations
 
 from .constants import (BR_CATEGORIES, BR_ENFORCEMENTS, BR_SIGNALS, CARDINALITIES,
                         CONFIDENCE, DIRECTIONS, ENTITY_TYPES, OWNERSHIP_DIMS,
-                        PRIORITIES, RELATION_TYPES, TAGS, TRAITS, TRIGGER_SOURCES)
+                        PRIORITIES, RELATION_TYPES, TAGS, TRAITS, TRIGGER_SOURCES,
+                        XC_SOURCES)
 
 LLM = "llm"
 LLM_MUTATED = "llm_mutated"
@@ -165,10 +166,17 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
               mutation_conditions="_assign_ids"),
         Field("source_state", "source_state", LLM, required=True),
         Field("target_entity", "target_entity", LLM, required=True),
+        Field("target_transition", "target_transition", LLM_MUTATED, required=False,
+              mutation_conditions="_assign_ids",
+              desc="消费者转换 id（持有跨实体 state_ref 前置条件的转换）。镜像/联动必填；"
+                   "分支差异可缺省。C04 补镜像时填当前转换。"),
         Field("target_dimension", "target_dimension", LLM, required=True),
         Field("target_condition", "target_condition", LLM, required=True),
         Field("desc", "desc", LLM_MUTATED, required=True, mutation_conditions="_assign_ids",
-              desc="引用被 _assign_ids 改写；来源前缀约定见 prompt Step 5"),
+              desc="语义内容，不写来源前缀与正式标签；assemble 按 xc_source 重建前缀+注入标签"),
+        Field("xc_source", "xc_source", LLM, required=False, enum=XC_SOURCES,
+              desc="来源分类（镜像/4.5判/联动/分支差异），desc 前缀由框架按此生成。"
+                   "旧数据缺省时 assemble 从 desc 前缀反推。"),
         Field("source_ref", "source_ref", LLM, required=True, desc="继承宿主"),
     ],
     "br": [
@@ -176,6 +184,10 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("category", "category", LLM, enum=BR_CATEGORIES, required=True),
         Field("desc", "desc", LLM, required=True),
         Field("entities_involved", "entities_involved", LLM, required=True),
+        Field("constrained_entity", "constrained_entity", LLM,
+              derived_from="单实体=entities_involved 唯一元素（add_br 派生）；多实体=LLM 填写，缺失 C24 报错",
+              desc="运行受该规则约束的实体（谁的增删改被门禁）。单实体 BR 由 add_br 派生为唯一元素；"
+                   "多实体 BR 必须显式填写增删改 subject 实体；转换/结构/UI 对称规则取任一 involved 实体并在 note 注明。"),
         Field("source_ref", "source_ref", LLM, required=True),
         Field("signal_type", "signal_type", LLM, enum=BR_SIGNALS, required=True),
         Field("note", "note", LLM),

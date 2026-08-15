@@ -324,6 +324,12 @@
           "state": "存在",
           "description": "操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "部门",
+          "state": "",
+          "description": "部门名称(字符；必填项；名称唯一)；排序(数字；默认为0)；备注(字符)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -402,6 +408,12 @@
           "state": "存在",
           "description": "操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "部门",
+          "state": "",
+          "description": "部门名称(字符；必填项；名称唯一)；排序(数字；默认为0)；备注(字符)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -463,7 +475,7 @@
         "multi_count": 1,
         "multi_reason": "entity=部门 dim_count=0 instances=1"
       },
-      "title": "操作入口可用时，编辑部门实现信息修改，但被客户使用的部门不能修改必填项"
+      "title": "操作入口可用时，编辑部门实现对已存在部门信息的编辑，被客户使用的部门不能修改必填项"
     },
     {
       "temp_id": "PROC-003",
@@ -566,7 +578,7 @@
         "multi_count": 1,
         "multi_reason": "entity=部门 dim_count=0 instances=1"
       },
-      "title": "操作入口可用时，删除部门实现信息删除，但被客户使用和实验单使用的部门不能删除；不能删除修改根部门"
+      "title": "操作入口可用时，删除部门实现对已存在部门信息的删除，被客户使用和实验单使用的部门不能删除；不能删除修改根部门"
     },
     {
       "temp_id": "PROC-004",
@@ -644,7 +656,7 @@
         "multi_count": 1,
         "multi_reason": "entity=部门 dim_count=0 instances=1"
       },
-      "title": "规则适用前提满足时，执行部门名称必填项和唯一性规则"
+      "title": "部门相关数据准备就绪时，执行规则验证部门名称必填项和名称唯一性"
     },
     {
       "temp_id": "PROC-005",
@@ -740,7 +752,7 @@
         "multi_count": 1,
         "multi_reason": "entity=部门 dim_count=0 instances=1"
       },
-      "title": "信息录入页面打开时，提交含违规值的表单，验证部门名称、排序等校验失败提示"
+      "title": "部门信息录入页面打开时，提交含违规值的部门表单，验证必填项校验失败及提示信息"
     },
     {
       "temp_id": "PROC-006.1",
@@ -988,7 +1000,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "当前导出方式配置值时，变更导出方式配置，验证导出方式显示修改后的值"
+      "title": "当前导出方式配置值确定时，变更导出方式配置，验证导出方式显示为修改后的值"
     },
     {
       "temp_id": "PROC-007.2",
@@ -1066,7 +1078,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "当前导出方式配置值时，变更导出方式配置，验证导出方式显示修改后的值"
+      "title": "当前导出方式配置值确定时，变更导出方式配置，验证导出方式显示为修改后的值"
     },
     {
       "temp_id": "PROC-008.1",
@@ -1083,6 +1095,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件导出任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；导出方式(字符；必填项；从光盘、U盘、邮件中选择；选择邮件方式需添加邮箱地址)；密码保护(字符；必填项；从是、否中选择；选择是系统对导出文件加密，收件箱收到加密密码)；文件列表(字符；必填项；从本地磁盘选择上传文件并确定文件级别；文件名必须标明文件级别；导出文件不大于2GB)；份数(字符；必填项；输入1~99数字)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -1144,7 +1162,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，新增导出申请，进入页面可录入申请内容"
+      "title": "操作入口可用时，新增导出申请，进入导出申请页面录入申请内容"
     },
     {
       "temp_id": "PROC-008.2",
@@ -1161,6 +1179,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件导出任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；导出方式(字符；必填项；从光盘、U盘、邮件中选择；选择邮件方式需添加邮箱地址)；密码保护(字符；必填项；从是、否中选择；选择是系统对导出文件加密，收件箱收到加密密码)；文件列表(字符；必填项；从本地磁盘选择上传文件并确定文件级别；文件名必须标明文件级别；导出文件不大于2GB)；份数(字符；必填项；输入1~99数字)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -1222,7 +1246,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，新增导出申请，进入页面可录入申请内容"
+      "title": "操作入口可用时，新增导出申请，进入导出申请页面录入申请内容"
     },
     {
       "temp_id": "PROC-009.1",
@@ -1239,6 +1263,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件导出任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；导出方式(字符；必填项；从光盘、U盘、邮件中选择；选择邮件方式需添加邮箱地址)；密码保护(字符；必填项；从是、否中选择；选择是系统对导出文件加密，收件箱收到加密密码)；文件列表(字符；必填项；从本地磁盘选择上传文件并确定文件级别；文件名必须标明文件级别；导出文件不大于2GB)；份数(字符；必填项；输入1~99数字)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -1300,7 +1330,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，编辑导出申请，可修改已存在的记录"
+      "title": "操作入口可用时，编辑导出申请，验证可对已存在的导出申请记录进行修改"
     },
     {
       "temp_id": "PROC-009.2",
@@ -1317,6 +1347,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件导出任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；导出方式(字符；必填项；从光盘、U盘、邮件中选择；选择邮件方式需添加邮箱地址)；密码保护(字符；必填项；从是、否中选择；选择是系统对导出文件加密，收件箱收到加密密码)；文件列表(字符；必填项；从本地磁盘选择上传文件并确定文件级别；文件名必须标明文件级别；导出文件不大于2GB)；份数(字符；必填项；输入1~99数字)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -1378,7 +1414,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，编辑导出申请，可修改已存在的记录"
+      "title": "操作入口可用时，编辑导出申请，验证可对已存在的导出申请记录进行修改"
     },
     {
       "temp_id": "PROC-010.1",
@@ -1456,7 +1492,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，暂存导出申请，保存为草稿状态"
+      "title": "操作入口可用时，暂存导出申请，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-010.2",
@@ -1534,7 +1570,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，暂存导出申请，保存为草稿状态"
+      "title": "操作入口可用时，暂存导出申请，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-011.1",
@@ -1612,7 +1648,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，上传导出文件，从本地磁盘中选择文件并自动获取文件信息"
+      "title": "操作入口可用时，上传导出文件，验证文件选择、级别确定及系统自动获取文件信息"
     },
     {
       "temp_id": "PROC-011.2",
@@ -1690,7 +1726,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，上传导出文件，从本地磁盘中选择文件并自动获取文件信息"
+      "title": "操作入口可用时，上传导出文件，验证文件选择、级别确定及系统自动获取文件信息"
     },
     {
       "temp_id": "PROC-012.1",
@@ -1768,7 +1804,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，查询导出任务，看到本人提交的任务列表及状态"
+      "title": "操作入口可用时，查询导出任务，验证申请监控页面显示本人提交的文件导出任务列表及状态"
     },
     {
       "temp_id": "PROC-012.2",
@@ -1846,7 +1882,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，查询导出任务，看到本人提交的任务列表及状态"
+      "title": "操作入口可用时，查询导出任务，验证申请监控页面显示本人提交的文件导出任务列表及状态"
     },
     {
       "temp_id": "PROC-013.1",
@@ -1924,7 +1960,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，下载导出任务，批量下载保存文件导出任务"
+      "title": "操作入口可用时，下载导出任务，验证批量下载保存文件导出任务"
     },
     {
       "temp_id": "PROC-013.2",
@@ -2236,7 +2272,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，删除导出申请，验证选中记录删除及列表数据刷新"
+      "title": "存在操作入口时，删除导出申请，验证业务允许情况下记录删除及列表刷新"
     },
     {
       "temp_id": "PROC-015.2",
@@ -2314,7 +2350,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，删除导出申请，验证选中记录删除及列表数据刷新"
+      "title": "存在操作入口时，删除导出申请，验证业务允许情况下记录删除及列表刷新"
     },
     {
       "temp_id": "PROC-016.1",
@@ -2446,7 +2482,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "文件导出任务信息录入页面打开时，提交含违规值的文件导出任务表单，验证各项校验失败提示"
+      "title": "文件导出任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败提示"
     },
     {
       "temp_id": "PROC-016.2",
@@ -2578,7 +2614,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "文件导出任务信息录入页面打开时，提交含违规值的文件导出任务表单，验证各项校验失败提示"
+      "title": "文件导出任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败提示"
     },
     {
       "temp_id": "PROC-017.1",
@@ -2663,7 +2699,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "初始状态下，新建导入申请，验证任务状态变更为草稿"
+      "title": "初始状态下，新建导入申请，验证任务状态转换为草稿"
     },
     {
       "temp_id": "PROC-017.2",
@@ -2748,7 +2784,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "初始状态下，新建导入申请，验证任务状态变更为草稿"
+      "title": "初始状态下，新建导入申请，验证任务状态转换为草稿"
     },
     {
       "temp_id": "PROC-018.1",
@@ -2871,7 +2907,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为A级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为A级，验证A级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-018.2",
@@ -2994,7 +3030,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为A级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为A级，验证A级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-019.1",
@@ -3117,7 +3153,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为B级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为B级，验证B级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-019.2",
@@ -3240,7 +3276,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为B级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为B级，验证B级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-020.1",
@@ -3363,7 +3399,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为C级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为C级，验证C级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-020.2",
@@ -3486,7 +3522,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "任务级别为当前值时，配置任务级别为C级，验证效果生效及规则触发"
+      "title": "任务级别为当前值时，配置任务级别为C级，验证C级效果生效及规则触发"
     },
     {
       "temp_id": "PROC-021.1",
@@ -3503,6 +3539,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "导入任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；20个字符)；源数据单位(字符；必填项)；源文件存储介质(字符；必填项；可选:光盘、U盘、其它；选择其它时文本框必须输入内容)；任务级别(字符；必填项；只可选:A级、B级、C级)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -3564,7 +3606,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，新增导入申请，验证进入导入申请页面并录入内容"
+      "title": "导入任务页面打开时，新增导入申请，验证进入申请页面并录入内容"
     },
     {
       "temp_id": "PROC-021.2",
@@ -3581,6 +3623,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "导入任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；20个字符)；源数据单位(字符；必填项)；源文件存储介质(字符；必填项；可选:光盘、U盘、其它；选择其它时文本框必须输入内容)；任务级别(字符；必填项；只可选:A级、B级、C级)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -3642,7 +3690,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，新增导入申请，验证进入导入申请页面并录入内容"
+      "title": "导入任务页面打开时，新增导入申请，验证进入申请页面并录入内容"
     },
     {
       "temp_id": "PROC-022.1",
@@ -3659,6 +3707,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "导入任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；20个字符)；源数据单位(字符；必填项)；源文件存储介质(字符；必填项；可选:光盘、U盘、其它；选择其它时文本框必须输入内容)；任务级别(字符；必填项；只可选:A级、B级、C级)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -3720,7 +3774,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，编辑导入申请，验证修改已存在记录"
+      "title": "导入任务页面打开时，编辑导入申请，验证修改已存在记录"
     },
     {
       "temp_id": "PROC-022.2",
@@ -3737,6 +3791,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "导入任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；20个字符)；源数据单位(字符；必填项)；源文件存储介质(字符；必填项；可选:光盘、U盘、其它；选择其它时文本框必须输入内容)；任务级别(字符；必填项；只可选:A级、B级、C级)；联系电话(数字；可选项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -3798,7 +3858,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，编辑导入申请，验证修改已存在记录"
+      "title": "导入任务页面打开时，编辑导入申请，验证修改已存在记录"
     },
     {
       "temp_id": "PROC-023.1",
@@ -3876,7 +3936,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，暂存导入申请，验证保存为草稿状态"
+      "title": "导入任务页面打开时，暂存导入申请，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-023.2",
@@ -3954,7 +4014,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "导入申请暂存时，验证保存为草稿状态且不进入审批流程"
+      "title": "导入申请暂存后，验证保存为草稿状态且不进入审批流程"
     },
     {
       "temp_id": "PROC-024.1",
@@ -4032,7 +4092,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "查询导入任务时，验证申请监控页面显示本人提交的导入任务列表及状态"
+      "title": "查询导入任务后，验证申请监控页面显示本人提交的导入任务列表及状态"
     },
     {
       "temp_id": "PROC-024.2",
@@ -4110,7 +4170,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "查询导入任务时，验证申请监控页面显示本人提交的导入任务列表及状态"
+      "title": "查询导入任务后，验证申请监控页面显示本人提交的导入任务列表及状态"
     },
     {
       "temp_id": "PROC-025.1",
@@ -4188,7 +4248,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "下载导入文件时，验证能够批量下载并保存"
+      "title": "下载导入文件后，验证能够批量下载并保存导入任务"
     },
     {
       "temp_id": "PROC-025.2",
@@ -4266,7 +4326,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "下载导入文件时，验证能够批量下载并保存"
+      "title": "下载导入文件后，验证能够批量下载并保存导入任务"
     },
     {
       "temp_id": "PROC-026.1",
@@ -4344,7 +4404,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "查看导入任务详情时，验证提供记录的详细信息"
+      "title": "查看导入任务详情后，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-026.2",
@@ -4422,7 +4482,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "查看导入任务详情时，验证提供记录的详细信息"
+      "title": "查看导入任务详情后，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-027.1",
@@ -4500,7 +4560,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "删除导入申请时，验证在业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "删除导入申请后，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-027.2",
@@ -4578,7 +4638,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "删除导入申请时，验证在业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "删除导入申请后，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-028.1",
@@ -4656,7 +4716,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "确认导入完成时，验证任务结束"
+      "title": "确认导入完成后，验证任务结束"
     },
     {
       "temp_id": "PROC-028.2",
@@ -4734,7 +4794,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "确认导入完成时，验证任务结束"
+      "title": "确认导入完成后，验证任务结束"
     },
     {
       "temp_id": "PROC-029.1",
@@ -4857,7 +4917,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "提交含违规值的导入任务表单时，验证各字段校验失败并显示相应提示"
+      "title": "提交含违规值的导入任务表单后，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-029.2",
@@ -4980,7 +5040,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "提交含违规值的导入任务表单时，验证各字段校验失败并显示相应提示"
+      "title": "提交含违规值的导入任务表单后，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-030",
@@ -5058,7 +5118,7 @@
         "multi_count": 1,
         "multi_reason": "entity=角色 dim_count=0 instances=1"
       },
-      "title": "查询角色时，验证通过角色名称字段进行查询"
+      "title": "查询角色后，验证通过角色名称字段进行查询"
     },
     {
       "temp_id": "PROC-031",
@@ -5136,7 +5196,7 @@
         "multi_count": 1,
         "multi_reason": "entity=角色 dim_count=0 instances=1"
       },
-      "title": "查看角色下用户时，验证查看该角色下对应的用户信息"
+      "title": "查看角色下用户后，验证查看该角色下对应的用户信息"
     },
     {
       "temp_id": "PROC-032",
@@ -5229,7 +5289,7 @@
         "multi_count": 1,
         "multi_reason": "entity=角色 dim_count=0 instances=1"
       },
-      "title": "尝试违反规则操作时，验证系统内置角色不可更改、删除和禁用"
+      "title": "尝试违反规则操作后，验证系统内置角色不可更改、删除和禁用"
     },
     {
       "temp_id": "PROC-033",
@@ -5311,7 +5371,7 @@
         "multi_count": 1,
         "multi_reason": "entity=角色 dim_count=0 instances=1"
       },
-      "title": "执行角色操作事件时，验证角色管理员可授权普通用户等角色"
+      "title": "执行角色操作事件后，验证角色管理员可授权普通用户等角色"
     },
     {
       "temp_id": "PROC-034",
@@ -5404,7 +5464,7 @@
         "multi_count": 1,
         "multi_reason": "entity=角色 dim_count=0 instances=1"
       },
-      "title": "执行角色操作事件时，验证实现基于角色的访问控制"
+      "title": "执行基于角色访问控制操作事件后，验证实现基于角色的访问控制"
     },
     {
       "temp_id": "PROC-035.1",
@@ -5489,7 +5549,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "新建扫描申请时，验证任务状态转换为草稿并初始化为草稿"
+      "title": "新建扫描申请后，验证任务状态转换为草稿并初始化为草稿"
     },
     {
       "temp_id": "PROC-035.2",
@@ -5574,7 +5634,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "新建扫描申请时，验证任务状态转换为草稿并初始化为草稿"
+      "title": "新建扫描申请后，验证任务状态转换为草稿并初始化为草稿"
     },
     {
       "temp_id": "PROC-036.1",
@@ -5652,7 +5712,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "文件级别配置变更后，文件级别显示修改后的值"
+      "title": "文件级别配置变更后，验证文件级别显示修改后的值"
     },
     {
       "temp_id": "PROC-036.2",
@@ -5730,7 +5790,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "文件级别配置变更后，文件级别显示修改后的值"
+      "title": "文件级别配置变更后，验证文件级别显示修改后的值"
     },
     {
       "temp_id": "PROC-037.1",
@@ -5747,6 +5807,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件扫描任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；文件级别(字符；必填项；只可选:A级、B级、C级)；文件页数(字符；必填项；只能填入1~100之间的数字)；联系电话(数字；可选项)；扫描内容(字符；必选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -5808,7 +5874,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "新增扫描申请后，进入扫描申请页面可录入申请内容"
+      "title": "进入扫描申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-037.2",
@@ -5825,6 +5891,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件扫描任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；文件级别(字符；必填项；只可选:A级、B级、C级)；文件页数(字符；必填项；只能填入1~100之间的数字)；联系电话(数字；可选项)；扫描内容(字符；必选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -5886,7 +5958,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "新增扫描申请后，进入扫描申请页面可录入申请内容"
+      "title": "进入扫描申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-038.1",
@@ -5903,6 +5975,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件扫描任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；文件级别(字符；必填项；只可选:A级、B级、C级)；文件页数(字符；必填项；只能填入1~100之间的数字)；联系电话(数字；可选项)；扫描内容(字符；必选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -5964,7 +6042,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "编辑扫描申请后，可对已存在的扫描申请记录进行修改"
+      "title": "编辑扫描申请，验证可修改已存在的申请记录"
     },
     {
       "temp_id": "PROC-038.2",
@@ -5981,6 +6059,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "文件扫描任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；文件级别(字符；必填项；只可选:A级、B级、C级)；文件页数(字符；必填项；只能填入1~100之间的数字)；联系电话(数字；可选项)；扫描内容(字符；必选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -6042,7 +6126,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "编辑扫描申请后，可对已存在的扫描申请记录进行修改"
+      "title": "编辑扫描申请，验证可修改已存在的申请记录"
     },
     {
       "temp_id": "PROC-039.1",
@@ -6120,7 +6204,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "暂存扫描申请后，保存为草稿状态"
+      "title": "暂存扫描申请，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-039.2",
@@ -6198,7 +6282,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "暂存扫描申请后，保存为草稿状态"
+      "title": "暂存扫描申请，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-040.1",
@@ -6276,7 +6360,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "查询扫描任务后，申请监控页面显示本人提交的任务列表及状态"
+      "title": "查询扫描任务，验证看到本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-040.2",
@@ -6354,7 +6438,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "查询扫描任务后，申请监控页面显示本人提交的任务列表及状态"
+      "title": "查询扫描任务，验证看到本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-041.1",
@@ -6432,7 +6516,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "下载扫描任务后，能够批量下载保存任务"
+      "title": "下载扫描任务，验证批量下载保存功能"
     },
     {
       "temp_id": "PROC-041.2",
@@ -6510,7 +6594,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "下载扫描任务后，能够批量下载保存任务"
+      "title": "下载扫描任务，验证批量下载保存功能"
     },
     {
       "temp_id": "PROC-042.1",
@@ -6588,7 +6672,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "查看扫描任务详情后，提供记录的详细信息"
+      "title": "查看扫描任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-042.2",
@@ -6666,7 +6750,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "查看扫描任务详情后，提供记录的详细信息"
+      "title": "查看扫描任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-043.1",
@@ -6744,7 +6828,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "删除扫描申请后，业务允许情况下删除选中记录，列表数据实时刷新"
+      "title": "删除扫描申请，验证删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-043.2",
@@ -6822,7 +6906,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "删除扫描申请后，业务允许情况下删除选中记录，列表数据实时刷新"
+      "title": "删除扫描申请，验证删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-044.1",
@@ -6927,7 +7011,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "提交含违规值的文件扫描任务表单后，各字段校验失败并提示错误信息"
+      "title": "提交含违规值的文件扫描任务表单，验证校验失败并提示错误信息"
     },
     {
       "temp_id": "PROC-044.2",
@@ -7032,7 +7116,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "提交含违规值的文件扫描任务表单后，各字段校验失败并提示错误信息"
+      "title": "提交含违规值的文件扫描任务表单，验证校验失败并提示错误信息"
     },
     {
       "temp_id": "PROC-045.1",
@@ -7117,7 +7201,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "新建用户后，用户状态转换为正常并初始化为正常"
+      "title": "新建用户后，验证用户状态转换为正常并初始化"
     },
     {
       "temp_id": "PROC-045.2",
@@ -7202,7 +7286,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "新建用户后，用户状态转换为正常并初始化为正常"
+      "title": "新建用户后，验证用户状态转换为正常并初始化"
     },
     {
       "temp_id": "PROC-046.1",
@@ -7921,7 +8005,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "用户接近截止时间连续输错密码时，系统自动锁定用户，验证状态转换为锁定"
+      "title": "用户接近截止时间连续输错密码时，系统锁定用户，验证状态转换为锁定"
     },
     {
       "temp_id": "PROC-049.2",
@@ -8006,7 +8090,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "用户接近截止时间连续输错密码时，系统自动锁定用户，验证状态转换为锁定"
+      "title": "用户接近截止时间连续输错密码时，系统锁定用户，验证状态转换为锁定"
     },
     {
       "temp_id": "PROC-050.1",
@@ -8271,7 +8355,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "持有人载体到期不进行处理时，系统自动限制用户功能，验证不能发起登记、导入、导出、扫描流程"
+      "title": "用户持有人载体到期不进行处理时，系统自动限制用户功能，验证用户不能发起相关流程"
     },
     {
       "temp_id": "PROC-051.2",
@@ -8366,7 +8450,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "持有人载体到期不进行处理时，系统自动限制用户功能，验证不能发起登记、导入、导出、扫描流程"
+      "title": "用户持有人载体到期不进行处理时，系统自动限制用户功能，验证用户不能发起相关流程"
     },
     {
       "temp_id": "PROC-052.1",
@@ -8383,6 +8467,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "用户",
+          "state": "",
+          "description": "用户账号(字符；必填项；可以由汉字、小写字母、数字、下划线(_)组成；不可重复；不可修改)；用户姓名(字符；必填项)；登录密码(数字；必填项；由数字、大小写字母和特殊符号组成；长度大于等于8个字符小于等于18个字符)；确认密码(数字；必填项；与登录密码一致)；手机号码(数字；必填项，唯一；第一位数字1，第二位数字:3、4、5、6、7、8、9，一共11位数字)；邮箱(字符；必须包含@和.；不能包含中文、其它特殊符号)；生日(日期；yyyy-mm-dd)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -8444,7 +8534,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，实现用户新增功能"
+      "title": "用户页面操作入口可用时，实现用户新增功能"
     },
     {
       "temp_id": "PROC-052.2",
@@ -8461,6 +8551,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "用户",
+          "state": "",
+          "description": "用户账号(字符；必填项；可以由汉字、小写字母、数字、下划线(_)组成；不可重复；不可修改)；用户姓名(字符；必填项)；登录密码(数字；必填项；由数字、大小写字母和特殊符号组成；长度大于等于8个字符小于等于18个字符)；确认密码(数字；必填项；与登录密码一致)；手机号码(数字；必填项，唯一；第一位数字1，第二位数字:3、4、5、6、7、8、9，一共11位数字)；邮箱(字符；必须包含@和.；不能包含中文、其它特殊符号)；生日(日期；yyyy-mm-dd)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -8522,7 +8618,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，实现用户新增功能"
+      "title": "用户页面操作入口可用时，实现用户新增功能"
     },
     {
       "temp_id": "PROC-053.1",
@@ -8539,6 +8635,12 @@
           "state": "存在",
           "description": "[实例 1] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "用户",
+          "state": "",
+          "description": "用户账号(字符；必填项；可以由汉字、小写字母、数字、下划线(_)组成；不可重复；不可修改)；用户姓名(字符；必填项)；登录密码(数字；必填项；由数字、大小写字母和特殊符号组成；长度大于等于8个字符小于等于18个字符)；确认密码(数字；必填项；与登录密码一致)；手机号码(数字；必填项，唯一；第一位数字1，第二位数字:3、4、5、6、7、8、9，一共11位数字)；邮箱(字符；必须包含@和.；不能包含中文、其它特殊符号)；生日(日期；yyyy-mm-dd)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -8600,7 +8702,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，编辑用户信息，验证用户账号不能进行修改"
+      "title": "用户页面操作入口可用时，实现用户信息修改，验证用户账号不可修改"
     },
     {
       "temp_id": "PROC-053.2",
@@ -8617,6 +8719,12 @@
           "state": "存在",
           "description": "[实例 2] 操作入口可用",
           "given_type": "state"
+        },
+        {
+          "target": "用户",
+          "state": "",
+          "description": "用户账号(字符；必填项；可以由汉字、小写字母、数字、下划线(_)组成；不可重复；不可修改)；用户姓名(字符；必填项)；登录密码(数字；必填项；由数字、大小写字母和特殊符号组成；长度大于等于8个字符小于等于18个字符)；确认密码(数字；必填项；与登录密码一致)；手机号码(数字；必填项，唯一；第一位数字1，第二位数字:3、4、5、6、7、8、9，一共11位数字)；邮箱(字符；必须包含@和.；不能包含中文、其它特殊符号)；生日(日期；yyyy-mm-dd)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -8678,7 +8786,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，编辑用户信息，验证用户账号不能进行修改"
+      "title": "用户页面操作入口可用时，实现用户信息修改，验证用户账号不可修改"
     },
     {
       "temp_id": "PROC-054.1",
@@ -8756,7 +8864,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，查看用户详情"
+      "title": "用户页面操作入口可用时，查看用户详细信息"
     },
     {
       "temp_id": "PROC-054.2",
@@ -8834,7 +8942,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，查看用户详情"
+      "title": "用户页面操作入口可用时，查看用户详细信息"
     },
     {
       "temp_id": "PROC-055.1",
@@ -8912,7 +9020,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，重置用户密码，验证重置后的密码为Abcd123456！"
+      "title": "用户页面操作入口可用时，重置用户密码，验证密码为Abcd123456！"
     },
     {
       "temp_id": "PROC-055.2",
@@ -8990,7 +9098,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "操作入口可用时，重置用户密码，验证重置后的密码为Abcd123456！"
+      "title": "用户页面操作入口可用时，重置用户密码，验证密码为Abcd123456！"
     },
     {
       "temp_id": "PROC-056.1",
@@ -9081,7 +9189,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，删除用户，验证用户从系统中删除及流程信息用户不能删除"
+      "title": "用户存在且操作入口可用时，删除用户，验证用户被删除及具有流程信息用户不能删除"
     },
     {
       "temp_id": "PROC-056.2",
@@ -9172,7 +9280,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，删除用户，验证用户从系统中删除及流程信息用户不能删除"
+      "title": "用户存在且操作入口可用时，删除用户，验证用户被删除及具有流程信息用户不能删除"
     },
     {
       "temp_id": "PROC-057.1",
@@ -9250,7 +9358,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，查询用户，验证根据用户账号查询符合条件的用户"
+      "title": "用户存在且操作入口可用时，查询用户，验证根据用户账号查询到符合条件的用户"
     },
     {
       "temp_id": "PROC-057.2",
@@ -9328,7 +9436,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，查询用户，验证根据用户账号查询符合条件的用户"
+      "title": "用户存在且操作入口可用时，查询用户，验证根据用户账号查询到符合条件的用户"
     },
     {
       "temp_id": "PROC-058.1",
@@ -9430,7 +9538,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，登录用户，验证登录成功后显示名称及角色进入相应页面"
+      "title": "用户存在且操作入口可用时，登录用户，验证登录成功后显示登录人员名称及角色进入相应页面"
     },
     {
       "temp_id": "PROC-058.2",
@@ -9532,7 +9640,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，登录用户，验证登录成功后显示名称及角色进入相应页面"
+      "title": "用户存在且操作入口可用时，登录用户，验证登录成功后显示登录人员名称及角色进入相应页面"
     },
     {
       "temp_id": "PROC-059.1",
@@ -9610,7 +9718,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，注销用户，验证退出登录状态并返回登录界面"
+      "title": "用户存在且操作入口可用时，注销用户，验证退出登录状态并返回登录界面"
     },
     {
       "temp_id": "PROC-059.2",
@@ -9688,7 +9796,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "存在操作入口时，注销用户，验证退出登录状态并返回登录界面"
+      "title": "用户存在且操作入口可用时，注销用户，验证退出登录状态并返回登录界面"
     },
     {
       "temp_id": "PROC-060.1",
@@ -9773,7 +9881,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "用户处于锁定状态时，尝试锁定，验证操作被拒绝且状态仍为锁定"
+      "title": "用户处于锁定状态时，尝试解锁，验证操作被拒绝且用户状态保持锁定"
     },
     {
       "temp_id": "PROC-060.2",
@@ -9858,7 +9966,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "用户处于锁定状态时，尝试锁定，验证操作被拒绝且状态仍为锁定"
+      "title": "用户处于锁定状态时，尝试解锁，验证操作被拒绝且用户状态保持锁定"
     },
     {
       "temp_id": "PROC-061.1",
@@ -9949,7 +10057,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，尝试违反规则操作，验证用户账号规则及不可重复不可修改"
+      "title": "用户规则适用前提满足时，尝试违反规则操作，验证用户账号规则及不可重复不可修改"
     },
     {
       "temp_id": "PROC-061.2",
@@ -10040,7 +10148,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，尝试违反规则操作，验证用户账号规则及不可重复不可修改"
+      "title": "用户规则适用前提满足时，尝试违反规则操作，验证用户账号规则及不可重复不可修改"
     },
     {
       "temp_id": "PROC-062.1",
@@ -10132,7 +10240,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行锁定规则操作，验证用户连续输错3次密码后自动锁定"
+      "title": "用户规则适用前提满足时，执行连续输错3次密码锁定规则，验证用户被锁定"
     },
     {
       "temp_id": "PROC-062.2",
@@ -10224,7 +10332,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行锁定规则操作，验证用户连续输错3次密码后自动锁定"
+      "title": "用户规则适用前提满足时，执行连续输错3次密码锁定规则，验证用户被锁定"
     },
     {
       "temp_id": "PROC-063.1",
@@ -10313,7 +10421,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行密码错误规则操作，验证用户密码输入错误后返回提示信息"
+      "title": "用户规则适用前提满足时，执行密码输入错误提示规则，验证返回'用户名或密码错误'提示"
     },
     {
       "temp_id": "PROC-063.2",
@@ -10402,7 +10510,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行密码错误规则操作，验证用户密码输入错误后返回提示信息"
+      "title": "用户规则适用前提满足时，执行密码输入错误提示规则，验证返回'用户名或密码错误'提示"
     },
     {
       "temp_id": "PROC-064.1",
@@ -10494,7 +10602,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行无操作自动退出登录规则操作，验证用户无操作30分钟后自动退出登录"
+      "title": "用户规则适用前提满足时，执行用户登录后无操作自动退出登录规则，验证用户自动退出登录"
     },
     {
       "temp_id": "PROC-064.2",
@@ -10586,7 +10694,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行无操作自动退出登录规则操作，验证用户无操作30分钟后自动退出登录"
+      "title": "用户规则适用前提满足时，执行用户登录后无操作自动退出登录规则，验证用户自动退出登录"
     },
     {
       "temp_id": "PROC-065.1",
@@ -10679,7 +10787,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行用户登录后显示名称及角色进入相应页面规则操作，验证规则正面效果"
+      "title": "用户和角色规则适用前提满足时，执行用户登录规则，验证登录成功后显示名称及角色进入相应页面"
     },
     {
       "temp_id": "PROC-065.2",
@@ -10772,7 +10880,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行用户登录后显示名称及角色进入相应页面规则操作，验证规则正面效果"
+      "title": "用户和角色规则适用前提满足时，执行用户登录规则，验证登录成功后显示名称及角色进入相应页面"
     },
     {
       "temp_id": "PROC-066.1",
@@ -10861,7 +10969,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "尝试退出系统时，验证操作被拒绝且系统状态保持不变"
+      "title": "用户尝试退出系统时，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-066.2",
@@ -10950,7 +11058,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "尝试退出系统时，验证操作被拒绝且系统状态保持不变"
+      "title": "用户尝试退出系统时，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-067.1",
@@ -11028,7 +11136,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置登录密码时，验证密码规则符合要求"
+      "title": "用户设置登录密码时，验证密码规则符合要求"
     },
     {
       "temp_id": "PROC-067.2",
@@ -11106,7 +11214,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置登录密码时，验证密码规则符合要求"
+      "title": "用户设置登录密码时，验证密码规则符合要求"
     },
     {
       "temp_id": "PROC-068.1",
@@ -11184,7 +11292,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置手机号码时，验证手机号码格式正确且唯一"
+      "title": "用户设置手机号码时，验证手机号码格式正确且唯一"
     },
     {
       "temp_id": "PROC-068.2",
@@ -11262,7 +11370,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置手机号码时，验证手机号码格式正确且唯一"
+      "title": "用户设置手机号码时，验证手机号码格式正确且唯一"
     },
     {
       "temp_id": "PROC-069.1",
@@ -11340,7 +11448,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置邮箱时，验证邮箱格式正确"
+      "title": "用户设置邮箱时，验证邮箱格式正确"
     },
     {
       "temp_id": "PROC-069.2",
@@ -11418,7 +11526,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "设置邮箱时，验证邮箱格式正确"
+      "title": "用户设置邮箱时，验证邮箱格式正确"
     },
     {
       "temp_id": "PROC-070.1",
@@ -11507,7 +11615,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "修改密码时，验证密码修改规则符合要求"
+      "title": "用户修改密码时，验证密码修改规则符合要求"
     },
     {
       "temp_id": "PROC-070.2",
@@ -11596,7 +11704,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "修改密码时，验证密码修改规则符合要求"
+      "title": "用户修改密码时，验证密码修改规则符合要求"
     },
     {
       "temp_id": "PROC-071.1",
@@ -11685,7 +11793,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "显示密码时，验证密码不以明文显示"
+      "title": "用户查看密码时，验证密码不以明文显示"
     },
     {
       "temp_id": "PROC-071.2",
@@ -11774,7 +11882,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "显示密码时，验证密码不以明文显示"
+      "title": "用户查看密码时，验证密码不以明文显示"
     },
     {
       "temp_id": "PROC-072.1",
@@ -11852,7 +11960,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "显示提示信息时，验证提示信息不包含系统运行、技术架构等信息"
+      "title": "用户操作时，验证提示信息不包含系统运行、技术架构等信息"
     },
     {
       "temp_id": "PROC-072.2",
@@ -11930,7 +12038,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "显示提示信息时，验证提示信息不包含系统运行、技术架构等信息"
+      "title": "用户操作时，验证提示信息不包含系统运行、技术架构等信息"
     },
     {
       "temp_id": "PROC-073.1",
@@ -12019,7 +12127,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "登录系统时，验证用户账号或密码错误有提示，用户不存在时可被证实"
+      "title": "用户登录时，验证对用户账号或密码错误的输入有提示，且用户不存在时登录系统时可被证实"
     },
     {
       "temp_id": "PROC-073.2",
@@ -12108,7 +12216,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "登录系统时，验证用户账号或密码错误有提示，用户不存在时可被证实"
+      "title": "用户登录时，验证对用户账号或密码错误的输入有提示，且用户不存在时登录系统时可被证实"
     },
     {
       "temp_id": "PROC-074.1",
@@ -12217,7 +12325,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "输入日期类数据时，验证提供日历选择功能"
+      "title": "用户输入日期类数据时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-074.2",
@@ -12326,7 +12434,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "输入日期类数据时，验证提供日历选择功能"
+      "title": "用户输入日期类数据时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-075.1",
@@ -12503,7 +12611,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "提交用户表单时，验证各项数据校验规则符合要求"
+      "title": "系统管理员提交含违规值的用户表单时，验证各字段校验失败并给出相应提示"
     },
     {
       "temp_id": "PROC-075.2",
@@ -12680,7 +12788,7 @@
         "multi_count": 2,
         "multi_reason": "entity=用户 dim_count=1 instances=2"
       },
-      "title": "提交用户表单时，验证各项数据校验规则符合要求"
+      "title": "系统管理员提交含违规值的用户表单时，验证各字段校验失败并给出相应提示"
     },
     {
       "temp_id": "PROC-076.1",
@@ -13861,7 +13969,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "初始状态下，普通用户新建登记申请，验证任务状态变更为草稿"
+      "title": "初始状态下，普通用户新建登记申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-082.2",
@@ -13946,7 +14054,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "初始状态下，普通用户新建登记申请，验证任务状态变更为草稿"
+      "title": "初始状态下，普通用户新建登记申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-082.3",
@@ -14031,7 +14139,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "初始状态下，普通用户新建登记申请，验证任务状态变更为草稿"
+      "title": "初始状态下，普通用户新建登记申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-082.4",
@@ -14116,7 +14224,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "初始状态下，普通用户新建登记申请，验证任务状态变更为草稿"
+      "title": "初始状态下，普通用户新建登记申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-083.1",
@@ -14506,7 +14614,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体类别配置变更后，验证载体类别显示为修改后的值"
+      "title": "载体类别配置变更后，验证载体类别显示修改后的值"
     },
     {
       "temp_id": "PROC-084.2",
@@ -14584,7 +14692,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体类别配置变更后，验证载体类别显示为修改后的值"
+      "title": "载体类别配置变更后，验证载体类别显示修改后的值"
     },
     {
       "temp_id": "PROC-084.3",
@@ -14662,7 +14770,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体类别配置变更后，验证载体类别显示为修改后的值"
+      "title": "载体类别配置变更后，验证载体类别显示修改后的值"
     },
     {
       "temp_id": "PROC-084.4",
@@ -14740,7 +14848,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体类别配置变更后，验证载体类别显示为修改后的值"
+      "title": "载体类别配置变更后，验证载体类别显示修改后的值"
     },
     {
       "temp_id": "PROC-085.1",
@@ -14757,6 +14865,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -14839,6 +14953,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -14921,6 +15041,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -15003,6 +15129,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -15085,6 +15217,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -15167,6 +15305,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -15249,6 +15393,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -15331,6 +15481,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体登记任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体登记任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成，规则为:任务类型+申请时间+流水序号)；申请时间(字符；必填项；系统自动生成)；载体信息(必填项；添加载体后可看到载体快照)；文件或资料名称(字符；必填项；30个字符)；载体类别(必填项；下拉选项:光盘、纸质)；载体来源(字符；必填项)；原载体编号(字符；必填项；20个字符)；级别(字符；必填项；只可选:A级、B级、C级)；纸张页数(字符；载体类别为纸质时必填项；数值范围1-9999)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -16462,7 +16618,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看载体登记任务详情，验证详细信息提供"
+      "title": "草稿状态下，查看载体登记任务详情，验证提供详细信息功能"
     },
     {
       "temp_id": "PROC-090.2",
@@ -16544,7 +16700,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看载体登记任务详情，验证详细信息提供"
+      "title": "草稿状态下，查看载体登记任务详情，验证提供详细信息功能"
     },
     {
       "temp_id": "PROC-090.3",
@@ -16626,7 +16782,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看载体登记任务详情，验证详细信息提供"
+      "title": "草稿状态下，查看载体登记任务详情，验证提供详细信息功能"
     },
     {
       "temp_id": "PROC-090.4",
@@ -16708,7 +16864,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看载体登记任务详情，验证详细信息提供"
+      "title": "草稿状态下，查看载体登记任务详情，验证提供详细信息功能"
     },
     {
       "temp_id": "PROC-091.1",
@@ -16790,7 +16946,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除载体登记申请，验证删除记录及列表刷新"
+      "title": "草稿状态下，删除载体登记申请，验证删除记录并实时刷新列表功能"
     },
     {
       "temp_id": "PROC-091.2",
@@ -16872,7 +17028,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除载体登记申请，验证删除记录及列表刷新"
+      "title": "草稿状态下，删除载体登记申请，验证删除记录并实时刷新列表功能"
     },
     {
       "temp_id": "PROC-091.3",
@@ -16954,7 +17110,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除载体登记申请，验证删除记录及列表刷新"
+      "title": "草稿状态下，删除载体登记申请，验证删除记录并实时刷新列表功能"
     },
     {
       "temp_id": "PROC-091.4",
@@ -17036,7 +17192,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除载体登记申请，验证删除记录及列表刷新"
+      "title": "草稿状态下，删除载体登记申请，验证删除记录并实时刷新列表功能"
     },
     {
       "temp_id": "PROC-092.1",
@@ -17177,7 +17333,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证各项校验失败提示"
+      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证表单校验失败提示信息"
     },
     {
       "temp_id": "PROC-092.2",
@@ -17318,7 +17474,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证各项校验失败提示"
+      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证表单校验失败提示信息"
     },
     {
       "temp_id": "PROC-092.3",
@@ -17459,7 +17615,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证各项校验失败提示"
+      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证表单校验失败提示信息"
     },
     {
       "temp_id": "PROC-092.4",
@@ -17600,7 +17756,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证各项校验失败提示"
+      "title": "可编辑状态下，提交含违规值的载体登记任务表单，验证表单校验失败提示信息"
     },
     {
       "temp_id": "PROC-093",
@@ -17678,7 +17834,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "操作入口可用时，查询登录日志，验证查询功能"
+      "title": "存在操作入口时，查询登录日志，验证查询功能"
     },
     {
       "temp_id": "PROC-094",
@@ -17756,7 +17912,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "操作入口可用时，查询操作日志，验证查询功能"
+      "title": "存在操作入口时，查询操作日志，验证查询功能"
     },
     {
       "temp_id": "PROC-095",
@@ -17834,7 +17990,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "操作入口可用时，导入日志文件，验证导入操作"
+      "title": "存在操作入口时，导入日志文件，验证导入操作"
     },
     {
       "temp_id": "PROC-096",
@@ -17912,7 +18068,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "操作入口可用时，导出日志Excel，验证导出及删除操作"
+      "title": "存在操作入口时，导出日志Excel，验证导出操作"
     },
     {
       "temp_id": "PROC-097",
@@ -18005,7 +18161,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "日志管理规则执行时，验证日志管理只对日志管理员和角色管理员开放，系统日志记录只能由他们查看"
+      "title": "日志管理规则执行时，验证系统日志管理权限和记录权限符合规则要求"
     },
     {
       "temp_id": "PROC-098",
@@ -18094,7 +18250,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "日志管理规则执行时，验证登录日志、操作日志和系统日志的记录要求"
+      "title": "日志记录规则执行时，验证日志记录内容符合规则要求"
     },
     {
       "temp_id": "PROC-099",
@@ -18183,7 +18339,7 @@
         "multi_count": 1,
         "multi_reason": "entity=日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "日志管理规则执行时，验证日志导出和删除操作"
+      "title": "日志导出规则执行时，验证日志导出功能符合规则要求"
     },
     {
       "temp_id": "PROC-100.1",
@@ -20037,7 +20193,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "已回收的载体尝试归档时，操作被拒绝，状态保持为已回收"
+      "title": "已回收的载体尝试归档，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-109.1",
@@ -20122,7 +20278,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "载体规则执行后，载体登记成功并记入台账，持有时间默认72小时，到期前12小时自动提醒"
+      "title": "载体规则适用前提满足时，验证载体登记规则执行正确"
     },
     {
       "temp_id": "PROC-109.2",
@@ -20207,7 +20363,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "载体规则执行后，载体登记成功并记入台账，持有时间默认72小时，到期前12小时自动提醒"
+      "title": "载体规则适用前提满足时，验证载体登记规则执行正确"
     },
     {
       "temp_id": "PROC-110.1",
@@ -20308,7 +20464,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "持有人到期未处理，载体发起操作被拒绝，系统状态保持不变"
+      "title": "持有人到期未处理，验证载体发起操作被拒绝且系统状态不变"
     },
     {
       "temp_id": "PROC-110.2",
@@ -20409,7 +20565,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "持有人到期未处理，载体发起操作被拒绝，系统状态保持不变"
+      "title": "持有人到期未处理，验证载体发起操作被拒绝且系统状态不变"
     },
     {
       "temp_id": "PROC-111.1",
@@ -20502,7 +20658,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "载体留存时间到期前12小时，系统自动提醒并允许操作，不满足条件时规则不触发"
+      "title": "载体留存时间到期前，验证系统自动发送到期提醒并允许操作"
     },
     {
       "temp_id": "PROC-111.2",
@@ -20595,7 +20751,7 @@
         "multi_count": 2,
         "multi_reason": "entity=载体 dim_count=1 instances=2"
       },
-      "title": "载体留存时间到期前12小时，系统自动提醒并允许操作，不满足条件时规则不触发"
+      "title": "载体留存时间到期前，验证系统自动发送到期提醒并允许操作"
     },
     {
       "temp_id": "PROC-112.1",
@@ -20680,7 +20836,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "普通用户新建归档申请，任务状态转换为草稿"
+      "title": "普通用户新建归档申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-112.2",
@@ -20765,7 +20921,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "普通用户新建归档申请，任务状态转换为草稿"
+      "title": "普通用户新建归档申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-112.3",
@@ -20850,7 +21006,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "普通用户新建归档申请，任务状态转换为草稿"
+      "title": "普通用户新建归档申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-112.4",
@@ -20935,7 +21091,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "普通用户新建归档申请，任务状态转换为草稿"
+      "title": "普通用户新建归档申请，验证状态转换为草稿"
     },
     {
       "temp_id": "PROC-113.1",
@@ -20952,6 +21108,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21017,7 +21179,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，新增申请后进入申请页面可录入内容"
+      "title": "草稿状态归档申请，验证进入归档申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-113.2",
@@ -21034,6 +21196,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21099,7 +21267,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，新增申请后进入申请页面可录入内容"
+      "title": "草稿状态归档申请，验证进入归档申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-113.3",
@@ -21116,6 +21284,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21181,7 +21355,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，新增申请后进入申请页面可录入内容"
+      "title": "草稿状态归档申请，验证进入归档申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-113.4",
@@ -21198,6 +21372,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21263,7 +21443,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，新增申请后进入申请页面可录入内容"
+      "title": "草稿状态归档申请，验证进入归档申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-114.1",
@@ -21280,6 +21460,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21345,7 +21531,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，编辑申请可修改记录"
+      "title": "草稿状态归档申请，验证可对已存在的记录进行修改"
     },
     {
       "temp_id": "PROC-114.2",
@@ -21362,6 +21548,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21427,7 +21619,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，编辑申请可修改记录"
+      "title": "草稿状态归档申请，验证可对已存在的记录进行修改"
     },
     {
       "temp_id": "PROC-114.3",
@@ -21444,6 +21636,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21509,7 +21707,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，编辑申请可修改记录"
+      "title": "草稿状态归档申请，验证可对已存在的记录进行修改"
     },
     {
       "temp_id": "PROC-114.4",
@@ -21526,6 +21724,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体归档任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体归档任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -21591,7 +21795,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，编辑申请可修改记录"
+      "title": "草稿状态归档申请，验证可对已存在的记录进行修改"
     },
     {
       "temp_id": "PROC-115.1",
@@ -21673,7 +21877,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态的归档任务，暂存申请后保存为草稿状态"
+      "title": "草稿状态归档申请，验证暂存后保存为草稿状态"
     },
     {
       "temp_id": "PROC-115.2",
@@ -23327,7 +23531,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败并提示"
+      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息、备注校验失败并提示错误"
     },
     {
       "temp_id": "PROC-120.2",
@@ -23423,7 +23627,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败及提示信息"
+      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败"
     },
     {
       "temp_id": "PROC-120.3",
@@ -23519,7 +23723,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败及提示信息"
+      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败"
     },
     {
       "temp_id": "PROC-120.4",
@@ -23615,7 +23819,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败及提示信息"
+      "title": "载体归档任务信息录入页面打开时，普通用户提交含违规值的载体归档任务表单，验证申请事由、载体信息和备注校验失败"
     },
     {
       "temp_id": "PROC-121.1",
@@ -23972,6 +24176,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24037,7 +24247,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面并可录入申请内容"
+      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-122.2",
@@ -24054,6 +24264,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24119,7 +24335,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面并可录入申请内容"
+      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-122.3",
@@ -24136,6 +24352,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24201,7 +24423,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面并可录入申请内容"
+      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-122.4",
@@ -24218,6 +24440,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24283,7 +24511,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面并可录入申请内容"
+      "title": "载体外送任务处于草稿状态时，新增外送申请，验证进入外送申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-123.1",
@@ -24300,6 +24528,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24382,6 +24616,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24464,6 +24704,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -24546,6 +24792,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体外送任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体外送任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；外送单位(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；文件内容(字符；必填项)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -25103,7 +25355,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查询外送任务，验证看到本人提交的任务列表及状态"
+      "title": "草稿状态下，查询外送任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-125.3",
@@ -25185,7 +25437,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查询外送任务，验证看到本人提交的任务列表及状态"
+      "title": "草稿状态下，查询外送任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-125.4",
@@ -25267,7 +25519,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查询外送任务，验证看到本人提交的任务列表及状态"
+      "title": "草稿状态下，查询外送任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-126.1",
@@ -25677,7 +25929,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看外送任务详情，验证提供详细信息"
+      "title": "草稿状态下，查看外送任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-127.2",
@@ -25759,7 +26011,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看外送任务详情，验证提供详细信息"
+      "title": "草稿状态下，查看外送任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-127.3",
@@ -25841,7 +26093,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看外送任务详情，验证提供详细信息"
+      "title": "草稿状态下，查看外送任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-127.4",
@@ -25923,7 +26175,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，查看外送任务详情，验证提供详细信息"
+      "title": "草稿状态下，查看外送任务详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-128.1",
@@ -26005,7 +26257,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，下载外送回执单，验证审批通过后可查看和下载"
+      "title": "草稿状态下，下载外送回执单，验证审批通过后回执单可查看和下载"
     },
     {
       "temp_id": "PROC-128.2",
@@ -26087,7 +26339,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，下载外送回执单，验证审批通过后可查看和下载"
+      "title": "草稿状态下，下载外送回执单，验证审批通过后回执单可查看和下载"
     },
     {
       "temp_id": "PROC-128.3",
@@ -26169,7 +26421,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，下载外送回执单，验证审批通过后可查看和下载"
+      "title": "草稿状态下，下载外送回执单，验证审批通过后回执单可查看和下载"
     },
     {
       "temp_id": "PROC-128.4",
@@ -26251,7 +26503,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，下载外送回执单，验证审批通过后可查看和下载"
+      "title": "草稿状态下，下载外送回执单，验证审批通过后回执单可查看和下载"
     },
     {
       "temp_id": "PROC-129.1",
@@ -26333,7 +26585,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除外送申请，验证删除选中记录并刷新列表数据"
+      "title": "草稿状态下，删除外送申请，验证业务允许情况下删除记录并刷新列表"
     },
     {
       "temp_id": "PROC-129.2",
@@ -26415,7 +26667,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除外送申请，验证删除选中记录并刷新列表数据"
+      "title": "草稿状态下，删除外送申请，验证业务允许情况下删除记录并刷新列表"
     },
     {
       "temp_id": "PROC-129.3",
@@ -26497,7 +26749,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除外送申请，验证删除选中记录并刷新列表数据"
+      "title": "草稿状态下，删除外送申请，验证业务允许情况下删除记录并刷新列表"
     },
     {
       "temp_id": "PROC-129.4",
@@ -26579,7 +26831,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "草稿状态下，删除外送申请，验证删除选中记录并刷新列表数据"
+      "title": "草稿状态下，删除外送申请，验证业务允许情况下删除记录并刷新列表"
     },
     {
       "temp_id": "PROC-130.1",
@@ -26720,7 +26972,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "信息录入页面打开时，提交含违规值的载体外送任务表单，验证校验失败并提示错误信息"
+      "title": "载体外送任务信息录入页面打开时，提交含违规值的载体外送任务表单，验证校验失败及提示信息"
     },
     {
       "temp_id": "PROC-130.2",
@@ -27500,6 +27752,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27582,6 +27840,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27664,6 +27928,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27746,6 +28016,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27828,6 +28104,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27910,6 +28192,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -27992,6 +28280,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -28074,6 +28368,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体回收任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体回收任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -28631,7 +28931,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查询回收任务，验证申请监控页面显示本人提交的任务列表及状态"
+      "title": "载体回收任务处于草稿状态时，查询任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-135.3",
@@ -28713,7 +29013,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查询回收任务，验证申请监控页面显示本人提交的任务列表及状态"
+      "title": "载体回收任务处于草稿状态时，查询任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-135.4",
@@ -28795,7 +29095,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查询回收任务，验证申请监控页面显示本人提交的任务列表及状态"
+      "title": "载体回收任务处于草稿状态时，查询任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-136.1",
@@ -28877,7 +29177,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，下载回收任务，验证能够批量下载保存"
+      "title": "载体回收任务处于草稿状态时，下载任务，验证能够批量下载保存"
     },
     {
       "temp_id": "PROC-136.2",
@@ -28959,7 +29259,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，下载回收任务，验证能够批量下载保存"
+      "title": "载体回收任务处于草稿状态时，下载任务，验证能够批量下载保存"
     },
     {
       "temp_id": "PROC-136.3",
@@ -29041,7 +29341,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，下载回收任务，验证能够批量下载保存"
+      "title": "载体回收任务处于草稿状态时，下载任务，验证能够批量下载保存"
     },
     {
       "temp_id": "PROC-136.4",
@@ -29123,7 +29423,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，下载回收任务，验证能够批量下载保存"
+      "title": "载体回收任务处于草稿状态时，下载任务，验证能够批量下载保存"
     },
     {
       "temp_id": "PROC-137.1",
@@ -29205,7 +29505,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查看回收任务详情，验证提供记录的详细信息"
+      "title": "载体回收任务处于草稿状态时，查看详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-137.2",
@@ -29287,7 +29587,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查看回收任务详情，验证提供记录的详细信息"
+      "title": "载体回收任务处于草稿状态时，查看详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-137.3",
@@ -29369,7 +29669,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查看回收任务详情，验证提供记录的详细信息"
+      "title": "载体回收任务处于草稿状态时，查看详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-137.4",
@@ -29451,7 +29751,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，查看回收任务详情，验证提供记录的详细信息"
+      "title": "载体回收任务处于草稿状态时，查看详情，验证提供记录的详细信息"
     },
     {
       "temp_id": "PROC-138.1",
@@ -29533,7 +29833,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，删除回收申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "载体回收任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-138.2",
@@ -29615,7 +29915,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，删除回收申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "载体回收任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-138.3",
@@ -29697,7 +29997,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，删除回收申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "载体回收任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-138.4",
@@ -29779,7 +30079,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务处于草稿状态时，删除回收申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
+      "title": "载体回收任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
     },
     {
       "temp_id": "PROC-139.1",
@@ -29884,7 +30184,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务信息录入页面打开时，提交含违规值的载体回收任务表单，验证校验失败并提示错误信息"
+      "title": "载体回收任务信息录入页面打开时，提交含违规值的表单，验证申请事由、载体信息和备注校验失败并提示"
     },
     {
       "temp_id": "PROC-139.2",
@@ -29989,7 +30289,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务信息录入页面打开时，提交含违规值的载体回收任务表单，验证校验失败并提示错误信息"
+      "title": "载体回收任务信息录入页面打开时，提交含违规值的表单，验证申请事由、载体信息和备注校验失败并提示"
     },
     {
       "temp_id": "PROC-139.3",
@@ -30094,7 +30394,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务信息录入页面打开时，提交含违规值的载体回收任务表单，验证校验失败并提示错误信息"
+      "title": "载体回收任务信息录入页面打开时，提交含违规值的表单，验证申请事由、载体信息和备注校验失败并提示"
     },
     {
       "temp_id": "PROC-139.4",
@@ -30199,7 +30499,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体回收任务信息录入页面打开时，提交含违规值的载体回收任务表单，验证校验失败并提示错误信息"
+      "title": "载体回收任务信息录入页面打开时，提交含违规值的表单，验证申请事由、载体信息和备注校验失败并提示"
     },
     {
       "temp_id": "PROC-140.1",
@@ -30303,7 +30603,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "登记申请处于草稿状态且申请人已填写必填项时，提交登记申请，验证状态转换为待审批并流转至审批流程"
+      "title": "登记申请处于草稿状态且申请人已填写必填项时，提交申请，验证状态转换为待审批并流转至审批流程"
     },
     {
       "temp_id": "PROC-140.2",
@@ -30407,7 +30707,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "用户提交登记申请后，验证任务状态变更为待审批"
+      "title": "申请人填写必填项后，普通用户提交登记申请，验证任务状态变更为待审批"
     },
     {
       "temp_id": "PROC-140.3",
@@ -30511,7 +30811,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "用户提交登记申请后，验证任务状态变更为待审批"
+      "title": "申请人填写必填项后，普通用户提交登记申请，验证任务状态变更为待审批"
     },
     {
       "temp_id": "PROC-140.4",
@@ -30615,7 +30915,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "用户提交登记申请后，验证任务状态变更为待审批"
+      "title": "申请人填写必填项后，普通用户提交登记申请，验证任务状态变更为待审批"
     },
     {
       "temp_id": "PROC-141.1",
@@ -30700,7 +31000,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "用户新建留存申请后，验证任务状态初始化为草稿"
+      "title": "初始状态下，普通用户新建留存申请，验证任务状态初始化为草稿"
     },
     {
       "temp_id": "PROC-141.2",
@@ -30785,7 +31085,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "用户新建留存申请后，验证任务状态初始化为草稿"
+      "title": "初始状态下，普通用户新建留存申请，验证任务状态初始化为草稿"
     },
     {
       "temp_id": "PROC-141.3",
@@ -30870,7 +31170,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "用户新建留存申请后，验证任务状态初始化为草稿"
+      "title": "初始状态下，普通用户新建留存申请，验证任务状态初始化为草稿"
     },
     {
       "temp_id": "PROC-141.4",
@@ -30955,7 +31255,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "用户新建留存申请后，验证任务状态初始化为草稿"
+      "title": "初始状态下，普通用户新建留存申请，验证任务状态初始化为草稿"
     },
     {
       "temp_id": "PROC-142.1",
@@ -30972,6 +31272,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31037,7 +31343,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可进入页面录入申请内容"
+      "title": "载体留存任务处于草稿状态，录入必填项后，验证进入载体留存申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-142.2",
@@ -31054,6 +31360,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31119,7 +31431,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可进入页面录入申请内容"
+      "title": "载体留存任务处于草稿状态，录入必填项后，验证进入载体留存申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-142.3",
@@ -31136,6 +31448,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31201,7 +31519,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可进入页面录入申请内容"
+      "title": "载体留存任务处于草稿状态，录入必填项后，验证进入载体留存申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-142.4",
@@ -31218,6 +31536,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31283,7 +31607,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可进入页面录入申请内容"
+      "title": "载体留存任务处于草稿状态，录入必填项后，验证进入载体留存申请页面可录入申请内容"
     },
     {
       "temp_id": "PROC-143.1",
@@ -31300,6 +31624,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31365,7 +31695,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可对申请记录进行修改"
+      "title": "载体留存任务处于草稿状态，验证可对已存在的留存申请记录进行修改"
     },
     {
       "temp_id": "PROC-143.2",
@@ -31382,6 +31712,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31447,7 +31783,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可对申请记录进行修改"
+      "title": "载体留存任务处于草稿状态，验证可对已存在的留存申请记录进行修改"
     },
     {
       "temp_id": "PROC-143.3",
@@ -31464,6 +31800,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31529,7 +31871,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可对申请记录进行修改"
+      "title": "载体留存任务处于草稿状态，验证可对已存在的留存申请记录进行修改"
     },
     {
       "temp_id": "PROC-143.4",
@@ -31546,6 +31888,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体留存任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体留存任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入)；留存原因(字符；必填项)；留存时间(字符；必填项；单位为小时；只能填入1~48之间的整数)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -31611,7 +31959,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可对申请记录进行修改"
+      "title": "载体留存任务处于草稿状态，验证可对已存在的留存申请记录进行修改"
     },
     {
       "temp_id": "PROC-144.1",
@@ -31693,7 +32041,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可暂存申请为草稿状态"
+      "title": "载体留存任务处于草稿状态，暂存申请后，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-144.2",
@@ -31775,7 +32123,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可暂存申请为草稿状态"
+      "title": "载体留存任务处于草稿状态，暂存申请后，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-144.3",
@@ -31857,7 +32205,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可暂存申请为草稿状态"
+      "title": "载体留存任务处于草稿状态，暂存申请后，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-144.4",
@@ -31939,7 +32287,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，验证可暂存申请为草稿状态"
+      "title": "载体留存任务处于草稿状态，暂存申请后，验证保存为草稿状态"
     },
     {
       "temp_id": "PROC-145.1",
@@ -32021,7 +32369,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "用户查询留存任务后，验证申请监控页面显示本人提交的任务列表及状态"
+      "title": "载体留存任务处于草稿状态，查询留存任务后，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-145.2",
@@ -33005,7 +33353,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
+      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-148.2",
@@ -33087,7 +33435,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
+      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-148.3",
@@ -33169,7 +33517,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
+      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-148.4",
@@ -33251,7 +33599,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录且列表数据实时刷新"
+      "title": "载体留存任务处于草稿状态时，删除申请，验证业务允许情况下删除选中记录并实时刷新列表数据"
     },
     {
       "temp_id": "PROC-149.1",
@@ -33383,7 +33731,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-149.2",
@@ -33515,7 +33863,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-149.3",
@@ -33647,7 +33995,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-149.4",
@@ -33779,7 +34127,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "载体留存任务信息录入页面打开时，提交含违规值的表单，验证各字段校验失败并提示相应错误信息"
     },
     {
       "temp_id": "PROC-150.1",
@@ -34136,6 +34484,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34201,7 +34555,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，新增移交申请，验证进入申请页面并录入内容"
+      "title": "载体移交任务处于草稿状态时，进入载体移交申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-151.2",
@@ -34218,6 +34572,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34283,7 +34643,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，新增移交申请，验证进入申请页面并录入内容"
+      "title": "载体移交任务处于草稿状态时，进入载体移交申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-151.3",
@@ -34300,6 +34660,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34365,7 +34731,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，新增移交申请，验证进入申请页面并录入内容"
+      "title": "载体移交任务处于草稿状态时，进入载体移交申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-151.4",
@@ -34382,6 +34748,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34447,7 +34819,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，新增移交申请，验证进入申请页面并录入内容"
+      "title": "载体移交任务处于草稿状态时，进入载体移交申请页面，验证可录入申请内容"
     },
     {
       "temp_id": "PROC-152.1",
@@ -34464,6 +34836,12 @@
           "state": "草稿",
           "description": "[实例 1] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34546,6 +34924,12 @@
           "state": "草稿",
           "description": "[实例 2] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34628,6 +35012,12 @@
           "state": "草稿",
           "description": "[实例 3] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -34710,6 +35100,12 @@
           "state": "草稿",
           "description": "[实例 4] 载体移交任务已存在，处于草稿状态",
           "given_type": "restatement"
+        },
+        {
+          "target": "载体移交任务",
+          "state": "",
+          "description": "申请人(字符；必填项；根据登录用户自动获取申请人姓名)；申请部门(字符；必填项；根据登录用户自动获取申请人部门)；流水号(字符；必填项；系统自动生成)；申请时间(字符；必填项；系统自动生成)；申请事由(字符；必填项；30个字符)；载体信息(字符；必填项；从申请人名下载体中选择，载体信息自动带入；包括载体编号、载体名称、文件名、载体级别、载体类型、人员部门等)；接收人(字符；必填项；从系统用户中进行选择)；备注(字符；可选项)",
+          "given_type": "field_data"
         }
       ],
       "when": {
@@ -35185,7 +35581,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查询移交任务，验证看到本人提交的任务列表及状态"
+      "title": "载体移交任务处于草稿状态时，查询移交任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-154.2",
@@ -35267,7 +35663,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查询移交任务，验证看到本人提交的任务列表及状态"
+      "title": "载体移交任务处于草稿状态时，查询移交任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-154.3",
@@ -35349,7 +35745,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查询移交任务，验证看到本人提交的任务列表及状态"
+      "title": "载体移交任务处于草稿状态时，查询移交任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-154.4",
@@ -35431,7 +35827,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查询移交任务，验证看到本人提交的任务列表及状态"
+      "title": "载体移交任务处于草稿状态时，查询移交任务，验证申请监控页面显示本人提交的任务列表及状态"
     },
     {
       "temp_id": "PROC-155.1",
@@ -35513,7 +35909,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，下载移交任务，验证批量下载保存功能"
+      "title": "载体移交任务处于草稿状态时，下载移交任务，验证能够批量下载保存"
     },
     {
       "temp_id": "PROC-155.2",
@@ -35595,7 +35991,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，下载任务，验证批量下载保存功能"
+      "title": "草稿状态下，下载载体移交任务，验证批量下载保存功能"
     },
     {
       "temp_id": "PROC-155.3",
@@ -35677,7 +36073,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，下载任务，验证批量下载保存功能"
+      "title": "草稿状态下，下载载体移交任务，验证批量下载保存功能"
     },
     {
       "temp_id": "PROC-155.4",
@@ -35759,7 +36155,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，下载任务，验证批量下载保存功能"
+      "title": "草稿状态下，下载载体移交任务，验证批量下载保存功能"
     },
     {
       "temp_id": "PROC-156.1",
@@ -35841,7 +36237,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查看详情，验证提供详细信息"
+      "title": "草稿状态下，查看载体移交任务详情，验证详细信息提供"
     },
     {
       "temp_id": "PROC-156.2",
@@ -35923,7 +36319,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查看详情，验证提供详细信息"
+      "title": "草稿状态下，查看载体移交任务详情，验证详细信息提供"
     },
     {
       "temp_id": "PROC-156.3",
@@ -36005,7 +36401,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查看详情，验证提供详细信息"
+      "title": "草稿状态下，查看载体移交任务详情，验证详细信息提供"
     },
     {
       "temp_id": "PROC-156.4",
@@ -36087,7 +36483,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，查看详情，验证提供详细信息"
+      "title": "草稿状态下，查看载体移交任务详情，验证详细信息提供"
     },
     {
       "temp_id": "PROC-157.1",
@@ -36169,7 +36565,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，删除申请，验证删除记录并实时刷新列表"
+      "title": "草稿状态下，删除载体移交申请，验证删除记录及列表刷新"
     },
     {
       "temp_id": "PROC-157.2",
@@ -36251,7 +36647,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，删除申请，验证删除记录并实时刷新列表"
+      "title": "草稿状态下，删除载体移交申请，验证删除记录及列表刷新"
     },
     {
       "temp_id": "PROC-157.3",
@@ -36333,7 +36729,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，删除申请，验证删除记录并实时刷新列表"
+      "title": "草稿状态下，删除载体移交申请，验证删除记录及列表刷新"
     },
     {
       "temp_id": "PROC-157.4",
@@ -36415,7 +36811,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务处于草稿状态时，删除申请，验证删除记录并实时刷新列表"
+      "title": "草稿状态下，删除载体移交申请，验证删除记录及列表刷新"
     },
     {
       "temp_id": "PROC-158.1",
@@ -36529,7 +36925,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "可编辑状态下，提交含违规值的载体移交任务表单，验证校验失败及提示信息"
     },
     {
       "temp_id": "PROC-158.2",
@@ -36643,7 +37039,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "可编辑状态下，提交含违规值的载体移交任务表单，验证校验失败及提示信息"
     },
     {
       "temp_id": "PROC-158.3",
@@ -36757,7 +37153,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "可编辑状态下，提交含违规值的载体移交任务表单，验证校验失败及提示信息"
     },
     {
       "temp_id": "PROC-158.4",
@@ -36871,7 +37267,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "载体移交任务信息录入页面打开时，提交含违规值的表单，验证校验失败并提示错误信息"
+      "title": "可编辑状态下，提交含违规值的载体移交任务表单，验证校验失败及提示信息"
     },
     {
       "temp_id": "PROC-159.1",
@@ -36983,7 +37379,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待审批时，一级审批员审批通过，验证任务状态变更为待二级审批"
+      "title": "C级待审批导出任务一级审批通过，验证任务状态流转至待二级审批"
     },
     {
       "temp_id": "PROC-159.2",
@@ -37095,7 +37491,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待审批时，一级审批员审批通过，验证任务状态变更为待二级审批"
+      "title": "C级待审批导出任务一级审批通过，验证任务状态流转至待二级审批"
     },
     {
       "temp_id": "PROC-160.1",
@@ -37209,7 +37605,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "C级导入任务待审批时，一级审批员审批通过，验证任务状态变更为待二级审批"
+      "title": "C级待审批导入任务一级审批通过，验证任务状态流转至待二级审批"
     },
     {
       "temp_id": "PROC-160.2",
@@ -37323,7 +37719,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "C级导入任务待审批时，一级审批员审批通过，验证任务状态变更为待二级审批"
+      "title": "C级待审批导入任务一级审批通过，验证任务状态流转至待二级审批"
     },
     {
       "temp_id": "PROC-161.1",
@@ -37435,7 +37831,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "C级扫描任务待审批时，一级审批员审批通过，验证任务状态变更为待二级审批"
+      "title": "C级待审批扫描任务一级审批通过，验证任务状态流转至待二级审批"
     },
     {
       "temp_id": "PROC-161.2",
@@ -48819,7 +49215,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并执行回收"
+      "title": "C级回收任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并移交载体管理员"
     },
     {
       "temp_id": "PROC-193.1",
@@ -49811,7 +50207,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-195.2",
@@ -49923,7 +50319,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-195.3",
@@ -50035,7 +50431,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-195.4",
@@ -50147,7 +50543,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "B级留存任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-196.1",
@@ -50259,7 +50655,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-196.2",
@@ -50371,7 +50767,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-196.3",
@@ -50483,7 +50879,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-196.4",
@@ -50595,7 +50991,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加持有时间"
+      "title": "C级留存任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并增加载体持有时间"
     },
     {
       "temp_id": "PROC-197.1",
@@ -51043,7 +51439,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "B级移交任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过并完成交接"
+      "title": "B级移交任务待审批时，一级审批员审批通过，验证任务状态变更为审批通过"
     },
     {
       "temp_id": "PROC-198.1",
@@ -51155,7 +51551,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并完成交接"
+      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过"
     },
     {
       "temp_id": "PROC-198.2",
@@ -51267,7 +51663,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并完成交接"
+      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过"
     },
     {
       "temp_id": "PROC-198.3",
@@ -51379,7 +51775,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并完成交接"
+      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过"
     },
     {
       "temp_id": "PROC-198.4",
@@ -51491,7 +51887,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过并完成交接"
+      "title": "C级移交任务待二级审批时，二级审批员审批通过，验证任务状态变更为审批通过"
     },
     {
       "temp_id": "PROC-199.1",
@@ -51603,7 +51999,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导出任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-199.2",
@@ -51715,7 +52111,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导出任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-200.1",
@@ -51833,7 +52229,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "B级或B级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "B级或B级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-200.2",
@@ -51951,7 +52347,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "B级或B级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "B级或B级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-201.1",
@@ -52069,7 +52465,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-201.2",
@@ -52187,7 +52583,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "C级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导出任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-202.1",
@@ -52295,7 +52691,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "导出任务待执行时，载体管理员确认导出完成，验证任务状态变更为已完成并系统归档信息"
+      "title": "导出任务待执行时，载体管理员确认导出完成，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-202.2",
@@ -52403,7 +52799,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "导出任务待执行时，载体管理员确认导出完成，验证任务状态变更为已完成并系统归档信息"
+      "title": "导出任务待执行时，载体管理员确认导出完成，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-203.1",
@@ -52481,7 +52877,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "导出任务执行操作时，验证规则导出文件大小、份数及文件名级别标记符合要求"
+      "title": "导出任务执行操作时，验证导出文件大小、份数及文件名符合规则"
     },
     {
       "temp_id": "PROC-203.2",
@@ -52559,7 +52955,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件导出任务 dim_count=1 instances=2"
       },
-      "title": "导出任务执行操作时，验证规则导出文件大小、份数及文件名级别标记符合要求"
+      "title": "导出任务执行操作时，验证导出文件大小、份数及文件名符合规则"
     },
     {
       "temp_id": "PROC-204.1",
@@ -52673,7 +53069,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "C级导入任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导入任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-204.2",
@@ -52787,7 +53183,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "C级导入任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导入任务待二级审批时，二级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-205.1",
@@ -52907,7 +53303,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "B级或B级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "B级或B级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-205.2",
@@ -53027,7 +53423,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "B级或B级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "B级或B级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-206.1",
@@ -53147,7 +53543,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "C级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝并终止任务"
+      "title": "C级导入任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-206.2",
@@ -53937,7 +54333,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则验证新增、编辑页面必填项提示及约束提示"
+      "title": "规则执行时，验证新增、编辑页面必填项标识及输入提示"
     },
     {
       "temp_id": "PROC-210.2",
@@ -54033,7 +54429,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则验证新增、编辑页面必填项提示及约束提示"
+      "title": "规则执行时，验证新增、编辑页面必填项标识及输入提示"
     },
     {
       "temp_id": "PROC-211.1",
@@ -54140,7 +54536,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行查询规则验证组合查询模糊查询功能"
+      "title": "规则执行时，验证查询功能组合查询支持模糊查询"
     },
     {
       "temp_id": "PROC-211.2",
@@ -54247,7 +54643,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行查询规则验证组合查询模糊查询功能"
+      "title": "规则执行时，验证查询功能组合查询支持模糊查询"
     },
     {
       "temp_id": "PROC-212.1",
@@ -54354,7 +54750,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行操作规则验证操作可逆性处理"
+      "title": "规则执行时，验证操作支持可逆性处理"
     },
     {
       "temp_id": "PROC-212.2",
@@ -54461,7 +54857,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行操作规则验证操作可逆性处理"
+      "title": "规则执行时，验证操作支持可逆性处理"
     },
     {
       "temp_id": "PROC-213.1",
@@ -54553,7 +54949,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行导入任务规则验证任务执行完成后未确认自动结束及文件删除"
+      "title": "规则执行时，验证导入任务完成后未确认，系统自动结束任务并删除文件"
     },
     {
       "temp_id": "PROC-213.2",
@@ -54645,7 +55041,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行导入任务规则验证任务执行完成后未确认自动结束及文件删除"
+      "title": "规则执行时，验证导入任务完成后未确认，系统自动结束任务并删除文件"
     },
     {
       "temp_id": "PROC-214.1",
@@ -54741,7 +55137,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行流水号生成规则验证流水号自动生成规则"
+      "title": "规则执行时，验证流水号系统自动生成规则"
     },
     {
       "temp_id": "PROC-214.2",
@@ -54837,7 +55233,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行流水号生成规则验证流水号自动生成规则"
+      "title": "规则执行时，验证流水号系统自动生成规则"
     },
     {
       "temp_id": "PROC-215.1",
@@ -54933,7 +55329,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行申请人获取规则验证申请人、申请部门自动获取"
+      "title": "规则执行时，验证申请人、申请部门根据登录用户自动获取"
     },
     {
       "temp_id": "PROC-215.2",
@@ -55029,7 +55425,7 @@
         "multi_count": 2,
         "multi_reason": "entity=导入任务 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行申请人获取规则验证申请人、申请部门自动获取"
+      "title": "规则执行时，验证申请人、申请部门根据登录用户自动获取"
     },
     {
       "temp_id": "PROC-216.1",
@@ -56019,7 +56415,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "文件页数输入不符合规则时，验证规则提示信息显示"
+      "title": "文件页数输入不符合规则，验证规则提示信息显示"
     },
     {
       "temp_id": "PROC-220.2",
@@ -56097,7 +56493,7 @@
         "multi_count": 2,
         "multi_reason": "entity=文件扫描任务 dim_count=1 instances=2"
       },
-      "title": "文件页数输入不符合规则时，验证规则提示信息显示"
+      "title": "文件页数输入不符合规则，验证规则提示信息显示"
     },
     {
       "temp_id": "PROC-221.1",
@@ -56215,7 +56611,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "A级归档申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级归档任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-221.2",
@@ -56333,7 +56729,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "A级归档申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级归档任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-221.3",
@@ -56451,7 +56847,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "A级归档申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级归档任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-221.4",
@@ -56569,7 +56965,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "A级归档申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级归档任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-222.1",
@@ -56671,7 +57067,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "归档任务审批通过后，载体管理员进入归档执行，验证任务状态变更为待执行并进入执行环节"
+      "title": "归档任务审批通过后进入归档执行，验证任务状态变更为待执行并开始执行环节"
     },
     {
       "temp_id": "PROC-222.2",
@@ -56773,7 +57169,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "归档任务审批通过后，载体管理员进入归档执行，验证任务状态变更为待执行并进入执行环节"
+      "title": "归档任务审批通过后进入归档执行，验证任务状态变更为待执行并开始执行环节"
     },
     {
       "temp_id": "PROC-222.3",
@@ -56875,7 +57271,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "归档任务审批通过后，载体管理员进入归档执行，验证任务状态变更为待执行并进入执行环节"
+      "title": "归档任务审批通过后进入归档执行，验证任务状态变更为待执行并开始执行环节"
     },
     {
       "temp_id": "PROC-222.4",
@@ -56977,7 +57373,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "归档任务审批通过后，载体管理员进入归档执行，验证任务状态变更为待执行并进入执行环节"
+      "title": "归档任务审批通过后进入归档执行，验证任务状态变更为待执行并开始执行环节"
     },
     {
       "temp_id": "PROC-223.1",
@@ -57095,7 +57491,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "A级外送申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级外送任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-223.2",
@@ -57213,7 +57609,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "A级外送申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级外送任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-223.3",
@@ -57331,7 +57727,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "A级外送申请草稿提交后，验证任务状态直接转换为待执行"
+      "title": "A级外送任务草稿状态提交申请，验证任务状态直接进入待执行状态"
     },
     {
       "temp_id": "PROC-223.4",
@@ -57449,7 +57845,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "A级外送任务草稿状态下，普通用户提交申请，验证任务状态变更为待执行"
+      "title": "A级外送任务草稿状态下，普通用户提交申请后，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-224.1",
@@ -57566,7 +57962,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "外送任务审批通过后，载体管理员进入外送执行，验证任务状态变更为待执行"
+      "title": "外送任务审批通过后，载体管理员确认交接单回执，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-224.2",
@@ -57683,7 +58079,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "外送任务审批通过后，载体管理员进入外送执行，验证任务状态变更为待执行"
+      "title": "外送任务审批通过后，载体管理员确认交接单回执，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-224.3",
@@ -57800,7 +58196,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "外送任务审批通过后，载体管理员进入外送执行，验证任务状态变更为待执行"
+      "title": "外送任务审批通过后，载体管理员确认交接单回执，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-224.4",
@@ -57917,7 +58313,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "外送任务审批通过后，载体管理员进入外送执行，验证任务状态变更为待执行"
+      "title": "外送任务审批通过后，载体管理员确认交接单回执，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-225.1",
@@ -58035,7 +58431,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "A级回收任务草稿状态下，普通用户提交申请，验证任务状态变更为待执行"
+      "title": "A级回收任务草稿状态下，普通用户提交申请后，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-225.2",
@@ -58153,7 +58549,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "A级回收任务草稿状态下，普通用户提交申请，验证任务状态变更为待执行"
+      "title": "A级回收任务草稿状态下，普通用户提交申请后，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-225.3",
@@ -58271,7 +58667,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "A级回收任务草稿状态下，普通用户提交申请，验证任务状态变更为待执行"
+      "title": "A级回收任务草稿状态下，普通用户提交申请后，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-225.4",
@@ -58389,7 +58785,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "A级回收任务草稿状态下，普通用户提交申请，验证任务状态变更为待执行"
+      "title": "A级回收任务草稿状态下，普通用户提交申请后，验证任务状态变更为待执行"
     },
     {
       "temp_id": "PROC-226.1",
@@ -59717,7 +60113,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "B级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "B级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及终止登记"
     },
     {
       "temp_id": "PROC-229.1",
@@ -59835,7 +60231,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及终止登记"
     },
     {
       "temp_id": "PROC-229.2",
@@ -59953,7 +60349,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及终止登记"
     },
     {
       "temp_id": "PROC-229.3",
@@ -60071,7 +60467,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及终止登记"
     },
     {
       "temp_id": "PROC-229.4",
@@ -60189,7 +60585,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级登记任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及终止登记"
     },
     {
       "temp_id": "PROC-230.1",
@@ -60303,7 +60699,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员完成登记执行，验证任务状态变更为已完成及申请人可见载体"
+      "title": "载体管理员完成登记执行后，验证任务状态变更为已完成及申请人可见载体"
     },
     {
       "temp_id": "PROC-230.2",
@@ -60417,7 +60813,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员完成登记执行，验证任务状态变更为已完成及申请人可见载体"
+      "title": "载体管理员完成登记执行后，验证任务状态变更为已完成及申请人可见载体"
     },
     {
       "temp_id": "PROC-230.3",
@@ -60531,7 +60927,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员完成登记执行，验证任务状态变更为已完成及申请人可见载体"
+      "title": "载体管理员完成登记执行后，验证任务状态变更为已完成及申请人可见载体"
     },
     {
       "temp_id": "PROC-230.4",
@@ -60645,7 +61041,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体登记任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员完成登记执行，验证任务状态变更为已完成及申请人可见载体"
+      "title": "载体管理员完成登记执行后，验证任务状态变更为已完成及申请人可见载体"
     },
     {
       "temp_id": "PROC-231.1",
@@ -61081,7 +61477,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "A级留存申请草稿提交，验证任务状态变更为待执行且无需审批"
+      "title": "A级留存申请草稿提交后，验证任务状态变更为待执行且无需审批"
     },
     {
       "temp_id": "PROC-232.2",
@@ -61205,7 +61601,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "A级留存申请草稿提交，验证任务状态变更为待执行且无需审批"
+      "title": "A级留存申请草稿提交后，验证任务状态变更为待执行且无需审批"
     },
     {
       "temp_id": "PROC-232.3",
@@ -61329,7 +61725,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "A级留存申请草稿提交，验证任务状态变更为待执行且无需审批"
+      "title": "A级留存申请草稿提交后，验证任务状态变更为待执行且无需审批"
     },
     {
       "temp_id": "PROC-232.4",
@@ -61453,7 +61849,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "A级留存申请草稿提交，验证任务状态变更为待执行且无需审批"
+      "title": "A级留存申请草稿提交后，验证任务状态变更为待执行且无需审批"
     },
     {
       "temp_id": "PROC-233.1",
@@ -61555,7 +61951,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "留存任务审批通过后进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
+      "title": "留存任务审批通过后，系统进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
     },
     {
       "temp_id": "PROC-233.2",
@@ -61657,7 +62053,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "留存任务审批通过后进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
+      "title": "留存任务审批通过后，系统进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
     },
     {
       "temp_id": "PROC-233.3",
@@ -61759,7 +62155,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "留存任务审批通过后进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
+      "title": "留存任务审批通过后，系统进入留存执行，验证任务状态变更为待执行并自动增加载体持有时间"
     },
     {
       "temp_id": "PROC-233.4",
@@ -61861,7 +62257,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "留存任务审批通过后，系统进入留存执行，验证任务状态变更为待执行及载体持有时间自动增加"
+      "title": "留存任务审批通过后，系统进入留存执行，验证任务状态变更为待执行及用户持有时间增加"
     },
     {
       "temp_id": "PROC-234.1",
@@ -61979,7 +62375,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "A级草稿任务提交移交申请后，验证任务状态变更为待执行且无需审批"
+      "title": "A级草稿任务申请人填写必填项后提交，验证任务状态直接转换为待执行"
     },
     {
       "temp_id": "PROC-234.2",
@@ -62097,7 +62493,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "A级草稿任务提交移交申请后，验证任务状态变更为待执行且无需审批"
+      "title": "A级草稿任务申请人填写必填项后提交，验证任务状态直接转换为待执行"
     },
     {
       "temp_id": "PROC-234.3",
@@ -62215,7 +62611,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "A级草稿任务提交移交申请后，验证任务状态变更为待执行且无需审批"
+      "title": "A级草稿任务申请人填写必填项后提交，验证任务状态直接转换为待执行"
     },
     {
       "temp_id": "PROC-234.4",
@@ -62333,7 +62729,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "A级草稿任务提交移交申请后，验证任务状态变更为待执行且无需审批"
+      "title": "A级草稿任务申请人填写必填项后提交，验证任务状态直接转换为待执行"
     },
     {
       "temp_id": "PROC-235.1",
@@ -62435,7 +62831,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人在线确认载体移交"
+      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人确认"
     },
     {
       "temp_id": "PROC-235.2",
@@ -62537,7 +62933,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人在线确认载体移交"
+      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人确认"
     },
     {
       "temp_id": "PROC-235.3",
@@ -62639,7 +63035,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人在线确认载体移交"
+      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人确认"
     },
     {
       "temp_id": "PROC-235.4",
@@ -62741,7 +63137,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人在线确认载体移交"
+      "title": "移交任务审批通过后，普通用户进入移交执行，验证任务状态变更为待执行及接收人确认"
     },
     {
       "temp_id": "PROC-236.1",
@@ -62853,7 +63249,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待二级审批时，二级审批员拒绝审批，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-236.2",
@@ -62965,7 +63361,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待二级审批时，二级审批员拒绝审批，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-236.3",
@@ -63077,7 +63473,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待二级审批时，二级审批员拒绝审批，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-236.4",
@@ -63189,7 +63585,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待二级审批时，二级审批员拒绝审批，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-237.1",
@@ -63307,7 +63703,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "B级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "B级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-237.2",
@@ -63425,7 +63821,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "B级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "B级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-237.3",
@@ -63543,7 +63939,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "B级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "B级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-237.4",
@@ -63661,7 +64057,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "B级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "B级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-238.1",
@@ -63779,7 +64175,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-238.2",
@@ -63897,7 +64293,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-238.3",
@@ -64015,7 +64411,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体归档任务 dim_count=1 instances=4"
       },
-      "title": "C级归档任务待审批时，一级审批员审批拒绝，验证任务状态变更为审批拒绝及任务终止"
+      "title": "C级归档任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝并终止任务"
     },
     {
       "temp_id": "PROC-238.4",
@@ -66461,7 +66857,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体外送任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员在线确认外送完成，验证任务状态变更为已完成"
+      "title": "载体管理员在线确认外送完成时，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-244.1",
@@ -66573,7 +66969,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-244.2",
@@ -66685,7 +67081,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-244.3",
@@ -66797,7 +67193,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-244.4",
@@ -66909,7 +67305,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-245.1",
@@ -67027,7 +67423,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "B级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "B级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-245.2",
@@ -67145,7 +67541,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "B级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "B级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-245.3",
@@ -67263,7 +67659,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "B级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "B级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-245.4",
@@ -67381,7 +67777,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "B级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "B级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-246.1",
@@ -67499,7 +67895,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-246.2",
@@ -67617,7 +68013,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-246.3",
@@ -67735,7 +68131,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-246.4",
@@ -67853,7 +68249,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "C级回收任务待审批时，一级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级回收任务待审批时，一级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-247.1",
@@ -67970,7 +68366,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员确认回收完成，验证任务状态变更为已完成"
+      "title": "载体管理员确认回收完成时，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-247.2",
@@ -68087,7 +68483,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员确认回收完成，验证任务状态变更为已完成"
+      "title": "载体管理员确认回收完成时，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-247.3",
@@ -68204,7 +68600,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员确认回收完成，验证任务状态变更为已完成"
+      "title": "载体管理员确认回收完成时，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-247.4",
@@ -68321,7 +68717,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体回收任务 dim_count=1 instances=4"
       },
-      "title": "载体管理员确认回收完成，验证任务状态变更为已完成"
+      "title": "载体管理员确认回收完成时，验证任务状态变更为已完成"
     },
     {
       "temp_id": "PROC-248.1",
@@ -68433,7 +68829,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级留存任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-248.2",
@@ -68545,7 +68941,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级留存任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-248.3",
@@ -68657,7 +69053,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体留存任务 dim_count=1 instances=4"
       },
-      "title": "C级留存任务待二级审批时，二级审批员拒绝审批，验证任务终止并需重新提交"
+      "title": "C级留存任务待二级审批时，二级审批员拒绝，验证任务状态变更为审批拒绝"
     },
     {
       "temp_id": "PROC-248.4",
@@ -72689,7 +73085,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务待执行且接收人在线确认时，普通用户确认移交完成，验证任务状态变更为已完成并更新台账"
+      "title": "待执行任务接收人在线确认载体移交后，验证任务状态转换为已完成并更新台账"
     },
     {
       "temp_id": "PROC-258.2",
@@ -72797,7 +73193,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务待执行且接收人在线确认时，普通用户确认移交完成，验证任务状态变更为已完成并更新台账"
+      "title": "待执行任务接收人在线确认载体移交后，验证任务状态转换为已完成并更新台账"
     },
     {
       "temp_id": "PROC-258.3",
@@ -72905,7 +73301,7 @@
         "multi_count": 4,
         "multi_reason": "entity=载体移交任务 dim_count=1 instances=4"
       },
-      "title": "移交任务待执行且接收人在线确认时，普通用户确认移交完成，验证任务状态变更为已完成并更新台账"
+      "title": "待执行任务接收人在线确认载体移交后，验证任务状态转换为已完成并更新台账"
     },
     {
       "temp_id": "PROC-258.4",
@@ -74436,7 +74832,7 @@
       "P5": 104,
       "P6": 92
     },
-    "elapsed_seconds": 39.94
+    "elapsed_seconds": 53.18
   },
   "clause_coverage": {
     "summary": {

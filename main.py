@@ -897,6 +897,13 @@ def _generate_markdown(
                         # {状态}状态"）：与结构化前缀（target 状态 = state）完全
                         # 同义，保留句子形态。句子形态由 S1 模板生成，渲染层不拼接。
                         g_lines.append(f"- {desc}")
+                    elif gtype == "field_data":
+                        # 表单字段标注：创建/编辑表单的字段清单。Given 在本管线
+                        # = 前置条件（S3 依 givens[0].state 建依赖边），字段清单是
+                        # 操作的数据内容、非前置状态（定义性事实，恒真不依赖状态），
+                        # 故不在 Given 渲染——由 When 块挂到 create/edit 事件步下作
+                        # 子行。JSON 数据保留（state 恒空，S3 Guard 1 豁免），纯渲染。
+                        continue
                     else:
                         # state/event（默认）：主锚定/同维度/跨维度纯状态 统一格式
                         desc_str = f" ({desc})" if desc else ""
@@ -941,6 +948,14 @@ def _generate_markdown(
                     lines.append("**When**")
                     for i, step in enumerate(when_steps, 1):
                         lines.append(f"{i}. {step}")
+                    # 表单字段标注：字段清单是 create/edit 操作的数据内容，非前置
+                    # 条件（Given=前置条件，S3 依 givens[0].state 建边）。挂到事件
+                    # 步（最后一步）下作 4 空格续行——列表项内续行不触发代码块。
+                    # 纯渲染，JSON 数据不动（field_data given 保留，state 恒空）。
+                    fd_descs = [g.get("description", "") or ""
+                                for g in givens if g.get("given_type") == "field_data"]
+                    for fd_desc in fd_descs:
+                        lines.append(f"   表单字段：{fd_desc}")
 
             # Then clauses (rendering-layer dedup — JSON data untouched)
             if thens:

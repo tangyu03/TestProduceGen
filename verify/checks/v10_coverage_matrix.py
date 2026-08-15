@@ -84,6 +84,17 @@ def _obligation_coverage(model: dict, procs: list) -> tuple[list, list]:
             if cid in br_by_cid:
                 embedded_covered.add(br_by_cid[cid])
 
+    # 模型内部覆盖声明: covered_by 字段(P2 Step 2.5b)——CRUD EO 的 expected_results
+    # 被同(entity, action) 初始化转换的 er 文本逐条包含时标 covered_by, S1 据此跳过
+    # 独立 Type5 用例。代行转换(T-xxx)已被用例引用 → 该义务视为已覆盖。
+    _covered_by_decl = (model.get("transition_obligations") or []) \
+                     + (model.get("entity_obligations") or []) \
+                     + (model.get("constraint_obligations") or [])
+    for _ob in _covered_by_decl:
+        _cb = _ob.get("covered_by")
+        if _cb and _cb in src_covered:
+            src_covered.add(_ob.get("id"))
+
     # TO 覆盖
     miss_to = sorted(to_ids - src_covered)
     if miss_to:
