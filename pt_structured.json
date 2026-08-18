@@ -1,0 +1,1058 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-18T08:59:21+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704.md",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-BM.费用状态 初始状态[待缴费]无创建转换",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-BM.发票状态 初始状态[待开票]无创建转换",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-007",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-008",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-009",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-010",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-011",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-012",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-013",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-014",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-015",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-016",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-017",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-018",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-019",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-020",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-021",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-022",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-023",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-024",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-025",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-026",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-027",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-028",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-029",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-030",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-031",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-032",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-033",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-034",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-035",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-036",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-037",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-038",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-039",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-040",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-041",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-042",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-043",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-044",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-045",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-046",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-047",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-048",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-049",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-050",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-051",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-052",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-053",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-054",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-055",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-056",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-057",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-058",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-059",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-060",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-061",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-062",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-063",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-064",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-065",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-066",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-067",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-068",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-069",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-070",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-071",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-072",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-073",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-074",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-075",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-076",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-077",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-078",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-079",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-080",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-081",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-082",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-083",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-084",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-085",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-086",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-087",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-088",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-089",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-090",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-091",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-092",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-093",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-094",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-095",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-096",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-097",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-098",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-099",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-100",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-101",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-102",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-103",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-104",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-105",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-106",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-107",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-108",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-109",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-110",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-111",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-112",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-113",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-114",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-115",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-116",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-117",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-118",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-119",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-120",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-121",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "operation 缺 note.role —— entity_obligations actor 将为空（INV-6）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-122",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[项目类型]无任何 BR 的 note.branch_dimension 承载（INV-7）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-123",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[评分方式]无任何 BR 的 note.branch_dimension 承载（INV-7）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-124",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[是否需要还样]无任何 BR 的 note.branch_dimension 承载（INV-7）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-125",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核结果]无任何 BR 的 note.branch_dimension 承载（INV-7）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-126",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "T-050: 章节号[18.16]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-127",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "T-061: 章节号[18.6]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-128",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "BR-018: 章节号[20.5.1.6]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-129",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "E-YP.样品出入库登记: 章节号[18.12]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-130",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "E-FY.确认付款: 章节号[18.16]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-131",
+        "severity": "critical",
+        "concept": "C15",
+        "description": "E-ZS.签发证书: 章节号[18.6]在原文中不存在",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

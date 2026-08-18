@@ -444,7 +444,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "试用状态下，机构累计10次项目阶段评价结果为优，系统升为合格，验证状态流转为合格"
+      "title": "试用状态下，机构累计10次评价结果为优，系统升为合格，验证状态流转为合格"
     },
     {
       "temp_id": "PROC-002.2",
@@ -554,7 +554,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "试用状态下，机构累计10次项目阶段评价结果为优，系统升为合格，验证状态流转为合格"
+      "title": "试用状态下，机构累计10次评价结果为优，系统升为合格，验证状态流转为合格"
     },
     {
       "temp_id": "PROC-003.1",
@@ -1524,7 +1524,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "下发时限配置值当前时，下发时限配置变更，验证下发时限显示为修改后的值"
+      "title": "当前下发时限配置值时，下发时限配置变更，验证下发时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-007.2",
@@ -1602,7 +1602,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "下发时限配置值当前时，下发时限配置变更，验证下发时限显示为修改后的值"
+      "title": "当前下发时限配置值时，下发时限配置变更，验证下发时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-008.1",
@@ -1680,7 +1680,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "专家人数配置值当前时，专家人数配置变更，验证专家人数显示为修改后的值"
+      "title": "当前专家人数配置值时，专家人数配置变更，验证专家人数显示为修改后的值"
     },
     {
       "temp_id": "PROC-008.2",
@@ -1758,7 +1758,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "专家人数配置值当前时，专家人数配置变更，验证专家人数显示为修改后的值"
+      "title": "当前专家人数配置值时，专家人数配置变更，验证专家人数显示为修改后的值"
     },
     {
       "temp_id": "PROC-009.1",
@@ -1836,7 +1836,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "启动时限配置值当前时，启动时限配置变更，验证启动时限显示为修改后的值"
+      "title": "当前启动时限配置值时，启动时限配置变更，验证启动时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-009.2",
@@ -1914,7 +1914,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "启动时限配置值当前时，启动时限配置变更，验证启动时限显示为修改后的值"
+      "title": "当前启动时限配置值时，启动时限配置变更，验证启动时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-010.1",
@@ -1992,7 +1992,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "归档时限配置值当前时，归档时限配置变更，验证归档时限显示为修改后的值"
+      "title": "当前归档时限配置值时，归档时限配置变更，验证归档时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-010.2",
@@ -2070,7 +2070,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "归档时限配置值当前时，归档时限配置变更，验证归档时限显示为修改后的值"
+      "title": "当前归档时限配置值时，归档时限配置变更，验证归档时限显示为修改后的值"
     },
     {
       "temp_id": "PROC-011.1",
@@ -4102,7 +4102,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，系统管理员锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-018.4",
@@ -4200,7 +4200,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，系统管理员锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-019.1",
@@ -4300,7 +4300,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员解锁锁定用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态锁定时，系统管理员解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-019.2",
@@ -4400,7 +4400,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员解锁锁定用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态锁定时，系统管理员解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-019.3",
@@ -4500,7 +4500,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员解锁锁定用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态锁定时，系统管理员解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-019.4",
@@ -4600,7 +4600,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "系统管理员解锁锁定用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态锁定时，系统管理员解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-020.1",
@@ -4678,7 +4678,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "角色配置变更后，验证角色显示为修改后的值"
+      "title": "角色配置变更时，验证角色显示为修改后的值"
     },
     {
       "temp_id": "PROC-020.2",
@@ -4756,7 +4756,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "角色配置变更后，验证角色显示为修改后的值"
+      "title": "角色配置变更时，验证角色显示为修改后的值"
     },
     {
       "temp_id": "PROC-020.3",
@@ -4834,7 +4834,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "角色配置变更后，验证角色显示为修改后的值"
+      "title": "角色配置变更时，验证角色显示为修改后的值"
     },
     {
       "temp_id": "PROC-020.4",
@@ -4912,7 +4912,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "角色配置变更后，验证角色显示为修改后的值"
+      "title": "角色配置变更时，验证角色显示为修改后的值"
     },
     {
       "temp_id": "PROC-021.1",
@@ -5025,7 +5025,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "编辑用户信息时，验证用户信息可修改且不可编辑用户账号、手机号、技术领域、所属机构和角色"
+      "title": "用户信息编辑时，验证用户信息可修改，但用户账号、手机号等不可编辑"
     },
     {
       "temp_id": "PROC-021.2",
@@ -5138,7 +5138,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "编辑用户信息时，验证用户信息可修改且不可编辑用户账号、手机号、技术领域、所属机构和角色"
+      "title": "用户信息编辑时，验证用户信息可修改，但用户账号、手机号等不可编辑"
     },
     {
       "temp_id": "PROC-021.3",
@@ -5251,7 +5251,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "编辑用户信息时，验证用户信息可修改且不可编辑用户账号、手机号、技术领域、所属机构和角色"
+      "title": "用户信息编辑时，验证用户信息可修改，但用户账号、手机号等不可编辑"
     },
     {
       "temp_id": "PROC-021.4",
@@ -5364,7 +5364,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "编辑用户信息时，验证用户信息可修改且不可编辑用户账号、手机号、技术领域、所属机构和角色"
+      "title": "用户信息编辑时，验证用户信息可修改，但用户账号、手机号等不可编辑"
     },
     {
       "temp_id": "PROC-022.1",
@@ -5446,7 +5446,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-022.2",
@@ -5528,7 +5528,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-022.3",
@@ -5610,7 +5610,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-022.4",
@@ -5692,7 +5692,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "锁定用户后，验证用户状态变更为锁定且不得登录"
+      "title": "用户状态正常时，锁定用户，验证用户状态变更为锁定且不得登录"
     },
     {
       "temp_id": "PROC-023.1",
@@ -5774,7 +5774,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "解锁用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态正常时，解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-023.2",
@@ -5856,7 +5856,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "解锁用户后，验证用户状态变更为正常且可以登录"
+      "title": "用户状态正常时，解锁用户，验证用户状态变更为正常且可以登录"
     },
     {
       "temp_id": "PROC-023.3",
@@ -6443,7 +6443,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务限制"
+      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务关联检查"
     },
     {
       "temp_id": "PROC-025.2",
@@ -6538,7 +6538,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务限制"
+      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务关联检查"
     },
     {
       "temp_id": "PROC-025.3",
@@ -6633,7 +6633,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务限制"
+      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务关联检查"
     },
     {
       "temp_id": "PROC-025.4",
@@ -6728,7 +6728,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务限制"
+      "title": "用户处于正常状态时，删除用户，验证用户删除功能及任务关联检查"
     },
     {
       "temp_id": "PROC-026.1",
@@ -6810,7 +6810,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能"
+      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能实现"
     },
     {
       "temp_id": "PROC-026.2",
@@ -6892,7 +6892,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能"
+      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能实现"
     },
     {
       "temp_id": "PROC-026.3",
@@ -6974,7 +6974,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能"
+      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能实现"
     },
     {
       "temp_id": "PROC-026.4",
@@ -7056,7 +7056,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能"
+      "title": "用户处于正常状态时，查询用户，验证组合和模糊查询功能实现"
     },
     {
       "temp_id": "PROC-027.1",
@@ -7518,7 +7518,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，注销操作，验证注销后返回登录界面"
+      "title": "用户处于正常状态时，注销系统，验证注销功能实现及返回登录界面"
     },
     {
       "temp_id": "PROC-028.2",
@@ -7600,7 +7600,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，注销操作，验证注销后返回登录界面"
+      "title": "用户处于正常状态时，注销系统，验证注销功能实现及返回登录界面"
     },
     {
       "temp_id": "PROC-028.3",
@@ -7852,7 +7852,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，修改密码，验证密码修改规则"
+      "title": "用户处于正常状态时，修改密码，验证密码修改功能及规则"
     },
     {
       "temp_id": "PROC-029.2",
@@ -7940,7 +7940,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，修改密码，验证密码修改规则"
+      "title": "用户处于正常状态时，修改密码，验证密码修改功能及规则"
     },
     {
       "temp_id": "PROC-029.3",
@@ -8028,7 +8028,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，修改密码，验证密码修改规则"
+      "title": "用户处于正常状态时，修改密码，验证密码修改功能及规则"
     },
     {
       "temp_id": "PROC-029.4",
@@ -8116,7 +8116,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户处于正常状态时，修改密码，验证密码修改规则"
+      "title": "用户处于正常状态时，修改密码，验证密码修改功能及规则"
     },
     {
       "temp_id": "PROC-030.1",
@@ -8829,7 +8829,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝"
+      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-032.2",
@@ -8918,7 +8918,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝"
+      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-032.3",
@@ -9007,7 +9007,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝"
+      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-032.4",
@@ -9096,7 +9096,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝"
+      "title": "实现用户锁定功能后，尝试执行被规则禁止的登录操作，验证操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-033.1",
@@ -9363,7 +9363,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证登录时密码不以明文显示"
+      "title": "用户相关数据准备就绪时，执行密码明文显示规则，验证密码不以明文显示且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-033.4",
@@ -9452,7 +9452,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证登录时密码不以明文显示"
+      "title": "用户相关数据准备就绪时，执行密码明文显示规则，验证密码不以明文显示且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-034.1",
@@ -9541,7 +9541,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户初次登录需更改密码"
+      "title": "用户相关数据准备就绪时，执行初次登录更改密码规则，验证用户需更改密码且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-034.2",
@@ -9630,7 +9630,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户初次登录需更改密码"
+      "title": "用户相关数据准备就绪时，执行初次登录更改密码规则，验证用户需更改密码且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-034.3",
@@ -9719,7 +9719,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户初次登录需更改密码"
+      "title": "用户相关数据准备就绪时，执行初次登录更改密码规则，验证用户需更改密码且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-034.4",
@@ -9808,7 +9808,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户初次登录需更改密码"
+      "title": "用户相关数据准备就绪时，执行初次登录更改密码规则，验证用户需更改密码且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-035.1",
@@ -9900,7 +9900,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户登录后30分钟无操作需重新登录"
+      "title": "用户相关数据准备就绪时，执行用户登录后30分钟无操作需重新登录规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-035.2",
@@ -9992,7 +9992,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户登录后30分钟无操作需重新登录"
+      "title": "用户相关数据准备就绪时，执行用户登录后30分钟无操作需重新登录规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-035.3",
@@ -10084,7 +10084,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户登录后30分钟无操作需重新登录"
+      "title": "用户相关数据准备就绪时，执行用户登录后30分钟无操作需重新登录规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-035.4",
@@ -10176,7 +10176,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户登录后30分钟无操作需重新登录"
+      "title": "用户相关数据准备就绪时，执行用户登录后30分钟无操作需重新登录规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-036.1",
@@ -10268,7 +10268,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户连续密码错误3次账户被锁定"
+      "title": "用户相关数据准备就绪时，执行普通用户连续密码错误3次锁定账户规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-036.2",
@@ -10360,7 +10360,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户连续密码错误3次账户被锁定"
+      "title": "用户相关数据准备就绪时，执行普通用户连续密码错误3次锁定账户规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-036.3",
@@ -10452,7 +10452,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户连续密码错误3次账户被锁定"
+      "title": "用户相关数据准备就绪时，执行普通用户连续密码错误3次锁定账户规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-036.4",
@@ -10544,7 +10544,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户连续密码错误3次账户被锁定"
+      "title": "用户相关数据准备就绪时，执行普通用户连续密码错误3次锁定账户规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-037.1",
@@ -10625,7 +10625,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户密码有效期为7天且过期后强制更改"
+      "title": "用户相关数据准备就绪时，执行普通用户密码有效期7天强制更改规则，验证规则触发"
     },
     {
       "temp_id": "PROC-037.2",
@@ -10706,7 +10706,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户密码有效期为7天且过期后强制更改"
+      "title": "用户相关数据准备就绪时，执行普通用户密码有效期7天强制更改规则，验证规则触发"
     },
     {
       "temp_id": "PROC-037.3",
@@ -10787,7 +10787,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户密码有效期为7天且过期后强制更改"
+      "title": "用户相关数据准备就绪时，执行普通用户密码有效期7天强制更改规则，验证规则触发"
     },
     {
       "temp_id": "PROC-037.4",
@@ -10868,7 +10868,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证普通用户密码有效期为7天且过期后强制更改"
+      "title": "用户相关数据准备就绪时，执行普通用户密码有效期7天强制更改规则，验证规则触发"
     },
     {
       "temp_id": "PROC-038.1",
@@ -10957,7 +10957,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户修改密码流程"
+      "title": "用户相关数据准备就绪时，执行用户修改密码规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-038.2",
@@ -11046,7 +11046,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "规则适用前提满足时，验证用户修改密码流程"
+      "title": "用户相关数据准备就绪时，执行用户修改密码规则，验证规则触发且不满足条件时规则不触发"
     },
     {
       "temp_id": "PROC-038.3",
@@ -11313,7 +11313,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证数据加密规则触发及加密效果"
+      "title": "用户密码修改时，验证加密规则执行情况"
     },
     {
       "temp_id": "PROC-039.2",
@@ -11402,7 +11402,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证数据加密规则触发及加密效果"
+      "title": "用户密码修改时，验证加密规则执行情况"
     },
     {
       "temp_id": "PROC-039.3",
@@ -11491,7 +11491,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证数据加密规则触发及加密效果"
+      "title": "用户密码修改时，验证加密规则执行情况"
     },
     {
       "temp_id": "PROC-039.4",
@@ -11580,7 +11580,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证数据加密规则触发及加密效果"
+      "title": "用户密码修改时，验证加密规则执行情况"
     },
     {
       "temp_id": "PROC-040.1",
@@ -11658,7 +11658,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证页面提示信息规则"
+      "title": "用户密码修改时，验证页面提示信息规则"
     },
     {
       "temp_id": "PROC-040.2",
@@ -11736,7 +11736,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证页面提示信息规则"
+      "title": "用户密码修改时，验证页面提示信息规则"
     },
     {
       "temp_id": "PROC-040.3",
@@ -11814,7 +11814,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证页面提示信息规则"
+      "title": "用户密码修改时，验证页面提示信息规则"
     },
     {
       "temp_id": "PROC-040.4",
@@ -11892,7 +11892,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证页面提示信息规则"
+      "title": "用户密码修改时，验证页面提示信息规则"
     },
     {
       "temp_id": "PROC-041.1",
@@ -11981,7 +11981,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证用户账号或密码错误提示规则"
+      "title": "用户登录时，验证账号密码错误提示规则"
     },
     {
       "temp_id": "PROC-041.2",
@@ -12070,7 +12070,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证用户账号或密码错误提示规则"
+      "title": "用户登录时，验证账号密码错误提示规则"
     },
     {
       "temp_id": "PROC-041.3",
@@ -12159,7 +12159,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证用户账号或密码错误提示规则"
+      "title": "用户登录时，验证账号密码错误提示规则"
     },
     {
       "temp_id": "PROC-041.4",
@@ -12248,7 +12248,7 @@
         "multi_count": 4,
         "multi_reason": "entity=用户 dim_count=1 instances=4"
       },
-      "title": "用户修改密码时，验证用户账号或密码错误提示规则"
+      "title": "用户登录时，验证账号密码错误提示规则"
     },
     {
       "temp_id": "PROC-042.1",
@@ -14654,7 +14654,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已存在且处于待选入状态时，新增项目后验证项目状态初始化为待选入，处于开题阶段"
+      "title": "待选入状态下新增项目后，验证项目状态初始化为待选入，处于开题阶段"
     },
     {
       "temp_id": "PROC-046.2",
@@ -14742,7 +14742,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已存在且处于待选入状态时，新增项目后验证项目状态初始化为待选入，处于开题阶段"
+      "title": "待选入状态下新增项目后，验证项目状态初始化为待选入，处于开题阶段"
     },
     {
       "temp_id": "PROC-046.3",
@@ -14830,7 +14830,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已存在且处于待选入状态时，新增项目后验证项目状态初始化为待选入，处于开题阶段"
+      "title": "待选入状态下新增项目后，验证项目状态初始化为待选入，处于开题阶段"
     },
     {
       "temp_id": "PROC-046.4",
@@ -14918,7 +14918,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已存在且处于待选入状态时，新增项目后验证项目状态初始化为待选入，处于开题阶段"
+      "title": "待选入状态下新增项目后，验证项目状态初始化为待选入，处于开题阶段"
     },
     {
       "temp_id": "PROC-046.5",
@@ -15006,7 +15006,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已存在且处于待选入状态时，新增项目后验证项目状态初始化为待选入，处于开题阶段"
+      "title": "待选入状态下新增项目后，验证项目状态初始化为待选入，处于开题阶段"
     },
     {
       "temp_id": "PROC-047.1",
@@ -15088,7 +15088,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目处于待选入状态时，验证只能删除未评价过的项目"
+      "title": "待选入状态下删除项目，验证只能删除未评价过的项目"
     },
     {
       "temp_id": "PROC-047.2",
@@ -15170,7 +15170,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目处于待选入状态时，验证只能删除未评价过的项目"
+      "title": "待选入状态下删除项目，验证只能删除未评价过的项目"
     },
     {
       "temp_id": "PROC-047.3",
@@ -15252,7 +15252,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，删除项目，验证只能删除待选入且未评价过的项目"
+      "title": "待选入项目删除时，验证只能删除待选入且未评价过的项目"
     },
     {
       "temp_id": "PROC-047.4",
@@ -15334,7 +15334,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，删除项目，验证只能删除待选入且未评价过的项目"
+      "title": "待选入项目删除时，验证只能删除待选入且未评价过的项目"
     },
     {
       "temp_id": "PROC-047.5",
@@ -15416,7 +15416,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，删除项目，验证只能删除待选入且未评价过的项目"
+      "title": "待选入项目删除时，验证只能删除待选入且未评价过的项目"
     },
     {
       "temp_id": "PROC-048.1",
@@ -15504,7 +15504,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，编辑项目，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "待选入项目编辑时，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
     },
     {
       "temp_id": "PROC-048.2",
@@ -15592,7 +15592,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，编辑项目，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "待选入项目编辑时，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
     },
     {
       "temp_id": "PROC-048.3",
@@ -15680,7 +15680,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，编辑项目，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "待选入项目编辑时，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
     },
     {
       "temp_id": "PROC-048.4",
@@ -15768,7 +15768,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，编辑项目，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "待选入项目编辑时，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
     },
     {
       "temp_id": "PROC-048.5",
@@ -15856,7 +15856,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，编辑项目，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "待选入项目编辑时，验证只可编辑待选入的项目信息；对评价过的项目编辑附件"
     },
     {
       "temp_id": "PROC-049.1",
@@ -15938,7 +15938,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目，验证显示项目详细信息"
+      "title": "待选入项目查看时，验证显示项目详细信息"
     },
     {
       "temp_id": "PROC-049.2",
@@ -16020,7 +16020,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目，验证显示项目详细信息"
+      "title": "待选入项目查看时，验证显示项目详细信息"
     },
     {
       "temp_id": "PROC-049.3",
@@ -16102,7 +16102,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目，验证显示项目详细信息"
+      "title": "待选入项目查看时，验证显示项目详细信息"
     },
     {
       "temp_id": "PROC-049.4",
@@ -16184,7 +16184,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目，验证显示项目详细信息"
+      "title": "待选入项目查看时，验证显示项目详细信息"
     },
     {
       "temp_id": "PROC-049.5",
@@ -16266,7 +16266,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目，验证显示项目详细信息"
+      "title": "待选入项目查看时，验证显示项目详细信息"
     },
     {
       "temp_id": "PROC-050.1",
@@ -16348,7 +16348,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查询项目，验证依据项目名称和技术领域条件返回匹配项目列表"
+      "title": "待选入项目查询时，验证依据项目名称和技术领域条件返回匹配项目列表"
     },
     {
       "temp_id": "PROC-050.2",
@@ -16430,7 +16430,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查询项目，验证依据项目名称和技术领域条件返回匹配项目列表"
+      "title": "待选入项目查询时，验证依据项目名称和技术领域条件返回匹配项目列表"
     },
     {
       "temp_id": "PROC-050.3",
@@ -16512,7 +16512,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查询项目，验证依据项目名称和技术领域条件返回匹配项目列表"
+      "title": "待选入项目查询时，验证依据项目名称和技术领域条件返回匹配项目列表"
     },
     {
       "temp_id": "PROC-050.4",
@@ -16594,7 +16594,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查询项目，验证依据项目名称和技术领域条件返回匹配项目列表"
+      "title": "待选入项目查询时，验证依据项目名称和技术领域条件返回匹配项目列表"
     },
     {
       "temp_id": "PROC-050.5",
@@ -16676,7 +16676,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查询项目，验证依据项目名称和技术领域条件返回匹配项目列表"
+      "title": "待选入项目查询时，验证依据项目名称和技术领域条件返回匹配项目列表"
     },
     {
       "temp_id": "PROC-051.1",
@@ -16758,7 +16758,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目附件，验证集中展示项目附件；机构管理员只可查看本机构的项目附件"
+      "title": "待选入项目查看附件时，验证集中展示项目附件；机构管理员只可查看本机构的项目附件"
     },
     {
       "temp_id": "PROC-051.2",
@@ -16840,7 +16840,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目状态下，查看项目附件，验证集中展示项目附件；机构管理员只可查看本机构的项目附件"
+      "title": "待选入项目查看附件时，验证集中展示项目附件；机构管理员只可查看本机构的项目附件"
     },
     {
       "temp_id": "PROC-051.3",
@@ -18808,7 +18808,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目分页工具条支持设置展示条数及翻页操作"
+      "title": "待选入项目分页工具条支持设置展示条数和翻页操作"
     },
     {
       "temp_id": "PROC-056.2",
@@ -18890,7 +18890,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目分页工具条支持设置展示条数及翻页操作"
+      "title": "待选入项目分页工具条支持设置展示条数和翻页操作"
     },
     {
       "temp_id": "PROC-056.3",
@@ -18972,7 +18972,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目分页工具条支持设置展示条数及翻页操作"
+      "title": "待选入项目分页工具条支持设置展示条数和翻页操作"
     },
     {
       "temp_id": "PROC-056.4",
@@ -19054,7 +19054,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目分页工具条支持设置展示条数及翻页操作"
+      "title": "待选入项目分页工具条支持设置展示条数和翻页操作"
     },
     {
       "temp_id": "PROC-056.5",
@@ -19136,7 +19136,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目分页工具条支持设置展示条数及翻页操作"
+      "title": "待选入项目分页工具条支持设置展示条数和翻页操作"
     },
     {
       "temp_id": "PROC-057.1",
@@ -20002,7 +20002,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "提交含违规值的项目表单，验证多项校验失败提示"
+      "title": "提交含违规值的项目表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-058.2",
@@ -20458,7 +20458,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "提交含违规值的项目表单，验证多项校验失败提示"
+      "title": "提交含违规值的项目表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-058.3",
@@ -20914,7 +20914,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "提交含违规值的项目表单，验证多项校验失败提示"
+      "title": "提交含违规值的项目表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-058.4",
@@ -21370,7 +21370,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "提交含违规值的项目表单，验证多项校验失败提示"
+      "title": "提交含违规值的项目表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-058.5",
@@ -21826,7 +21826,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "提交含违规值的项目表单，验证多项校验失败提示"
+      "title": "提交含违规值的项目表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-059",
@@ -21908,7 +21908,7 @@
         "multi_count": 1,
         "multi_reason": "entity=系统日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "审计管理员可查看系统日志信息"
+      "title": "审计管理员查看日志，验证可查看和查询日志信息"
     },
     {
       "temp_id": "PROC-060",
@@ -21990,7 +21990,7 @@
         "multi_count": 1,
         "multi_reason": "entity=系统日志 dim_count=0 instances=1 [singleton]"
       },
-      "title": "系统日志支持根据内容、创建时间组合查询"
+      "title": "审计管理员查询日志，验证可组合查询日志内容和时间"
     },
     {
       "temp_id": "PROC-061",
@@ -23834,7 +23834,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "建立评审计划后，验证评审计划状态为已建立并可进行编辑"
+      "title": "建立评审计划后，验证评审计划状态为已建立并可编辑"
     },
     {
       "temp_id": "PROC-078.2",
@@ -24261,7 +24261,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统下发超时后，验证评审计划状态变更为待启动"
+      "title": "评审计划下发超时后，验证计划状态变更为待启动"
     },
     {
       "temp_id": "PROC-080.2",
@@ -24368,7 +24368,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统下发超时后，验证评审计划状态变更为待启动"
+      "title": "评审计划下发超时后，验证计划状态变更为待启动"
     },
     {
       "temp_id": "PROC-081.1",
@@ -24452,7 +24452,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统下发超时（时间边界）后，验证评审计划状态变更为待启动"
+      "title": "评审计划接近截止时间下发超时后，验证计划状态变为待启动"
     },
     {
       "temp_id": "PROC-081.2",
@@ -24536,7 +24536,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统下发超时（时间边界）后，验证评审计划状态变更为待启动"
+      "title": "评审计划接近截止时间下发超时后，验证计划状态变为待启动"
     },
     {
       "temp_id": "PROC-082.1",
@@ -24620,7 +24620,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统尝试下发超时（已过期）后，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间尝试下发超时后，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-082.2",
@@ -24704,7 +24704,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统尝试下发超时（已过期）后，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间尝试下发超时后，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-083.1",
@@ -25026,7 +25026,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员下发评审计划后，验证计划状态变更为待启动并符合下发时限规则"
+      "title": "评审管理员下发评审计划后，验证计划状态变更为待启动并遵循下发时限规则"
     },
     {
       "temp_id": "PROC-084.2",
@@ -25136,7 +25136,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员下发评审计划后，验证计划状态变更为待启动并符合下发时限规则"
+      "title": "评审管理员下发评审计划后，验证计划状态变更为待启动并遵循下发时限规则"
     },
     {
       "temp_id": "PROC-085.1",
@@ -25231,7 +25231,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员启动评审计划后，验证计划状态变更为待评审并符合启动时限规则"
+      "title": "评审管理员启动评审计划后，验证计划状态变更为待评审并遵循启动时限规则"
     },
     {
       "temp_id": "PROC-085.2",
@@ -25326,7 +25326,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员启动评审计划后，验证计划状态变更为待评审并符合启动时限规则"
+      "title": "评审管理员启动评审计划后，验证计划状态变更为待评审并遵循启动时限规则"
     },
     {
       "temp_id": "PROC-086.1",
@@ -25408,7 +25408,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员暂停评审计划后，验证计划状态变为暂停且专家不能评审"
+      "title": "评审管理员暂停评审计划后，验证计划状态变为暂停且专家无法评审"
     },
     {
       "temp_id": "PROC-086.2",
@@ -25490,7 +25490,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员暂停评审计划后，验证计划状态变为暂停且专家不能评审"
+      "title": "评审管理员暂停评审计划后，验证计划状态变为暂停且专家无法评审"
     },
     {
       "temp_id": "PROC-087.1",
@@ -25749,7 +25749,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员归档评审计划后，验证计划状态变更为结束并对项目进行归档评价"
+      "title": "评审管理员归档评审计划后，验证计划状态变更为结束并按规则归档项目"
     },
     {
       "temp_id": "PROC-088.2",
@@ -25844,7 +25844,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "已建立评审计划归档后，验证计划状态变更为结束并按规则归档项目"
+      "title": "已建立评审计划归档后，验证计划状态变更为结束，项目归档及机构评价"
     },
     {
       "temp_id": "PROC-089.1",
@@ -26437,7 +26437,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "已建立评审计划编辑时，验证处于已建立状态的计划可编辑，下发后不可编辑"
+      "title": "已建立评审计划编辑时，验证可编辑下发前计划，下发后不可编辑"
     },
     {
       "temp_id": "PROC-092.2",
@@ -26538,7 +26538,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "已建立评审计划编辑时，验证处于已建立状态的计划可编辑，下发后不可编辑"
+      "title": "已建立评审计划编辑时，验证可编辑下发前计划，下发后不可编辑"
     },
     {
       "temp_id": "PROC-093.1",
@@ -26791,7 +26791,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待启动评审计划尝试取消结束转换时，验证操作被拒绝且状态保持待启动"
+      "title": "待启动评审计划尝试转换状态时，验证操作被拒绝，状态保持待启动"
     },
     {
       "temp_id": "PROC-094.2",
@@ -26880,7 +26880,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待启动评审计划尝试取消结束转换时，验证操作被拒绝且状态保持待启动"
+      "title": "待启动评审计划尝试转换状态时，验证操作被拒绝，状态保持待启动"
     },
     {
       "temp_id": "PROC-095.1",
@@ -26972,7 +26972,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证评价结果差的项目操作被拒绝"
+      "title": "待选入项目选入时，验证操作被拒绝，状态保持待选入并给出禁止提示"
     },
     {
       "temp_id": "PROC-095.2",
@@ -27064,7 +27064,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证评价结果差的项目操作被拒绝"
+      "title": "待选入项目选入时，验证操作被拒绝，状态保持待选入并给出禁止提示"
     },
     {
       "temp_id": "PROC-095.3",
@@ -27156,7 +27156,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证评价结果差的项目操作被拒绝"
+      "title": "待选入项目选入时，验证操作被拒绝，状态保持待选入并给出禁止提示"
     },
     {
       "temp_id": "PROC-095.4",
@@ -27248,7 +27248,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证评价结果差的项目操作被拒绝"
+      "title": "待选入项目选入时，验证操作被拒绝，状态保持待选入并给出禁止提示"
     },
     {
       "temp_id": "PROC-095.5",
@@ -27340,7 +27340,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证评价结果差的项目操作被拒绝"
+      "title": "待选入项目选入时，验证操作被拒绝，状态保持待选入并给出禁止提示"
     },
     {
       "temp_id": "PROC-096.1",
@@ -27437,7 +27437,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证状态转换为已选入并流转"
+      "title": "待选入项目选入时，验证状态转换为已选入，并流转待选入至已选入"
     },
     {
       "temp_id": "PROC-096.2",
@@ -27534,7 +27534,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待选入项目选入时，验证状态转换为已选入并流转"
+      "title": "待选入项目选入时，验证状态转换为已选入，并流转待选入至已选入"
     },
     {
       "temp_id": "PROC-096.3",
@@ -28829,7 +28829,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则操作，验证规则正面和负面效果"
+      "title": "规则适用前提满足时，执行规则，验证规则正面行为触发"
     },
     {
       "temp_id": "PROC-100.2",
@@ -28922,7 +28922,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则操作，验证规则正面和负面效果"
+      "title": "规则适用前提满足时，执行规则，验证规则正面行为触发"
     },
     {
       "temp_id": "PROC-101.1",
@@ -29193,7 +29193,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则操作，验证规则正面和负面效果"
+      "title": "规则适用前提满足时，执行规则，验证规则正面行为触发"
     },
     {
       "temp_id": "PROC-102.2",
@@ -29286,7 +29286,7 @@
         "multi_count": 2,
         "multi_reason": "entity=机构 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行规则操作，验证规则正面和负面效果"
+      "title": "规则适用前提满足时，执行规则，验证规则正面行为触发"
     },
     {
       "temp_id": "PROC-103.1",
@@ -29621,7 +29621,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待启动且超过启动时限的评审计划，系统启动超时后状态变更为待评审"
+      "title": "评审计划待启动且超过启动时限时，系统启动超时，验证状态变更为待评审"
     },
     {
       "temp_id": "PROC-104.2",
@@ -29730,7 +29730,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待启动且超过启动时限的评审计划，系统启动超时后状态变更为待评审"
+      "title": "评审计划待启动且超过启动时限时，系统启动超时，验证状态变更为待评审"
     },
     {
       "temp_id": "PROC-105.1",
@@ -29816,7 +29816,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "接近截止时间的待启动评审计划，系统启动超时后状态转换为待评审"
+      "title": "评审计划接近截止时间时，系统启动超时，验证状态转换为待评审"
     },
     {
       "temp_id": "PROC-105.2",
@@ -29902,7 +29902,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "接近截止时间的待启动评审计划，系统启动超时后状态转换为待评审"
+      "title": "评审计划接近截止时间时，系统启动超时，验证状态转换为待评审"
     },
     {
       "temp_id": "PROC-106.1",
@@ -29988,7 +29988,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "超过截止时间的待启动评审计划，尝试启动超时事件操作不可执行或状态不变"
+      "title": "评审计划超过截止时间时，尝试启动超时事件，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-106.2",
@@ -30074,7 +30074,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "超过截止时间的待启动评审计划，尝试启动超时事件操作不可执行或状态不变"
+      "title": "评审计划超过截止时间时，尝试启动超时事件，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-107.1",
@@ -30163,7 +30163,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待评审状态的评审计划，尝试取消结束转换事件操作被拒绝，状态不变"
+      "title": "评审计划处于待评审状态时，尝试取消结束转换事件，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-107.2",
@@ -30252,7 +30252,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "待评审状态的评审计划，尝试取消结束转换事件操作被拒绝，状态不变"
+      "title": "评审计划处于待评审状态时，尝试取消结束转换事件，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-108.1",
@@ -30358,7 +30358,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "已选入状态的项目纳入评审计划后，状态转换为待评审"
+      "title": "项目处于已选入状态时，评审管理员纳入评审计划，验证项目状态变更为待评审"
     },
     {
       "temp_id": "PROC-108.2",
@@ -30464,7 +30464,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "已选入状态的项目纳入评审计划后，状态转换为待评审"
+      "title": "项目处于已选入状态时，评审管理员纳入评审计划，验证项目状态变更为待评审"
     },
     {
       "temp_id": "PROC-108.3",
@@ -30570,7 +30570,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "已选入状态的项目纳入评审计划后，状态转换为待评审"
+      "title": "项目处于已选入状态时，评审管理员纳入评审计划，验证项目状态变更为待评审"
     },
     {
       "temp_id": "PROC-108.4",
@@ -30676,7 +30676,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "已选入状态的项目纳入评审计划后，状态转换为待评审"
+      "title": "项目处于已选入状态时，评审管理员纳入评审计划，验证项目状态变更为待评审"
     },
     {
       "temp_id": "PROC-108.5",
@@ -30782,7 +30782,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "已选入状态的项目纳入评审计划后，状态转换为待评审"
+      "title": "项目处于已选入状态时，评审管理员纳入评审计划，验证项目状态变更为待评审"
     },
     {
       "temp_id": "PROC-109.1",
@@ -30867,7 +30867,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审中状态的评审计划，尝试取消结束转换事件操作被拒绝，状态不变"
+      "title": "评审计划处于评审中状态时，尝试取消结束转换事件，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-109.2",
@@ -30952,7 +30952,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审中状态的评审计划，尝试取消结束转换事件操作被拒绝，状态不变"
+      "title": "评审计划处于评审中状态时，尝试取消结束转换事件，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-110.1",
@@ -31062,7 +31062,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待评审状态的项目进入评审后，状态转换为评审中"
+      "title": "项目处于待评审状态且评审计划状态由待启动变为待评审时，系统进入评审，验证项目状态变更为评审中"
     },
     {
       "temp_id": "PROC-110.2",
@@ -31172,7 +31172,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待评审状态的项目进入评审后，状态转换为评审中"
+      "title": "项目处于待评审状态且评审计划状态由待启动变为待评审时，系统进入评审，验证项目状态变更为评审中"
     },
     {
       "temp_id": "PROC-110.3",
@@ -31282,7 +31282,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待评审状态的项目进入评审后，状态转换为评审中"
+      "title": "项目处于待评审状态且评审计划状态由待启动变为待评审时，系统进入评审，验证项目状态变更为评审中"
     },
     {
       "temp_id": "PROC-110.4",
@@ -31392,7 +31392,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待评审状态的项目进入评审后，状态转换为评审中"
+      "title": "项目处于待评审状态且评审计划状态由待启动变为待评审时，系统进入评审，验证项目状态变更为评审中"
     },
     {
       "temp_id": "PROC-110.5",
@@ -31502,7 +31502,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "待评审状态的项目进入评审后，状态转换为评审中"
+      "title": "项目处于待评审状态且评审计划状态由待启动变为待评审时，系统进入评审，验证项目状态变更为评审中"
     },
     {
       "temp_id": "PROC-111.1",
@@ -31600,7 +31600,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "初始状态下，系统分配打分任务，验证打分状态变更为未打分"
+      "title": "初始状态下，分配打分任务后，打分状态转换为未打分"
     },
     {
       "temp_id": "PROC-111.2",
@@ -31698,7 +31698,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "初始状态下，系统分配打分任务，验证打分状态变更为未打分"
+      "title": "初始状态下，分配打分任务后，打分状态转换为未打分"
     },
     {
       "temp_id": "PROC-111.3",
@@ -31796,7 +31796,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "初始状态下，系统分配打分任务，验证打分状态变更为未打分"
+      "title": "初始状态下，分配打分任务后，打分状态转换为未打分"
     },
     {
       "temp_id": "PROC-111.4",
@@ -31894,7 +31894,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "初始状态下，系统分配打分任务，验证打分状态变更为未打分"
+      "title": "初始状态下，分配打分任务后，打分状态转换为未打分"
     },
     {
       "temp_id": "PROC-112.1",
@@ -31989,7 +31989,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，专家进行打分，验证打分规则执行及提交限制"
+      "title": "打分已存在且未打分时，专家进行打分，验证打分规则和提交限制"
     },
     {
       "temp_id": "PROC-112.2",
@@ -32084,7 +32084,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，专家进行打分，验证打分规则执行及提交限制"
+      "title": "打分已存在且未打分时，专家进行打分，验证打分规则和提交限制"
     },
     {
       "temp_id": "PROC-112.3",
@@ -32179,7 +32179,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，专家进行打分，验证打分规则执行及提交限制"
+      "title": "打分已存在且未打分时，专家进行打分，验证打分规则和提交限制"
     },
     {
       "temp_id": "PROC-112.4",
@@ -32274,7 +32274,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，专家进行打分，验证打分规则执行及提交限制"
+      "title": "打分已存在且未打分时，专家进行打分，验证打分规则和提交限制"
     },
     {
       "temp_id": "PROC-113.1",
@@ -32356,7 +32356,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，保存打分，验证打分状态变更为已保存"
+      "title": "打分已存在且未打分时，保存打分后，打分状态变为已保存"
     },
     {
       "temp_id": "PROC-113.2",
@@ -32438,7 +32438,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，保存打分，验证打分状态变更为已保存"
+      "title": "打分已存在且未打分时，保存打分后，打分状态变为已保存"
     },
     {
       "temp_id": "PROC-113.3",
@@ -32520,7 +32520,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，保存打分，验证打分状态变更为已保存"
+      "title": "打分已存在且未打分时，保存打分后，打分状态变为已保存"
     },
     {
       "temp_id": "PROC-113.4",
@@ -32602,7 +32602,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，保存打分，验证打分状态变更为已保存"
+      "title": "打分已存在且未打分时，保存打分后，打分状态变为已保存"
     },
     {
       "temp_id": "PROC-114.1",
@@ -32684,7 +32684,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，提交打分，验证打分状态变更为已提交及提交限制"
+      "title": "打分已存在且未打分时，提交打分后，打分状态变为已提交，并验证提交限制"
     },
     {
       "temp_id": "PROC-114.2",
@@ -32766,7 +32766,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，提交打分，验证打分状态变更为已提交及提交限制"
+      "title": "打分已存在且未打分时，提交打分后，打分状态变为已提交，并验证提交限制"
     },
     {
       "temp_id": "PROC-114.3",
@@ -32848,7 +32848,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，提交打分，验证打分状态变更为已提交及提交限制"
+      "title": "打分已存在且未打分时，提交打分后，打分状态变为已提交，并验证提交限制"
     },
     {
       "temp_id": "PROC-114.4",
@@ -32930,7 +32930,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分已存在且未打分时，提交打分，验证打分状态变更为已提交及提交限制"
+      "title": "打分已存在且未打分时，提交打分后，打分状态变为已提交，并验证提交限制"
     },
     {
       "temp_id": "PROC-115.1",
@@ -33233,7 +33233,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "提交含违规值的打分表单，验证各项信息校验失败及提示信息"
+      "title": "提交含违规值的打分表单后，验证各项信息校验失败并提示"
     },
     {
       "temp_id": "PROC-115.2",
@@ -33536,7 +33536,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "提交含违规值的打分表单，验证各项信息校验失败及提示信息"
+      "title": "提交含违规值的打分表单后，验证各项信息校验失败并提示"
     },
     {
       "temp_id": "PROC-115.3",
@@ -33839,7 +33839,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "提交含违规值的打分表单，验证各项信息校验失败及提示信息"
+      "title": "提交含违规值的打分表单后，验证各项信息校验失败并提示"
     },
     {
       "temp_id": "PROC-115.4",
@@ -34142,7 +34142,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "提交含违规值的打分表单，验证各项信息校验失败及提示信息"
+      "title": "提交含违规值的打分表单后，验证各项信息校验失败并提示"
     },
     {
       "temp_id": "PROC-116.1",
@@ -34506,7 +34506,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "评审专家保存打分，验证打分状态变为已保存"
+      "title": "评审专家保存打分，验证打分状态由未打分变为已保存"
     },
     {
       "temp_id": "PROC-117.2",
@@ -34616,7 +34616,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "评审专家保存打分，验证打分状态变为已保存"
+      "title": "评审专家保存打分，验证打分状态由未打分变为已保存"
     },
     {
       "temp_id": "PROC-117.3",
@@ -34726,7 +34726,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "评审专家保存打分，验证打分状态变为已保存"
+      "title": "评审专家保存打分，验证打分状态由未打分变为已保存"
     },
     {
       "temp_id": "PROC-117.4",
@@ -34836,7 +34836,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "评审专家保存打分，验证打分状态变为已保存"
+      "title": "评审专家保存打分，验证打分状态由未打分变为已保存"
     },
     {
       "temp_id": "PROC-118.1",
@@ -35612,7 +35612,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审助理重启暂停计划，验证状态返回到暂停前的已完成状态"
+      "title": "评审助理重启暂停计划，验证状态由暂停变为已完成"
     },
     {
       "temp_id": "PROC-121.2",
@@ -35714,7 +35714,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审助理重启暂停计划，验证状态返回到暂停前的已完成状态"
+      "title": "评审助理重启暂停计划，验证状态由暂停变为已完成"
     },
     {
       "temp_id": "PROC-122.1",
@@ -35829,7 +35829,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统完成评审，验证评审计划状态由评审中转为已完成"
+      "title": "系统完成评审，验证评审计划状态由评审中变为已完成"
     },
     {
       "temp_id": "PROC-122.2",
@@ -35944,7 +35944,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "系统完成评审，验证评审计划状态由评审中转为已完成"
+      "title": "系统完成评审，验证评审计划状态由评审中变为已完成"
     },
     {
       "temp_id": "PROC-123.1",
@@ -36456,7 +36456,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统完成评审，验证状态变更为已完成"
+      "title": "评审计划接近截止时，系统完成评审，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-125.2",
@@ -36542,7 +36542,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统完成评审，验证状态变更为已完成"
+      "title": "评审计划接近截止时，系统完成评审，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-126.1",
@@ -36628,7 +36628,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试完成评审，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试完成评审，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-126.2",
@@ -36714,7 +36714,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试完成评审，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试完成评审，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-127.1",
@@ -36832,7 +36832,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划评审超时时，系统完成评审超时，验证状态变更为已完成"
+      "title": "评审计划超时时，系统完成评审超时，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-127.2",
@@ -36950,7 +36950,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划评审超时时，系统完成评审超时，验证状态变更为已完成"
+      "title": "评审计划超时时，系统完成评审超时，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-128.1",
@@ -37036,7 +37036,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统完成评审超时，验证状态变更为已完成"
+      "title": "评审计划接近截止时，系统完成评审超时，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-128.2",
@@ -37122,7 +37122,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统完成评审超时，验证状态变更为已完成"
+      "title": "评审计划接近截止时，系统完成评审超时，验证状态变更为已完成"
     },
     {
       "temp_id": "PROC-129.1",
@@ -37208,7 +37208,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试评审超时完成，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试评审超时完成，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-129.2",
@@ -37294,7 +37294,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试评审超时完成，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试评审超时完成，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-130.1",
@@ -37407,7 +37407,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员取消已建立的评审计划，验证状态变更为取消结束"
+      "title": "评审管理员取消已建立状态的评审计划，验证状态变更为取消结束"
     },
     {
       "temp_id": "PROC-130.2",
@@ -37520,7 +37520,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员取消已建立的评审计划，验证状态变更为取消结束"
+      "title": "评审管理员取消已建立状态的评审计划，验证状态变更为取消结束"
     },
     {
       "temp_id": "PROC-131.1",
@@ -37644,7 +37644,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员和评审助理归档已完成的评审计划，验证状态变更为结束"
+      "title": "评审管理员和评审助理归档已完成状态的评审计划，验证状态变更为结束"
     },
     {
       "temp_id": "PROC-131.2",
@@ -37768,7 +37768,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审管理员和评审助理归档已完成的评审计划，验证状态变更为结束"
+      "title": "评审管理员和评审助理归档已完成状态的评审计划，验证状态变更为结束"
     },
     {
       "temp_id": "PROC-132.1",
@@ -37901,7 +37901,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过归档时限时，系统触发归档超时，验证状态变更为超时结束"
+      "title": "评审计划超过归档时限，系统归档超时，验证状态变更为超时结束"
     },
     {
       "temp_id": "PROC-132.2",
@@ -38034,7 +38034,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过归档时限时，系统触发归档超时，验证状态变更为超时结束"
+      "title": "评审计划超过归档时限，系统归档超时，验证状态变更为超时结束"
     },
     {
       "temp_id": "PROC-133.1",
@@ -38126,7 +38126,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统触发归档超时，验证状态变更为超时结束"
+      "title": "评审计划接近截止时，系统归档超时，验证状态变更为超时结束"
     },
     {
       "temp_id": "PROC-133.2",
@@ -38218,7 +38218,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划接近截止时间时，系统触发归档超时，验证状态变更为超时结束"
+      "title": "评审计划接近截止时，系统归档超时，验证状态变更为超时结束"
     },
     {
       "temp_id": "PROC-134.1",
@@ -38310,7 +38310,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试触发归档超时，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试归档超时，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-134.2",
@@ -38402,7 +38402,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "评审计划超过截止时间时，系统尝试触发归档超时，验证操作不可执行或状态不变"
+      "title": "评审计划超过截止时间，系统尝试归档超时，验证操作不可执行或状态不变"
     },
     {
       "temp_id": "PROC-135.1",
@@ -38484,7 +38484,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审计划选取规则，验证选取1-5个项目纳入评审计划"
+      "title": "规则适用前提满足时，执行评审管理员选取项目纳入评审计划规则"
     },
     {
       "temp_id": "PROC-135.2",
@@ -38566,7 +38566,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审计划选取规则，验证选取1-5个项目纳入评审计划"
+      "title": "规则适用前提满足时，执行评审管理员选取项目纳入评审计划规则"
     },
     {
       "temp_id": "PROC-136.1",
@@ -38648,7 +38648,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审组组成规则，验证评审组由5、7或9个专家组成，有且只能有一个组长专家"
+      "title": "规则适用前提满足时，执行评审组专家组成规则"
     },
     {
       "temp_id": "PROC-136.2",
@@ -38730,7 +38730,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审组组成规则，验证评审组由5、7或9个专家组成，有且只能有一个组长专家"
+      "title": "规则适用前提满足时，执行评审组专家组成规则"
     },
     {
       "temp_id": "PROC-137.1",
@@ -38823,7 +38823,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审专家技术领域覆盖规则，验证每个评审专家的技术领域覆盖评审计划中项目的领域"
+      "title": "规则适用前提满足时，执行评审专家技术领域覆盖规则"
     },
     {
       "temp_id": "PROC-137.2",
@@ -38916,7 +38916,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审专家技术领域覆盖规则，验证每个评审专家的技术领域覆盖评审计划中项目的领域"
+      "title": "规则适用前提满足时，执行评审专家技术领域覆盖规则"
     },
     {
       "temp_id": "PROC-138.1",
@@ -39009,7 +39009,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审组工作时段规则，验证评审组专家工作时段相同，且一个工作时段只能被分配一个评审计划"
+      "title": "规则适用前提满足时，执行评审组专家工作时段规则"
     },
     {
       "temp_id": "PROC-138.2",
@@ -39102,7 +39102,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审组工作时段规则，验证评审组专家工作时段相同，且一个工作时段只能被分配一个评审计划"
+      "title": "规则适用前提满足时，执行评审组专家工作时段规则"
     },
     {
       "temp_id": "PROC-139.1",
@@ -39183,7 +39183,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审时限规则，验证评审时限从待评审到已完成的时间为1-5天，默认为2天，超过时限计划自动转为已完成状态"
+      "title": "规则适用前提满足时，执行评审时限规则"
     },
     {
       "temp_id": "PROC-139.2",
@@ -39264,7 +39264,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审时限规则，验证评审时限从待评审到已完成的时间为1-5天，默认为2天，超过时限计划自动转为已完成状态"
+      "title": "规则适用前提满足时，执行评审时限规则"
     },
     {
       "temp_id": "PROC-140.1",
@@ -39345,7 +39345,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行归档时限规则，验证归档时限从已完成到结束的时限为1-3天，默认为2天，超过时限计划自动转为超时结束状态"
+      "title": "规则适用前提满足时，执行归档时限规则"
     },
     {
       "temp_id": "PROC-140.2",
@@ -39426,7 +39426,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行归档时限规则，验证归档时限从已完成到结束的时限为1-3天，默认为2天，超过时限计划自动转为超时结束状态"
+      "title": "规则适用前提满足时，执行归档时限规则"
     },
     {
       "temp_id": "PROC-141.1",
@@ -39518,7 +39518,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行超时设置规则，验证超时设置完成后，对所有计划立即生效"
+      "title": "规则适用前提满足时，执行超时设置规则"
     },
     {
       "temp_id": "PROC-141.2",
@@ -39610,7 +39610,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行超时设置规则，验证超时设置完成后，对所有计划立即生效"
+      "title": "规则适用前提满足时，执行超时设置规则"
     },
     {
       "temp_id": "PROC-142.1",
@@ -39706,7 +39706,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审任务说明规则，验证评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时5小时内的任务的说明"
+      "title": "规则适用前提满足时，执行评审任务说明规则"
     },
     {
       "temp_id": "PROC-142.2",
@@ -39802,7 +39802,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审任务说明规则，验证评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时5小时内的任务的说明"
+      "title": "规则适用前提满足时，执行评审任务说明规则"
     },
     {
       "temp_id": "PROC-143.1",
@@ -39895,7 +39895,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审专家匹配规则，验证在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家"
+      "title": "规则适用前提满足时，执行评审专家匹配规则"
     },
     {
       "temp_id": "PROC-143.2",
@@ -39988,7 +39988,7 @@
         "multi_count": 2,
         "multi_reason": "entity=评审计划 dim_count=1 instances=2"
       },
-      "title": "规则适用前提满足时，执行评审专家匹配规则，验证在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家"
+      "title": "规则适用前提满足时，执行评审专家匹配规则"
     },
     {
       "temp_id": "PROC-144.1",
@@ -40066,7 +40066,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "回避项目为当前值时，变更回避项目配置，验证回避项目显示为修改后的值"
+      "title": "回避项目为当前值时，变更回避项目配置"
     },
     {
       "temp_id": "PROC-144.2",
@@ -40144,7 +40144,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "回避项目为当前值时，变更回避项目配置，验证回避项目显示为修改后的值"
+      "title": "回避项目为当前值时，变更回避项目配置"
     },
     {
       "temp_id": "PROC-145.1",
@@ -40222,7 +40222,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "技术领域配置变更后，验证技术领域显示修改后的值"
+      "title": "技术领域配置变更后，验证技术领域显示为修改后的值"
     },
     {
       "temp_id": "PROC-145.2",
@@ -40300,7 +40300,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "技术领域配置变更后，验证技术领域显示修改后的值"
+      "title": "技术领域配置变更后，验证技术领域显示为修改后的值"
     },
     {
       "temp_id": "PROC-146.1",
@@ -40378,7 +40378,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "评审身份配置变更后，验证评审身份显示修改后的值"
+      "title": "评审身份配置变更后，验证评审身份显示为修改后的值"
     },
     {
       "temp_id": "PROC-146.2",
@@ -40456,7 +40456,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "评审身份配置变更后，验证评审身份显示修改后的值"
+      "title": "评审身份配置变更后，验证评审身份显示为修改后的值"
     },
     {
       "temp_id": "PROC-147.1",
@@ -40544,7 +40544,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，新增专家，验证手机号作为账号，密码默认为手机号后六位，操作结果同步到用户管理"
+      "title": "机构合格状态下，验证新增专家功能实现，手机号作为账号，密码默认为手机号后六位，操作结果同步到用户管理"
     },
     {
       "temp_id": "PROC-147.2",
@@ -40632,7 +40632,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，新增专家，验证手机号作为账号，密码默认为手机号后六位，操作结果同步到用户管理"
+      "title": "机构合格状态下，验证新增专家功能实现，手机号作为账号，密码默认为手机号后六位，操作结果同步到用户管理"
     },
     {
       "temp_id": "PROC-148.1",
@@ -40733,7 +40733,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，编辑专家，验证不能编辑技术领域、机构、评审身份和手机号"
+      "title": "机构合格状态下，验证编辑专家功能实现，不能编辑技术领域、机构、评审身份和手机号"
     },
     {
       "temp_id": "PROC-148.2",
@@ -40834,7 +40834,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，编辑专家，验证不能编辑技术领域、机构、评审身份和手机号"
+      "title": "机构合格状态下，验证编辑专家功能实现，不能编辑技术领域、机构、评审身份和手机号"
     },
     {
       "temp_id": "PROC-149.1",
@@ -40931,7 +40931,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，删除专家，验证专家有待评审或评审中项目时不可以删除，并提示"
+      "title": "机构合格状态下，验证删除专家功能，专家有待评审或评审中项目时不可以删除，不足5人或2人组长专家时需确认"
     },
     {
       "temp_id": "PROC-149.2",
@@ -41028,7 +41028,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，删除专家，验证专家有待评审或评审中项目时不可以删除，并提示"
+      "title": "机构合格状态下，验证删除专家功能，专家有待评审或评审中项目时不可以删除，不足5人或2人组长专家时需确认"
     },
     {
       "temp_id": "PROC-150.1",
@@ -41110,7 +41110,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，查询专家，验证根据姓名、手机号和技术领域进行查询"
+      "title": "机构合格状态下，验证查询专家功能，根据姓名、手机号和技术领域进行查询"
     },
     {
       "temp_id": "PROC-150.2",
@@ -41192,7 +41192,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，查询专家，验证根据姓名、手机号和技术领域进行查询"
+      "title": "机构合格状态下，验证查询专家功能，根据姓名、手机号和技术领域进行查询"
     },
     {
       "temp_id": "PROC-151.1",
@@ -41274,7 +41274,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，查看专家打分项目，验证查看该专家参评的项目的打分信息与意见"
+      "title": "机构合格状态下，验证打分项目查看功能，查看专家参评项目的打分信息与意见"
     },
     {
       "temp_id": "PROC-151.2",
@@ -41356,7 +41356,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，查看专家打分项目，验证查看该专家参评的项目的打分信息与意见"
+      "title": "机构合格状态下，验证打分项目查看功能，查看专家参评项目的打分信息与意见"
     },
     {
       "temp_id": "PROC-152.1",
@@ -41453,7 +41453,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，设置回避项目，验证回避项目设置有效，且只对回避项目设置后建立的评审计划有效"
+      "title": "机构合格状态下，验证回避项目设置功能，对已选入项目进行设置，只对后续评审计划有效"
     },
     {
       "temp_id": "PROC-152.2",
@@ -41550,7 +41550,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "合格机构下，设置回避项目，验证回避项目设置有效，且只对回避项目设置后建立的评审计划有效"
+      "title": "机构合格状态下，验证回避项目设置功能，对已选入项目进行设置，只对后续评审计划有效"
     },
     {
       "temp_id": "PROC-153.1",
@@ -41646,7 +41646,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家规则适用时，尝试执行被规则禁止的分配操作，验证操作被拒绝且系统状态保持不变"
+      "title": "专家规则适用前提下，验证尝试执行被规则禁止的分配操作时，操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-153.2",
@@ -41742,7 +41742,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家规则适用时，尝试执行被规则禁止的分配操作，验证操作被拒绝且系统状态保持不变"
+      "title": "专家规则适用前提下，验证尝试执行被规则禁止的分配操作时，操作被拒绝且系统状态保持不变"
     },
     {
       "temp_id": "PROC-154.1",
@@ -41820,7 +41820,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "按规则执行专家新增操作，验证实现专家新增的功能，手机号作为账号，密码默认为手机号后六位"
+      "title": "规则适用前提满足下，验证按规则执行操作事件，实现专家新增功能，手机号作为账号，密码默认为手机号后六位"
     },
     {
       "temp_id": "PROC-154.2",
@@ -41898,7 +41898,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "按规则执行专家新增操作，验证实现专家新增的功能，手机号作为账号，密码默认为手机号后六位"
+      "title": "规则适用前提满足下，验证按规则执行操作事件，实现专家新增功能，手机号作为账号，密码默认为手机号后六位"
     },
     {
       "temp_id": "PROC-155.1",
@@ -41996,7 +41996,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家回避项目设置规则有效时，验证规则触发及不满足条件时不触发"
+      "title": "规则适用前提满足时，执行专家回避项目设置规则，验证规则正面和负面情况"
     },
     {
       "temp_id": "PROC-155.2",
@@ -42094,7 +42094,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家回避项目设置规则有效时，验证规则触发及不满足条件时不触发"
+      "title": "规则适用前提满足时，执行专家回避项目设置规则，验证规则正面和负面情况"
     },
     {
       "temp_id": "PROC-156.1",
@@ -42172,7 +42172,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家邮箱规则有效时，验证邮箱格式正确性"
+      "title": "规则适用前提满足时，执行专家邮箱格式规则，验证规则要求"
     },
     {
       "temp_id": "PROC-156.2",
@@ -42250,7 +42250,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家邮箱规则有效时，验证邮箱格式正确性"
+      "title": "规则适用前提满足时，执行专家邮箱格式规则，验证规则要求"
     },
     {
       "temp_id": "PROC-157.1",
@@ -42328,7 +42328,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家手机号规则有效时，验证手机号格式及唯一性"
+      "title": "规则适用前提满足时，执行专家手机号格式规则，验证规则要求"
     },
     {
       "temp_id": "PROC-157.2",
@@ -42406,7 +42406,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "专家手机号规则有效时，验证手机号格式及唯一性"
+      "title": "规则适用前提满足时，执行专家手机号格式规则，验证规则要求"
     },
     {
       "temp_id": "PROC-158.1",
@@ -42583,7 +42583,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "提交含违规值的专家表单时，验证各字段校验规则及提示信息"
+      "title": "信息录入页面打开时，提交含违规值的专家表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-158.2",
@@ -42760,7 +42760,7 @@
         "multi_count": 2,
         "multi_reason": "entity=专家 dim_count=0 instances=2"
       },
-      "title": "提交含违规值的专家表单时，验证各字段校验规则及提示信息"
+      "title": "信息录入页面打开时，提交含违规值的专家表单，验证各项校验失败提示"
     },
     {
       "temp_id": "PROC-159.1",
@@ -42877,7 +42877,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态取消结束回退时，验证项目状态回退至已选入"
+      "title": "项目状态为评审中且评审计划状态为取消结束时，执行计划取消回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-159.2",
@@ -42994,7 +42994,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态取消结束回退时，验证项目状态回退至已选入"
+      "title": "项目状态为评审中且评审计划状态为取消结束时，执行计划取消回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-159.3",
@@ -43111,7 +43111,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态取消结束回退时，验证项目状态回退至已选入"
+      "title": "项目状态为评审中且评审计划状态为取消结束时，执行计划取消回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-159.4",
@@ -43228,7 +43228,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态取消结束回退时，验证项目状态回退至已选入"
+      "title": "项目状态为评审中且评审计划状态为取消结束时，执行计划取消回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-159.5",
@@ -43345,7 +43345,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态取消结束回退时，验证项目状态回退至已选入"
+      "title": "项目状态为评审中且评审计划状态为取消结束时，执行计划取消回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-160.1",
@@ -43462,7 +43462,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态完成结束回退时，验证项目状态回退至已选入及状态流转"
+      "title": "项目状态为评审中且评审计划状态由已完成变为结束或超时结束时，执行计划完成结束回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-160.2",
@@ -43579,7 +43579,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态完成结束回退时，验证项目状态回退至已选入及状态流转"
+      "title": "项目状态为评审中且评审计划状态由已完成变为结束或超时结束时，执行计划完成结束回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-160.3",
@@ -43696,7 +43696,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态完成结束回退时，验证项目状态回退至已选入及状态流转"
+      "title": "项目状态为评审中且评审计划状态由已完成变为结束或超时结束时，执行计划完成结束回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-160.4",
@@ -43813,7 +43813,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态完成结束回退时，验证项目状态回退至已选入及状态流转"
+      "title": "项目状态为评审中且评审计划状态由已完成变为结束或超时结束时，执行计划完成结束回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-160.5",
@@ -43930,7 +43930,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评审中状态完成结束回退时，验证项目状态回退至已选入及状态流转"
+      "title": "项目状态为评审中且评审计划状态由已完成变为结束或超时结束时，执行计划完成结束回退，验证项目状态回退至已选入"
     },
     {
       "temp_id": "PROC-161.1",
@@ -44015,7 +44015,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已归档时，验证已归档为终态，项目状态不再变更"
+      "title": "项目处于已归档状态时，尝试转换状态，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-161.2",
@@ -44100,7 +44100,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目已归档时，验证已归档为终态，项目状态不再变更"
+      "title": "项目处于已归档状态时，尝试转换状态，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-161.3",
@@ -44447,7 +44447,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "项目分数已保存且全部为零时，提交打分操作被拒绝"
+      "title": "打分状态为已保存且项目打分全部为零时，提交打分操作被拒绝"
     },
     {
       "temp_id": "PROC-162.2",
@@ -44539,7 +44539,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "项目分数已保存且全部为零时，提交打分操作被拒绝"
+      "title": "打分状态为已保存且项目打分全部为零时，提交打分操作被拒绝"
     },
     {
       "temp_id": "PROC-162.3",
@@ -44631,7 +44631,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "项目分数已保存且全部为零时，提交打分操作被拒绝"
+      "title": "打分状态为已保存且项目打分全部为零时，提交打分操作被拒绝"
     },
     {
       "temp_id": "PROC-162.4",
@@ -44723,7 +44723,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "项目分数已保存且全部为零时，提交打分操作被拒绝"
+      "title": "打分状态为已保存且项目打分全部为零时，提交打分操作被拒绝"
     },
     {
       "temp_id": "PROC-163.1",
@@ -44820,7 +44820,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已保存项目分数时，提交打分操作成功，状态流转为已提交"
+      "title": "打分状态为已保存时，提交打分操作成功，状态流转为已提交"
     },
     {
       "temp_id": "PROC-163.2",
@@ -44917,7 +44917,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已保存项目分数时，提交打分操作成功，状态流转为已提交"
+      "title": "打分状态为已保存时，提交打分操作成功，状态流转为已提交"
     },
     {
       "temp_id": "PROC-163.3",
@@ -45014,7 +45014,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已保存项目分数时，提交打分操作成功，状态流转为已提交"
+      "title": "打分状态为已保存时，提交打分操作成功，状态流转为已提交"
     },
     {
       "temp_id": "PROC-163.4",
@@ -45111,7 +45111,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已保存项目分数时，提交打分操作成功，状态流转为已提交"
+      "title": "打分状态为已保存时，提交打分操作成功，状态流转为已提交"
     },
     {
       "temp_id": "PROC-164.1",
@@ -45246,7 +45246,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "评审中项目完成评审打分后，状态转换为待归档并自动评价"
+      "title": "评审中项目完成评审打分后，项目状态转换为待归档并自动进行项目评价"
     },
     {
       "temp_id": "PROC-164.2",
@@ -45381,7 +45381,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "评审中项目完成评审打分后，状态转换为待归档并自动评价"
+      "title": "评审中项目完成评审打分后，项目状态转换为待归档并自动进行项目评价"
     },
     {
       "temp_id": "PROC-164.3",
@@ -45516,7 +45516,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "评审中项目完成评审打分后，状态转换为待归档并自动评价"
+      "title": "评审中项目完成评审打分后，项目状态转换为待归档并自动进行项目评价"
     },
     {
       "temp_id": "PROC-164.4",
@@ -45651,7 +45651,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "评审中项目完成评审打分后，状态转换为待归档并自动评价"
+      "title": "评审中项目完成评审打分后，项目状态转换为待归档并自动进行项目评价"
     },
     {
       "temp_id": "PROC-164.5",
@@ -45786,7 +45786,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "评审中项目完成评审打分后，状态转换为待归档并自动评价"
+      "title": "评审中项目完成评审打分后，项目状态转换为待归档并自动进行项目评价"
     },
     {
       "temp_id": "PROC-165.1",
@@ -45875,7 +45875,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已提交项目尝试修改分数，验证操作被拒绝且状态不变"
+      "title": "已提交项目尝试转换状态为已保存，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-165.2",
@@ -45964,7 +45964,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已提交项目尝试修改分数，验证操作被拒绝且状态不变"
+      "title": "已提交项目尝试转换状态为已保存，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-165.3",
@@ -46053,7 +46053,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已提交项目尝试修改分数，验证操作被拒绝且状态不变"
+      "title": "已提交项目尝试转换状态为已保存，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-165.4",
@@ -46142,7 +46142,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "已提交项目尝试修改分数，验证操作被拒绝且状态不变"
+      "title": "已提交项目尝试转换状态为已保存，验证操作被拒绝且状态不变"
     },
     {
       "temp_id": "PROC-166.1",
@@ -46220,7 +46220,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证数值范围及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-166.2",
@@ -46298,7 +46298,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证数值范围及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-166.3",
@@ -46376,7 +46376,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证数值范围及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-166.4",
@@ -46454,7 +46454,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证数值范围及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-167.1",
@@ -46532,7 +46532,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证开题和验收分数计算及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-167.2",
@@ -46610,7 +46610,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证开题和验收分数计算及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-167.3",
@@ -46688,7 +46688,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证开题和验收分数计算及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-167.4",
@@ -46766,7 +46766,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分数据准备满足规则时，执行特定规则操作，验证数据符合规则要求"
+      "title": "打分数据准备满足规则时，执行特定规则，验证开题和验收分数计算及四舍五入保留两位小数"
     },
     {
       "temp_id": "PROC-168.1",
@@ -46848,7 +46848,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分和项目数据准备满足规则时，执行专家打分规则操作，验证打分结果正确"
+      "title": "打分和项目数据准备满足规则时，执行专家打分规则，验证打分项平均分及得分计算"
     },
     {
       "temp_id": "PROC-168.2",
@@ -46930,7 +46930,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分和项目数据准备满足规则时，执行专家打分规则操作，验证打分结果正确"
+      "title": "打分和项目数据准备满足规则时，执行专家打分规则，验证打分项平均分及得分计算"
     },
     {
       "temp_id": "PROC-168.3",
@@ -47012,7 +47012,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分和项目数据准备满足规则时，执行专家打分规则操作，验证打分结果正确"
+      "title": "打分和项目数据准备满足规则时，执行专家打分规则，验证打分项平均分及得分计算"
     },
     {
       "temp_id": "PROC-168.4",
@@ -47094,7 +47094,7 @@
         "multi_count": 4,
         "multi_reason": "entity=打分 dim_count=1 instances=4"
       },
-      "title": "打分和项目数据准备满足规则时，执行专家打分规则操作，验证打分结果正确"
+      "title": "打分和项目数据准备满足规则时，执行专家打分规则，验证打分项平均分及得分计算"
     },
     {
       "temp_id": "PROC-169.1",
@@ -47647,7 +47647,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评级合格及以上且评审计划结束，开题阶段项目自动归档为已选入，阶段变为验收"
+      "title": "项目状态为待归档且评审计划状态结束，项目评级合格及以上时，系统归档项目，验证状态流转及阶段变更"
     },
     {
       "temp_id": "PROC-170.2",
@@ -47775,7 +47775,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评级合格及以上且评审计划结束，开题阶段项目自动归档为已选入，阶段变为验收"
+      "title": "项目状态为待归档且评审计划状态结束，项目评级合格及以上时，系统归档项目，验证状态流转及阶段变更"
     },
     {
       "temp_id": "PROC-170.3",
@@ -47903,7 +47903,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目评级合格及以上且评审计划结束，开题阶段项目自动归档为已选入，阶段变为验收"
+      "title": "项目状态为待归档且评审计划状态结束，项目评级合格及以上时，系统归档项目，验证状态流转及阶段变更"
     },
     {
       "temp_id": "PROC-170.4",
@@ -48031,7 +48031,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已选入"
+      "title": "开题阶段合格及以上项目待归档时，系统归档操作后状态变更为已选入"
     },
     {
       "temp_id": "PROC-170.5",
@@ -48159,7 +48159,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已选入"
+      "title": "开题阶段合格及以上项目待归档时，系统归档操作后状态变更为已选入"
     },
     {
       "temp_id": "PROC-171.1",
@@ -48287,7 +48287,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "开题阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-171.2",
@@ -48415,7 +48415,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "开题阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-171.3",
@@ -48543,7 +48543,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "开题阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-171.4",
@@ -48671,7 +48671,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "开题阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-171.5",
@@ -48799,7 +48799,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "开题阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-172.1",
@@ -48911,7 +48911,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后项目阶段变更为验收"
+      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后状态变更为验收"
     },
     {
       "temp_id": "PROC-172.2",
@@ -49023,7 +49023,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后项目阶段变更为验收"
+      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后状态变更为验收"
     },
     {
       "temp_id": "PROC-172.3",
@@ -49135,7 +49135,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后项目阶段变更为验收"
+      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后状态变更为验收"
     },
     {
       "temp_id": "PROC-172.4",
@@ -49247,7 +49247,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后项目阶段变更为验收"
+      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后状态变更为验收"
     },
     {
       "temp_id": "PROC-172.5",
@@ -49359,7 +49359,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后项目阶段变更为验收"
+      "title": "开题阶段合格及以上项目评审计划结束时，系统阶段转换操作后状态变更为验收"
     },
     {
       "temp_id": "PROC-173.1",
@@ -49487,7 +49487,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已归档"
+      "title": "验收阶段合格及以上项目待归档时，系统归档操作后状态变更为已归档"
     },
     {
       "temp_id": "PROC-173.2",
@@ -49615,7 +49615,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已归档"
+      "title": "验收阶段合格及以上项目待归档时，系统归档操作后状态变更为已归档"
     },
     {
       "temp_id": "PROC-173.3",
@@ -49743,7 +49743,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已归档"
+      "title": "验收阶段合格及以上项目待归档时，系统归档操作后状态变更为已归档"
     },
     {
       "temp_id": "PROC-173.4",
@@ -49871,7 +49871,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已归档"
+      "title": "验收阶段合格及以上项目待归档时，系统归档操作后状态变更为已归档"
     },
     {
       "temp_id": "PROC-173.5",
@@ -49999,7 +49999,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段合格及以上项目待归档时，系统归档操作后项目状态变更为已归档"
+      "title": "验收阶段合格及以上项目待归档时，系统归档操作后状态变更为已归档"
     },
     {
       "temp_id": "PROC-174.1",
@@ -50127,7 +50127,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "验收阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-174.2",
@@ -50255,7 +50255,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "验收阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-174.3",
@@ -50383,7 +50383,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段不合格或差项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "验收阶段不合格或差项目待归档时，系统归档操作后状态变更为待选入"
     },
     {
       "temp_id": "PROC-174.4",
@@ -50511,7 +50511,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段不合格项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "项目处于验收阶段且评级为不合格或差时，系统归档项目，验证项目状态变更为待选入"
     },
     {
       "temp_id": "PROC-174.5",
@@ -50639,7 +50639,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "验收阶段不合格项目待归档时，系统归档操作后项目状态变更为待选入"
+      "title": "项目处于验收阶段且评级为不合格或差时，系统归档项目，验证项目状态变更为待选入"
     },
     {
       "temp_id": "PROC-175.1",
@@ -51107,7 +51107,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "联系人电话必填且符合手机号验证规则时，验证规则执行正确"
+      "title": "联系人电话为必填项且符合手机号验证规则时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-176.2",
@@ -51185,7 +51185,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "联系人电话必填且符合手机号验证规则时，验证规则执行正确"
+      "title": "联系人电话为必填项且符合手机号验证规则时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-176.3",
@@ -51263,7 +51263,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "联系人电话必填且符合手机号验证规则时，验证规则执行正确"
+      "title": "联系人电话为必填项且符合手机号验证规则时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-176.4",
@@ -51341,7 +51341,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "联系人电话必填且符合手机号验证规则时，验证规则执行正确"
+      "title": "联系人电话为必填项且符合手机号验证规则时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-176.5",
@@ -51419,7 +51419,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "联系人电话必填且符合手机号验证规则时，验证规则执行正确"
+      "title": "联系人电话为必填项且符合手机号验证规则时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-177.1",
@@ -51497,7 +51497,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "申请经费必填且符合整数长度和范围时，验证规则执行正确"
+      "title": "申请经费为必填项且符合整数长度和范围时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-177.2",
@@ -51575,7 +51575,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "申请经费必填且符合整数长度和范围时，验证规则执行正确"
+      "title": "申请经费为必填项且符合整数长度和范围时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-177.3",
@@ -51653,7 +51653,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "申请经费必填且符合整数长度和范围时，验证规则执行正确"
+      "title": "申请经费为必填项且符合整数长度和范围时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-177.4",
@@ -51731,7 +51731,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "申请经费必填且符合整数长度和范围时，验证规则执行正确"
+      "title": "申请经费为必填项且符合整数长度和范围时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-177.5",
@@ -51809,7 +51809,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "申请经费必填且符合整数长度和范围时，验证规则执行正确"
+      "title": "申请经费为必填项且符合整数长度和范围时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-178.1",
@@ -51887,7 +51887,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "建议书附件上传格式、大小、覆盖规则和必填项符合要求时，验证规则执行正确"
+      "title": "建议书附件上传格式、大小、覆盖规则和必填项要求正确时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-178.2",
@@ -51965,7 +51965,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "建议书附件上传格式、大小、覆盖规则和必填项符合要求时，验证规则执行正确"
+      "title": "建议书附件上传格式、大小、覆盖规则和必填项要求正确时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-178.3",
@@ -52043,7 +52043,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "建议书附件上传格式、大小、覆盖规则和必填项符合要求时，验证规则执行正确"
+      "title": "建议书附件上传格式、大小、覆盖规则和必填项要求正确时，验证规则执行正确"
     },
     {
       "temp_id": "PROC-178.4",
@@ -52121,7 +52121,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "建议书附件上传规则验证：格式限制、管理员上传、大小限制、覆盖规则和必填项"
+      "title": "建议书附件上传规则验证"
     },
     {
       "temp_id": "PROC-178.5",
@@ -52199,7 +52199,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "建议书附件上传规则验证：格式限制、管理员上传、大小限制、覆盖规则和必填项"
+      "title": "建议书附件上传规则验证"
     },
     {
       "temp_id": "PROC-179.1",
@@ -52288,7 +52288,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目删除规则验证：只能删除待选入且未评价过的项目"
+      "title": "项目删除规则验证"
     },
     {
       "temp_id": "PROC-179.2",
@@ -52377,7 +52377,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目删除规则验证：只能删除待选入且未评价过的项目"
+      "title": "项目删除规则验证"
     },
     {
       "temp_id": "PROC-179.3",
@@ -52466,7 +52466,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目删除规则验证：只能删除待选入且未评价过的项目"
+      "title": "项目删除规则验证"
     },
     {
       "temp_id": "PROC-179.4",
@@ -52555,7 +52555,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目删除规则验证：只能删除待选入且未评价过的项目"
+      "title": "项目删除规则验证"
     },
     {
       "temp_id": "PROC-179.5",
@@ -52644,7 +52644,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目删除规则验证：只能删除待选入且未评价过的项目"
+      "title": "项目删除规则验证"
     },
     {
       "temp_id": "PROC-180.1",
@@ -52733,7 +52733,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目信息编辑规则验证：只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "项目信息编辑规则验证"
     },
     {
       "temp_id": "PROC-180.2",
@@ -52822,7 +52822,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目信息编辑规则验证：只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "项目信息编辑规则验证"
     },
     {
       "temp_id": "PROC-180.3",
@@ -52911,7 +52911,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目信息编辑规则验证：只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "项目信息编辑规则验证"
     },
     {
       "temp_id": "PROC-180.4",
@@ -53000,7 +53000,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目信息编辑规则验证：只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "项目信息编辑规则验证"
     },
     {
       "temp_id": "PROC-180.5",
@@ -53089,7 +53089,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目信息编辑规则验证：只可编辑待选入的项目信息；对评价过的项目编辑附件"
+      "title": "项目信息编辑规则验证"
     },
     {
       "temp_id": "PROC-181.1",
@@ -53181,7 +53181,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入机会规则验证：本阶段不合格评价结果的项目只有1次选入机会"
+      "title": "项目选入机会规则验证"
     },
     {
       "temp_id": "PROC-181.2",
@@ -53273,7 +53273,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入机会规则验证：本阶段不合格评价结果的项目只有1次选入机会"
+      "title": "项目选入机会规则验证"
     },
     {
       "temp_id": "PROC-181.3",
@@ -53365,7 +53365,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入机会规则验证：本阶段不合格评价结果的项目只有1次选入机会"
+      "title": "项目选入机会规则验证"
     },
     {
       "temp_id": "PROC-181.4",
@@ -53457,7 +53457,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入机会规则验证：本阶段不合格评价结果的项目只有1次选入机会"
+      "title": "项目选入机会规则验证"
     },
     {
       "temp_id": "PROC-181.5",
@@ -53549,7 +53549,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入机会规则验证：本阶段不合格评价结果的项目只有1次选入机会"
+      "title": "项目选入机会规则验证"
     },
     {
       "temp_id": "PROC-182.1",
@@ -53638,7 +53638,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入规则验证：评价结果为差的项目不可选入"
+      "title": "评价结果差项目选入规则验证"
     },
     {
       "temp_id": "PROC-182.2",
@@ -53727,7 +53727,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入规则验证：评价结果为差的项目不可选入"
+      "title": "评价结果差项目选入规则验证"
     },
     {
       "temp_id": "PROC-182.3",
@@ -53816,7 +53816,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "项目选入规则验证：评价结果为差的项目不可选入"
+      "title": "评价结果差项目选入规则验证"
     },
     {
       "temp_id": "PROC-182.4",
@@ -54083,7 +54083,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证评审管理员只能对已选入状态的项目进行选出"
+      "title": "执行选入操作时，验证评审管理员只能对已选入状态的项目进行选出"
     },
     {
       "temp_id": "PROC-183.2",
@@ -54172,7 +54172,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证评审管理员只能对已选入状态的项目进行选出"
+      "title": "执行选入操作时，验证评审管理员只能对已选入状态的项目进行选出"
     },
     {
       "temp_id": "PROC-183.3",
@@ -54261,7 +54261,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证评审管理员只能对已选入状态的项目进行选出"
+      "title": "执行选入操作时，验证评审管理员只能对已选入状态的项目进行选出"
     },
     {
       "temp_id": "PROC-183.4",
@@ -54350,7 +54350,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证评审管理员只能对已选入状态的项目进行选出"
+      "title": "执行选入操作时，验证评审管理员只能对已选入状态的项目进行选出"
     },
     {
       "temp_id": "PROC-183.5",
@@ -54439,7 +54439,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证评审管理员只能对已选入状态的项目进行选出"
+      "title": "执行选入操作时，验证评审管理员只能对已选入状态的项目进行选出"
     },
     {
       "temp_id": "PROC-184.1",
@@ -54517,7 +54517,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证项目级别根据得分和约束条件匹配和降级逻辑"
+      "title": "根据得分匹配项目级别时，验证优先级和约束条件"
     },
     {
       "temp_id": "PROC-184.2",
@@ -54595,7 +54595,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证项目级别根据得分和约束条件匹配和降级逻辑"
+      "title": "根据得分匹配项目级别时，验证优先级和约束条件"
     },
     {
       "temp_id": "PROC-184.3",
@@ -54673,7 +54673,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证项目级别根据得分和约束条件匹配和降级逻辑"
+      "title": "根据得分匹配项目级别时，验证优先级和约束条件"
     },
     {
       "temp_id": "PROC-184.4",
@@ -54751,7 +54751,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证项目级别根据得分和约束条件匹配和降级逻辑"
+      "title": "根据得分匹配项目级别时，验证优先级和约束条件"
     },
     {
       "temp_id": "PROC-184.5",
@@ -54829,7 +54829,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证项目级别根据得分和约束条件匹配和降级逻辑"
+      "title": "根据得分匹配项目级别时，验证优先级和约束条件"
     },
     {
       "temp_id": "PROC-185.1",
@@ -54924,7 +54924,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证日期类数据输入提供日历选择功能"
+      "title": "日期类数据输入时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-185.2",
@@ -55019,7 +55019,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证日期类数据输入提供日历选择功能"
+      "title": "日期类数据输入时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-185.3",
@@ -55114,7 +55114,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证日期类数据输入提供日历选择功能"
+      "title": "日期类数据输入时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-185.4",
@@ -55209,7 +55209,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证日期类数据输入提供日历选择功能"
+      "title": "日期类数据输入时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-185.5",
@@ -55304,7 +55304,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证日期类数据输入提供日历选择功能"
+      "title": "日期类数据输入时，验证提供日历选择功能"
     },
     {
       "temp_id": "PROC-186.1",
@@ -55403,7 +55403,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证查询功能支持组合查询两个以上字段"
+      "title": "查询功能中，验证组合查询支持两个以上字段'与'的查询"
     },
     {
       "temp_id": "PROC-186.2",
@@ -55502,7 +55502,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证查询功能支持组合查询两个以上字段"
+      "title": "查询功能中，验证组合查询支持两个以上字段'与'的查询"
     },
     {
       "temp_id": "PROC-186.3",
@@ -55601,7 +55601,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用时，验证查询功能支持组合查询两个以上字段"
+      "title": "查询功能中，验证组合查询支持两个以上字段'与'的查询"
     },
     {
       "temp_id": "PROC-186.4",
@@ -57689,7 +57689,7 @@
         "multi_count": 5,
         "multi_reason": "entity=项目 dim_count=2 instances=5"
       },
-      "title": "规则适用前提满足时，执行项目状态回退规则，验证不满足条件时规则不触发"
+      "title": "规则适用前提满足时，执行项目状态回退规则，验证不满足条件时不触发规则"
     }
   ],
   "br_classifications": [
@@ -59497,7 +59497,7 @@
       "P6": 15,
       "P7": 95
     },
-    "elapsed_seconds": 264.41
+    "elapsed_seconds": 27.63
   },
   "clause_coverage": {
     "summary": {

@@ -45,7 +45,7 @@
 ```python
 # Step 4 发现新动词/新操作归属，在当前位置追加
 m.add_action_verbs(["归档"])
-m.add_permission("机构管理员", ["归档项目"])
+m.add_permission(role="机构管理员", operations=["归档项目"])
 ```
 
 ---
@@ -59,7 +59,7 @@ m.add_permission("机构管理员", ["归档项目"])
 以下为词表**形态**示例，实际词表须从当前文档的转换动词提取：
 
 ```python
-m.set_prohibition_config({
+m.set_prohibition_config(config={
     "action_verbs": ["选入", "纳入", "启动", "提交", "保存", "删除", "修改", "新增",
                      "审批", "批准", "通过", "归档", "重启", "暂停", "结束", "发放",
                      "退出", "登录", "编辑", "查看", "分配", "入选", "进入", "选为", "选择", "执行"],
@@ -74,11 +74,11 @@ m.set_prohibition_config({
 `add_permission` 仅声明 `session/ui/file/query/config` 及不改状态的 crud；转换型操作由 `transitions.role` 承载，混入即移除。范围约束由授权类 BR 承载。
 
 ```python
-m.add_role("r01", "机构管理员")
-m.add_role("r02", "评审管理员")
-m.add_role("r03", "系统管理员", readonly=True)
-m.add_permission("机构管理员", ["编辑项目", "查看项目", "查询项目", "查看项目附件", "上传附件", "下载附件"])
-m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项目设置"])
+m.add_role(id="r01", name="机构管理员")
+m.add_role(id="r02", name="评审管理员")
+m.add_role(id="r03", name="系统管理员", readonly=True)
+m.add_permission(role="机构管理员", operations=["编辑项目", "查看项目", "查询项目", "查看项目附件", "上传附件", "下载附件"])
+m.add_permission(role="评审管理员", operations=["编辑专家", "查询专家", "回避项目设置"])
 ```
 
 ### Step 1：实体 → `m.add_entity()`
@@ -91,9 +91,36 @@ m.add_permission("评审管理员", ["编辑专家", "查询专家", "回避项�
 
 **状态维度**：维度名与状态值逐字取原文；原文无枚举行时取原文原词并在维度级 `note` 注明出处。`states` 一律纯字符串，禁止字典元素。原文逐字查无的状态值（隐式初态/散文抽象）仍以纯字符串入 `states`，同时列入维度级 `inferred` 并写依据（"查无"＝状态字符串全文逐字不存在，非"概念没提"）。属性操作 ≠ 状态变化：仅变更属性而无新具名阶段 → 只入 operations 或同状态自环，不建状态与转换。终态判据＝具名 + 全文无返回/归还回路，缺一不立。
 
+**多状态类型建模**：若原文将多个状态类型并列（如「报名记录状态」「费用状态」「发票状态」并列为多条「状态类型」行），且各类型有独立的 lifecycle/操作主体/触发事件，应建模为**独立实体**而非单实体的多维度；只有当多状态值在同一记录的生命周期中**强耦合、共享操作主体**时才作为同一实体的多维度。避免"同一状态值既作为独立实体的状态维度、又作为另一实体的多维度"的重复建模。
+
 **tags**：按需 `approvable`/`multi-state`/`expirable`/`collaborative`/`configurable`。
 
-**operations**：扫描全部用户可执行操作（含通用功能/易用性章节）。`category` ∈ `session/ui/file/query/crud/config`。`expected_results` ≥1 逐字取原文可观察结果（含提示语）；原文未述以操作名短语补 + `inferred`。跨实体通用操作仅在最相关实体登记一次，`note.comment` 注"通用操作"。
+**operations**：扫描全部用户可执行操作。`category` ∈ `session/ui/file/query/crud/config`。`expected_results` ≥1 逐字取原文可观察结果（含提示语）；原文未述以操作名短语补 + `inferred`。
+
+> **铁律：op 的 `note` 必填 `role` 字段（C18 强校验，缺失即 critical 中断）**。`role` 取值须对齐 `add_role` 的 `name` 或字符串 `"system"`；多角色用 list；推断标 `inferred`。`note.comment` 用于补充说明（如"通用操作"、"对应转换 tXX"）。跨实体通用操作仅在最相关实体登记一次。
+
+**正确用例**（必读）：
+
+```python
+operations=[
+    op(name="新增实验室", category="crud",
+       expected_results=["实验室状态变为待审核"],
+       source_ref="20.4.1.1",
+       note=N(role="能力验证参加者", comment="对应转换 t01")),
+    op(name="实验室列表查询", category="query",
+       expected_results=["分页展示符合条件的实验室记录"],
+       source_ref="20.4.1.1",
+       note=N(role="系统管理人员", comment="通用查询操作")),
+    op(name="重置查询", category="ui",
+       expected_results=["清空查询条件并分页展示所有数据"],
+       source_ref="20.4.1.1",
+       note=N(role="system", comment="通用操作；框架行为")),
+    op(name="下载证明文件", category="file",
+       expected_results=["下载实验室证明文件"],
+       source_ref="20.4.1.1",
+       note=N(role=["系统管理人员", "项目管理员"], comment="通用操作")),
+],
+```
 
 实体写完即扫：跨实体通用操作确认仅在最相关实体登记一次（无框架兜底，唯一防线）。
 
@@ -219,6 +246,27 @@ m.add_branch_dimension(
 
 > 两步独立。例如"页面提示信息不能含有系统后台"→ signal_type=restrictive + category=display。
 
+**分支维度承载**：每个 Step 3 分支维度在 Step 5 需 ≥1 条 BR 的 `note` 含 `branch_dimension` 字段（值为维度名）。分支穿透已在转换层通过 `note.branch_dimension` 表达，BR 层须再承载一次以满足 INV-7 校验。BR 的 `note` 为 plain dict（不使用 `N()` helper，N() 仅限 attr/op）。
+
+**BR 承载分支维度的正确用例**（必读）：
+
+```python
+# 分支维度 "项目类型" 由 BR 承载一次
+m.add_br(bid="b13", category="validation",
+         desc="只有已上传对应文件且未提交审核的记录才可以被选定",
+         entities_involved=["E-PTXM", "E-BM"],
+         constrained_entity="E-BM",
+         source_ref="20.5.1.3", signal_type="restrictive",
+         note={"branch_dimension": "项目类型"})
+
+# 分支维度 "评分方式" 由 BR 承载一次
+m.add_br(bid="b12", category="authorization",
+         desc="评价人员只能对自己的评价结果进行修改",
+         entities_involved=["E-PJ"],
+         source_ref="20.7.1.2", signal_type="restrictive",
+         note={"branch_dimension": "评分方式"})
+```
+
 **constrained_entity（约束主体实体，按序首条命中；多实体 BR 必填）**＝谁的增删改被门禁：
 
 | 序 | BR 形态 | 取值 |
@@ -239,7 +287,7 @@ from srs_pipeline import DomainModel, N, attr, op, precond, state_ref
 
 def build() -> DomainModel:
     m = DomainModel(source="<文件名，无则填 未命名文档>", document_scope="<覆盖范围>")
-    m.set_prohibition_config({...})  # Step 0
+    m.set_prohibition_config(config={...})  # Step 0
     # Step 0.5→5 按顺序调用 ...
     return m
 ```
@@ -273,22 +321,28 @@ m.add_xc(xid, source_entity, source_transition, source_state, target_entity,
 m.add_br(bid, category, desc, entities_involved, source_ref, signal_type,
          note=None, constrained_entity=None)
 # constrained_entity：谁的增删改被门禁（多实体必填，判定见 Step 5）
+# note 为 plain dict，可含 "branch_dimension" 字段以承载分支维度（INV-7）
 ```
 
 **辅助构造**：
 
 ```python
 N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
-# role: op note 必填（C18），对齐 add_role 的 name 或 "system"；多角色用 list；推断标 inferred
+# role: op note 必填（C18，缺失即 critical 中断）
+#       取值对齐 add_role 的 name 或 "system"；多角色用 list；推断标 inferred
+#       虽默认 None，但用于 op note 时必须显式传 role=
+#       attr note 不强制 role（仅 op 强制）
+# branch_dimension: 转换 note 用（表达分支穿透），BR 不使用 N() 而用 plain dict
 attr(name, desc, is_config=False)
 op(name, category, expected_results, source_ref, note=None)
+# op 的 note 必填 N(role=...)，否则 C18 报错
 precond(text, ptype, ref=None, note=None)
 state_ref(entity, dimension, state)
 ```
 
 **编号规则**：局部标签 `tid=t01…`、`xc=x01…`、`br=b01…`、`it=i01…`、角色 `id=r01…`（小写无横线）。角色 id 不做编号移交、直接落盘，仅 `name` 参与引用。实体 ID `E-{2~6 字母缩写}`。
 
-**inferred 标注**：推断内容必须标 `inferred=True` 并写依据。推断状态值 → 维度级 `inferred` 列表 + 维度级 `note`；其余 → `note={"inferred": True, "comment": "..."}`；`attr`/`op` → `N(inferred=True, comment="...")`。XC/IT 无 note 字段，由源转换/源规则的标注继承。
+**inferred 标注**：推断内容必须标 `inferred=True` 并写依据。推断状态值 → 维度级 `inferred` 列表 + 维度级 `note`；其余 → `note={"inferred": True, "comment": "..."}`；`attr`/`op` → `N(inferred=True, comment="...", role=...)`。XC/IT 无 note 字段，由源转换/源规则的标注继承。
 
 ---
 
@@ -319,6 +373,19 @@ m.add_trans(
     note={"comment": "direction判③frm待选入先于to已选入"},
 )
 
+# op 正常用例（必填 role，C18 强校验）
+# 文档片段："点击【新增】按钮，弹出一个表单对话框"
+op(name="新增标准库", category="crud",
+   expected_results=["列表新增一条标准库记录"],
+   source_ref="20.4.2.2",
+   note=N(role="系统管理人员", comment="对应转换 t08")),
+
+# op 通用查询用例（system 角色）
+op(name="标准库列表查询", category="query",
+   expected_results=["分页展示符合条件标准库"],
+   source_ref="20.4.2.1",
+   note=N(role="系统管理人员", comment="通用查询操作")),
+
 # 隐式初态标注（add_entity 的 state_dimensions 片段）
 # {"dimension_name": "打分状态", "states": ["未打分", "已保存", "已提交"],
 #  "initial": "未打分", "terminal": ["已提交"], "inferred": ["未打分"],
@@ -345,6 +412,14 @@ m.add_br(bid="b09", category="validation",
          entities_involved=["E-ZJ", "E-PSJH"],
          constrained_entity="E-ZJ",            # 删除门禁的对象是专家
          source_ref="4.10（3）", signal_type="restrictive")
+
+# BR 承载分支维度（每个 Step 3 分支维度需 ≥1 条 BR 在 note 中含 branch_dimension）
+m.add_br(bid="b13", category="validation",
+         desc="只有已上传对应文件且未提交审核的记录才可以被选定",
+         entities_involved=["E-PTXM", "E-BM"],
+         constrained_entity="E-BM",
+         source_ref="20.5.1.3", signal_type="restrictive",
+         note={"branch_dimension": "项目类型"})
 
 # 镜像 XC：source＝生产者，target＝消费者，分类交 xc_source，前缀框架生成
 m.add_xc(xid="x03", source_entity="E-PSJH",
