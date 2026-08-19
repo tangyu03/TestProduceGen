@@ -10,10 +10,10 @@ from .constants import (BR_SIGNALS, DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
                         TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_SOURCES)
 from .escape import find_forbidden, find_unescaped
 
-# validate.py 顶部，import 之后：
+# 分支穿透豁免词：分支维度 impact_scope 含这些词时，transitions 层可无 branch
+# 转换（纯计算/展示/筛选/查询型），BR 层仍须承载（INV-7 由 C20 硬校验）。
 PURE_BRANCH_WORDS = ("纯计算", "计算型", "纯展示", "展示型",
                      "纯筛选", "筛选型", "纯查询", "查询型", "仅影响")
-
 
 
 @dataclass
@@ -74,6 +74,14 @@ class Validator:
         self.lateral_states = {t["to"]: t["id"] for t in model.transitions
                                if t["direction"] == "lateral"}
 
+    @staticmethod
+    def _hint(obj, problem, fix, example=""):
+        """统一报错模板：对象定位｜问题｜修法｜示例。"""
+        msg = f"{obj}: {problem}。修法：{fix}"
+        if example:
+            msg += f"。示例：{example}"
+        return msg
+
     def register_check(self, fn):
         """扩展点：项目自定义校验 fn(validator, report)，在内置 13 项之后执行。"""
         self._extra.append(fn)
@@ -100,35 +108,61 @@ class Validator:
     # 1. 引用完整性
     def c01_reference_integrity(self):
         r = self.report
+        declared_roles = sorted({x["name"] for x in self.m.roles})
         for t in self.m.transitions:
             d = self.dims.get((t["entity"], t["dimension"]))
             if t["entity"] not in self.entities:
-                r.error("C01", f"引用未建模实体 {t['entity']}", t["id"])
+                r.error("C01", self._hint(
+                    t["id"], f"引用未建模实体 {t['entity']}",
+                    "核对实体 ID 拼写或补建 add_entity",
+                    f"已登记实体: {sorted(self.entities)}"), t["id"])
             elif d is None:
-                r.error("C01", f"引用未建模维度 {t['entity']}.{t['dimension']}", t["id"])
+                r.error("C01", self._hint(
+                    t["id"], f"引用未建模维度 {t['entity']}.{t['dimension']}",
+                    "在该实体 state_dimensions 中补建该维度"), t["id"])
             else:
                 for s in (t["from"], t["to"]):
                     if s is not None and s not in d["states"]:
-                        r.error("C01", f"状态[{s}]不在 {t['dimension']} 的 states 中", t["id"])
+                        r.error("C01", self._hint(
+                            t["id"], f"状态[{s}]不在 {t['dimension']} 的 states 中",
+                            "将该状态补入 states，或修正 from/to 取值"), t["id"])
             if t["role"] not in self.role_ids:
-                r.error("C01", f"引用未收录角色 {t['role']}（system 豁免）", t["id"])
+                r.error("C01", self._hint(
+                    t["id"], f"引用未收录角色 {t['role']}",
+                    "角色须先 add_role 登记，或用 system",
+                    f"已登记角色: {declared_roles}"), t["id"])
         for x in self.m.cross_entity:
             if x["source_transition"] not in self.trans:
-                r.error("C01", f"XC 引用不存在的转换 {x['source_transition']}", x["id"])
+                r.error("C01", self._hint(
+                    x["id"], f"XC 引用不存在的转换 {x['source_transition']}",
+                    "改为已存在转换的局部标签/正式号",
+                    f"已登记转换: {sorted(self.trans)}"), x["id"])
             tt = x.get("target_transition")
             if tt and tt not in self.trans:
-                r.error("C01", f"XC 引用不存在的消费者转换 {tt}", x["id"])
+                r.error("C01", self._hint(
+                    x["id"], f"XC 引用不存在的消费者转换 {tt}",
+                    "改为已存在转换的局部标签/正式号",
+                    f"已登记转换: {sorted(self.trans)}"), x["id"])
             for eid in (x["source_entity"], x["target_entity"]):
                 if eid not in self.entities:
-                    r.error("C01", f"XC 引用未建模实体 {eid}", x["id"])
+                    r.error("C01", self._hint(
+                        x["id"], f"XC 引用未建模实体 {eid}",
+                        "核对实体 ID 或补建 add_entity",
+                        f"已登记实体: {sorted(self.entities)}"), x["id"])
         for b in self.m.business_rules:
             for eid in b["entities_involved"]:
                 if eid not in self.entities:
-                    r.error("C01", f"BR 引用未建模实体 {eid}", b["id"])
+                    r.error("C01", self._hint(
+                        b["id"], f"BR 引用未建模实体 {eid}",
+                        "核对实体 ID 或补建 add_entity",
+                        f"已登记实体: {sorted(self.entities)}"), b["id"])
         for rel in self.m.structural_relations + self.m.transition_relations:
             for eid in (rel["from"], rel["to"]):
                 if eid not in self.entities:
-                    r.error("C01", f"关系引用未建模实体 {eid}")
+                    r.error("C01", self._hint(
+                        f"关系 {rel['from']}→{rel['to']}", f"引用未建模实体 {eid}",
+                        "核对实体 ID 或补建 add_entity",
+                        f"已登记实体: {sorted(self.entities)}"))
 
     # 2. 状态结构（铁律10）
     def c02_state_structure(self):
@@ -139,7 +173,10 @@ class Validator:
         for key, d in self.dims.items():
             ts, terminal = by_dim.get(key, []), set(d["terminal"])
             if not any(t["from"] is None and t["to"] == d["initial"] for t in ts):
-                r.error("C02", f"{key[0]}.{key[1]} 初始状态[{d['initial']}]无创建转换")
+                r.error("C02", self._hint(
+                    f"{key[0]}.{key[1]}", f"初始状态[{d['initial']}]无创建转换",
+                    "补一条 frm=None 的创建转换",
+                    f"add_trans(frm=None, to='{d['initial']}', …)"))
             outs = {t["from"] for t in ts if t["from"] is not None}
             for s in d["states"]:
                 if s not in terminal and s not in outs:
@@ -160,7 +197,6 @@ class Validator:
                                 f"（转换 {t['id']}: {t['from']}→{t['to']}），"
                                 f"已从 terminal 移除该状态（states/转换保持不变）"
                             )
-                       
 
     # 3. preconditions 结构（铁律12）
     def c03_precondition_structure(self):
@@ -168,11 +204,15 @@ class Validator:
         for t in self.m.transitions:
             for p in t["preconditions"]:
                 if not isinstance(p, dict) or not p.get("text"):
-                    r.error("C03", "precondition 必须为含非空 text 的对象（铁律12）", t["id"])
+                    r.error("C03", self._hint(
+                        t["id"], "precondition 必须为含非空 text 的对象",
+                        "补 text 字段"), t["id"])
                     continue
                 ptype = p.get("type")
                 if ptype not in PRECOND_TYPES:
-                    r.error("C03", f"precondition type 非法: {ptype!r}", t["id"])
+                    r.error("C03", self._hint(
+                        t["id"], f"precondition type 非法: {ptype!r}",
+                        "改为 PRECOND_TYPES 之一", f"合法值: {PRECOND_TYPES}"), t["id"])
                     continue
                 if ptype == "state_ref":
                     ref = p.get("ref")
@@ -238,24 +278,27 @@ class Validator:
 
     # 5. 分支穿透
     def c05_branch_penetration(self):
-    #"""分支穿透三层覆盖。transitions/Xc 层豁免纯计算/展示/筛选型维度
-    #（prompt：仅影响计算/展示的分支维度转换层无 branch 转换属合法，
-    #impact_scope 注明即可）；BR 层必填（INV-7 由 C20 硬校验）。
-    #cross_entity 层不设检查：分支差异 XC 可缺省（仅存在分支差异约束时写）。"""
+        """分支穿透三层覆盖。transitions 层豁免纯计算/展示/筛选型维度
+        （prompt：仅影响计算/展示的分支维度转换层无 branch 转换属合法，
+        impact_scope 注明即可）；BR 层必填（INV-7 由 C20 硬校验）。
+        cross_entity 层不设检查：分支差异 XC 可缺省（仅存在分支差异约束时写）。"""
         r = self.report
         for d in self.m.branch_dimensions:
             cov = d.get("coverage") or {}
             impact = d.get("impact_scope") or ""
             pure = any(w in impact for w in PURE_BRANCH_WORDS)
             if not cov.get("transitions") and not pure:
-                r.warn("C05", f"分支维度[{d['dimension']}]在 transitions 层无体现"
-                            f"（非纯计算型应有 branch 转换；纯计算/展示/筛选型"
-                            f"请在 impact_scope 注明）")
+                r.warn("C05", self._hint(
+                    f"分支维度[{d['dimension']}]", "在 transitions 层无体现",
+                    "有 branch 转换则补 traits=['branch']；若属纯计算/展示/筛选型，"
+                    "在 impact_scope 注明 '纯计算/纯展示/纯筛选' 等字样",
+                    f"impact_scope='…；纯筛选型，不影响任何状态流转'"))
             if not cov.get("business_rules"):
-                r.warn("C05", f"分支维度[{d['dimension']}]在 business_rules 层无体现"
-                            f"（INV-7：BR 层须承载）")
+                r.warn("C05", self._hint(
+                    f"分支维度[{d['dimension']}]", "在 business_rules 层无体现",
+                    "建/改一条 BR，在 note.branch_dimension 填维度名",
+                    f"m.add_br(..., note={{\"branch_dimension\": \"{d['dimension']}\"}})"))
         # cross_entity 层：分支差异 XC 可缺省，不设检查
-
 
     # 6. structural 一致性
     def c06_structural_consistency(self):
@@ -263,10 +306,16 @@ class Validator:
         for rel in self.m.structural_relations:
             tag = f"{rel['from']}→{rel['to']}"
             if rel["cardinality"] == "N:1":
-                r.error("C06", f"结构关系 {tag} 为 N:1（方向必须父→子）")
+                r.error("C06", self._hint(
+                    tag, "cardinality 为 N:1（方向必须父→子）",
+                    "调换 frm/to，或改为 1:N / M:N"))
             expect = OWNERSHIP_BY_RELATION.get(rel["relation_type"])
             if expect and rel["ownership_dimension"] != expect:
-                r.error("C06", f"{tag} 违反联动约束：{rel['relation_type']} 应配 {expect}")
+                r.error("C06", self._hint(
+                    tag, f"违反联动约束：{rel['relation_type']} 应配 {expect}",
+                    "修正 relation_type 或 ownership_dimension 使成套",
+                    "合法配对仅 composition↔business_ownership、"
+                    "reference↔configuration_source"))
             if rel["ownership_dimension"] == "management_dimension" \
                     and "复核" not in rel["note"].get("comment", ""):
                 r.warn("C06", f"{tag} 为 management_dimension 但缺复核结论")
@@ -278,9 +327,13 @@ class Validator:
         for rel in list(self.m.transition_relations):
             key = (rel["from"], rel["to"])
             if not rel.get("trigger"):
-                r.error("C07", f"因果 {key[0]}→{key[1]} 缺 trigger")
+                r.error("C07", self._hint(
+                    f"因果 {key[0]}→{key[1]}", "缺 trigger",
+                    "补充触发描述（原文句式）"))
             if rel["trigger_source"] not in TRIGGER_SOURCES:
-                r.error("C07", f"因果 {key[0]}→{key[1]} trigger_source 非法")
+                r.error("C07", self._hint(
+                    f"因果 {key[0]}→{key[1]}", f"trigger_source={rel['trigger_source']!r} 非法",
+                    "改为 TRIGGER_SOURCES 之一", f"合法值: {TRIGGER_SOURCES}"))
             ev = rel["evidence_transitions"]
             # bidi_coupling 同 desc/business_rule: 双向同步可无单一转换证据
             # (如 E-EXP↔E-USER 操作级同步,实体无状态机),note.comment 注明
@@ -289,11 +342,16 @@ class Validator:
                 if not ev and not rel["note"].get("comment"):
                     r.warn("C07", f"{key[0]}→{key[1]} 证据为空且未注明证据位置（4.5）")
             elif not ev:
-                r.error("C07", f"{key[0]}→{key[1]} evidence_transitions 必填（4.5）")
+                r.error("C07", self._hint(
+                    f"因果 {key[0]}→{key[1]}", "evidence_transitions 必填（4.5）",
+                    "填驱动方转换的局部标签/正式号"))
             if rel["trigger_source"] == "bidi_coupling" and not any(
                     s["from"] == rel["to"] and s["to"] == rel["from"]
                     for s in self.m.structural_relations):
-                r.error("C07", f"bidi_coupling 缺反向结构关系 {key[1]}→{key[0]}")
+                r.error("C07", self._hint(
+                    f"因果 {key[0]}→{key[1]}", "bidi_coupling 缺反向结构关系",
+                    "补一条反向 structural 关系",
+                    f"add_structural(frm='{key[1]}', to='{key[0]}', …)"))
             if key in seen:                                    # 铁律8：去重，仅升级
                 old = seen[key]
                 if TRIGGER_PRIORITY[rel["trigger_source"]] < \
@@ -369,7 +427,6 @@ class Validator:
                 return False              # role 和 state_ref 都相同 → 不可区分
         return True
 
-    
     # 10. 字符安全（铁律4，等效 json.loads 验证）
     def c10_char_safety(self):
         r = self.report
@@ -393,7 +450,10 @@ class Validator:
 
         def need(obj, ref):
             if not obj.get("source_ref"):
-                r.error("C11", "source_ref 必须非空（输入契约）", ref)
+                r.error("C11", self._hint(
+                    ref, "source_ref 必须非空",
+                    "补充原文定位引用",
+                    "格式: 章节号（子项号），如 20.4.1.2（1）；20.5.1.3"))
 
         for e in self.m.entities:
             for o in e["operations"]:
@@ -413,11 +473,15 @@ class Validator:
             for o in e["operations"]:
                 ref = f"{e['id']}.{o['name']}"
                 if o["category"] not in OP_CATEGORIES:
-                    r.error("C12", f"category 非法: {o['category']!r}", ref)
+                    r.error("C12", self._hint(
+                        ref, f"category 非法: {o['category']!r}",
+                        "改为 OP_CATEGORIES 之一", f"合法值: {OP_CATEGORIES}"))
                 if not o.get("expected_results"):
-                    r.error("C12", "expected_results 至少 1 条", ref)
+                    r.error("C12", self._hint(
+                        ref, "expected_results 至少 1 条",
+                        "补充可观察结果（含提示语）；原文未述以操作名短语补 + inferred"))
                 if o["name"] in seen:
-                    r.error("C12", "同实体同名操作重复", ref)
+                    r.error("C12", f"同实体同名操作重复", ref)
                 seen.add(o["name"])
                 if o["category"] in nonstate and o["name"] in actions:
                     r.warn("C12", "无状态操作疑似误入 transitions（铁律13）", ref)
@@ -451,9 +515,10 @@ class Validator:
                             r.fix(f"C12: 未命中候选，自动标注 {ref} 为属性操作")
                         else:
                             ids = "、".join(t["id"] for t in hits[:4])
-                            r.warn("C12", f"crud 操作命中多条候选转换 [{ids}]，"
-                                   f"为合并入口类，需人工在 comment 指定对应转换", ref)
-                     
+                            r.warn("C12", self._hint(
+                                ref, f"crud 操作命中多条候选转换 [{ids}]",
+                                "合并入口类，人工在 comment 指定对应转换",
+                                f"note=N(..., comment=\"对应转换 {'；'.join(t['id'] for t in hits[:4])}\")"))
 
     # 13. direction 完整性
     def c13_direction(self):
@@ -461,12 +526,18 @@ class Validator:
         for t in self.m.transitions:
             d = t.get("direction")
             if d not in DIRECTIONS:
-                r.error("C13", f"direction 缺失或非法: {d!r}", t["id"])
+                r.error("C13", self._hint(
+                    t["id"], f"direction 缺失或非法: {d!r}",
+                    "改为 DIRECTIONS 之一", f"合法值: {DIRECTIONS}"), t["id"])
                 continue
             if t["from"] is None and d != "forward":
-                r.error("C13", "创建转换 direction 必须为 forward", t["id"])
+                t["direction"] = "forward"
+                r.fix(f"C13: {t['id']} 创建转换 direction 已强制为 forward")
             if d == "resume" and t["from"] not in self.lateral_states:
-                r.error("C13", f"resume 的 from[{t['from']}]非侧挂状态", t["id"])
+                r.error("C13", self._hint(
+                    t["id"], f"resume 的 from[{t['from']}]非侧挂状态",
+                    "from 须为被 lateral 转换标记的状态",
+                    f"当前侧挂状态: {sorted(self.lateral_states)}"), t["id"])
             if d == "backward":
                 dim = self.dims.get((t["entity"], t["dimension"]))
                 if dim and t["from"] in dim["states"] and t["to"] in dim["states"]:
@@ -488,7 +559,6 @@ class Validator:
                 r.warn("C13", f"侧挂状态[{s}]无 resume 返回边"
                       f"（由 {src_id} 标记为 lateral）", src_id)
             # 无出边的终态侧挂（如已撤销）无需 resume：无返回路径属设计语义，豁免
-
 
     def c14_expected_direction(self):
         """expected_results 中"由X变为Y"与 from/to 对账（抓 T-003 类笔误）。"""
@@ -603,9 +673,11 @@ class Validator:
                                    f"请确认是推断值）", e["id"])
                     else:
                         self.report.error(
-                            "C16", f"{e['id']}.{d['dimension_name']} 状态[{s}]"
-                                   f"在原文全文中不存在：状态值必须逐字取自原文"
-                                   f"（如需保留请在 inferred 声明）", e["id"])
+                            "C16", self._hint(
+                                f"{e['id']}.{d['dimension_name']} 状态[{s}]",
+                                "在原文全文中不存在",
+                                "状态值必须逐字取自原文；确需保留则在 inferred 声明",
+                                "inferred=[...] + note.comment 写依据"), e["id"])
                 if span and not missing:
                     ordered = [v for v in span.values if v in set(d["states"])]
                     if d["states"] != ordered:
@@ -639,28 +711,36 @@ class Validator:
         多角色列表），且逐一命中已声明角色或保留角色。缺失 → entity_obligations
         actor 为空，静默退化。"""
         declared = {r["name"] for r in self.m.roles} | set(RESERVED_ROLES)
+        role_names = sorted({r["name"] for r in self.m.roles})
         for e in self.m.entities:
             for o in e["operations"]:
                 ref = f"{e['id']}.{o['name']}"
                 note = o.get("note")
                 if not isinstance(note, dict) or "role" not in note:
                     self.report.error(
-                        "C18", "operation 缺 note.role —— entity_obligations "
-                               "actor 将为空（INV-6）", ref)
+                        "C18", self._hint(
+                            ref, "operation 缺 note.role",
+                            "在 op 的 note 加 role 字段（取 add_role 的 name 或 system）",
+                            f"note=N(role=\"项目管理员\") 或 note=N(role=[\"a\",\"b\"])；"
+                            f"已登记角色: {role_names}"))
                     continue
                 roles = note["role"]
                 for r in ([roles] if isinstance(roles, str) else roles):
                     if r not in declared:
                         self.report.error(
-                            "C18", f"note.role 引用未声明角色 {r!r}（INV-6）", ref)
+                            "C18", self._hint(
+                                ref, f"note.role 引用未声明角色 {r!r}",
+                                "改为已登记角色或 system",
+                                f"已登记角色: {role_names}"))
 
     def c19_inv_signal_type(self):
         """INV-8/BR 信号：signal_type ∈ BR_SIGNALS。"""
         for b in self.m.business_rules:
             if b.get("signal_type") not in BR_SIGNALS:
                 self.report.error(
-                    "C19", f"signal_type={b.get('signal_type')!r} 不在 "
-                           f"{BR_SIGNALS}（INV-8）", b["id"])
+                    "C19", self._hint(
+                        b["id"], f"signal_type={b.get('signal_type')!r} 非法",
+                        "改为 BR_SIGNALS 之一", f"合法值: {BR_SIGNALS}"))
 
     def c20_inv_branch_br_coverage(self):
         """INV-7：每个分支维度须在 ≥1 条 BR 的 note.branch_dimension 出现。"""
@@ -670,8 +750,11 @@ class Validator:
         for d in self.m.branch_dimensions:
             if d["dimension"] not in br_dims:
                 self.report.error(
-                    "C20", f"分支维度[{d['dimension']}]无任何 BR 的 "
-                           f"note.branch_dimension 承载（INV-7）", d["entity"])
+                    "C20", self._hint(
+                        f"分支维度[{d['dimension']}]", "无任何 BR 的 note.branch_dimension 承载",
+                        "建/改一条 BR 并在 note 挂 branch_dimension",
+                        f"m.add_br(..., note={{\"branch_dimension\": \"{d['dimension']}\"}})"),
+                    d["entity"])
 
     def c21_inv_label_refs(self):
         """INV-4：note/comment 中的标签引用须指向已存在条目。正式号（T-xxx…
@@ -682,7 +765,7 @@ class Validator:
                  | {x["id"] for x in self.m.cross_entity}
                  | {b["id"] for b in self.m.business_rules}
                  | {i["id"] for i in self.m.invalid_transitions}
-                 | {r["id"] for r in self.m.roles}) 
+                 | {r["id"] for r in self.m.roles})
         scanned = []
         for t in self.m.transitions:
             scanned.append((t["id"], self._flatten(t.get("note"))))
@@ -722,8 +805,9 @@ class Validator:
             if r["name"] not in used:
                 if any(v in r["name"] for v in verbs):
                     self.report.warn(
-                        "C22", f"角色[{r['name']}]名含转换动词但 transitions.role "
-                               f"0 次（INV-1）——若确无转换职责请在相关 note 说明理由")
+                        "C22", self._hint(
+                            f"角色[{r['name']}]", "名含转换动词但 transitions.role 0 次",
+                            "若确无转换职责，在相关 note 说明理由"))
                 else:
                     self.report.warn(
                         "C22", f"角色[{r['name']}]在 transitions.role 0 次"
@@ -735,9 +819,9 @@ class Validator:
         for x in self.m.cross_entity:
             if x.get("xc_source") not in XC_SOURCES:
                 self.report.warn(
-                    "C23", f"XC 缺来源分类 xc_source（应在 {XC_SOURCES} 内）: "
-                           f"{x['desc'][:40]!r}（INV-8）",
-                    x["id"])
+                    "C23", self._hint(
+                        x["id"], f"XC 缺来源分类 xc_source（应在 {XC_SOURCES} 内）",
+                        "显式传 xc_source 之一", f"合法值: {XC_SOURCES}"))
 
     def c25_inv_mirror_target_transition(self):
         """INV-XC：镜像类 XC 必须持有跨实体前置条件，即 target_transition 非空
@@ -745,8 +829,10 @@ class Validator:
         for x in self.m.cross_entity:
             if x.get("xc_source") == "镜像" and not x.get("target_transition"):
                 self.report.error(
-                    "C25", "镜像 XC 缺 target_transition（持有跨实体前置条件的"
-                           "消费者转换）", x["id"])
+                    "C25", self._hint(
+                        x["id"], "镜像 XC 缺 target_transition",
+                        "填持有该跨实体前置条件的消费者转换（局部标签/正式号）"),
+                    x["id"])
 
     def c24_inv_br_constrained_entity(self):
         """INV-BR/constrained_entity：BR 的受约束实体须显式、合法且一致。
@@ -763,16 +849,25 @@ class Validator:
             inv = b.get("entities_involved", [])
             if ce in (None, ""):
                 self.report.error(
-                    "C24", f"BR[{bid}] 缺 constrained_entity（单实体应已派生，"
-                           f"多实体须显式填写增删改 subject）")
+                    "C24", self._hint(
+                        f"BR[{bid}]", "缺 constrained_entity",
+                        "增删改门禁→填操作对象实体；对称规则→取任一 involved 实体"
+                        "并在 note.comment 注明'代表实体'",
+                        'constrained_entity="E-XXX"'))
             elif ce not in inv:
                 self.report.error(
-                    "C24", f"BR[{bid}] constrained_entity={ce!r} 不在 "
-                           f"entities_involved={inv} 中")
+                    "C24", self._hint(
+                        f"BR[{bid}]", f"constrained_entity={ce!r} 不在 "
+                                      f"entities_involved={inv} 中",
+                        "改为 involved 实体之一", f"involved: {inv}"))
             elif ce not in self.entities:
                 self.report.error(
-                    "C24", f"BR[{bid}] constrained_entity={ce!r} 引用未建模实体")
+                    "C24", self._hint(
+                        f"BR[{bid}]", f"constrained_entity={ce!r} 引用未建模实体",
+                        "改为已登记实体", f"已登记实体: {sorted(self.entities)}"))
             elif len(inv) == 1 and ce != inv[0]:
                 self.report.error(
-                    "C24", f"BR[{bid}] 单实体 BR constrained_entity={ce!r} "
-                           f"≠ 唯一元素 {inv[0]!r}（add_br 应已派生）")
+                    "C24", self._hint(
+                        f"BR[{bid}]", f"单实体 BR constrained_entity={ce!r} "
+                                      f"≠ 唯一元素 {inv[0]!r}",
+                        "与唯一元素保持一致", f"应填: {inv[0]}"))

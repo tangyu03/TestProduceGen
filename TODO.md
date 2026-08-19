@@ -46,3 +46,18 @@ C-1/C-2/C-3/C-4 是此次 badcase 修复的直接产物（角色覆盖、注释�
 | C-10 | 校验 | op 名称全局唯一 | 全部产物的 op name 跨实体唯一，重复即报错 |
 
 本版相对上一版的三处实质变更：其一，穿透判型从“路径分歧/结果差异”业务二分改为**分立型/共用型结构字段比较**（frm/to/role 任一不同即分立，全同仅结果差异才共用），删除了不可操作的动作集判据，新增纯计算型分支的合法出口；其二，4.2 判定表插入“分支维度取值条件”行，修补了穿透落盘与 precondition 归类的接口裂缝，降级理由条款同步豁免该行；其三，C-3 重设计为双通道（有 branch 转换走转换层字面量覆盖、无 branch 转换走 BR 层字面量＋impact_scope 注明），消除了原设计对纯计算分支的强制凑数诱导；C-4 相应改为结构字段组合唯一性检查。示例与 §9 检查清单已同步换用“分立型/共用型”措辞。
+
+
+
+S1 生成器主文件（最高优先级，可能为 main.py / s1_generation.py）
+
+struct_srs.py 完整内容
+
+
+constraint_fields.py
+
+co_derivation.py（P2 依赖）
+
+builders.py / constants.py / escape.py（构建器与常量）
+
+测试产物：review_structured.json、coverage_obligations.json、output.json、case_spec.json

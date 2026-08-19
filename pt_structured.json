@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "19.2",
-    "generated_at": "2026-08-19T16:25:02+08:00",
+    "generated_at": "2026-08-19T16:40:52+08:00",
     "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704.md",
     "document_scope": "网数中心能力验证服务平台升级维护项目需求分析，覆盖首页/基本信息/系统管理/能力验证/测量审核/项目评价/统计分析/业务审核/财务管理/其他模块的功能升级需求",
     "has_critical_ambiguity": false,
@@ -329,7 +329,7 @@
         "E-CYDX"
       ],
       "step2_structural_relations": 9,
-      "step3_branch_dimensions": 3,
+      "step3_branch_dimensions": 2,
       "step4_transitions": 54,
       "step4_transition_relations": 0,
       "step4_roles": 14,
@@ -408,35 +408,6 @@
           "cross_entity": [],
           "business_rules": [
             "BR-022"
-          ]
-        }
-      },
-      {
-        "dimension": "发票类型",
-        "entity": "E-FP",
-        "values": [
-          "电子专票",
-          "电子普票"
-        ],
-        "impact_scope": "财务管理缴费信息查询的业务维度筛选",
-        "evidence": "三型判：①配置型（对应 is_config 属性发票类型，互斥、影响财务管理查询）；§20.10.1.1缴费信息查询支持按发票类型筛选",
-        "branches": [
-          {
-            "value": "电子专票",
-            "target_transition": null,
-            "desc": "发票类型=电子专票时缴费信息查询返回电子专票记录"
-          },
-          {
-            "value": "电子普票",
-            "target_transition": null,
-            "desc": "发票类型=电子普票时缴费信息查询返回电子普票记录"
-          }
-        ],
-        "coverage": {
-          "transitions": [],
-          "cross_entity": [],
-          "business_rules": [
-            "BR-025"
           ]
         }
       }
@@ -4660,8 +4631,7 @@
         "source_ref": "20.10.1.1",
         "signal_type": "display",
         "note": {
-          "comment": "signal_type命中display（查询参数）；category判validation（查询校验）；constrained_entity判①操作对象实体E-JFD；分支维度发票类型覆盖",
-          "branch_dimension": "发票类型"
+          "comment": "signal_type命中display（查询参数）；category判validation（查询校验）；constrained_entity判①操作对象实体E-JFD；"
         }
       },
       {

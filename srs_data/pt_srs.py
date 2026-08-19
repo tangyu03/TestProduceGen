@@ -19,7 +19,6 @@ def build() -> DomainModel:
     #       | r05(项目管理员) | r06(样品制备人员) | r07(样品管理员) | r08(评价人员)
     #       | r09(统计人员) | r10(质量专员) | r11(财务管理人员) | r12(系统管理人员)
     #       | r13(能力验证参加者) | r14(监督员)
-    # 分支维度: 项目类型@E-XM | 评分方式@E-PJL | 发票类型@E-FP
     # ── 章节处置表 ──
     # 1-2 项目背景/目标 → 不适用：非功能性陈述，无实体/状态语义
     # 3 项目要求 → r01-r14（角色清单来自§3.2与§5-#6~#18；§3.2 超级管理员/审核人员口径与§5-#17系统管理人员/审核角色口径不一致，按§5-#6~#18登记，ambiguity 见维度级 note）
@@ -35,7 +34,6 @@ def build() -> DomainModel:
     # 20.7 项目评价 → E-PJL(评价状态)，t45-t48，s6，b15,b19-b22
     # 20.8 统计分析 → E-LSPJ(历史项目)，s7(E-XM→E-SP)，b33-b35；其余不适用：纯查询展示
     # 20.9 业务审核 → E-SP(任务状态)，t49-t52，s7(E-XM→E-SP)，b23-b25
-    # 20.10 财务管理 → E-JFD、E-FP，bd3(发票类型)，b26-b29
     # 20.11 其他 → E-LSPJ(历史项目)，b30,b31
     # 21 非功能性 → 不适用：非功能要求，无实体/状态
     m = DomainModel(
@@ -787,21 +785,7 @@ def build() -> DomainModel:
         ],
     )
 
-    # bd3: 发票类型 @ E-FP
-    # 三型判 ① 配置型：对应 is_config 属性（发票类型），影响财务管理查询
-    m.add_branch_dimension(
-        dimension="发票类型",
-        entity="E-FP",
-        values=["电子专票", "电子普票"],
-        impact_scope="财务管理缴费信息查询的业务维度筛选",
-        evidence="三型判：①配置型（对应 is_config 属性发票类型，互斥、影响财务管理查询）；§20.10.1.1缴费信息查询支持按发票类型筛选",
-        branches=[
-            {"value": "电子专票", "target_transition": None,
-             "desc": "发票类型=电子专票时缴费信息查询返回电子专票记录"},
-            {"value": "电子普票", "target_transition": None,
-             "desc": "发票类型=电子普票时缴费信息查询返回电子普票记录"},
-        ],
-    )
+    
 
     # ── Step 4.1：转换 ──
     # === E-XM.项目状态 ===
@@ -1856,8 +1840,8 @@ def build() -> DomainModel:
         signal_type="display",
         constrained_entity="E-JFD",
         note={
-            "comment": "signal_type命中display（查询参数）；category判validation（查询校验）；constrained_entity判①操作对象实体E-JFD；分支维度发票类型覆盖",
-            "branch_dimension": "发票类型",
+            "comment": "signal_type命中display（查询参数）；category判validation（查询校验）；constrained_entity判①操作对象实体E-JFD；"
+        
         },
     )
     m.add_br(
