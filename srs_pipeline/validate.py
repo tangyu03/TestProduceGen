@@ -10,6 +10,11 @@ from .constants import (BR_SIGNALS, DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
                         TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_SOURCES)
 from .escape import find_forbidden, find_unescaped
 
+# validate.py 顶部，import 之后：
+PURE_BRANCH_WORDS = ("纯计算", "计算型", "纯展示", "展示型",
+                     "纯筛选", "筛选型", "纯查询", "查询型", "仅影响")
+
+
 
 @dataclass
 class Issue:
@@ -148,8 +153,14 @@ class Validator:
                     elif "rollback" in t["traits"]:
                         r.warn("C02", f"rollback 转换的 from 为终态[{t['from']}]", t["id"])
                     else:
-                        r.warn("C02", f"终态[{t['from']}]有出边：该状态可能非终态，"
-                                      f"复核 terminal（铁律10）", t["id"])
+                        if t["from"] in d["terminal"]:
+                            d["terminal"].remove(t["from"])
+                            r.fix(
+                                f"C02: {key[0]}.{key[1]} 终态[{t['from']}]有出边"
+                                f"（转换 {t['id']}: {t['from']}→{t['to']}），"
+                                f"已从 terminal 移除该状态（states/转换保持不变）"
+                            )
+                       
 
     # 3. preconditions 结构（铁律12）
     def c03_precondition_structure(self):
@@ -227,12 +238,24 @@ class Validator:
 
     # 5. 分支穿透
     def c05_branch_penetration(self):
+    #"""分支穿透三层覆盖。transitions/Xc 层豁免纯计算/展示/筛选型维度
+    #（prompt：仅影响计算/展示的分支维度转换层无 branch 转换属合法，
+    #impact_scope 注明即可）；BR 层必填（INV-7 由 C20 硬校验）。
+    #cross_entity 层不设检查：分支差异 XC 可缺省（仅存在分支差异约束时写）。"""
+        r = self.report
         for d in self.m.branch_dimensions:
             cov = d.get("coverage") or {}
-            for layer in ("transitions", "cross_entity", "business_rules"):
-                if not cov.get(layer):
-                    self.report.warn("C05", f"分支维度[{d['dimension']}]在 {layer} 层"
-                                            f"无体现（穿透缺口；铁律2 不补生成，仅标记）")
+            impact = d.get("impact_scope") or ""
+            pure = any(w in impact for w in PURE_BRANCH_WORDS)
+            if not cov.get("transitions") and not pure:
+                r.warn("C05", f"分支维度[{d['dimension']}]在 transitions 层无体现"
+                            f"（非纯计算型应有 branch 转换；纯计算/展示/筛选型"
+                            f"请在 impact_scope 注明）")
+            if not cov.get("business_rules"):
+                r.warn("C05", f"分支维度[{d['dimension']}]在 business_rules 层无体现"
+                            f"（INV-7：BR 层须承载）")
+        # cross_entity 层：分支差异 XC 可缺省，不设检查
+
 
     # 6. structural 一致性
     def c06_structural_consistency(self):
@@ -416,22 +439,21 @@ class Validator:
                                 if t["entity"] == e["id"]
                                 and (o["name"] == t.get("action")
                                      or (er0 and (er0 in [p.get("text") or ""
-                                                          for p in t.get(
-                                                              "preconditions")
-                                                          or []]
-                                                  or er0 in (t.get(
-                                                      "expected_results")
-                                                      or []))))]
-                        cands = [t["id"] for t in hits][:3]
-                        cand_s = "、".join(cands) if cands \
-                            else "无匹配转换（属性操作）"
-                        r.warn(
-                            "C12",
-                            f"crud 操作未回填 T-xxx 关联（4.4⑤）；候选转换 "
-                            f"{cand_s}：有状态效果→回填「对应转换 "
-                            f"{cands[0] if cands else 'T-xxx'}」，属性操作→"
-                            f"注明「无对应转换」及理由",
-                            ref)
+                                                          for p in t.get("preconditions") or []]
+                                                  or er0 in (t.get("expected_results") or []))))]
+                        if len(hits) == 1:
+                            c = o["note"].get("comment") or ""
+                            o["note"]["comment"] = f"{c}；对应转换 {hits[0]['id']}".lstrip("；")
+                            r.fix(f"C12: 自动回填 {ref} → {hits[0]['id']}")
+                        elif not hits:
+                            c = o["note"].get("comment") or ""
+                            o["note"]["comment"] = f"{c}；无对应转换（属性操作）".lstrip("；")
+                            r.fix(f"C12: 未命中候选，自动标注 {ref} 为属性操作")
+                        else:
+                            ids = "、".join(t["id"] for t in hits[:4])
+                            r.warn("C12", f"crud 操作命中多条候选转换 [{ids}]，"
+                                   f"为合并入口类，需人工在 comment 指定对应转换", ref)
+                     
 
     # 13. direction 完整性
     def c13_direction(self):
@@ -448,16 +470,25 @@ class Validator:
             if d == "backward":
                 dim = self.dims.get((t["entity"], t["dimension"]))
                 if dim and t["from"] in dim["states"] and t["to"] in dim["states"]:
+                    comment = t["note"].get("comment", "")
+                    semantic_override = any(
+                        w in comment for w in ("环状机", "语义优先", "语义backward",
+                                   "语义 backward", "语义优先backward"))
                     if dim["states"].index(t["to"]) >= dim["states"].index(t["from"]) \
-                            and "环状机" not in t["note"].get("comment", ""):
+                        and not semantic_override:
                         r.warn("C13", "backward 但 to 索引不小于 from，"
-                                      "且未注明环状机", t["id"])
+                          "且未注明环状机/语义优先", t["id"])
+
         resumes = {t["from"] for t in self.m.transitions if t["direction"] == "resume"}
         for s, src_id in self.lateral_states.items():
-            if s not in resumes:
-                r.warn("C13",
-                       f"侧挂状态[{s}]无 resume 返回边"
-                       f"（由 {src_id} 标记为 lateral）", src_id)
+            if s in resumes:
+                continue
+            has_out = any(t["from"] == s for t in self.m.transitions)
+            if has_out:
+                r.warn("C13", f"侧挂状态[{s}]无 resume 返回边"
+                      f"（由 {src_id} 标记为 lateral）", src_id)
+            # 无出边的终态侧挂（如已撤销）无需 resume：无返回路径属设计语义，豁免
+
 
     def c14_expected_direction(self):
         """expected_results 中"由X变为Y"与 from/to 对账（抓 T-003 类笔误）。"""
@@ -650,7 +681,8 @@ class Validator:
         valid = ({t["id"] for t in self.m.transitions}
                  | {x["id"] for x in self.m.cross_entity}
                  | {b["id"] for b in self.m.business_rules}
-                 | {i["id"] for i in self.m.invalid_transitions})
+                 | {i["id"] for i in self.m.invalid_transitions}
+                 | {r["id"] for r in self.m.roles}) 
         scanned = []
         for t in self.m.transitions:
             scanned.append((t["id"], self._flatten(t.get("note"))))

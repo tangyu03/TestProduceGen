@@ -432,6 +432,8 @@ class DomainModel:
             x["target_transition"] = rw(x["target_transition"])
             # desc 不直接 rw：改为按 xc_source 重建（前缀 + 注入正式标签），
             # 根治手写 "T-tXX" 双前缀（T-T-019）与 desc 残留局部标签。
+            if x.get("xc_source"): 
+                x["desc"] = rw(x["desc"])  
             x["desc"] = self._rebuild_xc_desc(x)
         for r in self.transition_relations:
             r["evidence_transitions"] = [rw(e) for e in r["evidence_transitions"]]
