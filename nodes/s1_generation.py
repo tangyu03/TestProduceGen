@@ -2471,6 +2471,55 @@ def _field_data_given(cm: dict, entity: str) -> dict | None:
     return None
 
 
+# ── 效果状态锚定 (Type5) ────────────────────────────────────────────────
+# CRUD EO 的 expected_results 声明状态变更目标 ("费用状态变为已缴费" /
+# "报名记录状态推进至报告/证书审核中" / "记录状态初始化为报名待审核")。
+# phase 应锚到该效果状态所在阶段——操作发生在哪个业务阶段由其效果决定,
+# 而非一律取实体 entry phase=P0 (否则报名记录的 CRUD 用例全部挤在 P0)。
+# 数据驱动: 状态名来自 phase_table/dep_state_phase_map 的键集合, 不硬编码。
+# 无状态效果声明的属性操作 (下载/上传/查询/备注等) 解析失败 → 回退原逻辑。
+_EFFECT_STATE_RE = re.compile(
+    r'状态(?:变(?:为|更)?|初始化为|推进(?:为|至|到)?)(?:为|至|到|成)?([^；;，,。]+)')
+
+
+def _effect_state_phase(eo: dict, phase_table: dict, dep_map: dict) -> dict | None:
+    """从 CRUD EO 的 expected_results 解析效果状态 → 目标阶段。
+
+    返回 {"phase": N, "basis": "phase_table.<dim>.<state>"} 或 None(无信号)。
+    多效果取 MAX ("通过则报名成功; 退回则报名退回" → 报名成功 P1)。
+    跨实体效果也命中 (EO-CRU-048 操作报名记录但"样品状态变为已核查"→E-XM P1)。
+    """
+    cand: dict[str, list[tuple[str, int]]] = {}
+    for dim, m in (phase_table.get("state_to_phase") or {}).items():
+        for s, p in m.items():
+            cand.setdefault(s, []).append((f"phase_table.{dim}", int(p)))
+    for ent, dims in (dep_map or {}).items():
+        for dim, m in dims.items():
+            for s, p in m.items():
+                cand.setdefault(s, []).append((f"dep_state_phase_map.{ent}.{dim}", int(p)))
+    if not cand:
+        return None
+
+    hits: list[tuple[str, int, str]] = []
+    for er in eo.get("expected_results", []) or []:
+        for m in _EFFECT_STATE_RE.finditer(str(er)):
+            phrase = m.group(1).strip()
+            # 最长状态名前缀匹配: 捕获短语以状态名开头。规避短名子串误命中
+            # ("报名待审核" 命中 "待审核" 的歧义)。
+            best = None
+            for s, entries in cand.items():
+                if phrase.startswith(s) and (best is None or len(s) > len(best[0])):
+                    best = (s, entries)
+            if best:
+                s, entries = best
+                for src, p in entries:
+                    hits.append((s, p, src))
+    if not hits:
+        return None
+    s, p, src = max(hits, key=lambda x: x[1])
+    return {"phase": p, "basis": f"{src}.{s}"}
+
+
 def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None = None) -> list[dict]:
     """Generate Type5 (crud_operation) procedures with retention filter.
 
@@ -2498,24 +2547,32 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
         phase_basis = ""
 
         if entity == primary:
-            primary_dim_map = phase_table["state_to_phase"].get(phase_table["primary_dimension"], {})
-            if primary_dim_map:
-                # 锚定第一个状态,产成两段式 phase_table.<维度>.<状态>。该字符串是
-                # 引擎的相位追溯记录(JSON 内),渲染层不再解析它取模块名/状态——
-                # 模块名用 proc.entity,目标状态用 proc.post_state。
-                anchor_state, first_phase = next(iter(primary_dim_map.items()), (None, 0))
-                phase = first_phase if first_phase is not None else 0
-                phase_basis = f"phase_table.{phase_table['primary_dimension']}.{anchor_state}"
-        elif entity in dep_map:
-            first_dim = next(iter(dep_map[entity].values()), None)
-            if first_dim:
-                phase = min(first_dim.values())
-                phase_basis = f"dep_state_phase_map.{entity}.min_phase"
+            effect = _effect_state_phase(eo, phase_table, dep_map)
+            if effect:
+                phase, phase_basis = effect["phase"], effect["basis"]
             else:
-                # Empty dep_map (stateless) — setup precedes the flow → P0
-                phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.LIFECYCLE)
-                phase = phase_res["phase"]
-                phase_basis = phase_res["basis"]
+                primary_dim_map = phase_table["state_to_phase"].get(phase_table["primary_dimension"], {})
+                if primary_dim_map:
+                    # 锚定第一个状态,产成两段式 phase_table.<维度>.<状态>。该字符串是
+                    # 引擎的相位追溯记录(JSON 内),渲染层不再解析它取模块名/状态——
+                    # 模块名用 proc.entity,目标状态用 proc.post_state。
+                    anchor_state, first_phase = next(iter(primary_dim_map.items()), (None, 0))
+                    phase = first_phase if first_phase is not None else 0
+                    phase_basis = f"phase_table.{phase_table['primary_dimension']}.{anchor_state}"
+        elif entity in dep_map:
+            effect = _effect_state_phase(eo, phase_table, dep_map)
+            if effect:
+                phase, phase_basis = effect["phase"], effect["basis"]
+            else:
+                first_dim = next(iter(dep_map[entity].values()), None)
+                if first_dim:
+                    phase = min(first_dim.values())
+                    phase_basis = f"dep_state_phase_map.{entity}.min_phase"
+                else:
+                    # Empty dep_map (stateless) — setup precedes the flow → P0
+                    phase_res = _resolve_phase_for_non_transition(state, entity, obligation_type=ObligationType.LIFECYCLE)
+                    phase = phase_res["phase"]
+                    phase_basis = phase_res["basis"]
         elif entity in ves:
             phase = ves[entity].get("resolved_phase", 0)
             phase_basis = f"VE.{entity}.resolved_phase"

@@ -1,0 +1,787 @@
+{
+  "verdict": "fail",
+  "skeleton_pass": false,
+  "blocker_failures": 1,
+  "warning_failures": 2,
+  "checks": [
+    {
+      "check_id": "V01",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "tools/graph_algo.py"
+      ],
+      "note": "依赖图健康检查通过：无悬空引用、无依赖环、依赖相位单调（所有 proc 的 phase ≥ 其依赖的 phase）"
+    },
+    {
+      "check_id": "V02",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S3",
+      "suspected_files": [
+        "nodes/s3_dependency.py",
+        "prompts/s1_prompt.py"
+      ],
+      "note": "守卫极性检查通过：无 guard_policies 被触发（所有 proc 的 givens 均未命中任何 guard 的 when_given_matches 条件），无违规项"
+    },
+    {
+      "check_id": "V03",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "动作归属检查通过：跨实体级联均使用 indirect_via，未直接操作从动实体"
+    },
+    {
+      "check_id": "V04",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/field_validation.py"
+      ],
+      "note": "case_spec readonly 字段证据 18 条不参与字段级保护(AI 生成未确认、含误标；见代码注释): ['八种角色定义', '内置日志管理员角色', '内置监督员角色', '内置系统管理员角色', '初始日志管理员账号secauditor_a', '初始系统管理员账号sysadmin_a', '初始角色管理员账号secadmin_a', '密码重置默认值', '文件名称', '文件大小', '文件级别', '流水号', '申请人', '申请时间', '申请部门', '载体信息自动带入', '载体快照', '载体持有时间默认值']"
+    },
+    {
+      "check_id": "V05",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py",
+        "nodes/s0_topology.py"
+      ],
+      "note": "维度组合检查通过：实例化前 dimension_constraints 可达性剪枝无冲突"
+    },
+    {
+      "check_id": "V06",
+      "result": "fail",
+      "severity": "warning",
+      "fail_count": 11,
+      "evidence": [
+        {
+          "temp_id": "PROC-049.1",
+          "source_ids": [
+            "T-045"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-049.2",
+          "source_ids": [
+            "T-045"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-073.1",
+          "source_ids": [
+            "T-009"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-073.2",
+          "source_ids": [
+            "T-009"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-073.3",
+          "source_ids": [
+            "T-009"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-103.1",
+          "source_ids": [
+            "RO-BR-005"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-103.2",
+          "source_ids": [
+            "RO-BR-005"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-135.1",
+          "source_ids": [
+            "RO-BR-002"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-135.2",
+          "source_ids": [
+            "RO-BR-002"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-135.3",
+          "source_ids": [
+            "RO-BR-002"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        },
+        {
+          "temp_id": "PROC-172",
+          "source_ids": [
+            "RO-BR-013"
+          ],
+          "declared": null,
+          "allowed": [
+            "clock_injection",
+            "db_time_update",
+            "scheduler_manual_trigger"
+          ]
+        }
+      ],
+      "evidence_truncated": 0,
+      "suspected_stage": "S1",
+      "suspected_files": [
+        "nodes/s1_generation.py"
+      ],
+      "note": "time obligations=8, missing time_control=11"
+    },
+    {
+      "check_id": "V07",
+      "result": "fail",
+      "severity": "warning",
+      "fail_count": 251,
+      "evidence": [
+        {
+          "temp_id": "PROC-001.1",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-001.2",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-002.1",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-002.2",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-003.1",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-003.2",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-007.1",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-007.2",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-007.3",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-007.4",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-007.5",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-008.1",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-008.2",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-008.3",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-008.4",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-008.5",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-009.1",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-009.2",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-009.3",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-009.4",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-009.5",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.1",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.1",
+          "actor": "项目管理员",
+          "entity": "报名记录",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '报名记录' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-033.2",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.2",
+          "actor": "项目管理员",
+          "entity": "报名记录",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '报名记录' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-033.3",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.3",
+          "actor": "项目管理员",
+          "entity": "报名记录",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '报名记录' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-033.4",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.4",
+          "actor": "项目管理员",
+          "entity": "报名记录",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '报名记录' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-033.5",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-033.5",
+          "actor": "项目管理员",
+          "entity": "报名记录",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '报名记录' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-034.1",
+          "actor": "样品管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-034.2",
+          "actor": "样品管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-034.3",
+          "actor": "样品管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-037.1",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-037.2",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-037.3",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-039.1",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-039.1",
+          "actor": "项目管理员",
+          "entity": "项目",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '项目' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-039.2",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-039.2",
+          "actor": "项目管理员",
+          "entity": "项目",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '项目' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-039.3",
+          "actor": "项目管理员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-039.3",
+          "actor": "项目管理员",
+          "entity": "项目",
+          "reason": "Type9 actor '项目管理员' is not an operator of entity '项目' (operators: [])"
+        },
+        {
+          "temp_id": "PROC-040.1",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-040.2",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-041.1",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-041.2",
+          "actor": "系统管理人员",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-042.1",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-042.2",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        },
+        {
+          "temp_id": "PROC-048.1",
+          "actor": "能力验证参加者",
+          "reason": "actor not in model roles or system set (known: ['system', '一级审批员', '二级审批员', '日志管理员', '普通用户', '监督员', '系统管理员', '角色管理员', '载体管理员'])"
+        }
+      ],
+      "evidence_truncated": 201,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "empty_actor=0, unknown_actor=221, no_permission=30"
+    },
+    {
+      "check_id": "V08",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S0",
+      "suspected_files": [
+        "nodes/s0_topology.py",
+        "nodes/s2_sorting.py"
+      ],
+      "note": "spec hygiene: 导入任务: output 未找到相位表，整机跳过 | 载体登记任务: output 未找到相位表，整机跳过 | 载体归档任务: output 未找到相位表，整机跳过 | 载体移交任务: output 未找到相位表，整机跳过 | 载体留存任务: output 未找到相位表，整机跳过 | 载体回收任务: output 未找到相位表，整机跳过 | 载体外送任务: output 未找到相位表，整机跳过 | 文件导出任务: output 未找到相位表，整机跳过 | 文件扫描任务: output 未找到相位表，整机跳过 | 载体: output 未找到相位表，整机跳过"
+    },
+    {
+      "check_id": "V09",
+      "result": "pass",
+      "severity": "blocker",
+      "fail_count": 0,
+      "evidence": [],
+      "evidence_truncated": 0,
+      "suspected_stage": "S4",
+      "suspected_files": [
+        "nodes/s4_multi_instance.py"
+      ],
+      "note": "去重检查通过：无重复 (givens,when,thens) 合并、单例实体未复制"
+    },
+    {
+      "check_id": "V10",
+      "result": "fail",
+      "severity": "blocker",
+      "fail_count": 73,
+      "evidence": [
+        {
+          "obligation_kind": "transition",
+          "missing_obligation_ids": [
+            "T-006[a]",
+            "T-006[b]",
+            "T-007",
+            "T-015[a]",
+            "T-015[b]",
+            "T-024[a]",
+            "T-024[b]",
+            "T-033[a]",
+            "T-033[b]",
+            "T-042[a]"
+          ],
+          "count": 64
+        },
+        {
+          "obligation_kind": "entity",
+          "missing_obligation_ids": [
+            "EO-ATC-005",
+            "EO-CRU-078",
+            "EO-CRU-079",
+            "EO-CRU-080",
+            "EO-CRU-081",
+            "EO-CRU-082",
+            "EO-CRU-083",
+            "EO-CRU-084"
+          ],
+          "count": 8
+        },
+        {
+          "obligation_kind": "business_rule",
+          "missing_obligation_ids": [
+            "RO-BR-032",
+            "RO-BR-033",
+            "RO-BR-034",
+            "RO-BR-035",
+            "RO-BR-036",
+            "RO-BR-037",
+            "RO-BR-038",
+            "RO-BR-039"
+          ],
+          "count": 8
+        },
+        {
+          "obligation_kind": "invalid_transition",
+          "missing_obligation_ids": [
+            "RO-IT-001",
+            "RO-IT-002",
+            "RO-IT-003",
+            "RO-IT-004"
+          ],
+          "count": 4
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-IMP.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-REG.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-ARC.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-TRF.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-RET.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "审批通过"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "审批拒绝"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "待执行"
+        },
+        {
+          "machine": "E-RCY.任务状态",
+          "missing_state": "已完成"
+        },
+        {
+          "machine": "E-OUT.任务状态",
+          "missing_state": "草稿"
+        },
+        {
+          "machine": "E-OUT.任务状态",
+          "missing_state": "待审批"
+        },
+        {
+          "machine": "E-OUT.任务状态",
+          "missing_state": "待二级审批"
+        },
+        {
+          "machine": "E-OUT.任务状态",
+          "missing_state": "审批通过"
+        }
+      ],
+      "evidence_truncated": 23,
+      "suspected_stage": "P2",
+      "suspected_files": [
+        "build_obligations.py",
+        "nodes/s1_generation.py"
+      ],
+      "note": "TO 45/109 | EO 81/89 | BR 45/53(embedded 9, xc_causal 14) | IT 0/4 | state_misses=69"
+    }
+  ],
+  "metrics": {
+    "case_total": 601,
+    "dedup_ratio": 1.0,
+    "guard_violations": 0,
+    "dangling_deps": 0,
+    "invalid_combos": 0,
+    "builtin_misuse": 0,
+    "coverage_misses": 73
+  },
+  "signature": "919bbd9b2214"
+}

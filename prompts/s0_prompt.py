@@ -11,8 +11,7 @@ S0 covers the following sub-stages:
 - S0.4: Dependent entity detection (dependent_entities, entity_parent,
         dependency_depth)
 - S0.5: Topology levels
-- S0.6: Upstream map rebuilding
-- S0.7: Virtual entity decomposition
+- S0.6: Virtual entity decomposition (was "Upstream map rebuilding" — 机制已随 ㊼ 2026-08-22 删除)
 """
 
 S0_SYSTEM_PROMPT = """你是一个测试规程编排引擎的S0拓扑发现模块。
@@ -63,7 +62,7 @@ P2 coverage_model JSON，包含：
 
 - **(a) 确定锚点**：anchor = entity_parent[E]（虚拟实体使用VE.parent_entity）
 - **(b) 获取锚点映射**：anchor=主实体→用phase_table；anchor=从属实体→用dep_state_phase_map[anchor]（递归）；递归终止于primary_entity的phase_table；递归深度超过|entities| → 报错（存在环路）
-- **(c) 入口定阶段**：from=null的to状态 → 从该转换的upstream转换（查transition_upstream_map）中找到属于锚点实体的转换U → 在锚点实体的phase_table全维度中查找U.to的phase（优先），否则查找U.from的phase → 取该phase作为入口phase；无anchor upstream → 取锚点主维度最小phase
+- **(c) 入口定阶段**：from=null的to状态 → 取锚点实体主维度最小phase 作为入口phase（transition_upstream_map 入口锚定已随 ㊼ 2026-08-22 删除；现实现 = state_info.initial→P0 优先 + 未解析入口态取锚点最小phase 兜底。主实体自身次维度已随 ㊾ 方案A 并入 phase_table.state_to_phase，不再落 fallback P0）
 - **(d) 链式传播**：
   - driving推进（from≠to，state_type_map[E][to]≠"side_effect"）：dim_map[to] = max(dim_map[fr], upstream_anchor_phase)
   - side_effect回退（from≠to，state_type_map[E][to]=="side_effect"）：dim_map[to] = dim_map[fr]，不递增phase
@@ -86,7 +85,7 @@ for each (from→to) in E's transitions:
 
 ---
 
-### 4. contextual_phase_rules (S0.3b)
+### 4. contextual_phase_rules (S0.3b) —— 已废弃（恒 {}，机制随 ㊼ 2026-08-22 删除，本结构仅存档不产出）
 维度级上下文依赖识别：
 
 **适用范围**：仅适用于同一实体内部的维度级多场景问题。实体级多场景问题由S0.7虚拟实体分解处理。

@@ -882,8 +882,47 @@ def _classify_edge_type(
     return 'forward'
 
 
+def _enrich_primary_sub_dims(primary: str, primary_dimension: str,
+                             state_info: dict | None,
+                             state_to_phase: dict[str, dict[str, int]],
+                             include_sub_dims: bool) -> dict[str, dict[str, int]]:
+    """㊾ 方案A：把主实体自身次维度并入 phase_table.state_to_phase。
+
+    根因（DECISIONS ㊾）：主实体自身次维度（如报名记录的 发票状态/费用状态/
+    通知状态/报名记录样品状态）既不在 phase_table.state_to_phase（只含
+    primary_dimension）也不在 dep_state_phase_map（_derive_dep_state_phase_map
+    对 primary 一律 continue）→ _resolve_phase 对它们落 fallback P0 → S2 排序
+    全部挤在 P0，与报名记录主生命周期脱节。
+
+    修复：从 state_info 取次维度的显式 phase_mapping（或 states 列表顺序）
+    并入 state_to_phase。_resolve_phase 对主实体只查 phase_table.state_to_phase
+    [dimension]，并入后 S1/S2/S3 零改动即按各自生命周期排序。只读 state_info，
+    不引入 TO 推导，保持确定性。
+
+    只对 pipeline 主实体调用生效（include_sub_dims=True，调用点 3117）。
+    从属/虚拟实体复用 _derive_phase_table 的路径（2067/2151/2774/2801，传
+    单实体 orig_si）不触发——它们的 shift 逻辑遍历 state_to_phase 全维度，
+    多键会污染 state_phase。
+    """
+    if not include_sub_dims or not state_info or not isinstance(state_info, dict):
+        return state_to_phase
+    ent = state_info.get(primary)
+    if not isinstance(ent, dict):
+        return state_to_phase
+    dim_field = ent.get('dimensions') if isinstance(ent.get('dimensions'), (list, dict)) else ent
+    dims = _normalize_dim_list(dim_field)
+    for dim in dims:
+        if dim == primary_dimension or dim in state_to_phase:
+            continue
+        pm = _get_explicit_phase_mapping(state_info, primary, dim)
+        if pm:
+            state_to_phase[dim] = pm
+    return state_to_phase
+
+
 def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
-                        state_info: dict | None = None) -> dict:
+                        state_info: dict | None = None,
+                        include_sub_dims: bool = False) -> dict:
     """Derive primary_dimension and state_to_phase via longest-path in DAG.
 
     Uses longest path (not BFS shortest path) so that skip-transitions
@@ -977,6 +1016,8 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
         max_phase = max(phase_map.values()) if phase_map else 0
         phase_names = [f'P{i}' for i in range(max_phase + 1)]
         state_to_phase = {primary_dimension: phase_map}
+        state_to_phase = _enrich_primary_sub_dims(
+            primary, primary_dimension, state_info, state_to_phase, include_sub_dims)
         return {
             'primary_entity': primary,
             'primary_dimension': primary_dimension,
@@ -1292,6 +1333,8 @@ def _derive_phase_table(primary: str, tos: list[dict], cos: list[dict],
     phase_names = [f'P{i}' for i in range(max_phase + 1)]
 
     state_to_phase = {primary_dimension: phase_map}
+    state_to_phase = _enrich_primary_sub_dims(
+        primary, primary_dimension, state_info, state_to_phase, include_sub_dims)
 
     return {
         'primary_entity': primary,
@@ -3114,7 +3157,10 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     state_info = cm.get('_context', {}).get('state_info', {}) if isinstance(cm, dict) else {}
 
     # S0.3: Phase table (longest path)
-    phase_table = _derive_phase_table(primary, tos, cos, state_info=state_info)
+    # include_sub_dims=True（㊾ 方案A）：主实体自身次维度并入 phase_table.
+    # state_to_phase；从属/虚拟实体复用路径保持 include_sub_dims=False。
+    phase_table = _derive_phase_table(primary, tos, cos, state_info=state_info,
+                                      include_sub_dims=True)
     warnings.append(f"S0.3: primary_dimension={phase_table['primary_dimension']}, phase_count={phase_table['phase_count']}")
 
     # S0.4: Dependent entities (cardinality-based)

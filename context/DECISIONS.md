@@ -5,7 +5,28 @@
 
 ---
 
-## 2026-08-15 ㊽ add_xc 实装 xc_source + assemble 统一 desc 前缀（修双前缀）+ C25 兜底 + 已删清单对照表
+## 2026-08-22 ㊾ 主实体自身次维度相位未锚定——根因定位 + 修复方案评估（方案A已实施）
+
+**问题**：主实体（E-BMJL 报名记录）自身的**非主维度**状态机（发票状态 / 报名记录样品状态 / 费用状态 / 通知状态）未进入任何相位映射 → S2 全部 `fallback`→P0 → 同实体跨维度排序退化为中文字典序（发票→样品→状态→费用→通知），报名记录内部未按生命周期组织（用户三连问：项目生命周期 / 报名记录生命周期 / DAG 业务时序 的根因之一）。
+
+**证据链**：
+- `phase_table.state_to_phase` 只含 primary_dimension（报名记录状态）1 个键；
+- `dep_state_phase_map` 只含从属实体 6 条目（E-BZK.标准库状态 / E-PJ.评价状态 / E-SP.审批状态 / E-SYS.实验室状态 / E-XM.项目状态 / E-XM.样品状态），主实体 E-BMJL 不在其中——`_derive_dep_state_phase_map`（s0_topology.py:1740）明确 `if entity == primary: continue`；
+- 实测 pt_outputv1 172 条基础用例：100 锚定 / 18 纯 fallback / 20 data_section_defer / 21 domain_precond_creat / 9 parent_primary_phase / 3 primary_entity_max_phase；**18 条纯 fallback 恰好 = 这 4 个子维度的全部用例**（发票 2 + 样品 4 + 费用 2 + 通知 10）；
+- 对照：从属实体 E-XM.项目状态 = 待开始0→报名中1→进行中2→报告审核中3→已结束4 **正确锚定**（项目生命周期其实排了）→ 证明锚点法本身有效，缺口只在"主实体自身次维度"。
+
+**入口信息仍然可得（不依赖已删的 transition_upstream_map）**：这 4 个维度入口态（待缴费 / 待开票 / 待发样 / 未发送）全部由**报名转换的级联效果**驱动（PROC-011 then："费用状态联动初始化为待缴费；发票状态联动初始化为待开票"），报名=phase 0（phase_table: 报名待审核=0）→ 入口 phase 可直接从主维度转换的级联声明锚定，再沿次维度自身转换链传播（state_type_map 区分 driving/side_effect）。`transition_relations` 仅 3 条（短信/退款），不承载该信息；cascade 声明是活数据。
+
+**候选方案**：
+- **A（推荐）**：锚点法 (a)~(f) 对主实体自身次维度也生效——anchor=主实体自己、锚映射=phase_table 主维度、入口 phase 从主维度转换级联声明（"联动初始化"）取、再沿次维度自身转换链传播。改动点：S0.3 手稿（(c) 已标注 ㊾ 待定）+ `_derive_dep_state_phase_map`（去 primary continue，补主实体次维度分支）。
+- **B**：次维度作为"内部从维度"统一并入 dep_state_phase_map 同规则处理（与 A 等价，实现路径略异）。
+- **C（不做）**：恢复 transition_upstream_map 入口锚定——已由 ㊼ 关闭（正向论证：同实体链冗余 + CO 边 hard 语义与 ㊻ 矛盾），复活路径不开放。
+
+**影响面**：S0 重跑 + S2 sort_key 变化 → 报名记录内部按生命周期重排（P0 内由字符串序变业务序，如 报名→审核→缴费→发样→通知）。需回归校验：标题/givens/thens/deps 语义内容不变，仅 phase/sort_key/temp_id 顺序变化；确定性双跑 SHA-256 验证。
+
+**状态**：**方案 A 已实施（2026-08-22）**。落地路径与评估时的 A 略有出入但效果等价且更小改动：**不**动 `_derive_dep_state_phase_map` 的 primary continue，而是把主实体次维度**并入 `phase_table.state_to_phase`**（新增 `_enrich_primary_sub_dims`，`_derive_phase_table` 加 `include_sub_dims` 参数，pipeline 主调用 3117 传 True；从属/虚拟实体复用路径 2067/2151/2774/2801 保持 False——它们的 shift 逻辑遍历全维度，多键会污染）。理由：`_resolve_phase` 对主实体只查 `phase_table.state_to_phase[dimension]`，并入后 S1/S2/S3 零改动；且 4 个次维度的 `phase_mapping` 已由 P2 显式写入 `state_info`（实测 通知状态 6 态 / 样品 4 态 / 费用 2 态 / 发票 2 态全带显式 phase_mapping），无需再从级联声明推导入口——`_get_explicit_phase_mapping` 直接取值，确定性。相邻观感问题（审核通过 P1 vs 审核退回 P0 按目标态分拆同一动作）**未处理**，保持现状。
+
+---
 
 **决策**（用户定调：P2 过期判据一并修正；数据迁移只迁 struct_srs，golden 数据文件冻结靠向后兼容）：`add_xc` 加 `xc_source` 参数（枚举 `XC_SOURCES`=镜像/4.5判/联动/分支差异），desc 契约改为**只写语义内容、不含来源前缀**；assemble `_assign_ids` 内 `_rebuild_xc_desc` 按 `xc_source` 用 `XC_DESC_TPL` 重建最终 desc（前缀 + 注入正式标签）。旧数据（golden 冻结）缺省 `xc_source=None` 时用 `XC_LEGACY_RE` 从旧 desc 前缀反推来源并剥掉残留 `T-tXX` 局部标签。
 
