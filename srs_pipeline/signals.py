@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-HEADING = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$")
+HEADING = re.compile(r"^#+[ \t]*(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.*?)\s*$")
 ENUM = re.compile(r"取值范围[:：]\s*(.+?)(?=[，。；;）)]|$)")
 CHANGE = re.compile(r"由(.{1,12}?)变为(.{1,12}?)(?=[（(，。；;]|$)")
 
@@ -83,13 +83,15 @@ def op_category_of(name: str) -> str | None:
 
 def _normalize_doc(text: str) -> str:
     """把 markdown 原文规整为可审计的纯文本：
-    去掉标题行前导 #，并解除反斜杠转义（原样 `## 4\\.6 项目管理` → `4.6 项目管理`），
+    保留标题行前导 #（作结构标记——标题识别靠它而非长度启发式，长标题章节
+    如 `#### 20.5.1.6 默认为…（FR-TEST-PLAN-06）**` 才不会漏注册），并解除
+    反斜杠转义（原样 `## 4\\.6 项目管理` → `## 4.6 项目管理`），
     使章节号/子项与数据里的 source_ref 逐字可比。"""
-    t = re.sub(r"(?m)^[ \t]*#+[ \t]*", "", text)
-    return re.sub(r"\\(.)", r"\1", t)
+    return re.sub(r"\\(.)", r"\1", text)
 
-# 标题行：`4.6 项目管理`、`4.8.1评审计划`（数字后可不带空格/标点）
-_HEAD = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$")
+# 标题行：`#### 4.6 项目管理`、`## 4.8.1评审计划`（必须带 markdown # 前缀，
+# 长标题不限长；数字后可不带空格/标点）
+_HEAD = re.compile(r"^#+[ \t]*(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.*?)\s*$")
 # 目录条目尾缀：`4.4 通用功能要求....7`（标题 + 省略点 + 页码）。目录页行也匹配
 # _HEAD，若注册会把章节锚到 TOC 上、正文变空（C15 假阳性）。真实标题无此尾缀。
 _TOC_ENTRY = re.compile(r"\.{2,}\d*\s*$")

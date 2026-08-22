@@ -10,7 +10,7 @@ serves as the tiebreaker within topological levels during final ordering.
 """
 import copy
 from typing import Any
-from context.domain_precondition import base_data_entity_ids
+from context.domain_precondition import base_data_entity_ids, object_existence
 from models.state import AgentState
 from models.schema import ObligationType
 
@@ -72,7 +72,6 @@ def s2_sorting_node(state: AgentState) -> dict:
     warnings = list(state.get("warnings", []))
     phase_table = state.get("phase_table", {})
     ctx_rules = state.get("contextual_phase_rules", {})
-    upstream_map = state.get("transition_upstream_map", {})
     dep_state_phase_map = state.get("dep_state_phase_map", {})
     entity_parent = state.get("entity_parent", {})
 
@@ -185,6 +184,26 @@ def s2_sorting_node(state: AgentState) -> dict:
     # richness, dependency_depth).  Leaves (日志) reach the tail via S0's leaf_level.
     entity_order_rank = _entity_order_rank(cm, topology_levels, dependency_depth)
 
+    # ── 数据段相位 (断点③ 修复): 无业务锚的数据操作整体落尾 ──
+    # 无业务锚 = ot ∈ {CRUD, INVALID, RULE, FIELD_VALIDATION} 且无维度且
+    # object_existence(cm, state, entity) 为 None (管理类实体/无创建转换)。
+    # 判定与 S3 Guard 7 共用同一事实源 (context.domain_precondition.object_existence),
+    # 数据驱动, 不硬编码实体名。此类 proc 此前以 phase 0 + 零依赖 + dim='￿'
+    # 的身份插在实体流之间形成堆头 (PT017: 项目/标准库/发票/实验室 数据操作 pile-up)。
+    # 抬到数据段相位 (主流程 max_phase + 1) 后, 它们在 S3 拓扑排序 (sort_key[0]=phase)
+    # 中作为零依赖源最后弹出 → 主流程优先 + 尾部数据操作与规则验证段。
+    # 锚定的数据操作 (如 报名记录/评价记录, object_existence 非 None) 保持原位。
+    data_section_phase = (
+        max((p.get("_S2_fields", {}).get("phase") or 0) for p in procedures) + 1
+        if procedures else 1
+    )
+    _deferrable_ots = {
+        ObligationType.CRUD,
+        ObligationType.INVALID,
+        ObligationType.RULE,
+        ObligationType.FIELD_VALIDATION,
+    }
+
     def _topo_level_for_entity(ent_name_or_id: str) -> int:
         """Look up topology_level by entity name or ID."""
         if not ent_name_or_id:
@@ -219,6 +238,25 @@ def s2_sorting_node(state: AgentState) -> dict:
         # I5: Ensure phase_basis is never empty
         if not s2.get("phase_basis"):
             s2["phase_basis"] = f"fallback: entity={proc['entity']} phase={s2['phase']}"
+
+        # 数据操作相位后置 (断点③): 无业务锚 (object_existence None) 的
+        # CRUD/RULE/FIELD_VALIDATION/INVALID 且无维度 → 抬到数据段相位。
+        # 相位抬升在 phase_name 赋值之前, 故 phase_name 自动落到 P{data_section_phase}。
+        ot = proc.get("obligation_type", ObligationType.UNSPECIFIED)
+        if cm and ot in _deferrable_ots:
+            proc_entity = proc.get("entity", "") or ""
+            raw_dim = proc.get("dimension", "") or ""
+            if not raw_dim:
+                _eid = (
+                    proc_entity if proc_entity in topology_levels
+                    else entity_name_map.get(proc_entity, proc_entity)
+                )
+                if object_existence(cm, state, _eid) is None:
+                    s2["phase"] = data_section_phase
+                    s2["phase_basis"] = (
+                        f"data_section_defer: {proc_entity} unanchored "
+                        f"(object_existence None)"
+                    )
 
         # Set phase_name
         phase_names = phase_table.get("phase_names", [])

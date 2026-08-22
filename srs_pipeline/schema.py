@@ -30,11 +30,12 @@ FRAMEWORK = "framework"
 
 class Field:
     __slots__ = ("dsl", "out", "written_by", "rename_reason",
-                 "mutation_conditions", "enum", "required", "derived_from", "desc")
+                 "mutation_conditions", "enum", "required", "required_when",
+                 "derived_from", "desc")
 
     def __init__(self, out, dsl=None, written_by=LLM, rename_reason=None,
                  mutation_conditions=None, enum=None, required=False,
-                 derived_from=None, desc=""):
+                 required_when=None, derived_from=None, desc=""):
         self.out = out                    # 输出 JSON 键
         self.dsl = dsl                    # LLM 侧参数名；None = 纯框架字段
         self.written_by = written_by
@@ -42,6 +43,7 @@ class Field:
         self.mutation_conditions = mutation_conditions
         self.enum = enum
         self.required = required
+        self.required_when = required_when   # callable(params)->bool；非 None 时覆盖 required
         self.derived_from = derived_from
         self.desc = desc
 
@@ -144,9 +146,12 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
               desc="引用被 _assign_ids 改写；C07 铁律8 升级时改写"),
         Field("trigger_source", "trigger_source", LLM_MUTATED, enum=TRIGGER_SOURCES,
               required=True, mutation_conditions="C07", desc="C07 铁律8 升级时改写"),
-        Field("evidence_transitions", "evidence_transitions", LLM_MUTATED, required=True,
+        Field("evidence_transitions", "evidence_transitions", LLM_MUTATED,
+              required_when=lambda p: p.get("trigger_source") not in
+              ("desc", "business_rule", "bidi_coupling"),
               mutation_conditions="_assign_ids; C07",
-              desc="引用被 _assign_ids 改写；C07 铁律8 并集合并"),
+              desc="引用被 _assign_ids 改写；C07 铁律8 并集合并；"
+                   "desc/business_rule/bidi_coupling 来源可空（comment 注明证据位置，见 validate C07）"),
         Field("rollback_propagation", "rollback_propagation", LLM),
         Field("confidence", "confidence", LLM, enum=CONFIDENCE),
         Field("note", "note", LLM),
@@ -255,7 +260,8 @@ def validate_llm(otype: str, params: dict) -> None:
                          f"或 LLM 侧试图写框架字段）")
     for dsl, f in table.items():
         val = params.get(dsl)
-        if f.required:
+        required = f.required_when(params) if f.required_when else f.required
+        if required:
             if isinstance(val, (list, tuple, dict)):
                 if val is None:
                     raise ValueError(f"[schema:{otype}] 必填参数 {dsl!r} 缺失")

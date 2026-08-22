@@ -268,33 +268,6 @@ if len(unique_contexts) >= 2:
 
 ---
 
-### 11. transition_upstream_map (S0.6)
-从两个来源重建（跨实体因果只由 CO 表达，transition_relations 不参与）：
-
-```python
-transition_upstream_map = {}  # tid → [upstream_tid, ...]
-
-# 1. 同实体内upstream：同一维度下，某转换的from状态 == 另一转换的to状态
-for entity E:
-  for dimension D:
-    tos_in_dim = [TO for TO in transition_obligations if TO.entity==E and TO.dimension==D]
-    for T1 in tos_in_dim:
-      for T2 in tos_in_dim:
-        if T2.to == T1.from and T2.id != T1.id:
-          transition_upstream_map.setdefault(T1.transition_id, []).append(T2.transition_id)
-
-# 2. 跨实体upstream：从cross_entity_obligations提取
-for CO in cross_entity_obligations:
-  if CO.enabler_transition_id and CO.dependent_transition_id:
-    transition_upstream_map.setdefault(CO.dependent_transition_id, []).append(CO.enabler_transition_id)
-
-# 去重
-for tid in transition_upstream_map:
-    transition_upstream_map[tid] = list(set(transition_upstream_map[tid]))
-```
-
----
-
 ## 铁律总结
 1. primary_entity非null
 2. primary_dimension非null
@@ -336,8 +309,7 @@ for tid in transition_upstream_map:
       "co_ids": ["..."],
       "resolved_phase": 0
     }
-  },
-  "transition_upstream_map": {"transition_id": ["upstream_transition_id"]}
+  }
 }"""
 
 S0_USER_PROMPT_TEMPLATE = """请根据以下P2覆盖义务模型执行S0拓扑发现，输出完整的EngineState拓扑字段JSON。
@@ -351,7 +323,6 @@ P2 Coverage Model:
 3. S0.3: 推导phase_table（主维度BFS编号）、dep_state_phase_map（锚点实体映射法）、contextual_phase_rules、state_type_map
 4. S0.4: 检测dependent_entities、计算entity_parent（链式）、dependency_depth（BFS）
 5. S0.5: 计算topology_levels（BFS基准+回溯）
-6. S0.6: 重建transition_upstream_map（三来源合并去重）
-7. S0.7: 虚拟实体分解（Structural多父+CO因果多父，合并+禁止规则+后置保护）
+6. S0.6: 虚拟实体分解（Structural多父+CO因果多父，合并+禁止规则+后置保护）
 
 确保满足所有铁律。输出纯JSON，不要markdown包裹。"""

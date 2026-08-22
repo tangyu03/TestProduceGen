@@ -73,7 +73,6 @@ def run_p3_pipeline(
         "topology_levels": None,
         "leaf_entity_ids": set(),
         "virtual_entities": None,
-        "transition_upstream_map": None,
         # P2 model
         "coverage_model": None,
         # S1 output
@@ -226,7 +225,6 @@ def run_p3_pipeline(
             "topology_levels": result.get("topology_levels"),
             "leaf_entity_ids": sorted(result.get("leaf_entity_ids", set())),
             "virtual_entities": result.get("virtual_entities"),
-            "transition_upstream_map": result.get("transition_upstream_map"),
         },
         "procedures": procedures,
         "br_classifications": result.get("br_classifications", []),
@@ -281,7 +279,6 @@ def run_p3_pipeline(
     print(f"        dependency_depth: {json.dumps(es['dependency_depth'], ensure_ascii=False)}")
     print(f"        topology_levels: {json.dumps(es['topology_levels'], ensure_ascii=False)}")
     print(f"        virtual_entities: {json.dumps(es['virtual_entities'], ensure_ascii=False)}")
-    print(f"        transition_upstream_map: {json.dumps(es['transition_upstream_map'], ensure_ascii=False)}")
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -1319,7 +1316,6 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
     """
     tos = coverage_model.get("transition_obligations", [])
     to_by_id = {to.get("id", ""): to for to in tos}
-    to_by_tid = {to.get("transition_id", ""): to for to in tos if to.get("transition_id")}
 
     # V06: 触发方式动态推导（与 s1_generation._derive_time_mechanism 逻辑一致）
     # 触发方式标识符是 validator 协议约定的枚举值，不算业务硬编码
@@ -1363,7 +1359,7 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
         is_time_sensitive = False
         source_to_id = ""
         for sid in source_ids:
-            to = to_by_id.get(sid) or to_by_tid.get(sid)
+            to = to_by_id.get(sid)
             if to:
                 traits = to.get("risk_traits", []) or to.get("traits", []) or []
                 if "time_sensitive" in traits:
@@ -1385,7 +1381,7 @@ def _build_time_sensitive_metadata(procedures: list[dict], coverage_model: dict)
         event = proc.get("when", {}).get("event", "") or ""
         action = proc.get("when", {}).get("action", "") or ""
         # 获取 source TO 用于动态推导 timeout_type
-        source_to = to_by_id.get(source_to_id) or to_by_tid.get(source_to_id)
+        source_to = to_by_id.get(source_to_id)
         trigger_method = _determine_trigger_method(action, event)
         timeout_type = _determine_timeout_type(action, event, source_to)
 

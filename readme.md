@@ -68,10 +68,10 @@ SRS 文档
 
 | 文件 | 阶段 | 职责 |
 |------|------|------|
-| `s0_topology.py` | S0 拓扑发现 | 从 coverage_model 推导 EngineState：primary_entity、phase_table、dep_state_phase_map、transition_upstream_map、virtual_entities 等。V08 修复：优先读 P2 产出的 phase_mapping，BFS 推导降级为 fallback |
+| `s0_topology.py` | S0 拓扑发现 | 从 coverage_model 推导 EngineState：primary_entity、phase_table、dep_state_phase_map、virtual_entities 等。V08 修复：优先读 P2 产出的 phase_mapping，BFS 推导降级为 fallback |
 | `s1_generation.py` | S1 规程生成 | 确定性生成 Type1~Type7 测试规程（BDD Given/When/Then）。含 BR 嵌入、guard polarity 校验、from→to 字面形式追加 |
 | `s2_sorting.py` | S2 排序元数据 | 计算 sort_key（8 维：phase/topology_level/entity_entry/entity/dim/obligation_type/dim_priority/gen_seq），不排序（排序在 S3） |
-| `s3_dependency.py` | S3 依赖绑定 | 绑定 procedure 间依赖（transition_upstream / guard1_state_pred / chain_ordering / guard6_precond / weak_side_effect）。V01 修复：phase guard 命中时降级为 weak_dependency。环检测 + 置信度排序破环 + Kahn 拓扑排序 + 顺序 ID 分配 |
+| `s3_dependency.py` | S3 依赖绑定 | 绑定 procedure 间依赖（guard1_state_pred / chain_ordering / guard6_precond / co_enabler / weak_side_effect）。V01 修复：phase guard 命中时降级为 weak_dependency。环检测 + 置信度排序破环 + Kahn 拓扑排序 + 顺序 ID 分配 |
 | `s4_multi_instance.py` | S4 多实例扩展 | 按 dimension_constraints 展开 procedure 实例（如 5/7/9 人组 × 开题/验收 = 6 实例） |
 
 ### `prompts/` — LLM Prompt 模板
@@ -86,7 +86,7 @@ SRS 文档
 
 | 文件 | 职责 |
 |------|------|
-| `graph_algo.py` | 图算法：`build_transition_graph`、`calc_all_chain_depths`（按 entity+dimension 隔离）、`break_cycles`（置信度排序破环）、`topological_sort_procedures`（Kahn + sort_key 优先级） |
+| `graph_algo.py` | 图算法：`break_cycles`（置信度排序破环）、`topological_sort_procedures`（Kahn + sort_key 优先级） |
 | `llm_client.py` | LLM 客户端封装 |
 | `fallback_log.py` | Fallback 观测日志——记录确定性算法降级到 keyword/regex fallback 的位置 |
 | `data_access.py` | 数据访问辅助 |

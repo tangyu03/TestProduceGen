@@ -107,7 +107,6 @@ class EngineState(BaseModel):
     topology_levels: dict
     leaf_entity_ids: set = set()
     virtual_entities: dict = {}
-    transition_upstream_map: dict
 
     @model_validator(mode="after")
     def _check_primary_entity(self) -> "EngineState":

@@ -302,7 +302,7 @@ V(验证): 验证规则生效（从description提取预期行为）
 - 虚拟实体驳回：audit驳回规程必须指向该虚拟实体自身
 - 虚拟实体S前置：标注context字段值作为前置说明
 - 义务归属：
-  - Type1按transition_upstream_map（虚拟实体按VE.co_ids匹配CO）
+  - Type1按TO自身（虚拟实体按VE.co_ids匹配CO）
   - Type3/Type5按EO.entity（虚拟实体按original_entity匹配）
   - Type4a/4b按CO.enabler_entity+dependent_entity（虚拟实体按VE.co_ids匹配）
   - Type6按RO.entity

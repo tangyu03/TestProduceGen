@@ -164,20 +164,6 @@ def _get_role_name(role_id: str | None, action: str = '', entity: str = '',
                 if parent_role and parent_role != 'system':
                     return role_map.get(parent_role, parent_role)
 
-            upstream_map = state.get('transition_upstream_map', {})
-            tos = state.get('coverage_model', {}).get('transition_obligations', [])
-            to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
-            for tid, ups in upstream_map.items():
-                t = to_by_tid.get(tid)
-                if t and t.get('entity') == entity:
-                    for uid in ups:
-                        ut = to_by_tid.get(uid)
-                        if ut and ut.get('entity') != entity:
-                            ctx = state.get('coverage_model', {}).get('_context', {})
-                            r = _role_lookup(ctx.get('roles', {}), ut.get('entity', ''))
-                            if r and r != 'system':
-                                return role_map.get(r, r)
-
         return '[待确认角色]'
 
     if has_auto_kw or role_id == 'system':
@@ -1316,7 +1302,7 @@ def _pred_contains_type(node, target: str) -> bool:
     return False
 
 
-def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
+def _generate_type1(state: AgentState, indices: dict,
                     br_list: list[dict] | None = None) -> list[dict]:
     """Generate Type1 (transition_obligation) procedures — BDD style.
 
@@ -1355,7 +1341,9 @@ def _generate_type1(state: AgentState, indices: dict, depth_cache: dict,
         dimension = to.get("dimension", "")
         risk_traits = to.get("risk_traits", [])
         transition_id = to.get("transition_id", "")
-        chain_depth = depth_cache.get(transition_id, 0)
+        # chain_depth: depth_cache 机制已随 transition_upstream_map 清除 (恒 0;
+        # 已从 S2 sort_key 移除, 仅作 break_cycles 全 0 tiebreaker)。
+        chain_depth = 0
 
         # Check if this TO belongs to a virtual entity
         ve_list = [(ve_name, ve) for ve_name, ve in ves.items()
@@ -2242,7 +2230,7 @@ def _type3_then_expectation(eo: dict, branch: dict, state: AgentState) -> tuple[
     return (f"{attr}显示为{val}", "state", [])
 
 
-def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list[dict]:
+def _generate_type3(state: AgentState, indices: dict) -> list[dict]:
     """Generate Type3 (attribute_config) procedures — BDD style.
 
     For each attribute_config EO:
@@ -2298,7 +2286,7 @@ def _generate_type3(state: AgentState, indices: dict, depth_cache: dict) -> list
             # Generate one procedure per branch value
             for branch in bd.get("branches", []):
                 transition_id = branch.get("target_transition", "")
-                chain_depth = depth_cache.get(transition_id, 0)
+                chain_depth = 0
                 # Type3 是数据维护类:分支路径走 setup 解析器,与非分支路径
                 # (PROC-002 基础数据-文件导出任务)一致。_resolve_phase 面向
                 # 状态锚定,配置属性(任务级别)非状态维度会落到 L0 debug 标记
@@ -2722,11 +2710,10 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
 # Type6 — Invalid Transition procedures
 # ---------------------------------------------------------------------------
 
-def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list[dict]:
+def _generate_type6(state: AgentState, indices: dict) -> list[dict]:
     """Generate Type6 (invalid_transition) procedures.
 
-    Phase is based on the 'from' state; chain_depth is the max depth of
-    TOs whose 'to' matches the RO's 'from'.
+    Phase is based on the 'from' state (chain_depth 恒 0, depth_cache 机制已清除).
     """
     phase_table = state["phase_table"]
     dep_map = state["dep_state_phase_map"]
@@ -2771,11 +2758,8 @@ def _generate_type6(state: AgentState, indices: dict, depth_cache: dict) -> list
             phase = phase_res["phase"]
             phase_basis = phase_res["basis"]
 
-        # Chain depth from the transition that leads to "from" state
+        # Chain depth: depth_cache 机制已清除 (恒 0)
         chain_depth = 0
-        for to in tos:
-            if to["entity"] == entity and to.get("to") == ro.get("from"):
-                chain_depth = max(chain_depth, depth_cache.get(to.get("transition_id", ""), 0))
 
         proc = {
             "temp_id": f"PROC-T6-{_next_gen_seq()}",
@@ -3315,7 +3299,6 @@ def _build_negative_test_thens(br_id: str, br_desc: str,
 # ---------------------------------------------------------------------------
 
 def _generate_type7_standalone(br_classifications: list[dict], state: AgentState,
-                               depth_cache: dict | None = None,
                                entity_name_map: dict | None = None,
                                signal_v_steps: dict[str, list[dict]] | None = None) -> list[dict]:
     """Generate standalone Type7 procedures from standalone BRs only.
@@ -3455,12 +3438,8 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
                         kind="behavior", br_refs=[sub_label],
                     ))
 
-        # Try to find associated transition for chain depth
+        # Chain depth: depth_cache 机制已清除 (恒 0)
         chain_depth = 0
-        for to in tos:
-            if br_entities and to["entity"] in br_entities:
-                t_depth = depth_cache.get(to.get("transition_id", ""), 0) if depth_cache else 0
-                chain_depth = max(chain_depth, t_depth)
 
         # V06: 时限/超时/timing BR 注入触发方式 hints + time_control
         # 条件与 V06 模型信号一致: category=timing 或 desc 含"超时/时限"
@@ -3506,7 +3485,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
 # ---------------------------------------------------------------------------
 
 def _generate_type9_field_validation(
-    state: AgentState, indices: dict, depth_cache: dict
+    state: AgentState, indices: dict
 ) -> list[dict]:
     """Generate independent Type9 procedures for field-level validation.
 
@@ -4290,24 +4269,6 @@ def s1_generation_node(state: AgentState) -> dict:
     # Calculate chain depths — PER-ENTITY-PER-DIMENSION (not global)
     # BDD root-cause fix: chain_depth only recurses within the same entity
     # AND same dimension.  This prevents independent business flows within
-    # the same entity (e.g. E-REG.通知状态 vs E-REG.报名记录状态) from
-    # sharing a chain_depth pool and interleaving by gen_seq.
-    from tools.graph_algo import calc_all_chain_depths
-    transition_entities: dict[str, str] = {}
-    transition_dimensions: dict[str, str] = {}
-    for to in tos:
-        tid = to.get("transition_id", "")
-        ent = to.get("entity", "")
-        dim = to.get("dimension", "") or ""
-        if tid and ent:
-            transition_entities[tid] = ent
-            transition_dimensions[tid] = dim
-    depth_cache = calc_all_chain_depths(
-        state["transition_upstream_map"],
-        transition_entities=transition_entities,
-        transition_dimensions=transition_dimensions,
-    )
-
     # Generate procedures by type
     # BDD: Type4a/4b (constraint/lifecycle CO) are NO LONGER generated as
     # independent procedures.  CO's enabler and dependent state transitions
@@ -4319,12 +4280,12 @@ def s1_generation_node(state: AgentState) -> dict:
     br_list = ro_by_type.get("business_rule", [])
 
     procedures: list[dict] = []
-    procedures.extend(_generate_type1(state, indices, depth_cache, br_list))
-    procedures.extend(_generate_type3(state, indices, depth_cache))
+    procedures.extend(_generate_type1(state, indices, br_list))
+    procedures.extend(_generate_type3(state, indices))
     procedures.extend(_generate_type5(state, indices, procedures))
-    procedures.extend(_generate_type6(state, indices, depth_cache))
+    procedures.extend(_generate_type6(state, indices))
     # BDD: field_validation as independent Type9 procedures (not injected into Type1/3/5)
-    procedures.extend(_generate_type9_field_validation(state, indices, depth_cache))
+    procedures.extend(_generate_type9_field_validation(state, indices))
 
     # BR classification and embedding
     br_classifications = _classify_business_rules(state, indices)
@@ -4349,7 +4310,7 @@ def s1_generation_node(state: AgentState) -> dict:
 
     # Type7 standalone — pass signal_v_steps for LLM-enriched V-steps
     procedures.extend(_generate_type7_standalone(
-        br_classifications, state, depth_cache, entity_name_map, signal_v_steps
+        br_classifications, state, entity_name_map, signal_v_steps
     ))
 
     # BR embedding (non-standalone → V steps in host procedures)

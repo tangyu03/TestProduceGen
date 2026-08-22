@@ -516,6 +516,12 @@ def _derive_anchors(model, spec):
                 if s:
                     refs.append((t, s))
     if not refs:
+        if dim:
+            # 分支字段：写点引用完全缺失 = 配置型分支（分支维度声明注明
+            # "转换层无 branch 转换属合法"，如 评分方式 分值/权重 仅影响计算与
+            # 展示）。无状态机写点 → 空锚点，下游 field_phase_lower_bound 返回
+            # None → 保守 P0，安全降级而非漂移。
+            return []
         raise ValueError(
             f"[{ent}.{spec['name']}] 找不到锚点引用 transition（数据源已漂移）")
     dims = sorted({t.get("dimension") for t, _ in refs} - {None})

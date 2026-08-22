@@ -54,7 +54,7 @@ try:
     out_path = '/tmp/run_output.json'
     es_keys = ['primary_entity','phase_table','dep_state_phase_map','contextual_phase_rules',
                'state_type_map','dependent_entities','entity_parent','dependency_depth',
-               'topology_levels','virtual_entities','transition_upstream_map']
+               'topology_levels','virtual_entities']
     engine_state = {k: result.get(k) for k in es_keys if result.get(k) is not None}
     out = {
         'engine_state': engine_state,

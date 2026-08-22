@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 from .signals import _normalize_doc
 
-_HEADING = re.compile(r"^(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.{0,40}?)\s*$", re.M)
+_HEADING = re.compile(r"^#+[ \t]*(\d+(?:\.\d+){0,3})[、.．]?\s*(\S.*?)\s*$", re.M)
 _ENUM_LINE = re.compile(r"(状态|阶段)(?:包括|分为)[：:]?\s*([^。\n]{2,100})")
 _SPLIT = re.compile(r"[、,，/；;]|和")
 _RESTRICTIVE = ("必须", "不得", "禁止", "只能", "不可", "不超过")
@@ -21,7 +21,7 @@ class Span:
 
 def build_evidence(doc_text: str) -> list:
     """机器抽取。任何入库存量都通过 `in doc_text` 精确验证，幻觉无从进入。
-    先归一化（去 #、解转义），标题 `## 4\\.6 …` 才能被 _HEADING 命中。"""
+    先归一化（保留 # 作结构标记、解转义），标题 `## 4\\.6 …` 才能被 _HEADING 命中。"""
     doc_text = _normalize_doc(doc_text)
     spans, seq = [], 0
 

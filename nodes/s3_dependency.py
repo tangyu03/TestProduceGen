@@ -136,7 +136,6 @@ def s3_dependency_node(state: AgentState) -> dict:
     warnings = list(state.get("warnings", []))
     errors = list(state.get("errors", []))
 
-    upstream_map = state.get("transition_upstream_map", {})
     cm = state.get("coverage_model", {})
     tos = cm.get("transition_obligations", [])
     cos = cm.get("cross_entity_obligations", [])
@@ -155,8 +154,6 @@ def s3_dependency_node(state: AgentState) -> dict:
         return sorted(dep_ids, key=lambda did: proc_by_id.get(did, {}).get("gen_seq", 999))
 
     to_by_id = {to["id"]: to for to in tos}
-    # Also index by transition_id — source_ids may use either convention
-    to_by_tid = {to["transition_id"]: to for to in tos if to.get("transition_id")}
     co_by_id = {co["id"]: co for co in cos}
     # State lifecycle positions for back-edge detection (Guard 1 / chain)
     state_pos = _build_state_pos(cm.get("_context", {}).get("state_info", {}))
@@ -168,21 +165,14 @@ def s3_dependency_node(state: AgentState) -> dict:
         (e.g. "T-001a" → "T-001") since branch-variant source_ids may not
         have their own TO entry.
         """
-        result = to_by_id.get(sid) or to_by_tid.get(sid)
+        result = to_by_id.get(sid)
         if result:
             return result
         # Strip trailing lowercase letter (branch suffix)
         base = re.sub(r'[a-z]$', '', sid)
         if base != sid:
-            return to_by_id.get(base) or to_by_tid.get(base)
+            return to_by_id.get(base)
         return None
-
-    trans_id_to_proc_ids: dict[str, list] = {}
-    for proc in procedures:
-        for sid in proc.get("source_ids", []):
-            to = _resolve_to(sid)
-            if to and to.get("transition_id"):
-                trans_id_to_proc_ids.setdefault(to["transition_id"], []).append(proc["temp_id"])
 
     enabler_state_to_procs: dict[tuple, list] = {}
     for proc in procedures:
@@ -238,81 +228,10 @@ def s3_dependency_node(state: AgentState) -> dict:
         # Remove guard1 deps from regular deps (they're now protected)
         deps -= set(s3.get("guard1_deps", []))
 
-        # 1. Transition upstream
-        # ── 惰性守卫（DECISIONS ㊼，2026-08-14）─────────────────────────────
-        # 本块按 transition_id 索引，而 coverage TO 0/91 有 transition_id
-        # （只用 id），故 trans_id_to_proc_ids 恒空 → 本块是文档化的 no-op。
-        # 这是**刻意保留**的惰性，不是 bug：id-keyed 双键索引会物化 112 条边
-        # （Source1 同实体链 107 + Source2 CO 5），其中 107 条与 Guard 1
-        # (guard1_state_pred)/chain_ordering 已派生的同实体状态链**完全冗余**，
-        # 5 条 CO 边已被 co_enabler 绑定以更优语义（weak + lateral/相位反转
-        # 标签，见 co_enabler 块）物化。双键索引=纯重复+churn，故**不做**。
-        #
-        # 重新激活路径：若上游某日给 coverage TO 回填 transition_id，本块会
-        # 自动复活（trans_id_to_proc_ids 非空）。复活前请重审：需先让 CO 边的
-        # hard 语义不再与 ㊻ lateral 定谳矛盾（lateral 下 hard 不成立），并
-        # 评估 107 条同实体边与 Guard 1/chain_ordering 的去重。
-        #
-        # For each upstream transition, pick the most specific matching
-        # procedure (fewest source_ids). This avoids pulling in mega-procedures
-        # created by S1.10 dedup that bundle unrelated transitions alongside
-        # the matching one (e.g. T-030a bundled with T-016/T-011 pulls T-031
-        # far to the right).
-        #
-        # Phase guard: skip upstream deps that would create phase violations
-        # (dep phase > proc phase).  Transition upstream_map is built from
-        # transition_id chains which may span entities at different phases.
-        # Only accept deps that don't break phase ordering.
+        # my_phase: chain ordering / CO enabler 的相位守卫共用。
         my_phase = proc.get("_S2_fields", {}).get("phase", 0)
-        for sid in proc.get("source_ids", []):
-            to = _resolve_to(sid)
-            if not to or not to.get("transition_id"):
-                continue
-            tid = to["transition_id"]
-            for up_tid in upstream_map.get(tid, []):
-                candidates = trans_id_to_proc_ids.get(up_tid, [])
-                if not candidates:
-                    continue
-                # Pick the most specific procedure: fewest source_ids = best match
-                if len(candidates) == 1:
-                    best = candidates[0]
-                else:
-                    best = min(candidates, key=lambda cid:
-                        len(proc_by_id.get(cid, {}).get("source_ids", [])))
-                if best == proc["temp_id"]:
-                    continue
-                # V01 fix: phase guard — when dep_phase > my_phase, the
-                # hard dependency would create a phase inversion (V01 BLOCKER).
-                # Instead of silently skipping (which loses the dependency
-                # entirely AND lets other mechanisms like chain_ordering
-                # still write the inverted dep), move it to weak_dependencies
-                # so the topological sort still produces a valid order AND
-                # the dependency is preserved for audit. The V01 validator
-                # only checks _S3_fields.dependencies (hard) for inversions;
-                # weak_dependencies are not subject to that check.
-                dep_p = proc_by_id.get(best, {})
-                dep_phase = dep_p.get("_S2_fields", {}).get("phase", 0)
-                if dep_phase > my_phase:
-                    weak_deps = s3.setdefault("weak_dependencies", [])
-                    weak_origins_map = s3.setdefault("weak_origins", {})
-                    if best not in weak_deps:
-                        weak_deps.append(best)
-                        weak_origins_map[best] = "transition_upstream_phase_inversion"
-                        _record_origin(best, "weak_side_effect")  # downgrade confidence
-                    continue
-                # Additional guard: skip if dep's post_state is the SAME as proc's from_state
-                # but dep phase > my phase (regression edge like T-007a 待归档→已选入).
-                # This prevents cross-phase dependencies that break topological order.
-                dep_givens = dep_p.get("givens", [{}])
-                dep_from = dep_givens[0].get("state", "") if dep_givens else ""
-                proc_givens = proc.get("givens", [{}])
-                proc_from = proc_givens[0].get("state", "") if proc_givens else ""
-                if dep_from and proc_from and dep_from == proc_from and dep_phase != my_phase:
-                    continue
-                upstream_deps.add(best)
-                _record_origin(best, "transition_upstream")
 
-        # 2. Same-entity same-dimension chain ordering
+        # 1. Same-entity same-dimension chain ordering
         # Sort same-dim procedures by sort_key for deterministic chain
         # (independent of input list order, which may be arbitrary from S1)
         # I23-fix: validate that the predecessor's post_state feeds into this
@@ -368,7 +287,7 @@ def s3_dependency_node(state: AgentState) -> dict:
             except ValueError:
                 pass
 
-        # 3. CO enabler dependency
+        # 2. CO enabler dependency
         # 修复 (2026-08-14): (1) S1 现注入 CO id 到 dependent proc 的 source_ids,
         # 此循环才会命中 co_by_id (原: source_ids 只有转换 id, 机制全死);
         # (2) 自环 CO (enabler==dependent) 与 S0 Source 3 的 dv==ev 守卫一致地
@@ -399,8 +318,8 @@ def s3_dependency_node(state: AgentState) -> dict:
             ee = co.get("enabler_entity")
             es = co.get("enabler_state")
             if ee and es:
-                en_to = to_by_id.get(co.get("enabler_transition_id")) or to_by_tid.get(co.get("enabler_transition_id"))
-                dep_to = to_by_id.get(co.get("dependent_transition_id")) or to_by_tid.get(co.get("dependent_transition_id"))
+                en_to = to_by_id.get(co.get("enabler_transition_id"))
+                dep_to = to_by_id.get(co.get("dependent_transition_id"))
                 both_lateral = bool(en_to and dep_to
                                     and en_to.get("from") == en_to.get("to")
                                     and dep_to.get("from") == dep_to.get("to"))
@@ -425,7 +344,7 @@ def s3_dependency_node(state: AgentState) -> dict:
                             deps.add(mid)
                             _record_origin(mid, "co_enabler")
 
-        # 4. VE.co_ids dependency binding
+        # 3. VE.co_ids dependency binding
         # (自环 CO 跳过; 内部空间 entity 是 ID 直接查表; 同 CO 块一律 weak)
         entity = proc["entity"]
         if entity in ves:

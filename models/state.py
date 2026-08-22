@@ -50,7 +50,6 @@ class AgentState(MessagesState):
                                     # 否则 LangGraph schema 过滤会剔除 S0 节点返回, 下游
                                     # lifecycle/base_data 判别 (domain_precondition) 拿不到
     virtual_entities: Optional[dict]  # VE name → {original_entity, parent_entity, transitions, context, co_ids, resolved_phase, trigger_source}
-    transition_upstream_map: Optional[dict]  # transition_id → [upstream_ids]
 
     # ── P2 Coverage Model (consumed by S1) ────────────────────────────
     coverage_model: Optional[dict]  # Full P2 coverage model

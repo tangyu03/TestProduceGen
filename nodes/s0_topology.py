@@ -7,7 +7,6 @@ Implements all sub-stages S0.1–S0.7:
   S0.3: Phase table derivation (longest-path DAG, from-state补全, 从维度, G0.3/I14 enforcement)
   S0.4: Dependent entity detection (4-level signal classification, F/V/D, transitivity)
   S0.5: Topology levels (BFS backtracking, conflict resolution)
-  S0.6: Upstream map rebuilding (3 sources merged)
   S0.7: Virtual entity decomposition (CO-causal + Structural multi-parent, E3 guards)
 
 Falls back to LLM only if deterministic computation fails.
@@ -204,6 +203,30 @@ def _get_explicit_phase_mapping(state_info: dict | None, entity: str, dim: str) 
                 return derived
 
     return None
+
+
+def _build_state_pos(state_info: dict | None) -> dict:
+    """Build {(entity_id, dim_name): {state: position}} from _context.state_info.
+
+    Position = explicit phase_mapping value (fallback: index in the states
+    list). Handles both state_info layouts (dict and P2's list-of-dicts with
+    `dimension_name`) via _normalize_dim_list. A transition whose `to`
+    position is <= its `from` position is a loop/back edge (s3 Guard 1).
+    """
+    pos: dict[tuple, dict] = {}
+    for ent, info in (state_info or {}).items():
+        if not isinstance(info, dict):
+            continue
+        for dim_name, dim in _normalize_dim_list(info.get("dimensions") or []).items():
+            pm = dim.get("phase_mapping") or {}
+            states = dim.get("states") or []
+            d = {}
+            for i, st in enumerate(states):
+                if isinstance(st, str) and st:
+                    d[st] = pm.get(st, i)
+            if d:
+                pos[(ent, dim_name)] = d
+    return pos
 
 
 # Domain-constant maps (truly invariant across projects)
@@ -1342,7 +1365,6 @@ def _compute_entry_phase(
     tos: list[dict],
     phase_table: dict,
     dep_map: dict,
-    transition_upstream_map: dict,
     structural: list[dict] = None,
     cos: list[dict] = None,
     transition_relations: list[dict] = None,
@@ -1353,8 +1375,6 @@ def _compute_entry_phase(
     Strategies (in priority order):
     0. Precondition-based: TO preconditions reference primary-entity states
        (e.g. "项目状态为已结束" → phase 4).  This is the most direct signal.
-    1. Upstream anchoring: from=null transitions with upstream from anchor
-       OR any entity in the dependency chain (recursive).
     2. CO constraint: fallback when no upstream chain found
     3. Structural composition: anchor creates child entity
     4. 从维度: transition_relations where to=entity
@@ -1445,38 +1465,6 @@ def _compute_entry_phase(
                 non_zero = [p for p in all_phases if p > 0]
                 return min(non_zero) if non_zero else min(all_phases)
         return 0
-
-    # Strategy 1: Upstream anchoring for initial transitions (PRIORITY)
-    # Check upstreams from anchor OR any entity in the dependency chain.
-    # When an upstream comes from a non-anchor entity (e.g. E-EVAL's T-090
-    # upstream T-015 from E-REG), look up that entity's dep_state_phase_map
-    # which is already aligned to the primary entity's global phase scale.
-    entity_dim_tos = [t for t in tos if t.get('entity') == entity and t.get('dimension') == dim and t.get('from') is None]
-    for to in entity_dim_tos:
-        tid = to.get('transition_id', '')
-        upstreams = transition_upstream_map.get(tid, [])
-        for utid in upstreams:
-            ut = next((x for x in tos if x.get('transition_id') == utid), None)
-            if not ut:
-                continue
-            ut_entity = ut.get('entity', '')
-            ut_dim = ut.get('dimension', '')
-            ut_to = ut.get('to')
-            # Try anchor first
-            if ut_entity == anchor:
-                a_pm = _get_anchor_phase(anchor, ut_dim, phase_table, dep_map)
-                if a_pm and ut_to in a_pm:
-                    return a_pm[ut_to]
-            # Try upstream entity's dep_state_phase_map (recursive chain)
-            if ut_entity in dep_map and ut_dim in dep_map.get(ut_entity, {}):
-                ut_phase = dep_map[ut_entity][ut_dim].get(ut_to)
-                if ut_phase is not None:
-                    return ut_phase
-            # Also try if upstream entity is the primary entity
-            if ut_entity == phase_table.get('primary_entity', ''):
-                pm = phase_table.get('state_to_phase', {}).get(ut_dim, {})
-                if ut_to in pm:
-                    return pm[ut_to]
 
     # Strategy 2: CO constraint anchoring (fallback)
     if cos:
@@ -1682,7 +1670,6 @@ def _derive_dep_state_phase_map(
     dependent_entities: list[str],
     entity_parent: dict,
     state_type_map: dict,
-    transition_upstream_map: dict,
     virtual_entities: dict,
     cos: list[dict] = None,
     transition_relations: list[dict] = None,
@@ -1850,7 +1837,7 @@ def _derive_dep_state_phase_map(
                 if not (set(merged.keys()) & primary_state_names):
                     _entry = _compute_entry_phase(
                         entity, anchor, dim, tos, phase_table, dep_map,
-                        transition_upstream_map, structural=structural, cos=cos,
+                        structural=structural, cos=cos,
                         transition_relations=transition_relations, restrict_05=True,
                     )
                 if _entry:
@@ -2184,101 +2171,6 @@ def _derive_dep_state_phase_map(
                 dim_map[dim] = dict(state_phase)
                 continue
 
-            tid_phase: dict[str, int] = {}
-            changed = True
-            max_iter = len(dim_transitions) * 3 + 10
-            iters = 0
-            while changed and iters < max_iter:
-                changed = False
-                iters += 1
-                for to in dim_transitions:
-                    tid = to.get('transition_id', '')
-                    if not tid or tid in tid_phase:
-                        continue
-                    f = to.get('from', '')
-                    t = to.get('to', '')
-                    f = f.strip() if isinstance(f, str) else (f if f else '')
-                    t = t.strip() if isinstance(t, str) else (t if t else '')
-
-                    # Check transition_relation binding (strongest signal)
-                    bound_phases = []
-                    for bound_tid in tr_bindings.get(tid, []):
-                        bp = _lookup_phase(bound_tid)
-                        if bp is not None:
-                            bound_phases.append(bp)
-
-                    if bound_phases:
-                        # transition_relation binding → same phase as bound transition.
-                        # Do NOT also apply forward +1 — TR binding is the
-                        # authoritative phase signal, forward +1 would inflate it.
-                        final_phase = max(bound_phases)
-                    elif not f:
-                        # Entry transition (from=None): try upstream from transition_upstream_map
-                        upstreams = transition_upstream_map.get(tid, [])
-                        up_phases = []
-                        for utid in upstreams:
-                            up = _lookup_phase(utid)
-                            if up is not None:
-                                up_phases.append(up)
-                        if up_phases:
-                            final_phase = max(up_phases)
-                        else:
-                            # No causal binding — use anchor min phase
-                            final_phase = _get_anchor_phase_for_entity(anchor, phase_table, dep_map)
-                    else:
-                        # Non-entry, no TR binding: forward edge.
-                        # v29 #5: toggle edges (启用↔停用) do NOT +1.
-                        # v28 behavior: rollback/re-submit edges do NOT +1.
-                        # v29 #1: if from_state is in state_info.terminal,
-                        #         this is a cross-stage boundary → +1.
-                        #         Otherwise default +1 (within-stage issue
-                        #         documented as known limitation; needs
-                        #         state_info.stages to fully fix).
-                        src_phase = state_phase.get(f, UNASSIGNED)
-                        if src_phase != UNASSIGNED:
-                            tid_local = to.get('transition_id', '')
-                            is_toggle = tid_local in toggle_tids
-                            is_side_effect = _is_side_effect_edge(to)
-                            if is_toggle or is_side_effect:
-                                final_phase = src_phase  # no increment
-                                # Fix-4e: side-effect / toggle / resubmit edges
-                                # represent state re-entry (e.g. 锁定→未锁定
-                                # unlock) and should ONLY set the target phase
-                                # if it was previously UNASSIGNED. They must
-                                # NOT overwrite a phase already assigned by
-                                # an entry transition or a forward edge —
-                                # otherwise they pull the entry state up to
-                                # the source's phase (e.g. 未锁定 P0 → P1
-                                # because 锁定 P1 → 未锁定 resubmit).
-                                if t and state_phase.get(t, UNASSIGNED) == UNASSIGNED:
-                                    state_phase[t] = final_phase
-                                    changed = True
-                                tid_phase[tid] = final_phase
-                                continue  # skip the normal t-update below
-                            elif f in terminal_states:
-                                # v29 #1: cross-stage boundary signal
-                                final_phase = src_phase + 1
-                            else:
-                                final_phase = src_phase + 1
-                        else:
-                            # Source not yet resolved — defer
-                            continue
-
-                    tid_phase[tid] = final_phase
-                    if os.environ.get('S0_TRACE') == '1' and entity in ('E-SCORE', 'E-USER'):
-                        print(f'[FIXPOINT] tid={tid} f={f} t={t} final={final_phase}', flush=True)
-                    if t:
-                        old = state_phase.get(t, UNASSIGNED)
-                        if old == UNASSIGNED or final_phase > old:
-                            state_phase[t] = final_phase
-                            changed = True
-                    # Also set from_state if unset (it may not have an entry)
-                    if f and state_phase.get(f, UNASSIGNED) == UNASSIGNED:
-                        # If this state is only a from_state and never a to_state,
-                        # it's a root state — try initial state info, else P0
-                        state_phase[f] = 0
-                        changed = True
-
             # Apply state_info.initial → P0 ONLY for states not yet resolved
             # by causal tracing.  For dep entities, initial state phase is
             # determined by causal bindings (e.g. E-REG.报名待审核 is bound
@@ -2333,80 +2225,9 @@ def _derive_dep_state_phase_map(
 
     # (handled inside _compute_entry_phase via the transition_relations param)
 
-    # Detect contextual phase rules
-    ctx_rules = _detect_contextual_phase_rules(
-        primary, tos, dep_map, entity_parent, phase_table, transition_upstream_map
-    )
-
-    return dep_map, ctx_rules
-
-
-def _detect_contextual_phase_rules(
-    primary: str,
-    tos: list[dict],
-    dep_map: dict,
-    entity_parent: dict,
-    phase_table: dict,
-    transition_upstream_map: dict,
-) -> dict[str, dict]:
-    """S0.3b: Detect dimensions where same state maps to different phases per context."""
-    ctx_rules: dict[str, dict] = {}
-
-    for entity, dims in dep_map.items():
-        for dim, state_phases in dims.items():
-            dim_tos = [t for t in tos if t.get('entity') == entity and t.get('dimension') == dim]
-            if not dim_tos:
-                continue
-
-            # Check from=null transitions with multiple upstream sources at different phases
-            trigger_sources: dict[str, list[dict]] = defaultdict(list)
-            for to in dim_tos:
-                if to.get('from') is None:
-                    tid = to.get('transition_id', '')
-                    upstreams = transition_upstream_map.get(tid, [])
-                    for utid in upstreams:
-                        ut = next((x for x in tos if x.get('transition_id') == utid), None)
-                        if ut:
-                            trigger_sources[ut.get('entity', '')].append({
-                                'transition': to,
-                                'upstream': ut,
-                            })
-
-            if len(trigger_sources) >= 2:
-                source_phases = {}
-                for src_entity, entries in trigger_sources.items():
-                    src_phase = _get_anchor_phase_for_entity(src_entity, phase_table, dep_map)
-                    source_phases[src_entity] = src_phase
-
-                unique_phases = set(source_phases.values())
-                if len(unique_phases) >= 2:
-                    rules = []
-                    for src_entity, entries in sorted(trigger_sources.items()):
-                        src_phase = source_phases[src_entity]
-                        context = f"{src_entity}触发"
-                        for entry in entries:
-                            ut = entry['upstream']
-                            action = ut.get('action', '')
-                            if action:
-                                context = action
-                                break
-                        rules.append({
-                            'trigger_source': f"{src_entity}.{entries[0]['upstream'].get('dimension', '')}={entries[0]['upstream'].get('to', '')}",
-                            'resolved_phase': src_phase,
-                            'context': context,
-                            'rationale': f"由{src_entity}触发",
-                        })
-
-                    ctx_key = f"{entity}.{dim}"
-                    ctx_rules[ctx_key] = {
-                        'strategy': 'upstream_anchor',
-                        'description': f'{entity}.{dim}是同一实体内的维度级多场景维度。不同类型的操作由不同阶段的上游触发，同一状态值在不同场景下归属不同阶段。',
-                        'rules': rules,
-                        'default_phase': None,
-                        'fallback': 'anchor_entity_min_phase',
-                    }
-
-    return ctx_rules
+    # contextual_phase_rules: 已随 transition_upstream_map 机制清除 (恒 {} —
+    # _detect_contextual_phase_rules 曾按 transition_id 索引, 全仓 TO 无该字段)。
+    return dep_map, {}
 
 
 # ---------------------------------------------------------------------------
@@ -2716,136 +2537,6 @@ def _compute_topology_levels(
             levels[e] = 0
 
     return levels
-
-
-# ---------------------------------------------------------------------------
-# S0.6: Upstream map rebuilding
-# ---------------------------------------------------------------------------
-
-def _tid_to_concrete_ids(tid: str, to_by_tid: dict) -> list[str]:
-    """Resolve an abstract transition id to its concrete TO ids.
-
-    Option C: a branch-split transition no longer emits a base TO, so its
-    abstract id (referenced by CO enabler/dependent_transition_id) resolves to
-    the [a][b]... variant TO ids. Unsplit transitions resolve to themselves.
-    Fallback: if the id is not found AND no variants exist (e.g. to_by_tid is
-    empty because the model's TOs carry `id` rather than `transition_id`),
-    keep the abstract id as-is to preserve pre-Option-C behavior.
-    """
-    if tid in to_by_tid:
-        return [tid]
-    variants = sorted(k for k in to_by_tid if k.startswith(tid + "["))
-    if variants:
-        return variants
-    return [tid]
-
-
-def _build_state_pos(state_info: dict) -> dict:
-    """Build {(entity_id, dim_name): {state: position}} from _context.state_info.
-
-    Position = phase_mapping value (fallback: index in the states list). A
-    transition whose `to` position is <= its `from` position is a loop/back edge.
-    """
-    pos: dict[tuple, dict] = {}
-    for ent, info in (state_info or {}).items():
-        for dim in info.get("dimensions", []) or []:
-            dim_name = dim.get("dimension_name", "")
-            pm = dim.get("phase_mapping") or {}
-            states = dim.get("states") or []
-            d = {}
-            for i, st in enumerate(states):
-                d[st] = pm.get(st, i)
-            pos[(ent, dim_name)] = d
-    return pos
-
-
-def _is_back_edge(t: dict, state_pos: dict) -> bool:
-    """True if transition t (from->to) goes to an EARLIER state (loop back).
-
-    Back edges (e.g. 归档评级 待归档->已选入 in a cyclic state machine) must
-    not become hard prerequisites — they would reverse lifecycle order in the
-    final topological sort. Creation (from=None) / terminal (to=None) are not
-    back edges; states without lifecycle info are treated as forward.
-    """
-    frm, to = t.get("from"), t.get("to")
-    if frm is None or to is None:
-        return False
-    d = state_pos.get((t.get("entity"), t.get("dimension")), {})
-    pf, pt = d.get(frm), d.get(to)
-    if pf is None or pt is None:
-        return False
-    return pt <= pf
-
-
-def _rebuild_upstream_map(
-    tos: list[dict],
-    cos: list[dict],
-    state_pos: dict | None = None,
-) -> dict[str, list[str]]:
-    """S0.6: Rebuild transition_upstream_map from two sources:
-    chain ordering (same entity/dimension) + CO enabler→dependent (cross-entity).
-    transition_relations evidence is NOT a source — causal_pairs was removed
-    (add_causal API has no such param); cross-entity causality lives in COs."""
-    upstream_map: dict[str, list[str]] = defaultdict(list)
-
-    to_by_tid = {t.get('transition_id'): t for t in tos if t.get('transition_id')}
-
-    entity_dim_tos: dict[tuple, list[dict]] = defaultdict(list)
-    for to in tos:
-        key = (to.get('entity'), to.get('dimension'))
-        entity_dim_tos[key].append(to)
-
-    # Source 1: Same-entity same-dimension chain ordering
-    # Back-edge fix: a loop-back transition (to-state earlier than from-state,
-    # e.g. 归档评级 待归档->已选入 in a cyclic machine) must NOT become a hard
-    # prerequisite — it would put the archive/rating step before selection in
-    # the final topological sort. Only forward chain edges build prerequisites.
-    for (entity, dim), dim_tos in entity_dim_tos.items():
-        for t1 in dim_tos:
-            t1_from = t1.get('from')
-            t1_tid = t1.get('transition_id')
-            if not t1_tid:
-                continue
-            for t2 in dim_tos:
-                if t2.get('transition_id') == t1_tid:
-                    continue
-                if t2.get('to') == t1_from and t2.get('transition_id'):
-                    if state_pos is not None and (
-                        _is_back_edge(t1, state_pos) or _is_back_edge(t2, state_pos)
-                    ):
-                        continue
-                    upstream_map[t1_tid].append(t2['transition_id'])
-
-    # Source 2 (removed): transition_relations evidence / causal_pairs.
-    # Cross-entity causality is expressed solely by COs (Source 3 below).
-    # Retained here for reference: the map is chain-ordering + CO fan-out only.
-
-    # Source 3: CO enabler → dependent transition
-    # Option C: CO refs use the abstract (base) transition id, which for a
-    # branch-split transition resolves to its [a][b]... variants. Fan the edge
-    # out so every concrete variant is wired (branch-agnostic causal link).
-    for co in cos:
-        et = co.get('enabler_transition_id')
-        dt = co.get('dependent_transition_id')
-        if et and dt:
-            for dv in _tid_to_concrete_ids(dt, to_by_tid):
-                for ev in _tid_to_concrete_ids(et, to_by_tid):
-                    # 自环防护: enabler == dependent (退化 CO, 如 T-061→T-061)
-                    # 产生 "转换依赖自身" 的无意义边, 跳过
-                    if dv == ev:
-                        continue
-                    upstream_map[dv].append(ev)
-
-    # Deduplicate
-    for tid in upstream_map:
-        upstream_map[tid] = list(set(upstream_map[tid]))
-
-    for to in tos:
-        tid = to.get('transition_id', '')
-        if tid and tid not in upstream_map:
-            upstream_map[tid] = []
-
-    return dict(upstream_map)
 
 
 # ---------------------------------------------------------------------------
@@ -3362,7 +3053,6 @@ def s0_topology_node(state: AgentState) -> dict:
             "topology_levels": result.get("topology_levels", {}),
             "leaf_entity_ids": result.get("leaf_entity_ids", set()),
             "virtual_entities": result.get("virtual_entities", {}),
-            "transition_upstream_map": result.get("transition_upstream_map", {}),
             "errors": errors,
             "warnings": warnings,
             "current_stage": "s0_failed",
@@ -3380,7 +3070,6 @@ def s0_topology_node(state: AgentState) -> dict:
         "topology_levels": result.get("topology_levels", {}),
         "leaf_entity_ids": result.get("leaf_entity_ids", set()),
         "virtual_entities": result.get("virtual_entities", {}),
-        "transition_upstream_map": result.get("transition_upstream_map", {}),
         "coverage_model": coverage_model,
         "warnings": warnings,
         "errors": errors,
@@ -3470,12 +3159,6 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     )
     warnings.append(f"S0.5: topology_levels computed for {len(topology_levels)} entities")
 
-    # S0.6: Upstream map (state_pos enables back-edge exclusion so cyclic
-    # state machines don't reverse lifecycle order in the dependency DAG)
-    state_pos = _build_state_pos(state_info)
-    transition_upstream_map = _rebuild_upstream_map(tos, cos, state_pos)
-    warnings.append(f"S0.6: upstream_map with {len(transition_upstream_map)} entries")
-
     # State type map
     state_type_map = _classify_state_types(tos, primary)
 
@@ -3483,7 +3166,7 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     # Dep state phase map (causal-graph-based phase derivation)
     dep_state_phase_map, contextual_phase_rules = _derive_dep_state_phase_map(
         primary, phase_table, tos, dependent_entities, entity_parent,
-        state_type_map, transition_upstream_map, virtual_entities,
+        state_type_map, virtual_entities,
         cos=cos, transition_relations=transition, structural=structural,
         state_info=state_info,
     )
@@ -3537,5 +3220,4 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         'topology_levels': topology_levels,
         'leaf_entity_ids': leaf_entity_ids,
         'virtual_entities': virtual_entities,
-        'transition_upstream_map': transition_upstream_map,
     }

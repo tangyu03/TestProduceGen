@@ -50,6 +50,10 @@
 
 ---
 
+**2026-08-22 更新：消费点已清除（机制删除，复活路径关闭）**。依用户指令"清除 transition_id 相关消费点"，`transition_upstream_map` 机制连同全部死消费点已删除：S0.6 重建（`_rebuild_upstream_map`/`_build_state_pos`/`_tid_to_concrete_ids`）、Strategy 1 入口锚定、fixpoint 死循环、`_detect_contextual_phase_rules`、S1 depth_cache（`calc_all_chain_depths` 及 graph_algo 的 `build_transition_graph`/`calc_chain_depth`）、S2 死读、S3 "1. Transition upstream" no-op 块、恒空 `to_by_tid` 双索引、models/main/run_pipeline 字段透传。`_S2_fields.chain_depth` 保留写 0（break_cycles tiebreaker `.get(...,0)` 行为不变）。**保留**：活代码内散点 `transition_id` 死读（s0 primary 选择等，防御性）、CO 活字段 `enabler_transition_id`/`dependent_transition_id`。验证：`--recompute-s0` 确定性重放，procedures 语义内容（标题/givens/thens/deps/phase/sort_key/temp_id）与清除前零差异，仅 engine_state 少 `transition_upstream_map` key。**复活路径已关闭**——机制从文档（s0_prompt §11）到实现（graph_algo 死库函数）整体移除，不再有"回填 transition_id 自动复活"的路径；因果顺序完全由 guard1_state_pred + chain_ordering + co_enabler + Kahn 拓扑排序承接。
+
+---
+
 ## 2026-08-14 ㊻ CO-004 hard-vs-weak 定谳：lateral 转换下 hard 语义不成立 → 双 lateral 规则落地 + 双表注册陷阱
 
 **决策**（用户定调「选 1，但不是倾向 weak，而是 hard 在状态机模型里语义不成立」）：S3 co_enabler 块按**双 lateral 规则**分流：
