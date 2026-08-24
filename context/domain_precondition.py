@@ -74,15 +74,33 @@ def _to_state_phase(t: dict, state: dict) -> int:
 
 
 def _anchor_creation(cm: dict, state: dict, entity: str) -> dict | None:
-    """存在性锚定创建转换: 最早 to_state 相位, 平局按 id 升序 (确定性)。
+    """存在性锚定创建转换: 主维度优先, 再按最早 to_state 相位, 平局按 id 升序。
 
     E-PROJ 有两个创建转换 (T-001 项目状态→待选入, T-013 项目阶段→开题),
     锚定在相位最早的那个 (待选入), 保证 "项目已存在" 挂在主生命周期上。
+
+    主维度优先 (PT017 2026-08-24): E-BMJL 有 5 个创建转换 (报名记录状态→
+    报名待审核, 通知状态→未发送, 样品→待发样, 费用→待缴费, 发票→待开票)。
+    P2 phase_mapping 是维度内相对序 (各维度入口态都=0), 相位解析全部平局 (0),
+    旧逻辑退化为 id 升序 → 选中 T-010 通知状态.未发送 —— "报名记录已存在" 挂到
+    通知子维度上, 语义错误 (未发送是通知状态, 不是报名记录本身的状态机)。
+    主维度优先: 主实体取 phase_table.primary_dimension, 从属取
+    dep_state_phase_map 首维度, 存在性锚定落在实体主状态机 (报名待审核)。
     """
     cands = creation_transitions(cm, entity)
     if not cands:
         return None
-    return sorted(cands, key=lambda t: (_to_state_phase(t, state), t.get("id", "")))[0]
+    pt = state.get("phase_table") or {}
+    dep_map = state.get("dep_state_phase_map") or {}
+    if entity == pt.get("primary_entity"):
+        primary_dim = pt.get("primary_dimension")
+    else:
+        primary_dim = next(iter((dep_map.get(entity) or {}).keys()), None)
+
+    def _key(t: dict):
+        return (0 if primary_dim is not None and t.get("dimension") == primary_dim else 1,
+                _to_state_phase(t, state), t.get("id", ""))
+    return sorted(cands, key=_key)[0]
 
 
 def _composition_parent(cm: dict, entity: str) -> str | None:

@@ -1401,6 +1401,33 @@ def _classify_state_types(tos: list[dict], primary: str) -> dict[str, dict[str, 
     return dict(state_type_map)
 
 
+def _entry_anchor_phase(entity: str, dim: str, phase_table: dict, dep_map: dict,
+                        entry_anchors: list | None) -> int | None:
+    """维度入口锚定相位 — dimension_entry_anchors 数据层配置 (PT017 2026-08-24)。
+
+    P1 声明 (entity, dimension) 的入口态锚定到 anchor_ref 状态 → 返回该状态的
+    绝对相位 (不加 +1: 入口态与锚定状态同段)。anchor_ref 实体是主实体 → 查
+    phase_table.state_to_phase; 否则查 dep_map。无配置 / 状态不存在 → None
+    (退回原 _compute_entry_phase 逻辑)。数据驱动, 不硬编码任何领域名词。
+    """
+    for ea in (entry_anchors or []):
+        if ea.get("entity") != entity or ea.get("dimension") != dim:
+            continue
+        ar = ea.get("anchor_ref") or {}
+        ae, ad, as_ = ar.get("entity"), ar.get("dimension"), ar.get("state")
+        if not ae or not as_:
+            continue
+        if ae == phase_table.get("primary_entity"):
+            pm = (phase_table.get("state_to_phase") or {}).get(ad or "", {})
+            if as_ in pm:
+                return int(pm[as_])
+        else:
+            dm = (dep_map.get(ae) or {}).get(ad or "", {})
+            if as_ in dm:
+                return int(dm[as_])
+    return None
+
+
 def _compute_entry_phase(
     entity: str,
     anchor: str,
@@ -1718,6 +1745,7 @@ def _derive_dep_state_phase_map(
     transition_relations: list[dict] = None,
     structural: list[dict] = None,
     state_info: dict = None,
+    entry_anchors: list = None,
 ) -> tuple[dict, dict]:
     """S0.3 step 3: Dependent entity phase mapping via anchor-entity method.
 
@@ -1876,13 +1904,20 @@ def _derive_dep_state_phase_map(
                 primary_state_names = set(
                     (phase_table.get('state_to_phase', {}) or {}).get(primary_dim_s, {}).keys()
                 )
-                _entry = 0
-                if not (set(merged.keys()) & primary_state_names):
-                    _entry = _compute_entry_phase(
-                        entity, anchor, dim, tos, phase_table, dep_map,
-                        structural=structural, cos=cos,
-                        transition_relations=transition_relations, restrict_05=True,
-                    )
+                # dimension_entry_anchors: 数据层声明的维度入口锚定 (PT017 2026-08-24)。
+                # 语义: (entity, dim) 的入口态 (相对 phase_mapping 的 0) 锚定到
+                # anchor_ref 状态的绝对相位 —— 不加 +1 (入口态与锚定状态同段:
+                # E-PJ.待评价 与 报名记录.结果已提交 同在 P3)。优先级高于策略 0,
+                # 因策略 0 的 +1 是"依赖后置于主状态"语义, 这里是"同段触发"。
+                _entry = _entry_anchor_phase(entity, dim, phase_table, dep_map, entry_anchors)
+                if _entry is None:
+                    _entry = 0
+                    if not (set(merged.keys()) & primary_state_names):
+                        _entry = _compute_entry_phase(
+                            entity, anchor, dim, tos, phase_table, dep_map,
+                            structural=structural, cos=cos,
+                            transition_relations=transition_relations, restrict_05=True,
+                        )
                 if _entry:
                     dim_map[dim] = {s: int(_entry) + int(p) for s, p in merged.items()}
                 else:
@@ -3215,6 +3250,7 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         state_type_map, virtual_entities,
         cos=cos, transition_relations=transition, structural=structural,
         state_info=state_info,
+        entry_anchors=(cm.get("_context") or {}).get("dimension_entry_anchors", []),
     )
 
     # Resolve VE phases AFTER dep_state_phase_map

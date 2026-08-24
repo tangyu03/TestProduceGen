@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-24 ㊿ 评价维度入口锚定 + 报告编制绑定评价完成（用户定调衔接报告编制）
+
+**问题**（用户反馈）：`pt_outputv1.md` 中评价用例 PROC-040~050 挤在 P0/P1/P2——「评价应该在 PROC-121 结果提交后」。根因：P2 phase_mapping 是维度内**相对序**（各维度入口态都=0），E-PJ.评价状态 无任何结构化前置引用主实体状态 → `_compute_entry_phase` 策略 0/5 都返回 0 → 待评价=0。CO-003（E-XM 创建同步）是**实例存在**关系（待开始=P0），不是相位关系，不提供「结果提交后开始评价」信号。
+
+**决策**（用户选「衔接报告编制」布局；两个数据驱动的机制，均单一真相源在 P1 数据层）：
+
+1. **维度入口锚定（Fix 2a）**：新增 P1 `_context.dimension_entry_anchors` 配置（与 phase_anchors 同构），声明 `E-PJ.评价状态 → anchor E-BMJL.报名记录状态.结果已提交`。S0 `_derive_dep_state_phase_map` 的显式 phase_mapping 分支消费：入口相位 = 锚定状态绝对相位（**不加 +1**——入口态与锚定状态**同段**触发，如 待评价 与 结果提交 同在 P3），`_entry_anchor_phase` 优先级高于策略 0。P2 Step 5 透传配置到模型 `_context`。落地后：`{待评价:0,评价中:1,已确认:2,退回修改:1} → {3,4,5,4}`。
+   - **V08 约束**：forward 严格递增（T-049 评价中→已确认）→ **已确认=P5 而非用户 preview 的 P4**；preview 的「结果确认 P4」会让 T-049 forward 不递增 → V08 blocker。合法布局整体右移 1 段（P4→P5），相对顺序不变、无倒挂。T-048（退回修改→评价中）同相位 forward 走 anomaly 豁免（与改造前一致）。
+2. **报告编制绑定评价完成（Fix 2b）**：P1 把 T-025 前置「评价已完成并统计」由 event_ref（ref=null，永不解析）改为 state_ref(E-PJ.评价状态.已确认)。R6 自动同步 `precondition_state_refs`（p1_inherited）→ S1 `_max_state_ref_phase` 把 T-025 用例抬到 P5（phase_basis 实测："报告/证书审核中 → bumped to P5 (state_ref 项目评价.评价状态.已确认)"）+ S3 Guard 6 建依赖边 → 拓扑排序 评价确认(PROC-147)→编制报告(PROC-148)→发放(PROC-149)，**无倒挂**。
+
+**验证**（`s1_fix_replay --recompute-s0 --coverage pt_coverage_obligationsv1.json`）：
+- 601 procs，+0/-0 内容签名（115 条 host-state 修正 = 未发送→报名待审核，0 增 0 失）；
+- 评价相位分布 {0:22,1:6,2:8} → **{3:22,4:6,5:8}**（整体 +3，P0-P2 评价用例清零）；待评价 P3、评价中 P4、已确认 P5、编制报告 P5、发放 P5；
+- 双重跑 SHA-256 一致（确定性）；V01-V05/V07-V10 全 pass、V06 skipped、**0 blocker**；
+- Fix 1（`_anchor_creation` 主维度优先，㊿ 前已在 domain_precondition.py 落地）回归通过：115 条无维度 CRUD givens 全部「报名记录已存在，处于报名待审核状态」（原 未发送）。
+
+**遗留**：replay 输出 title 由归档 overlay（601 hit 0 miss）——host-state 修正体现在 givens/thens 正文，title 仍显示归档旧文本；正式交付走 main.py 全流水线（LLM 生成新 title）。已确认=5 偏离用户 preview 的 4，若坚持 P4 需改 T-049 direction 数据或放宽 V08 STRICT_FORWARD（未做）。
+
+---
+
 ## 2026-08-22 ㊾ 主实体自身次维度相位未锚定——根因定位 + 修复方案评估（方案A已实施）
 
 **问题**：主实体（E-BMJL 报名记录）自身的**非主维度**状态机（发票状态 / 报名记录样品状态 / 费用状态 / 通知状态）未进入任何相位映射 → S2 全部 `fallback`→P0 → 同实体跨维度排序退化为中文字典序（发票→样品→状态→费用→通知），报名记录内部未按生命周期组织（用户三连问：项目生命周期 / 报名记录生命周期 / DAG 业务时序 的根因之一）。

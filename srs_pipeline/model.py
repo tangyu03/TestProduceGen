@@ -156,7 +156,7 @@ class DomainModel:
         validate_llm("trans", {"tid": tid, "entity": entity, "dimension": dimension,
                                "frm": frm, "to": to, "action": action, "role": role,
                                "preconditions": preconditions,
-                               "expected_results": expected_results, "traits": traits,
+                               "expected_results": expected_results, "traits": [],
                                "direction": direction, "priority": priority,
                                "source_ref": source_ref, "note": note})
         t = {"id": tid, "entity": entity, "dimension": dimension,
