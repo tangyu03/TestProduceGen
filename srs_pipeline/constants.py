@@ -32,6 +32,10 @@ OWNERSHIP_BY_RELATION = {"composition": "business_ownership",
 # 中文需求文本中"小写字母+数字"几乎必是标签，误伤可忽略。
 LOCAL_LABEL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
 
+# 事件标签形态（validate_llm fail-fast；e01/e03b…）。[etxbi] 为可被引用的
+# 局部标签前缀全集（event/transition/xc/br/invalid），事件 id 仅用 e。
+EVENT_LABEL = re.compile(r"[etxbi]\d{2,3}[a-z]?")
+
 # Step 5 XC 四来源分类（add_xc 的 xc_source 枚举；desc 前缀由框架按此生成）
 XC_SOURCES = ("镜像", "4.5判", "联动", "分支差异")
 

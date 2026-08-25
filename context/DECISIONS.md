@@ -11,10 +11,10 @@
 
 **根因**：事件台账是 glm5pr §2 定义的一等概念（F4 标签引用含 e 标签 / F10 双向覆盖 / F15 主体映射实体 均为规格要求的框架校验），但实现只把台账写成注释 → 引用失联、规格校验缺位。
 
-**决策**（用户确认范围=完整规格）：
-1. **`model.add_event(id, entity, dimension, action, actor, precond, consequence, source, note)`** 注册进 `DomainModel.events` → 输出 `domain_model.events`（57 条）。**不做编号移交**：e 标签即正式 id，不进 allmap/_assign_ids（`_LOCAL` 正则本就匹配，原样保留）。
-2. **schema.py** 新增 `"event"` 对象表：id/entity/dimension/action/actor/precond/consequence/source 全 required，note 可选。**id 参数用 add_entity/add_role 惯例**（参数 `id`、dsl="id"、written_by=LLM），非 tid/xid 的 id_transfer 惯例（事件无移交）。
-3. **C21** valid 集追加事件 id；**新增 C26(F15)**（事件 entity ∈ 已登记实体）与 **C27(F10)**（正向：每事件被 ≥1 转换/关系 note 消费；反向：每转换 note 引用 ≥1 事件，inferred 闭环转换豁免——note.comment 含「inferred」）。
+**决策**（用户确认范围=完整规格；签名以用户同步项为准）：
+1. **`model.add_event(eid, subject, dimension, action, actor, precondition, consequence, source_ref)`**（**8 列契约**，与台账格式一致；无 note 参数，inferred 依据落数据文件注释）注册到**内部标签映射表 `self._events`（dict eid→记录）**供 F4/F10/F15 读取；`self.events`（list）仅作输出 payload → `domain_model.events`（57 条）。**不做编号移交**：e 标签即正式 id，不进 allmap/_assign_ids（`_LOCAL` 正则本就匹配，原样保留，eid 自足）。
+2. **schema.py** 新增 `"event"` 对象表：eid/subject/dimension/action/actor/precondition/consequence/source_ref 全 required。**eid 参数用 add_entity/add_role 惯例**（dsl="eid"、out="id"、written_by=LLM），非 tid/xid 的 id_transfer 惯例（事件无移交）。**validate_llm 按 `[etxbi]` 正则（constants.EVENT_LABEL）对 eid 做形状 fail-fast**——注册即拒非法标签（abc/E01/e1234/5e01 拒，e01/e03b 收）。
+3. **C21** valid 集追加 `set(self._events)`；**新增 C26(F15)**（事件 subject ∈ 已登记实体）与 **C27(F10)**（正向：每事件被 ≥1 转换/关系 note 消费；反向：每转换 note 引用 ≥1 事件，inferred 闭环转换豁免——note.comment 含「inferred」）。
 4. **verify_schema.py / verify_schema_reverse.py** 同步注册 event 对象（MAPPED_METHODS/COLLECTIONS/COLLS）。
 5. **数据层**：pt_srs03 台账注释块 → build() 顶部 57 条 `m.add_event(...)`（主体名→E-XXX 映射）；b18 补 `constrained_entity="E-JK"`（操作对象=缴费单）、b32 补 `constrained_entity="E-XM"` + note 注明「代表实体（平台性能要求，非实体门禁）」。
 

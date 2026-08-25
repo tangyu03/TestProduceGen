@@ -19,9 +19,9 @@ rename_reason（dsl≠out 的两类性质，避免维护时混为一谈）：
 from __future__ import annotations
 
 from .constants import (BR_CATEGORIES, BR_ENFORCEMENTS, BR_SIGNALS, CARDINALITIES,
-                        CONFIDENCE, DIRECTIONS, ENTITY_TYPES, OWNERSHIP_DIMS,
-                        PRIORITIES, RELATION_TYPES, TAGS, TRAITS, TRIGGER_SOURCES,
-                        XC_SOURCES)
+                        CONFIDENCE, DIRECTIONS, ENTITY_TYPES, EVENT_LABEL,
+                        OWNERSHIP_DIMS, PRIORITIES, RELATION_TYPES, TAGS, TRAITS,
+                        TRIGGER_SOURCES, XC_SOURCES)
 
 LLM = "llm"
 LLM_MUTATED = "llm_mutated"
@@ -68,16 +68,16 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("readonly", "readonly", LLM, required=True),
     ],
     "event": [
-        Field("id", "id", LLM, required=True,
-              desc="事件台账编号（e01/e03b…，保持小写无横线，不参与编号移交）"),
-        Field("entity", "entity", LLM, required=True, desc="主体映射的实体 E-XXX id"),
+        Field("id", "eid", LLM, required=True,
+              desc="事件台账编号（e01/e03b…，保持小写无横线，不参与编号移交），"
+                   "须匹配 [etxbi]\\d{2,3}[a-z]? 局部标签形态"),
+        Field("subject", "subject", LLM, required=True, desc="主体映射的实体 E-XXX id"),
         Field("dimension", "dimension", LLM, required=True),
         Field("action", "action", LLM, required=True, desc="动作短语原文"),
         Field("actor", "actor", LLM, required=True, desc="执行者（角色名；system 时不登记角色）"),
-        Field("precond", "precond", LLM, required=True, desc="前置情形；无前置传'无'"),
+        Field("precondition", "precondition", LLM, required=True, desc="前置情形；无前置传'无'"),
         Field("consequence", "consequence", LLM, required=True, desc="后果情形"),
-        Field("source", "source", LLM, required=True, desc="来源段落/章节"),
-        Field("note", "note", LLM),
+        Field("source_ref", "source_ref", LLM, required=True, desc="来源段落/章节"),
     ],
     "permission": [
         Field("role", "role", LLM, required=True, desc="与 add_role 的 name 逐字对齐"),
@@ -137,7 +137,8 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
               desc="创建转换可为 None"),
         Field("to", "to", LLM, required=True),
         Field("action", "action", LLM, required=True),
-        Field("role", "role", LLM, required=True),
+        Field("role", "role", LLM, required=True,
+              desc="执行者角色名（引用 name）；协同转换写角色名列表（collaborative，glm5pr §1.3）"),
         Field("preconditions", "preconditions", LLM_MUTATED, required=True,
               mutation_conditions="C03",
               desc="嵌套 precond(); C03 可将 state_ref 降级 constraint"),
@@ -270,6 +271,20 @@ def validate_llm(otype: str, params: dict) -> None:
     if unknown:
         raise ValueError(f"[schema:{otype}] 未知参数 {unknown}（注册表未登记，"
                          f"或 LLM 侧试图写框架字段）")
+    # 事件标签形状（[etxbi] 局部标签形态）：eid 自足不参与编号移交，注册即校验，
+    # 保证转换/关系 note 中「源自 e01」类引用按同形可解析（F4/F10）。
+    if otype == "event" and params.get("eid") is not None \
+            and not EVENT_LABEL.fullmatch(str(params["eid"])):
+        raise ValueError(f"[schema:event] eid 非法: {params['eid']!r}，"
+                         f"须匹配局部标签形态 [etxbi]\\d{{2,3}}[a-z]?（e01/e03b…）")
+    # 转换执行者：单角色名或协同角色名列表（glm5pr §1.3 collaborative）。
+    # 空列表/非字符串元素 fail-fast，避免下游 C01 在 list 上崩溃。
+    if otype == "trans" and params.get("role") is not None:
+        role = params["role"]
+        roles = role if isinstance(role, (list, tuple)) else [role]
+        if not roles or any(not isinstance(x, str) or not x.strip() for x in roles):
+            raise ValueError(f"[schema:trans] role 非法: {role!r}，"
+                             f"须为角色名或角色名列表（协同转换，glm5pr §1.3）")
     for dsl, f in table.items():
         val = params.get(dsl)
         required = f.required_when(params) if f.required_when else f.required

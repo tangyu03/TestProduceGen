@@ -8,6 +8,13 @@ import sys
 from .model import CriticalAmbiguity, interrupt_schema
 
 def main(argv=None) -> int:
+    # GBK 控制台（Windows 中文默认 cp936）打印 Unicode 描述（如 ↔）会
+    # UnicodeEncodeError，使错误/歧义列表打印中断；统一改 UTF-8 + 替换符。
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser(prog="srs-pipeline",
                                  description="需求文档结构化 JSON 生成框架（P1.5）")
     ap.add_argument("module", help="数据模块路径，需暴露 build() -> DomainModel")

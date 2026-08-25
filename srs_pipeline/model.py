@@ -76,7 +76,8 @@ class DomainModel:
                      "branch_dimensions": []}
         self.entities, self.roles = [], []
         self.structural_relations, self.transition_relations = [], []
-        self.events = []                # 事件台账（§2）：转换/关系 note 引用的事件注册表
+        self.events = []                # 事件台账输出（§2）：转换/关系 note 引用的事件注册表
+        self._events = {}               # 内部标签映射表（eid→记录）：F4/F10/F15 校验的单一读取源
         self.transitions = []
         self.invalid_transitions, self.cross_entity, self.business_rules = [], [], []
         self.branch_dimensions = []
@@ -96,19 +97,21 @@ class DomainModel:
         self.review_queue = []          # 对账产生的评审队列
 
     # ---------- Step 0（事件台账）----------
-    def add_event(self, id, entity, dimension, action, actor, precond,
-                  consequence, source, note=None):
-        """登记事件台账条目（glm5pr §2）。主体映射为已登记实体 E-XXX id；
-        执行者为 system 时 actor 传"system"。precond 无前置传"无"。"""
-        validate_llm("event", {"id": id, "entity": entity, "dimension": dimension,
-                               "action": action, "actor": actor,
-                               "precond": precond, "consequence": consequence,
-                               "source": source, "note": note})
-        self.events.append({
-            "id": id, "entity": entity, "dimension": dimension,
-            "action": action, "actor": actor, "precond": precond,
-            "consequence": consequence, "source": esc(source),
-            "note": _esc_note(note)})
+    def add_event(self, eid, subject, dimension, action, actor, precondition,
+                  consequence, source_ref):
+        """登记事件台账条目（glm5pr §2，8 列契约）。主体映射为已登记实体 E-XXX id；
+        执行者为 system 时 actor 传"system"。precondition 无前置传"无"。"""
+        validate_llm("event", {"eid": eid, "subject": subject,
+                               "dimension": dimension, "action": action,
+                               "actor": actor, "precondition": precondition,
+                               "consequence": consequence,
+                               "source_ref": source_ref})
+        record = {"id": eid, "subject": subject, "dimension": dimension,
+                  "action": action, "actor": actor,
+                  "precondition": precondition, "consequence": consequence,
+                  "source_ref": esc(source_ref)}
+        self._events[eid] = record      # 内部标签映射表（eid→记录）：F4/F10/F15 读取源
+        self.events.append(record)      # 输出 payload（_build_output）
         return self
 
     # ---------- Step 1 ----------
