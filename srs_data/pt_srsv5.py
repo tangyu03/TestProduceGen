@@ -469,7 +469,7 @@ def build() -> DomainModel:
                 "initial": "待核查",
                 "terminal": [],
                 "inferred": ["已核查", "无需还样"],
-                "note": {"comment": "§19.3 枚举仅含'待核查/已核查'两值；'待发样/已发样/已还样/无需还样'来自 §19.1/§19.2 流程表推导。'已核查'为 §19.3 枚举值但 §19.1 表格显示样品核查直接从待核查→待发样，推断'已核查'为瞬态或并入'待发样'，按孤岛保留"},
+                "note": {"comment": "§19.3 枚举仅含'待核查/已核查'两值；'待发样/已发样/已还样/无需还样'来自 §19.1/§19.2 流程表推导。'已核查'为 §19.3 枚举值但 §19.1 表格显示样品核查直接从待核查变为待发样，推断'已核查'为瞬态或并入'待发样'，按孤岛保留"},
             },
         ],
         operations=[
@@ -1694,6 +1694,19 @@ def build() -> DomainModel:
         note={"branch_dimension": "项目类型", "comment": "源自 e32；⓪序判frm=None；与 t03 同 action，承担 E-BMJL 维度"},
     )
 
+    # t10b: 报名记录样品创建（联动 E-BMJL 创建自动生成，初始态待发样）
+    m.add_trans(
+        tid="t10b", entity="E-BMYP", dimension="报名记录样品状态",
+        frm=None, to="待发样", action="报名", role="能力验证参加者",
+        preconditions=[
+            precond(text="项目类型=能力验证", ptype="constraint", note={"comment": "分支值条件"}),
+        ],
+        expected_results=["报名记录样品记录创建，状态为待发样"],
+        traits=["branch"], direction="forward", priority="P0",
+        source_ref="19.1 实施阶段",
+        note={"branch_dimension": "项目类型", "comment": "源自 e04；⓪序判frm=None；联动 E-BMJL 创建自动创建对应样品记录（待发样 initial）"},
+    )
+
     # t11: 报名审核（退回分支）
     m.add_trans(
         tid="t11", entity="E-BMJL", dimension="报名记录状态",
@@ -2549,6 +2562,7 @@ def build() -> DomainModel:
         bid="b05", category="validation",
         desc="机构新增/修改实验室信息后需经管理用户审核通过后方可用于项目报名",
         entities_involved=["E-LAB", "E-BMJL"], source_ref="20.3.1 实验室信息",
+        constrained_entity="E-LAB",
         signal_type="restrictive",
         note={"comment": "signal_type命中'需经'（restrictive）；category判有效性校验；constrained_entity=E-LAB（被门禁的实体）"},
     )
@@ -2558,6 +2572,7 @@ def build() -> DomainModel:
         bid="b06", category="validation",
         desc="停用的标准库在项目创建等环节不可被选择",
         entities_involved=["E-BZK", "E-XM"], source_ref="20.4.2.5 停用/启用标准库",
+        constrained_entity="E-BZK",
         signal_type="restrictive",
         note={"comment": "signal_type命中'不可'（restrictive）；category判有效性校验；constrained_entity=E-BZK（被门禁的实体）"},
     )
@@ -2576,6 +2591,7 @@ def build() -> DomainModel:
         bid="b08", category="validation",
         desc="缴费前报名记录须处于报名成功状态",
         entities_involved=["E-BMJL", "E-FY"], source_ref="19.1 实施阶段",
+        constrained_entity="E-FY",
         signal_type="restrictive",
         note={"comment": "signal_type命中'须'（restrictive）；constrained_entity=E-FY（缴费被门禁）；承载 XC x03"},
     )
@@ -2585,6 +2601,7 @@ def build() -> DomainModel:
         bid="b09", category="authorization",
         desc="未结束的项目可以进行消息发送",
         entities_involved=["E-XM", "E-MSG"], source_ref="20.5.1.4 优化消息发送功能；20.6.1.2",
+        constrained_entity="E-MSG",
         signal_type="restrictive",
         note={"role": "项目管理员", "comment": "signal_type命中'可以'（restrictive 反向措辞）；prohibit_keywords 含'不可以进行消息发送'；category判访问控制；constrained_entity=E-MSG"},
     )
@@ -2639,6 +2656,7 @@ def build() -> DomainModel:
         bid="b15", category="validation",
         desc="审核任务创建前报名记录须处于报告/证书审核中状态",
         entities_involved=["E-TASK", "E-BMJL"], source_ref="20.9.1.1 测量审核结果通知单审核流程优化",
+        constrained_entity="E-TASK",
         signal_type="restrictive",
         note={"comment": "signal_type命中'须'（restrictive）；constrained_entity=E-TASK；承载 XC x06"},
     )
@@ -2711,8 +2729,9 @@ def build() -> DomainModel:
         bid="b23", category="notification",
         desc="系统每天上午9点对系统中的证书信息进行查询，距到期时间等于30天时通过邮件方式对用户进行提醒并抄送项目管理员；提醒标题'证书到期提醒'；提醒内容'您证书编号为xxxx的证书将于2025-01-01到期，请知悉'",
         entities_involved=["E-FP", "E-BMJL"], source_ref="20.5.2.3 增加证书到期前30天提醒功能；20.6.2.3",
+        constrained_entity="E-FP",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'每天上午9点'（restrictive，时间措辞）；category判通知触发；无状态落点，不入台账/operations"},
+        note={"comment": "signal_type命中'每天上午9点'（restrictive，时间措辞）；category判通知触发；无状态落点，不入台账/operations；代表实体（通知规则，非实体门禁）"},
     )
 
     # BR24：报名审核通过短信通知
@@ -2721,7 +2740,7 @@ def build() -> DomainModel:
         desc="报名审核通过后使用短信方式通知用户'您xxx项目的报名信息审核通过，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2 操作节点增加用户短信通知；20.6.3.2",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'审核通过后'（restrictive，时间措辞）；category判通知触发"},
+        note={"comment": "signal_type命中'审核通过后'（restrictive，时间措辞）；category判通知触发；branch_dimension=报名审核结果（分支承载）", "branch_dimension": "报名审核结果"},
     )
 
     # BR25：报名审核退回短信通知
@@ -2730,7 +2749,7 @@ def build() -> DomainModel:
         desc="报名审核退回后使用短信方式通知用户'您xxx项目的报名信息审核未通过，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2 操作节点增加用户短信通知；20.6.3.2",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'退回修改'（restrictive）；category判通知触发"},
+        note={"comment": "signal_type命中'退回修改'（restrictive）；category判通知触发；branch_dimension=报名审核结果（分支承载）", "branch_dimension": "报名审核结果"},
     )
 
     # BR26：发样通知短信
@@ -2739,7 +2758,7 @@ def build() -> DomainModel:
         desc="样品发出后使用短信方式通知用户'您xxxx项目的样品已发出，请知悉'",
         entities_involved=["E-YP"], source_ref="20.5.3.2 操作节点增加用户短信通知；20.6.3.2",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'已发出'（restrictive，状态变化措辞）；category判通知触发"},
+        note={"comment": "signal_type命中'已发出'（restrictive，状态变化措辞）；category判通知触发；branch_dimension=样品核查结果（核查通过→待发样→样品发出，分支承载）", "branch_dimension": "样品核查结果"},
     )
 
     # BR27：测试结果审核通过短信
@@ -2748,7 +2767,7 @@ def build() -> DomainModel:
         desc="测试结果审核通过后使用短信方式通知用户'您xxxx项目的测试报告审核通过，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2 操作节点增加用户短信通知；20.6.3.2",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'审核通过'（restrictive）；category判通知触发"},
+        note={"comment": "signal_type命中'审核通过'（restrictive）；category判通知触发；branch_dimension=参加者测试样品状态（测试结果审核承接测试提交，分支承载）", "branch_dimension": "参加者测试样品状态"},
     )
 
     # BR28：测试结果审核退回短信
@@ -2774,6 +2793,7 @@ def build() -> DomainModel:
         bid="b30", category="validation",
         desc="已报名项目付款支持多次操作，不对付款金额进行校验限制",
         entities_involved=["E-CW", "E-BMJL"], source_ref="20.5.2.1 已报名项目增加多次付款功能；20.6.2.1",
+        constrained_entity="E-CW",
         signal_type="restrictive",
         note={"comment": "signal_type命中'不对...校验限制'（restrictive，反向措辞）；category判有效性校验；constrained_entity=E-CW"},
     )
@@ -2783,6 +2803,7 @@ def build() -> DomainModel:
         bid="b31", category="validation",
         desc="缴费单退款时退款金额不能大于当前缴费金额；退款后更新'项目费用'为实际付款金额",
         entities_involved=["E-CW", "E-FK"], source_ref="20.10.2.3 缴费单退款",
+        constrained_entity="E-FK",
         signal_type="restrictive",
         note={"comment": "signal_type命中'不能为大于'（restrictive）；prohibit_keywords 含'不能为大于当前缴费金额'；constrained_entity=E-FK；退款金额累加处理，红色字体且大于0时显示"},
     )
@@ -2837,6 +2858,7 @@ def build() -> DomainModel:
         bid="b37", category="usability",
         desc="客户查询'实验室名称'列增加跳转功能，点击此列可以跳转到报名信息统计页面查看此实验室报表的所有项目信息",
         entities_involved=["E-TJBB", "E-BMJL"], source_ref="20.8.6.1 优化客户统计列表查询参数时间参数快速录入",
+        constrained_entity="E-TJBB",
         signal_type="usability",
         note={"comment": "signal_type命中'增加跳转功能'（usability）；category判易用功能"},
     )
@@ -2891,6 +2913,7 @@ def build() -> DomainModel:
         bid="b43", category="validation",
         desc="新建项目时第一个被选择的评价人员默认做为评价组长",
         entities_involved=["E-PJ", "E-XM"], source_ref="20.7 项目评价",
+        constrained_entity="E-PJ",
         signal_type="field_constraint",
         note={"comment": "signal_type命中'默认'（默认值）；category判有效性校验；constrained_entity=E-PJ"},
     )
@@ -2935,90 +2958,100 @@ def build() -> DomainModel:
     m.add_br(
         bid="b48", category="computation",
         desc="对关键操作进行留痕处理，系统自动记录操作者的身份、时间戳、操作细节及结果，生成不可篡改的审计日志，确保所有操作均可追踪和复核",
-        entities_involved=[], source_ref="20.11.1.2 安全性相关内容优化",
+        entities_involved=["E-XM"], source_ref="20.11.1.2 安全性相关内容优化",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'自动记录'（restrictive，自动行为措辞）；category判计算衍生（审计日志生成）"},
+        note={"comment": "signal_type命中'自动记录'（restrictive，自动行为措辞）；category判计算衍生（审计日志生成）；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR49：统一显示风格
     m.add_br(
         bid="b49", category="display",
         desc="统一系统的显示风格，消除系统中现有的风格差异；对不符合当前风格的页面进行调整，实现更加完整和统一的视觉体验",
-        entities_involved=[], source_ref="20.11.1.3 系统UI风格优化",
+        entities_involved=["E-XM"], source_ref="20.11.1.3 系统UI风格优化",
+        constrained_entity="E-XM",
         signal_type="display",
-        note={"comment": "signal_type命中'显示风格'（display）；category判信息展示"},
+        note={"comment": "signal_type命中'显示风格'（display）；category判信息展示；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR50：性能要求 - 在线用户数
     m.add_br(
         bid="b50", category="validation",
         desc="在网络和服务器正常运行的情况下，平台应支持至少300个同时在线用户数；并发100时每个页面响应时间不超过5秒；单次报名操作成功率应达到95%以上",
-        entities_involved=[], source_ref="3.4 性能要求；21.3 性能要求",
+        entities_involved=["E-XM"], source_ref="3.4 性能要求；21.3 性能要求",
+        constrained_entity="E-XM",
         signal_type="field_constraint",
-        note={"comment": "signal_type命中'至少300'（取值范围）；category判有效性校验（默认）"},
+        note={"comment": "signal_type命中'至少300'（取值范围）；category判有效性校验（默认）；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR51：兼容性要求
     m.add_br(
         bid="b51", category="validation",
         desc="Web系统应兼容多个系统和浏览器使用，系统包含win7、win10及以上；浏览器应兼容Edge、chrome、火狐等主流浏览器",
-        entities_involved=[], source_ref="3.5 兼容性要求；21.5 兼容性要求",
+        entities_involved=["E-XM"], source_ref="3.5 兼容性要求；21.5 兼容性要求",
+        constrained_entity="E-XM",
         signal_type="field_constraint",
-        note={"comment": "signal_type命中'兼容'（兼容性范围）；category判有效性校验"},
+        note={"comment": "signal_type命中'兼容'（兼容性范围）；category判有效性校验；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR52：等保二级安全要求
     m.add_br(
         bid="b52", category="validation",
         desc="能力验证服务平台的系统设计、开发、部署等应符合等保二级要求和网数中心应用系统设计开发安全管理规定",
-        entities_involved=[], source_ref="3.3 安全要求；21.2 安全要求",
+        entities_involved=["E-XM"], source_ref="3.3 安全要求；21.2 安全要求",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'应符合'（restrictive）；category判有效性校验"},
+        note={"comment": "signal_type命中'应符合'（restrictive）；category判有效性校验；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR53：数据加密
     m.add_br(
         bid="b53", category="validation",
         desc="对敏感数据进行加密存储，使用强加密标准（如AES）；使用TLS/SSL加密数据传输，确保数据在传输过程中的安全",
-        entities_involved=[], source_ref="21.2.2 数据安全",
+        entities_involved=["E-XM"], source_ref="21.2.2 数据安全",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'使用'（restrictive，使用要求）；category判有效性校验"},
+        note={"comment": "signal_type命中'使用'（restrictive，使用要求）；category判有效性校验；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR54：数据备份
     m.add_br(
         bid="b54", category="computation",
         desc="定期备份数据，并确保可以迅速恢复，以防数据丢失或损坏",
-        entities_involved=[], source_ref="21.2.2 数据安全",
+        entities_involved=["E-XM"], source_ref="21.2.2 数据安全",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'定期'（restrictive，时间措辞）；category判计算衍生（数据备份）"},
+        note={"comment": "signal_type命中'定期'（restrictive，时间措辞）；category判计算衍生（数据备份）；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR55：个人信息保护
     m.add_br(
         bid="b55", category="validation",
         desc="仅收集完成业务所必需的最少个人信息；确保在收集和处理个人数据之前获得用户的明确同意",
-        entities_involved=[], source_ref="21.2.3 个人信息保护；21.2.4 数据最小化",
+        entities_involved=["E-XM"], source_ref="21.2.3 个人信息保护；21.2.4 数据最小化",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'仅'（restrictive，访问控制措辞）；category判有效性校验"},
+        note={"comment": "signal_type命中'仅'（restrictive，访问控制措辞）；category判有效性校验；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR56：项目交付时间
     m.add_br(
         bid="b56", category="timing",
         desc="平台升级改造项目按照中心年度计划要求需要在2025年11月15日前完成相应的设计、开发、测试、部署、试运行等相关工作",
-        entities_involved=[], source_ref="21.6 时间要求",
+        entities_involved=["E-XM"], source_ref="21.6 时间要求",
+        constrained_entity="E-XM",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'2025年11月15日前'（restrictive，时间措辞）；category判时间/次数"},
+        note={"comment": "signal_type命中'2025年11月15日前'（restrictive，时间措辞）；category判时间/次数；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR57：删除操作二次确认
     m.add_br(
         bid="b57", category="usability",
         desc="操作完成时有统一规范的提示信息，例如删除操作时系统提示警示框'您确认删除记录吗？操作不可恢复！'，用户点击确认后才执行删除操作",
-        entities_involved=[], source_ref="3.6 可用性要求",
+        entities_involved=["E-XM"], source_ref="3.6 可用性要求",
+        constrained_entity="E-XM",
         signal_type="usability",
-        note={"comment": "signal_type命中'提示信息'（usability，易用功能）；category判易用功能"},
+        note={"comment": "signal_type命中'提示信息'（usability，易用功能）；category判易用功能；代表实体（平台级要求，非实体门禁）"},
     )
 
     # BR58：消息发送项目状态门禁
@@ -3026,6 +3059,7 @@ def build() -> DomainModel:
         bid="b58", category="validation",
         desc="消息发送时项目状态为'待开始'、'报名中'时右侧实验室列表为所有实验室，其他状态为报名实验室",
         entities_involved=["E-XM", "E-LAB", "E-MSG"], source_ref="20.5.1.4 优化消息发送功能",
+        constrained_entity="E-MSG",
         signal_type="restrictive",
         note={"comment": "signal_type命中'为'（restrictive，状态条件措辞）；category判有效性校验；constrained_entity=E-MSG"},
     )
@@ -3035,6 +3069,7 @@ def build() -> DomainModel:
         bid="b59", category="validation",
         desc="消息发送接收人1为数据列表，不可直接编辑，数据来源于右侧的实验室列表",
         entities_involved=["E-MSG", "E-LAB"], source_ref="20.5.1.4 优化消息发送功能",
+        constrained_entity="E-MSG",
         signal_type="restrictive",
         note={"comment": "signal_type命中'不可'（restrictive）；prohibit_keywords 含'不可直接编辑'；constrained_entity=E-MSG"},
     )
@@ -3072,7 +3107,7 @@ def build() -> DomainModel:
         desc="能力验证计划发布前项目须处于待开始状态",
         entities_involved=["E-XM"], source_ref="19.1 实施阶段",
         signal_type="restrictive",
-        note={"comment": "signal_type命中'须'（restrictive）；constrained_entity=E-XM；与 t02 precondition 一致"},
+        note={"comment": "signal_type命中'须'（restrictive）；constrained_entity=E-XM；与 t02 precondition 一致；branch_dimension=项目类型（能力验证分支承载）", "branch_dimension": "项目类型"},
     )
 
     # BR64：测量审核结果通知单审核流程合并
