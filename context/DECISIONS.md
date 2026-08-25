@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-25 ㊿-G 事件台账注册为模型一等注册表，F10/F15 校验落地（修复 pt_srs03 61 项校验错误）
+
+**问题**：`srs_data/pt_srs03.py`（P1.5 新数据文件）头部事件台账（57 条 e01..e35）只写成注释块，从未注册进 DomainModel → C21(INV-4) 将 note 中 e 标签判为「未映射局部标签」→ 59 条 C21 错误；另有 2 条 C24（b18/b32 多实体 BR 缺 constrained_entity）。共 61 项 critical，CLI 中断。
+
+**根因**：事件台账是 glm5pr §2 定义的一等概念（F4 标签引用含 e 标签 / F10 双向覆盖 / F15 主体映射实体 均为规格要求的框架校验），但实现只把台账写成注释 → 引用失联、规格校验缺位。
+
+**决策**（用户确认范围=完整规格）：
+1. **`model.add_event(id, entity, dimension, action, actor, precond, consequence, source, note)`** 注册进 `DomainModel.events` → 输出 `domain_model.events`（57 条）。**不做编号移交**：e 标签即正式 id，不进 allmap/_assign_ids（`_LOCAL` 正则本就匹配，原样保留）。
+2. **schema.py** 新增 `"event"` 对象表：id/entity/dimension/action/actor/precond/consequence/source 全 required，note 可选。**id 参数用 add_entity/add_role 惯例**（参数 `id`、dsl="id"、written_by=LLM），非 tid/xid 的 id_transfer 惯例（事件无移交）。
+3. **C21** valid 集追加事件 id；**新增 C26(F15)**（事件 entity ∈ 已登记实体）与 **C27(F10)**（正向：每事件被 ≥1 转换/关系 note 消费；反向：每转换 note 引用 ≥1 事件，inferred 闭环转换豁免——note.comment 含「inferred」）。
+4. **verify_schema.py / verify_schema_reverse.py** 同步注册 event 对象（MAPPED_METHODS/COLLECTIONS/COLLS）。
+5. **数据层**：pt_srs03 台账注释块 → build() 顶部 57 条 `m.add_event(...)`（主体名→E-XXX 映射）；b18 补 `constrained_entity="E-JK"`（操作对象=缴费单）、b32 补 `constrained_entity="E-XM"` + note 注明「代表实体（平台性能要求，非实体门禁）」。
+
+**坑**：`LOCAL_LABEL` 正则 `\b[a-z]{1,3}\d{2,3}[a-z]?\b` 的 `\b` 对 CJK 无效（Python `\w` 含汉字）——「e12后续」的 `后` 吞掉词界导致 e12 匹配失败；修法=数据侧加空格「源自 e12 后续」。
+
+**验证**：CLI `--strict` 0 error / 11 warning（C02×2/C05×2/C13×5/C17×2，全为既有数据语义，与本次改动无关）/ 28 autofix；`domain_model.events` 57 条，F10 双向全覆盖 0 orphan，t11b/t26b/t26c 经 inferred 豁免；verify_schema 正向（163 对象 0 错误）与反向（trace 163 条全命中）双 PASS；回归 pt_srs.py / struct_srs.py 0 error 不受影响（未调 add_event、C26/C27 空转）。
+
+---
+
 ## 2026-08-25 ㊿-F dimension_entry_anchors 已删除，入口相位改为数据长出（第一性原理）
 
 **问题**（用户定调）：㊿ Fix 2a 的 `_context.dimension_entry_anchors`「像是为了这个任务硬编码的一段」——1 条手写配置（E-PJ.评价状态→E-BMJL.结果已提交）只服务评价用例，还须 P1+P2+模型三处同步。

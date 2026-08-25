@@ -67,6 +67,18 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("name", "name", LLM, required=True),
         Field("readonly", "readonly", LLM, required=True),
     ],
+    "event": [
+        Field("id", "id", LLM, required=True,
+              desc="事件台账编号（e01/e03b…，保持小写无横线，不参与编号移交）"),
+        Field("entity", "entity", LLM, required=True, desc="主体映射的实体 E-XXX id"),
+        Field("dimension", "dimension", LLM, required=True),
+        Field("action", "action", LLM, required=True, desc="动作短语原文"),
+        Field("actor", "actor", LLM, required=True, desc="执行者（角色名；system 时不登记角色）"),
+        Field("precond", "precond", LLM, required=True, desc="前置情形；无前置传'无'"),
+        Field("consequence", "consequence", LLM, required=True, desc="后果情形"),
+        Field("source", "source", LLM, required=True, desc="来源段落/章节"),
+        Field("note", "note", LLM),
+    ],
     "permission": [
         Field("role", "role", LLM, required=True, desc="与 add_role 的 name 逐字对齐"),
         Field("operations", "operations", LLM, required=True),

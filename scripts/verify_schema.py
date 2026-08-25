@@ -24,6 +24,7 @@ from srs_data import struct_srs
 COLLECTIONS = {
     "entity": ("domain_model", "entities"),
     "role": ("domain_model", "roles"),
+    "event": ("domain_model", "events"),
     "structural": ("domain_model", "structural_relations"),
     "causal": ("domain_model", "transition_relations"),
     "trans": ("state_and_flow", "transitions"),
@@ -34,6 +35,7 @@ COLLECTIONS = {
 MAPPED_METHODS = {
     "entity": "add_entity",
     "role": "add_role",
+    "event": "add_event",
     "structural": "add_structural",
     "causal": "add_causal",
     "trans": "add_trans",

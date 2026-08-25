@@ -76,6 +76,7 @@ class DomainModel:
                      "branch_dimensions": []}
         self.entities, self.roles = [], []
         self.structural_relations, self.transition_relations = [], []
+        self.events = []                # 事件台账（§2）：转换/关系 note 引用的事件注册表
         self.transitions = []
         self.invalid_transitions, self.cross_entity, self.business_rules = [], [], []
         self.branch_dimensions = []
@@ -93,6 +94,22 @@ class DomainModel:
         # ---- P1.5 挂载点 ----
         self.doc_text = None            # attach_document 挂载原文后启用 C15 与对账
         self.review_queue = []          # 对账产生的评审队列
+
+    # ---------- Step 0（事件台账）----------
+    def add_event(self, id, entity, dimension, action, actor, precond,
+                  consequence, source, note=None):
+        """登记事件台账条目（glm5pr §2）。主体映射为已登记实体 E-XXX id；
+        执行者为 system 时 actor 传"system"。precond 无前置传"无"。"""
+        validate_llm("event", {"id": id, "entity": entity, "dimension": dimension,
+                               "action": action, "actor": actor,
+                               "precond": precond, "consequence": consequence,
+                               "source": source, "note": note})
+        self.events.append({
+            "id": id, "entity": entity, "dimension": dimension,
+            "action": action, "actor": actor, "precond": precond,
+            "consequence": consequence, "source": esc(source),
+            "note": _esc_note(note)})
+        return self
 
     # ---------- Step 1 ----------
     def add_entity(self, id, name, desc, type="core", tags=None,
@@ -359,6 +376,7 @@ class DomainModel:
                             "permissions": self.permissions},
                 "domain_model": {
                     "entities": self.entities, "roles": self.roles,
+                    "events": self.events,
                     "structural_relations": self.structural_relations,
                     "transition_relations": self.transition_relations},
                 "state_and_flow": {"transitions": self.transitions},
@@ -388,6 +406,7 @@ class DomainModel:
         pre = [p for t in self.transitions for p in t["preconditions"]]
         sr = [p for p in pre if p["type"] == "state_ref"]
         return {
+            "step0_events": len(self.events),
             "step1_entities": [e["id"] for e in self.entities],
             "step2_structural_relations": len(self.structural_relations),
             "step3_branch_dimensions": len(self.branch_dimensions),

@@ -32,7 +32,7 @@ from srs_pipeline.validate import Validator
 from srs_data import struct_srs
 
 COLLS = {
-    "entity": "entities", "role": "roles",
+    "entity": "entities", "role": "roles", "event": "events",
     "structural": "structural_relations", "causal": "transition_relations",
     "trans": "transitions", "invalid": "invalid_transitions",
     "xc": "cross_entity", "br": "business_rules",

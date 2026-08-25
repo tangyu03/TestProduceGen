@@ -99,7 +99,8 @@ class Validator:
                   self.c19_inv_signal_type, self.c20_inv_branch_br_coverage,
                   self.c21_inv_label_refs, self.c22_inv_role_coverage,
                   self.c23_inv_xc_desc_prefix, self.c24_inv_br_constrained_entity,
-                  self.c25_inv_mirror_target_transition):
+                  self.c25_inv_mirror_target_transition,
+                  self.c26_inv_event_entity, self.c27_inv_event_coverage):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -765,7 +766,8 @@ class Validator:
                  | {x["id"] for x in self.m.cross_entity}
                  | {b["id"] for b in self.m.business_rules}
                  | {i["id"] for i in self.m.invalid_transitions}
-                 | {r["id"] for r in self.m.roles})
+                 | {r["id"] for r in self.m.roles}
+                 | {ev["id"] for ev in self.m.events})
         scanned = []
         for t in self.m.transitions:
             scanned.append((t["id"], self._flatten(t.get("note"))))
@@ -871,3 +873,47 @@ class Validator:
                         f"BR[{bid}]", f"单实体 BR constrained_entity={ce!r} "
                                       f"≠ 唯一元素 {inv[0]!r}",
                         "与唯一元素保持一致", f"应填: {inv[0]}"))
+
+    def c26_inv_event_entity(self):
+        """F15：事件台账主体列映射的实体须已登记。台账是转换推导的唯一输入，
+        主体未建模 → 转换 entity 落空、下游不可用。"""
+        registered = {e["id"] for e in self.m.entities}
+        for ev in self.m.events:
+            if ev["entity"] not in registered:
+                self.report.error(
+                    "C26", self._hint(
+                        f"事件[{ev['id']}]", f"主体映射实体 {ev['entity']!r} 未建模",
+                        "改为已登记实体 id", f"已登记: {sorted(registered)}"),
+                    ev["id"])
+
+    def c27_inv_event_coverage(self):
+        """F10：台账双向覆盖——每事件被 ≥1 产物（转换/结构·因果关系的 note）消费，
+        每转换 note 引用 ≥1 事件 id。inferred 转换（状态机闭环、无台账事件对应，
+        note.comment 含「inferred」）豁免反向检查。台账完备性是根本职责，无机械兜底。"""
+        event_ids = {ev["id"] for ev in self.m.events}
+        if not event_ids:
+            return
+        consumed: set[str] = set()
+        reverse_bad: list[str] = []
+        for t in self.m.transitions:
+            note = self._flatten(t.get("note")) or ""
+            refs = set(LOCAL_LABEL.findall(note)) & event_ids
+            consumed |= refs
+            if not refs and "inferred" not in note:
+                reverse_bad.append(t["id"])
+        for rel in self.m.transition_relations + self.m.structural_relations:
+            consumed |= set(LOCAL_LABEL.findall(self._flatten(rel.get("note")))) & event_ids
+        for ev in self.m.events:
+            if ev["id"] not in consumed:
+                self.report.error(
+                    "C27", self._hint(
+                        f"事件[{ev['id']}]",
+                        f"{ev['entity']}.{ev['dimension']} 的 {ev['action']!r} "
+                        f"未被任何转换/关系 note 消费",
+                        "确认该事件对应的转换已建且 note.comment 引用其 id"))
+        for tid in reverse_bad:
+            self.report.error(
+                "C27", self._hint(
+                    f"转换[{tid}]", "note 未引用任何事件 id",
+                    "note.comment 引用其来源事件 id（如「源自 e03」）；"
+                    "状态机闭环转换在 note 注明 inferred 豁免"))
