@@ -1,0 +1,554 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-25T15:55:28+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704.md",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t02→t09: 引用未建模实体 t02。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t02→t09: 引用未建模实体 t09。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t09→t11: 引用未建模实体 t09。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t09→t11: 引用未建模实体 t11。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t12→t28: 引用未建模实体 t12。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t12→t28: 引用未建模实体 t28。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-007",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t28→t07: 引用未建模实体 t28。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-008",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t28→t07: 引用未建模实体 t07。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-009",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t07→t34: 引用未建模实体 t07。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-010",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t07→t34: 引用未建模实体 t34。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-011",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t34→t35: 引用未建模实体 t34。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-012",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t34→t35: 引用未建模实体 t35。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-013",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t35→t36: 引用未建模实体 t35。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-014",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t35→t36: 引用未建模实体 t36。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-015",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t14→t16: 引用未建模实体 t14。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-016",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t14→t16: 引用未建模实体 t16。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-017",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t16→t17: 引用未建模实体 t16。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-018",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t16→t17: 引用未建模实体 t17。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-019",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t17→t18: 引用未建模实体 t17。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-020",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t17→t18: 引用未建模实体 t18。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-021",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t18→t19: 引用未建模实体 t18。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-022",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t18→t19: 引用未建模实体 t19。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-023",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t19→t20: 引用未建模实体 t19。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-024",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t19→t20: 引用未建模实体 t20。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-025",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t20→t21: 引用未建模实体 t20。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-026",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t20→t21: 引用未建模实体 t21。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-027",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t21→t22: 引用未建模实体 t21。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-028",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t21→t22: 引用未建模实体 t22。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-029",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t22→t05: 引用未建模实体 t22。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-030",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t22→t05: 引用未建模实体 t05。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-031",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t50→t51: 引用未建模实体 t50。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-032",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t50→t51: 引用未建模实体 t51。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-033",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t51→t53: 引用未建模实体 t51。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-034",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t51→t53: 引用未建模实体 t53。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-035",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t54→t55: 引用未建模实体 t54。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-036",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t54→t55: 引用未建模实体 t55。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-037",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t43→t44: 引用未建模实体 t43。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-038",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t43→t44: 引用未建模实体 t44。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-039",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t39→t40: 引用未建模实体 t39。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-040",
+        "severity": "critical",
+        "concept": "C01",
+        "description": "关系 t39→t40: 引用未建模实体 t40。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-041",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-BMYP.报名记录样品状态: 初始状态[待发样]无创建转换。修法：补一条 frm=None 的创建转换。示例：add_trans(frm=None, to='待发样', …)",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-042",
+        "severity": "critical",
+        "concept": "C10",
+        "description": "残留箭头/弯引号 1 处，如 '→'（§19.3 枚举仅含'待核查/已核查'两值；'待发样/已发样/已还样/无需还样'…）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-043",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[项目类型]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"项目类型\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-044",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[报名审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"报名审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-045",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[样品核查结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"样品核查结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-046",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[参加者测试样品状态]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"参加者测试样品状态\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-047",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-005]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-048",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-006]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-049",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-008]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-050",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-009]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-051",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-015]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-052",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-023]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-053",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-030]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-054",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-031]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-055",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-037]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-056",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-043]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-057",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-048]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-058",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-049]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-059",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-050]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-060",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-051]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-061",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-052]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-062",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-053]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-063",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-054]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-064",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-055]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-065",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-056]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-066",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-057]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-067",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-058]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-068",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-059]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

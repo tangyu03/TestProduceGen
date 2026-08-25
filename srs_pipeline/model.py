@@ -97,16 +97,16 @@ class DomainModel:
         self.review_queue = []          # 对账产生的评审队列
 
     # ---------- Step 0（事件台账）----------
-    def add_event(self, eid, subject, dimension, action, actor, precondition,
+    def add_event(self, eid, entity, dimension, action, actor, precondition,
                   consequence, source_ref):
-        """登记事件台账条目（glm5pr §2，8 列契约）。主体映射为已登记实体 E-XXX id；
+        """登记事件台账条目（glm5pr §2，8 列契约）。entity=主体映射的已登记实体 E-XXX id；
         执行者为 system 时 actor 传"system"。precondition 无前置传"无"。"""
-        validate_llm("event", {"eid": eid, "subject": subject,
+        validate_llm("event", {"eid": eid, "entity": entity,
                                "dimension": dimension, "action": action,
                                "actor": actor, "precondition": precondition,
                                "consequence": consequence,
                                "source_ref": source_ref})
-        record = {"id": eid, "subject": subject, "dimension": dimension,
+        record = {"id": eid, "entity": entity, "dimension": dimension,
                   "action": action, "actor": actor,
                   "precondition": precondition, "consequence": consequence,
                   "source_ref": esc(source_ref)}

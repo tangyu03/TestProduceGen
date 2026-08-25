@@ -71,7 +71,7 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("id", "eid", LLM, required=True,
               desc="事件台账编号（e01/e03b…，保持小写无横线，不参与编号移交），"
                    "须匹配 [etxbi]\\d{2,3}[a-z]? 局部标签形态"),
-        Field("subject", "subject", LLM, required=True, desc="主体映射的实体 E-XXX id"),
+        Field("entity", "entity", LLM, required=True, desc="主体映射的实体 E-XXX id"),
         Field("dimension", "dimension", LLM, required=True),
         Field("action", "action", LLM, required=True, desc="动作短语原文"),
         Field("actor", "actor", LLM, required=True, desc="执行者（角色名；system 时不登记角色）"),

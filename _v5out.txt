@@ -1,0 +1,103 @@
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-001 设计方案编制（创建转换）' (dimension='项目类型', entity='E-XM') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-003 受理用户测量审核报名（创建转换）' (dimension='项目类型', entity='E-XM') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-011 报名审核（退回分支）' (dimension='报名审核结果', entity='E-BMJL') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-012 报名审核（通过分支）' (dimension='报名审核结果', entity='E-BMJL') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-034 样品核查（共用一条）' (dimension='样品核查结果', entity='E-YP') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-036 参加者测试与结果提交（共用一条）' (dimension='参加者测试样品状态', entity='E-YP') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-053 评价组长结果确认' (dimension='评价人员角色', entity='E-PJ') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-051 评价人员评价' (dimension='评价人员角色', entity='E-PJ') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='查询缴费信息（共用一条）' (dimension='缴费时间快速录入', entity='E-YJ') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='查询客户查询（共用一条）' (dimension='客户查询时间快速录入', entity='E-TJBB') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='查询统计对比（共用一条）' (dimension='统计对比分组', entity='E-TJBB') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='查询历年数据（共用一条）' (dimension='数据看板时间维度', entity='E-SJKB') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='查询近三年数据（共用一条）' (dimension='数据看板时间维度', entity='E-SJKB') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='上传结果通知单操作（共用一条）' (dimension='批量处理内容', entity='E-BMJL') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='上传证书操作（共用一条）' (dimension='批量处理内容', entity='E-BMJL') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-055 审核通过' (dimension='批量审核结果', entity='E-TASK') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+C:\Users\15831\Downloads\final_pkgV\srs_pipeline\model.py:339: UserWarning: branch target_transition='T-056 审核退回' (dimension='批量审核结果', entity='E-TASK') 非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）
+  self._assign_ids()
+critical 歧义（68 项），已输出中断 Schema: _v5run.json
+  [1] AMB-VAL-001 [C01] 关系 t02→t09: 引用未建模实体 t02。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [2] AMB-VAL-002 [C01] 关系 t02→t09: 引用未建模实体 t09。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [3] AMB-VAL-003 [C01] 关系 t09→t11: 引用未建模实体 t09。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [4] AMB-VAL-004 [C01] 关系 t09→t11: 引用未建模实体 t11。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [5] AMB-VAL-005 [C01] 关系 t12→t28: 引用未建模实体 t12。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [6] AMB-VAL-006 [C01] 关系 t12→t28: 引用未建模实体 t28。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [7] AMB-VAL-007 [C01] 关系 t28→t07: 引用未建模实体 t28。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [8] AMB-VAL-008 [C01] 关系 t28→t07: 引用未建模实体 t07。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [9] AMB-VAL-009 [C01] 关系 t07→t34: 引用未建模实体 t07。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [10] AMB-VAL-010 [C01] 关系 t07→t34: 引用未建模实体 t34。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [11] AMB-VAL-011 [C01] 关系 t34→t35: 引用未建模实体 t34。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [12] AMB-VAL-012 [C01] 关系 t34→t35: 引用未建模实体 t35。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [13] AMB-VAL-013 [C01] 关系 t35→t36: 引用未建模实体 t35。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [14] AMB-VAL-014 [C01] 关系 t35→t36: 引用未建模实体 t36。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [15] AMB-VAL-015 [C01] 关系 t14→t16: 引用未建模实体 t14。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [16] AMB-VAL-016 [C01] 关系 t14→t16: 引用未建模实体 t16。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [17] AMB-VAL-017 [C01] 关系 t16→t17: 引用未建模实体 t16。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [18] AMB-VAL-018 [C01] 关系 t16→t17: 引用未建模实体 t17。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [19] AMB-VAL-019 [C01] 关系 t17→t18: 引用未建模实体 t17。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [20] AMB-VAL-020 [C01] 关系 t17→t18: 引用未建模实体 t18。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [21] AMB-VAL-021 [C01] 关系 t18→t19: 引用未建模实体 t18。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [22] AMB-VAL-022 [C01] 关系 t18→t19: 引用未建模实体 t19。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [23] AMB-VAL-023 [C01] 关系 t19→t20: 引用未建模实体 t19。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [24] AMB-VAL-024 [C01] 关系 t19→t20: 引用未建模实体 t20。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [25] AMB-VAL-025 [C01] 关系 t20→t21: 引用未建模实体 t20。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [26] AMB-VAL-026 [C01] 关系 t20→t21: 引用未建模实体 t21。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [27] AMB-VAL-027 [C01] 关系 t21→t22: 引用未建模实体 t21。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [28] AMB-VAL-028 [C01] 关系 t21→t22: 引用未建模实体 t22。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [29] AMB-VAL-029 [C01] 关系 t22→t05: 引用未建模实体 t22。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [30] AMB-VAL-030 [C01] 关系 t22→t05: 引用未建模实体 t05。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [31] AMB-VAL-031 [C01] 关系 t50→t51: 引用未建模实体 t50。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [32] AMB-VAL-032 [C01] 关系 t50→t51: 引用未建模实体 t51。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [33] AMB-VAL-033 [C01] 关系 t51→t53: 引用未建模实体 t51。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [34] AMB-VAL-034 [C01] 关系 t51→t53: 引用未建模实体 t53。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [35] AMB-VAL-035 [C01] 关系 t54→t55: 引用未建模实体 t54。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [36] AMB-VAL-036 [C01] 关系 t54→t55: 引用未建模实体 t55。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [37] AMB-VAL-037 [C01] 关系 t43→t44: 引用未建模实体 t43。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [38] AMB-VAL-038 [C01] 关系 t43→t44: 引用未建模实体 t44。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [39] AMB-VAL-039 [C01] 关系 t39→t40: 引用未建模实体 t39。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [40] AMB-VAL-040 [C01] 关系 t39→t40: 引用未建模实体 t40。修法：核对实体 ID 或补建 add_entity。示例：已登记实体: ['E-BMJL', 'E-BMYP', 'E-BZK', 'E-CJMM', 'E-CSS', 'E-CW', 'E-DAGD', 'E-FK', 'E-FP', 'E-FY', 'E-JFTZ', 'E-LAB', 'E-MSG', 'E-PJ', 'E-SJKB', 'E-TASK', 'E-TJBB', 'E-TZGG', 'E-XM', 'E-XX', 'E-YJ', 'E-YP', 'E-YTZ', 'E-ZLY', 'E-ZYDS']
+  [41] AMB-VAL-041 [C02] E-BMYP.报名记录样品状态: 初始状态[待发样]无创建转换。修法：补一条 frm=None 的创建转换。示例：add_trans(frm=None, to='待发样', …)
+  [42] AMB-VAL-042 [C10] 残留箭头/弯引号 1 处，如 '→'（§19.3 枚举仅含'待核查/已核查'两值；'待发样/已发样/已还样/无需还样'…）
+  [43] AMB-VAL-043 [C20] 分支维度[项目类型]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={"branch_dimension": "项目类型"})
+  [44] AMB-VAL-044 [C20] 分支维度[报名审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={"branch_dimension": "报名审核结果"})
+  [45] AMB-VAL-045 [C20] 分支维度[样品核查结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={"branch_dimension": "样品核查结果"})
+  [46] AMB-VAL-046 [C20] 分支维度[参加者测试样品状态]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={"branch_dimension": "参加者测试样品状态"})
+  [47] AMB-VAL-047 [C24] BR[BR-005]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [48] AMB-VAL-048 [C24] BR[BR-006]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [49] AMB-VAL-049 [C24] BR[BR-008]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [50] AMB-VAL-050 [C24] BR[BR-009]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [51] AMB-VAL-051 [C24] BR[BR-015]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [52] AMB-VAL-052 [C24] BR[BR-023]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [53] AMB-VAL-053 [C24] BR[BR-030]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [54] AMB-VAL-054 [C24] BR[BR-031]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [55] AMB-VAL-055 [C24] BR[BR-037]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [56] AMB-VAL-056 [C24] BR[BR-043]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [57] AMB-VAL-057 [C24] BR[BR-048]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [58] AMB-VAL-058 [C24] BR[BR-049]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [59] AMB-VAL-059 [C24] BR[BR-050]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [60] AMB-VAL-060 [C24] BR[BR-051]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [61] AMB-VAL-061 [C24] BR[BR-052]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [62] AMB-VAL-062 [C24] BR[BR-053]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [63] AMB-VAL-063 [C24] BR[BR-054]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [64] AMB-VAL-064 [C24] BR[BR-055]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [65] AMB-VAL-065 [C24] BR[BR-056]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [66] AMB-VAL-066 [C24] BR[BR-057]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [67] AMB-VAL-067 [C24] BR[BR-058]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"
+  [68] AMB-VAL-068 [C24] BR[BR-059]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity="E-XXX"

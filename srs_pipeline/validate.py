@@ -887,10 +887,10 @@ class Validator:
         主体未建模 → 转换 entity 落空、下游不可用。"""
         registered = {e["id"] for e in self.m.entities}
         for eid, ev in self.m._events.items():
-            if ev["subject"] not in registered:
+            if ev["entity"] not in registered:
                 self.report.error(
                     "C26", self._hint(
-                        f"事件[{eid}]", f"主体映射实体 {ev['subject']!r} 未建模",
+                        f"事件[{eid}]", f"主体映射实体 {ev['entity']!r} 未建模",
                         "改为已登记实体 id", f"已登记: {sorted(registered)}"),
                     eid)
 
@@ -916,7 +916,7 @@ class Validator:
                 self.report.error(
                     "C27", self._hint(
                         f"事件[{eid}]",
-                        f"{ev['subject']}.{ev['dimension']} 的 {ev['action']!r} "
+                        f"{ev['entity']}.{ev['dimension']} 的 {ev['action']!r} "
                         f"未被任何转换/关系 note 消费",
                         "确认该事件对应的转换已建且 note.comment 引用其 id"))
         for tid in reverse_bad:
