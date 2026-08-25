@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-25 ㊿-F dimension_entry_anchors 已删除，入口相位改为数据长出（第一性原理）
+
+**问题**（用户定调）：㊿ Fix 2a 的 `_context.dimension_entry_anchors`「像是为了这个任务硬编码的一段」——1 条手写配置（E-PJ.评价状态→E-BMJL.结果已提交）只服务评价用例，还须 P1+P2+模型三处同步。
+
+**决策**（用户选「后置 +1」门禁语义 + 「外科手术」数据落点，废弃配置机制）：
+
+1. **领域真相进数据通道**：把门禁写成 T-046（待评价→评价中）的跨实体 `state_ref` 前置 `报名记录.结果已提交`（P1 pt_structuredv1.json → P2 透传 → 模型 pt_coverage_obligationsv1.json，与 T-025 报告编制绑定的 state_ref 同通道；R6 自动同步 `precondition_state_refs` pattern=p1_inherited）。
+2. **策略 0 推广**（s0_topology.py `_entry_from_gated_preconditions`，替换 `_entry_anchor_phase`）：按转换锚定——对维度内每条转换扫描主实体 state_ref 前置，取 `ref_phase+1` 为 target 相位，再沿相对相位映射回传 `entry = ref_phase+1 - rel_phase_map[target]`。落地：E-PJ.评价状态 = {待评价:3, 评价中:4, 已确认:5, 退回修改:4}，与㊿ 手写布局一致但由数据长出，配置机制三处全删。
+3. **回归面为空**：其余从属维度无跨实体 state_ref 前置，ref 路径不被使用（E-SP/E-XM/E-BZK 相位零变化）。
+
+**验证**（`s1_fix_replay --recompute-s0 --coverage pt_coverage_obligationsv1.json`，归档 pt_outputv1.json）：
+- 601 procs；temp_id +80/-80 为**纯再编号**（80/80 内容键匹配，零内容变化，总数不变）；
+- dep_state_phase_map 实测 E-PJ={待评价:3,评价中:4,已确认:5,退回修改:4}，与用户批准 preview 完全一致；
+- T-046 对应 PROC-130（启动评价）guard6_precond 依赖 报名记录.结果已提交 生产者（PROC-103 提交结果 / PROC-105 重新提交结果）——跨实体边由数据长出；
+- 双重跑 SHA-256 一致；V01-V10 全 pass、0 blocker、0 warning；V08 STRICT_FORWARD 仍成立（已确认=P5）。
+
+**遗留**：同㊿——replay title 由归档 overlay（601 hit 0 miss），正式交付走 main.py 全流水线；pt_srsv2.py（E-PJX 五态评价项）迁移为独立任务。
+
+---
+
 ## 2026-08-24 ㊿ 评价维度入口锚定 + 报告编制绑定评价完成（用户定调衔接报告编制）
 
 **问题**（用户反馈）：`pt_outputv1.md` 中评价用例 PROC-040~050 挤在 P0/P1/P2——「评价应该在 PROC-121 结果提交后」。根因：P2 phase_mapping 是维度内**相对序**（各维度入口态都=0），E-PJ.评价状态 无任何结构化前置引用主实体状态 → `_compute_entry_phase` 策略 0/5 都返回 0 → 待评价=0。CO-003（E-XM 创建同步）是**实例存在**关系（待开始=P0），不是相位关系，不提供「结果提交后开始评价」信号。

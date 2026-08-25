@@ -3192,6 +3192,15 @@
           }
         },
         {
+          "text": "报名记录处于结果已提交状态",
+          "type": "state_ref",
+          "ref": {
+            "entity": "E-BMJL",
+            "dimension": "报名记录状态",
+            "state": "结果已提交"
+          }
+        },
+        {
           "text": "评价组长已完善测试项目及评价细则",
           "type": "event_ref",
           "ref": null
@@ -3218,6 +3227,13 @@
           "dimension": "评价状态",
           "state": "待评价",
           "raw_text": "评价处于待评价状态",
+          "pattern": "p1_inherited"
+        },
+        {
+          "entity": "E-BMJL",
+          "dimension": "报名记录状态",
+          "state": "结果已提交",
+          "raw_text": "报名记录处于结果已提交状态",
           "pattern": "p1_inherited"
         }
       ],
@@ -6045,18 +6061,6 @@
         "value_closed_set": null,
         "populated_anchors": []
       }
-    },
-    "dimension_entry_anchors": [
-      {
-        "entity": "E-PJ",
-        "dimension": "评价状态",
-        "anchor_ref": {
-          "entity": "E-BMJL",
-          "dimension": "报名记录状态",
-          "state": "结果已提交"
-        },
-        "note": "评价在报名记录结果提交后开始：待评价与结果提交同段(P3)、评价中P4、已确认P5（用户定调衔接报告编制 2026-08-24；V08 forward 严格递增 → 已确认=P5 非 P4）"
-      }
-    ]
+    }
   }
 }

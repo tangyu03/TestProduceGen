@@ -1401,31 +1401,57 @@ def _classify_state_types(tos: list[dict], primary: str) -> dict[str, dict[str, 
     return dict(state_type_map)
 
 
-def _entry_anchor_phase(entity: str, dim: str, phase_table: dict, dep_map: dict,
-                        entry_anchors: list | None) -> int | None:
-    """维度入口锚定相位 — dimension_entry_anchors 数据层配置 (PT017 2026-08-24)。
+def _entry_from_gated_preconditions(
+    entity: str, dim: str, tos: list[dict], phase_table: dict,
+    rel_phase_map: dict,
+) -> int | None:
+    """策略 0 推广：按转换锚定 + 沿相对相位回传（2026-08-25）。
 
-    P1 声明 (entity, dimension) 的入口态锚定到 anchor_ref 状态 → 返回该状态的
-    绝对相位 (不加 +1: 入口态与锚定状态同段)。anchor_ref 实体是主实体 → 查
-    phase_table.state_to_phase; 否则查 dep_map。无配置 / 状态不存在 → None
-    (退回原 _compute_entry_phase 逻辑)。数据驱动, 不硬编码任何领域名词。
+    旧维度入口锚定（dimension_entry_anchors 配置）是为 E-PJ.评价状态 单点手写
+    的——评价维度转换零跨实体前置，策略 0/5 扫描不到门禁信号 → 入口=0 → 评价
+    用例挤 P0。第一性解法：把领域事实「评价以报名记录.结果已提交为前提」作为
+    state_ref 前置落在评价的第一个活动转换上（与 Fix 2b T-025 同一通道），本
+    函数把该门禁沿维度相对相位回传到入口态。
+
+    语义（与 _compute_entry_phase 策略 0 同源的 +1：活动后置于门禁态）：
+      - 携带对主实体主维度 state_ref 前置的转换 = 门禁转换，其**目标态**相位
+        = ref_phase + 1（不是入口态——修正旧策略 0「所有前置都当入口门禁」的
+        假设，门禁作用在目标态上）。
+      - 入口态相位 = 目标态相位 - 相对相位差（rel_phase_map[target]，即入口到
+        目标态的步数）。入口态即 rel_phase_map 最小值态。
+      - 多门禁取 min（最早的门禁决定入口）。无门禁 → None（退回原逻辑）。
+    E-PJ.评价状态：T-046(待评价→评价中) 前置 报名记录.结果已提交(P3) →
+    评价中 = 3+1 = 4，入口待评价 = 4-1 = 3 → {待评价:3, 评价中:4, 已确认:5,
+    退回修改:4}（与 ㊿ 手写 dimension_entry_anchors 的布局一致，但由数据长出）。
     """
-    for ea in (entry_anchors or []):
-        if ea.get("entity") != entity or ea.get("dimension") != dim:
+    primary_entity = phase_table.get("primary_entity", "")
+    primary_dim = phase_table.get("primary_dimension", "")
+    primary_states = phase_table.get("state_to_phase", {}).get(primary_dim, {})
+    if not rel_phase_map:
+        return None
+    entity_tos = [t for t in tos if t.get("entity") == entity and t.get("dimension") == dim]
+
+    candidates: list[int] = []
+    for to in entity_tos:
+        ref_phase = None
+        for prec in to.get("preconditions", []) or []:
+            if isinstance(prec, dict) and prec.get("pattern") == "phase_anchor":
+                continue  # 单转换相位锚定，非整机门禁（与策略 0 同规则）
+            ref = prec.get("ref") if isinstance(prec, dict) else None
+            if (isinstance(ref, dict)
+                    and ref.get("entity") == primary_entity
+                    and ref.get("dimension") == primary_dim
+                    and ref.get("state") in primary_states):
+                pv = primary_states[ref["state"]]
+                ref_phase = pv if ref_phase is None else max(ref_phase, pv)
+        if ref_phase is None:
             continue
-        ar = ea.get("anchor_ref") or {}
-        ae, ad, as_ = ar.get("entity"), ar.get("dimension"), ar.get("state")
-        if not ae or not as_:
-            continue
-        if ae == phase_table.get("primary_entity"):
-            pm = (phase_table.get("state_to_phase") or {}).get(ad or "", {})
-            if as_ in pm:
-                return int(pm[as_])
-        else:
-            dm = (dep_map.get(ae) or {}).get(ad or "", {})
-            if as_ in dm:
-                return int(dm[as_])
-    return None
+        target = (to.get("to") or "").strip()
+        offset = int(rel_phase_map.get(target, 0))  # 目标态距入口的相对步数
+        candidates.append(ref_phase + 1 - offset)
+    if not candidates:
+        return None
+    return min(candidates)
 
 
 def _compute_entry_phase(
@@ -1745,7 +1771,6 @@ def _derive_dep_state_phase_map(
     transition_relations: list[dict] = None,
     structural: list[dict] = None,
     state_info: dict = None,
-    entry_anchors: list = None,
 ) -> tuple[dict, dict]:
     """S0.3 step 3: Dependent entity phase mapping via anchor-entity method.
 
@@ -1904,12 +1929,12 @@ def _derive_dep_state_phase_map(
                 primary_state_names = set(
                     (phase_table.get('state_to_phase', {}) or {}).get(primary_dim_s, {}).keys()
                 )
-                # dimension_entry_anchors: 数据层声明的维度入口锚定 (PT017 2026-08-24)。
-                # 语义: (entity, dim) 的入口态 (相对 phase_mapping 的 0) 锚定到
-                # anchor_ref 状态的绝对相位 —— 不加 +1 (入口态与锚定状态同段:
-                # E-PJ.待评价 与 报名记录.结果已提交 同在 P3)。优先级高于策略 0,
-                # 因策略 0 的 +1 是"依赖后置于主状态"语义, 这里是"同段触发"。
-                _entry = _entry_anchor_phase(entity, dim, phase_table, dep_map, entry_anchors)
+                # 门禁前置锚定：扫描该维度转换对主实体主维度的 state_ref 前置，
+                # 沿相对相位回传入口态（_entry_from_gated_preconditions，2026-08-25
+                # 取代 dimension_entry_anchors 单点配置）。无门禁 → 回落策略 0/5。
+                _entry = _entry_from_gated_preconditions(
+                    entity, dim, tos, phase_table, merged,
+                )
                 if _entry is None:
                     _entry = 0
                     if not (set(merged.keys()) & primary_state_names):
@@ -3250,7 +3275,6 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         state_type_map, virtual_entities,
         cos=cos, transition_relations=transition, structural=structural,
         state_info=state_info,
-        entry_anchors=(cm.get("_context") or {}).get("dimension_entry_anchors", []),
     )
 
     # Resolve VE phases AFTER dep_state_phase_map

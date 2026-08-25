@@ -3018,11 +3018,6 @@ _context = {
         for e in p1["domain_model"]["entities"]
     ],
     "prohibition_config": _prohibition_config,
-    # 维度入口锚定,由 P1 数据层声明(单一真相源,与 phase_anchors 同构)。
-    # S0 据此把某从属实体的维度入口态(相对 phase_mapping 的 0)平移锚定到
-    # anchor_ref 状态的绝对相位(不加 +1:入口态与锚定状态同段)。PT017:
-    # E-PJ.评价状态 入口锚定 报名记录.结果已提交 → 待评价=P3 而非 P0。
-    "dimension_entry_anchors": (p1.get("_context") or {}).get("dimension_entry_anchors", []),
     # 角色→可执行操作权限,由 P1 数据层声明(单一真相源)。V07 校验器据此推导
     # 权限矩阵,不再依赖 case_spec 手写矩阵。P1 未声明时为空 list。
     "permissions": (p1.get("_context") or {}).get("permissions", []),
