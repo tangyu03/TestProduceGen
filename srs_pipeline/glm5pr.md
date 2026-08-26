@@ -12,7 +12,6 @@
 ## 1 契约
 
 - 术语：XC＝跨实体约束（`add_xc` 产物）；BR＝业务规则（`add_br` 产物）；镜像＝跨实体 precondition 复制为 XC；事件台账＝`build()` 内的 `add_event` 调用序列，是数据文件本体；编号移交＝数据文件只写局部标签，正式编号由框架分配。
-
 - 输出：`srs_data/<文档名>.py`，单 `build()`，头为 `add_event` 序列。形态三种：数据文件 / critical 中断 JSON / 断点锚点。`build()` 内仅骨架与 API 调用。
 - 骨架逐字保留（docstring、import、build 头尾、DomainModel 绑定、台账段位）：
 
@@ -31,12 +30,12 @@ def build() -> DomainModel:
 - 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）。实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，角色引用写 `id` 或 `name`。
 - API 形态：全部调用用关键字参数；唯一例外 `state_ref` 三参同型可位置式。
 - source_ref 非空且可定位原文，子项号真实，复合引用以 `；` 分隔。XC 继承宿主 source_ref：镜像/联动取 `source_transition` 所指转换的 ref；4.5判取持有对应 precondition 的转换的 ref。
-- critical （枚举缺失无推据/核心矛盾不可取舍）→ 立即停止，仅输出中断 JSON；其余 minor 假设填充+inferred；口径不一致但不构成矛盾 → 两口径并列写入 `note={"ambiguity": "..."}`，由框架收集。截断续传锚点：`断点位置: Step {N} | 已完成: {标签列表} | 下一个待处理: {标签及未完成字段}`。
+- critical（枚举缺失无推据/核心矛盾不可取舍）→ 立即停止，仅输出中断 JSON；其余 minor 假设填充＋inferred；口径不一致但不构成矛盾 → 两口径并列写入 `note={"ambiguity": "..."}`，由框架收集。截断续传锚点：`断点位置: Step {N} | 已完成: {标签列表} | 下一个待处理: {标签及未完成字段}`。
 - 回写：Step 1–4 中发现新动词/新角色/操作归属，在当前位置插入追加调用（注释标来源 Step）。`action_verbs` 追加去重；`permission` 同角色取并集。
 - inferred 标注：
 | 推断对象 | 标注方式 |
 |---|---|
-| 状态值 | 维度级 `inferred` 列表＋维度级 `note` 写依据|
+| 状态值 | 维度级 `inferred` 列表＋维度级 `note` 写依据 |
 | attr / op | `N(inferred=True, comment="依据…")` |
 | 转换/结构/BR | `note={"inferred": True, "comment": "依据…"}` |
 | XC / IT | 无 note，由源转换/源规则继承 |
@@ -52,10 +51,9 @@ m.add_event(eid, entity=E-ID, dimension, action, actor, precondition, consequenc
 ```
 
 - consequence：在情形空间取值（停留原情形也算落点，落为自环）；precondition：自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁）。
-- 落点①②③：
-- 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如"到期提醒"）入 Step 4 BR（notification/timing）。
+- 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如“到期提醒”）入 Step 4 BR（notification/timing）。
 - 粒度：一事件一 (entity, dimension)；一动作多状态面 → 拆行，每状态面一条 `add_event`，action 与 actor 相同，关联仅由转换 note 互引承载。
-- 表格列：流程表/状态表中某状态列取值随行动作变化 → 逐行逐列登记事件（entity＝该状态面承载主体对应的 E-ID）；自环事件仅落动作的业务对象维度（表格行中其他列的未变值走门禁判定，写入 precondition，不立事件）；其他实体状态列的驻留值，若判定为动作对象/输入前提 → precondition ；创建缺失 → 按 minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底。
+- 表格列：流程表/状态表中某状态列取值随行动作变化 → 逐行逐列登记事件（entity＝该状态面承载主体对应的 E-ID）；自环事件仅落动作的业务对象维度（表格行中其他列的未变值走门禁判定，写入 precondition，不立事件）；其他实体状态列的驻留值，若判定为动作对象/输入前提 → precondition；创建缺失 → 按 minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底。
 
 ---
 
@@ -80,7 +78,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 | Accept 皆 ∅ | 比终局语义：异→分立；同→复核 |
 
 - 命名：枚举行原词 > 散见原词（note 出处）> 语义命名（入 inferred，成对标注）。
-- states 顺序＝原文枚举顺序（序判③④的比较基准）；一个状态面仅建在一个实体名下；states值域＝文档枚举表值 ∪ 台账推导值 ；枚举有而台账无→按孤岛处置。
+- states 顺序＝原文枚举顺序（序判③④的比较基准）；一个状态面仅建在一个实体名下；states 值域＝文档枚举表值 ∪ 台账推导值；枚举有而台账无 → 按孤岛处置。
 - initial＝创建事件落入的状态；每个维度有 `frm=None` 创建转换。
 - 终态：无出边事件的状态为候选；有以其为起点的出边事件 → 回 §2 补事件重跑；全部无出边 → 入 terminal。文档具名终态但推导有出边 → 以推导为准＋note 说明。
 - 孤岛（枚举但无事件覆盖）：①入 states；②note“枚举但无事件覆盖”；③原样保留（框架降级警告）。
@@ -89,7 +87,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 ### 1.4 实体
 - 分类（交集归 core）：core＝状态枚举/多步骤多角色/状态自主/审批链/独立载体/可独立循环；managed＝管理员 CRUD/配置字典/状态简单。
 - tags：`approvable`＝存在审批类转换；`multi-state`＝≥2 状态维度；`expirable`＝存在失效/过期转换或 BR；`collaborative`＝多角色操作同一状态维度（转换层多执行者写 role 列表）；`configurable`＝存在 is_config 属性。
-- operations：op名称同一实体内唯一；通知语义由 BR 承载；category ①file②session③ui④config＞crud＞query；- `expected_results` ≥1 逐字取原文可观察结果，未述补＋inferred。note.role 必填。
+- operations：op 名称同一实体内唯一；通知语义由 BR 承载；category ①file②session③ui④config＞crud＞query；`expected_results` ≥1 逐字取原文可观察结果，未述补＋inferred；note.role 必填。
 
 ### 1.5 结构关系 → `m.add_structural()`
 `cardinality ∈ {"1:1", "1:N", "M:N"}`（父→子视角）：`1:1`＝一父一子；`1:N`＝一父多子；`M:N`＝多对多。M:N 无方向动词按叙述顺序定 frm/to。四元判定（首条命中 a→b→c→d，成套取自同一行）：
@@ -101,73 +99,73 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 | (c) B 有独立创建流程，B 是 core 流程实体（type=core 且有 dependent），A 为其业务归属容器 | composition | business_ownership |
 | (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source |
 
-(c) 先于 (d)。A 仅为 B 发起人/持有人/操作对象 → 降 (d)。B 核心产出属第三方 C → 改 C→B。判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B  → 归 (d)。dependent 三步判定：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
+(c) 先于 (d)。A 仅为 B 发起人/持有人/操作对象 → 降 (d)。B 核心产出属第三方 C → 改 C→B。判 (b) 且 1:1 → 复核“每条 A 必有 B”，可能无 B → 归 (d)。dependent 三步判定：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
 
 ---
 
 ## Step 2 分支
 
-三型：（型别序号写入 evidence）：① 配置型（is_config 属性：创建时定、互斥、影响后续）/ ② 运行时选择型（"根据…选择/分为…情况"）/ ③ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。
-准入判据＝可锚定转换；纯查询/筛选仅作实体属性，影响状态机路径或转换结果的取值维度才是分支维度。分支values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。
-target_transition 前向引用先用语义描述，3.3 回填 tid。指向规则：路径分歧各 value 指向首条转换；结果差异指向共用转换。回填匹配信号按优先级：动作等值 > 「frm 变为 to」路径 > 双向包含（描述含 action 或 action 含描述，描述可为「动作（括注）」形态）；分支值落在某转换 to 时 +2 消歧。唯一候选才回填，0/多候选→inferred＋记偏差（meta.branch_tt_deviations），P2 走 all-values 兜底。指向规则：路径分歧各 value 指向首条转换；结果差异指向共用转换。
+三型（型别序号写入 evidence）：① 配置型（is_config 属性：创建时定、互斥、影响后续）/ ② 运行时选择型（“根据…选择/分为…情况”）/ ③ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。
+
+准入判据＝可锚定转换：影响状态机路径或转换结果的取值维度才是分支维度；纯查询/筛选仅作实体属性。分支 values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。
+
+target_transition 用语义描述，以目标转换的 action 词为锚（如“能力验证计划发布转换”）；同动作多转换时括注 frm→to 或分支值消歧。框架装配时自动匹配为精确 tid，模型免回填。指向规则：路径分歧各 value 指向该分支值路径首条转换；结果差异各 value 指向共用转换。
 
 ---
 
 ## Step 3 转换与因果
 
 ### 3.1 转换 → `m.add_trans()`
-转换＝已登记状态空间上的边。台账每条事件在其 (entity, dimension) 上落一条转换。构造前提：entity 已登记；dimension∈ 该实体维度；frm/to ∈ 该维度 states；frm=None 仅限创建转换（to＝initial）。其余必填：：`tid, action, role, preconditions, expected_results, traits, direction, priority, source_ref`。`note.comment` 引用事件 id。
+
+转换＝已登记状态空间上的边。台账每条事件在其 (entity, dimension) 上落一条转换。构造前提：entity 已登记；dimension ∈ 该实体维度；frm/to ∈ 该维度 states；frm=None 仅限创建转换（to＝initial）。其余必填：`tid, action, role, preconditions, expected_results, traits, direction, priority, source_ref`。`note.comment` 引用事件 id。
 
 `traits`：`audit`＝留痕要求；`rollback`＝回退/撤销；`branch`＝分支转换（路径分歧/结果差异均标）；`time_sensitive`＝超时/时限触发；`data_constraint`＝执行前置数据校验。
 
 侧挂状态＝文档以挂起/暂停/停用/恢复语义命名的状态，或本维度已被某条 lateral 转换指向的状态。
 
 direction（首条命中）：
-⓪`frm=None` → forward，不再判。
-
-① "回退/返回/驳回/退回"→ backward；"暂停/挂起/停用"→ lateral；"重启/恢复/启用"→ resume。自环（frm==to）跳过本级直接按⑤判——自环无状态迁移，方向词描述的是动作内容。
+⓪ `frm=None` → forward，不再判。
+① “回退/返回/驳回/退回”→ backward；“暂停/挂起/停用”→ lateral；“重启/恢复/启用”→ resume。自环（frm==to）跳过本级直接按⑤判——自环无状态迁移，方向词描述的是动作内容。
 ② `to` 为侧挂 → lateral；`frm` 为侧挂 → resume（to 侧先判；均为侧挂回①）。无锚点且确需侧挂 → lateral＋inferred 注依据。
 ③ `frm` 先于 `to` → forward；④ 后于 → backward。
 ⑤ 仅自环 → forward＋inferred。
-③④与业务语义冲突（循环状态机）→语义优先，comment 记"序判{③|④}，语义{取值}（理由）"。
+③④与业务语义冲突（循环状态机）→ 语义优先，comment 记“序判{③|④}，语义{取值}（理由）”。
 
 priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主路径；P2＝辅助/低频/易用性；无法判定 → P1＋inferred。
 
 分支落盘（同一动作因分支值立出不同转换）：
-- 路径分歧（中间状态或 to 落点不同）→ 分立多条，各precondition 携带对应分支值（ptype=constraint），role 取该分支值执行者，标签同根后缀（t02/t02b），`traits` 含 `branch`，`note.branch_dimension` 填维度名。表格行并列状态值（如“已核查、待发样”）＝多落点快照→按落点分立转换。
-- 结果差异（路径与 to 落点均相同、仅可观察结果的措辞不同）→ 共用一条，`expected_results` 逐值用"若{维度}={值}，则…"，`traits` 含 `branch`，`note.branch_dimension` 填维度名。
+- 路径分歧（中间状态或 to 落点不同）→ 分立多条，各 precondition 携带对应分支值（ptype=constraint），role 取该分支值执行者，标签同根后缀（t02/t02b），`traits` 含 `branch`，`note.branch_dimension` 填维度名。表格行并列状态值（如“已核查、待发样”）＝多落点快照 → 按落点分立转换。
+- 结果差异（路径与 to 落点均相同、仅可观察结果的措辞不同）→ 共用一条，`expected_results` 逐值用“若{维度}={值}，则…”，`traits` 含 `branch`，`note.branch_dimension` 填维度名。
 
 ### 3.2 preconditions → `precond(text, ptype, ref, note)`
+
 先 state_ref 匹配；跨主体门禁（E-ID.状态值）落 state_ref 全锚点；含否定词同判；状态值无法消歧才降级 constraint，note 写降级理由。跨实体同名状态按 source_ref 位置就近归属。
 
 | 条件 | ptype | ref | note |
 |---|---|---|---|
 | 状态值可匹配到 (实体, 维度)，含跨主体门禁 | `state_ref` | `state_ref(entity,dimension,state)` | 缺省 |
 | 状态值无法消歧 | `constraint` | `null` | `{"comment": "降级理由…"}` |
-
 | 分支维度取值条件 | `constraint` | `null` | `{"comment": "分支值条件"}` |
 | 独立业务事件已完成（一次性完成信号；持续状态门禁走 state_ref） | `event_ref` | `null` | 缺省 |
-| 含"不可/不得/禁止/累计/按X计算" | `constraint` | `null` | 缺省 |
+| 含“不可/不得/禁止/累计/按X计算” | `constraint` | `null` | 缺省 |
 
 `state_ref` 的 ref 必填；`event_ref`/`constraint` 的 ref 一律 `null`。
 
 ### 3.3 自检
-回填 Step2的 target_transition 为精确 tid（不匹配→inferred＋记偏差）；crud 回填转换标签（多个 `;` 分隔）；回写遗漏动词/权限。
+
+crud 操作 `note.comment` 回填对应转换标签（多个 `;` 分隔），无对应 → 注明理由；回写遗漏动词/权限。
 
 ### 3.4 因果 → `m.add_causal()` 与鉴别
-`frm`/`to`＝实体 ID（E-XXX→E-XXX），，描述 X 实体的变化直接致 Y 实体的变化；两实体间的顺序门禁由 precondition/XC 表达。每案依序过  Q1→Q2→Q3，命中即止：
-- Q1：X 变直接致 Y 变？Y 需额外操作→约束，标 `[待写入: Step4 XC]`。
-- Q2：门禁已由 Y 侧 precondition 或既有 XC 表达？已表达→止于 Q2，不写因果、不标记。
-- Q3：上级作下级门禁→约束（标记 `[待写入]`）；下级全完成上级自动推进 → 因果。
+`frm`/`to`＝实体 ID（E-XXX→E-XXX），描述 X 实体的变化直接致 Y 实体的变化；两实体间的顺序门禁由 precondition/XC 表达。每案依序过 Q1→Q2→Q3，命中即止：
+- Q1：X 变直接致 Y 变？Y 需额外操作 → 约束，标 `[待写入: Step4 XC]`。
+- Q2：门禁已由 Y 侧 precondition 或既有 XC 表达？已表达 → 止于 Q2，不写因果、不标记。
+- Q3：上级作下级门禁 → 约束（标记 `[待写入]`）；下级全完成上级自动推进 → 因果。
 
-
-
-来源表：`desc` （显式句式B完成后A变）/ `expected_results` （含 E2 影响）/ `action`（`preconditions`  含 E1 的`state_ref`）/ `bidi_coupling` 。
-`evidence_transitions`：`desc`/`business_rule`可空（comment 注明位置），其余必填局部标签。
+来源表：`desc`（显式句式 B 完成后 A 变）/ `expected_results`（含 E2 影响）/ `action`（preconditions 含 E1 的 state_ref）/ `bidi_coupling`。
+`evidence_transitions`：`desc`/`business_rule` 可空（comment 注明位置），其余必填局部标签。
 `confidence`：显式 high，推导 medium，修补≤medium。
-`add_causal` 无 `causal_pairs` 参数。
-
 写入前扫描已有 `add_causal`，同 `(frm,to)` 去重仅升级：`desc/trigger` 以 `;` 合并、`evidence_transitions` 并集、`rollback` 取或。
+`add_causal` 无 `causal_pairs` 参数。
 
 ---
 
@@ -175,19 +173,18 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 
 回访：①检索 `[待写入` 逐条兑现为 XC；②核对 `prohibit_keywords`——每条短语须有产物 source_ref 可定位；③核对 `document_scope`——产物 source_ref 均落在声明范围内。
 
-invalid → `m.add_invalid()`**：仅明文禁止的状态转换（“不允许/不可以从X到Y”）。
+invalid → `m.add_invalid()`：仅明文禁止的状态转换（“不允许/不可以从X到Y”）。
 
-XC→ `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（`4.5判` 对应 3.4 鉴别判为约束）。`source_transition` 一律填生产者转换（达 source_state 的转换）。镜像可省略（框架补）；target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 值，即新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
+XC → `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（`4.5判` 对应 3.4 鉴别判为约束）。`source_transition` 一律填生产者转换（达 source_state 的转换）。镜像可省略（框架补）；target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 值，即新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
 
 BR → `m.add_br()`：两步判定 ① signal_type＝口吻（field_constraint＞restrictive〔含 X日内/次以内〕＞display＞usability；无命中不生成）；② category＝管什么（timing/notification/computation/authorization/usability/display/validation 默认）。时间/次数/通知/计算只落②。命中词注原词。一句一 BR。
-authorization→角色放 `note.role`；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一+“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 声明 `branch_dimensions`（首选 `add_br` 显式参数；`note.branch_dimension` 遗留形态亦归一化——`;`/`；` 分隔、去重保序、note 键自动剥离），且该 BR 的 desc/note 应含维度名或分支值作钩子；**状态落点值不作分支值**；系统行为 BR 的 entities_involved＝作用目标业务实体。
+authorization → 角色放 `note.role`；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一＋“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 的 `branch_dimensions` 含该维度（desc 含维度名或分支值作钩子）；系统行为 BR 的 entities_involved＝作用目标业务实体。
 
 ---
 
 ## 5 修复
 
-
-回喂格式：`[{"check": "<校验码>", "labels": ["t07"], "expected": "…"}]`。最小修复；修补 confidence≤medium；根源漏事件→先补 `add_event` 再补转换（回喂触发的补事件是合法回修）。
+回喂格式：`[{"check": "<校验码>", "labels": ["t07"], "expected": "…"}]`。最小修复；修补 confidence≤medium；根源漏事件 → 先补 `add_event` 再补转换（回喂触发的补事件是合法回修）。
 
 ---
 
@@ -196,10 +193,11 @@ authorization→角色放 `note.role`；多实体 BR 必填 constrained_entity�
 ```python
 m = DomainModel(source, document_scope)
 m.add_event(eid, entity, dimension, action, actor, precondition, consequence, source_ref)
+# entity 用 E-ID；precondition＝"自身状态值"或"自身状态值；E-ID.状态值"（跨主体门禁）
 m.set_prohibition_config(config)           # 限调一次
 m.add_action_verbs(verbs); m.add_prohibit_keywords(keywords)
-m.add_role(id, name, readonly=False)
-m.add_permission(role, operations)
+m.add_role(id, name, readonly=False)       # name＝原文角色名逐字复制
+m.add_permission(role, operations)         # role 用 name；operations 填具体操作名
 m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, operations)
 # state_dimensions 元素（键名精确 dimension_name）：
 #   {"dimension_name": "项目状态", "states": ["待开始", "报名中"],
@@ -208,10 +206,11 @@ m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, op
 m.add_structural(frm, to, relation_type, cardinality, ownership_dimension, desc, confidence="high", note=None)
 m.add_branch_dimension(dimension, entity, values, impact_scope, evidence, branches)
 m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expected_results, traits, direction, priority, source_ref, note=None)
-m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None, rollback_propagation=False, confidence="high", note=None)  # frm/to=实体 ID
+m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None, rollback_propagation=False, confidence="high", note=None)  # frm/to＝实体 ID
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity, target_dimension, target_condition, desc, source_ref, target_transition=None, xc_source)
-m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None, constrained_entity=None, branch_dimensions=None)  # branch_dimensions=治理的分支维度名列表（第一优先，并入 note.branch_dimension 遗留形态后去重保序）
+m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None, constrained_entity=None, branch_dimensions=None)
+# branch_dimensions＝该 BR 承载的分支维度名列表
 
 N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
 attr(name, desc, is_config=False)
@@ -224,7 +223,7 @@ state_ref(entity, dimension, state)
 
 ## 7 专项
 
-分支：途经中间状态或 to 落点不同→分立；路径与落点均相同、仅结果措辞不同 →共用＋“若”句式。
+分支：途经中间状态或 to 落点不同 → 分立；路径与落点均相同、仅结果措辞不同 → 共用＋“若”句式。
 system 触发：超时/自动触发且改变状态的事件 role="system"，traits 可含 `time_sensitive`，走完整推导。
 
 ---
@@ -315,5 +314,15 @@ m.add_br(
     desc="系统每天上午9点扫描证书信息，距到期时间等于30天时自动发送邮件提醒用户并抄送项目管理员",
     entities_involved=["E-BMJL"], source_ref="20.5.2.3", signal_type="restrictive",
     note={"comment": "signal_type命中'每天上午9点'；category判通知；无状态落点，不入台账/operations"},
+)
+
+# 分支承载＝branch_dimensions 参数：
+m.add_br(
+    bid="b23", category="computation",
+    desc="评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
+    entities_involved=["E-PJ"], source_ref="20.7.1项目列表",
+    signal_type="field_constraint",
+    note={"role": ["评价人员"], "comment": "signal_type命中'两种'（取值范围）；category判计算衍生"},
+    branch_dimensions=["评分方式"],
 )
 ```
