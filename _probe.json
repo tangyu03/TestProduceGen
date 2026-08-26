@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "19.2",
-    "generated_at": "2026-08-22T15:10:30+08:00",
+    "generated_at": "2026-08-26T14:19:23+08:00",
     "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116",
     "document_scope": "19.1-19.5 系统流程分析；20.2-20.11 系统功能需求分析；非功能性（21）不在范围",
     "has_critical_ambiguity": false,
@@ -177,6 +177,7 @@
       }
     ],
     "pipeline_trace": {
+      "step0_events": 0,
       "step1_entities": [
         "E-SYS",
         "E-BZK",
@@ -192,6 +193,8 @@
       ],
       "step2_structural_relations": 8,
       "step3_branch_dimensions": 2,
+      "step3_branch_tt_backfilled": 0,
+      "step3_branch_tt_deviations": 0,
       "step4_transitions": 51,
       "step4_transition_relations": 3,
       "step4_roles": 14,
@@ -274,7 +277,9 @@
           ]
         }
       }
-    ]
+    ],
+    "branch_tt_backfilled": [],
+    "branch_tt_deviations": []
   },
   "_context": {
     "prohibition_config": {
@@ -2465,6 +2470,7 @@
         "readonly": false
       }
     ],
+    "events": [],
     "structural_relations": [
       {
         "from": "E-BZK",
@@ -3321,12 +3327,8 @@
           },
           {
             "text": "评价已完成并统计",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-PJ",
-              "dimension": "评价状态",
-              "state": "已确认"
-            }
+            "type": "event_ref",
+            "ref": null
           }
         ],
         "expected_results": [
@@ -3913,15 +3915,6 @@
               "entity": "E-PJ",
               "dimension": "评价状态",
               "state": "待评价"
-            }
-          },
-          {
-            "text": "报名记录处于结果已提交状态",
-            "type": "state_ref",
-            "ref": {
-              "entity": "E-BMJL",
-              "dimension": "报名记录状态",
-              "state": "结果已提交"
             }
           },
           {

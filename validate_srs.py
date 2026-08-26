@@ -135,12 +135,27 @@ class DomainModel:
         })
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, note=None):
+               signal_type, note=None, constrained_entity=None,
+               branch_dimensions=None):
+        # branch_dimensions＝显式参数第一优先；note.branch_dimension＝遗留形态
+        # （';'/'；'分隔字符串或列表），归一化去重保序、剥离 note 键。
+        import re as _re
+        dims = list(branch_dimensions or [])
+        if isinstance(note, dict) and note.get("branch_dimension"):
+            legacy = note["branch_dimension"]
+            if isinstance(legacy, str):
+                legacy = [x.strip() for x in _re.split(r"[;；]", legacy)
+                          if x.strip()]
+            dims.extend(legacy)
+        dims = list(dict.fromkeys(dims))
+        if isinstance(note, dict) and "branch_dimension" in note:
+            note = {k: v for k, v in note.items()
+                    if k != "branch_dimension"}
         self.brs.append({
             "bid": bid, "category": category, "desc": desc,
             "entities_involved": list(entities_involved),
             "source_ref": source_ref, "signal_type": signal_type,
-            "note": note,
+            "note": note, "branch_dimensions": dims,
         })
 
 
@@ -415,16 +430,13 @@ def check_c5_terminal_constraint(model, report):
 
 
 def check_c6_branch_br_coverage(model, report):
-    """C6 分支 BR 覆盖：每个 branch_dimension 至少在 1 条 BR 中出现"""
-    br_dims = set()
-    for br in model.brs:
-        note = br["note"] or {}
-        if "branch_dimension" in note:
-            br_dims.add(note["branch_dimension"])
+    """C6 分支 BR 覆盖：每个 branch_dimension 至少在 1 条 BR 中出现
+    （add_br 归一化的顶层 branch_dimensions 列表）"""
+    br_dims = {d for br in model.brs for d in (br.get("branch_dimensions") or [])}
 
     for bd in model.branch_dimensions:
         if bd["dimension"] not in br_dims:
-            report.err("C6", f"分支维度'{bd['dimension']}'未在任何 BR 的 note.branch_dimension 中出现")
+            report.err("C6", f"分支维度'{bd['dimension']}'未在任何 BR 的 branch_dimensions 中出现")
 
 
 def check_c7_xc_desc_prefix(model, report):

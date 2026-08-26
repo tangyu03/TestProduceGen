@@ -3103,7 +3103,30 @@ def s0_topology_node(state: AgentState) -> dict:
     raw = cm_data.get('coverage_model')
     coverage_model = raw if raw is not None else cm_data
 
-    
+    # 协同角色（glm5pr §1.3 collaborative）归一化：role 为 list（多角色按审批顺序
+    # 共同执行，如批量审核由技术主管/授权签字人/实验室负责人）时，取首个执行者
+    # 作为 actor，完整列表保留进 note.collaborative_roles 供渲染/审计。
+    # 主流水线下游（_get_role_name / entity_operator_set / V07 / 渲染）一律按 str
+    # 消费 role——list 直接透传会在 role_map.get(list) 崩溃（unhashable dict key）。
+    # P1.5 首次引入协同 role（srs_pipeline schema 允许 list）暴露该缺口；归一化放
+    # 数据入口，S0 内部与后续全部阶段统一拿到 str。
+    for _lst in ("entity_obligations", "transition_obligations",
+                 "cross_entity_obligations", "constraint_obligations"):
+        _items = coverage_model.get(_lst)
+        if not isinstance(_items, list):
+            continue
+        for _ob in _items:
+            _r = _ob.get("role")
+            if not isinstance(_r, (list, tuple)) or not _r:
+                continue
+            _ob["role"] = _r[0]
+            _note = _ob.get("note")
+            if isinstance(_note, dict):
+                _note["collaborative_roles"] = list(_r)
+            else:
+                _ob["note"] = {"comment": str(_note) if _note else "",
+                               "collaborative_roles": list(_r)}
+
     # v29 #26k: load configurable action keywords from _context
     global _ACTION_KEYWORDS
     _ctx = coverage_model.get('_context', {}) if isinstance(coverage_model, dict) else {}

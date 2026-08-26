@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-26T16:38:14+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-ZS.证书状态: 初始状态[有效]无创建转换。修法：补一条 frm=None 的创建转换。示例：add_trans(frm=None, to='有效', …)",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[样品归还方式]: 无任何 BR 的 note.branch_dimension 承载。修法：撤销 add_branch_dimension 声明（values=['已还样', '无需还样'] 均等于标注转换落点态 ['已还样', '无需还样']，分歧已由转换分立承载，非分支维度）。示例：glm5pr:110 状态落点值不作分支值；落点差异经转换分立承载",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[预通知确认结果]: 无任何 BR 的 note.branch_dimension 承载。修法：撤销 add_branch_dimension 声明（values=['已发送', '待确认'] 均等于标注转换落点态 ['已发送', '待确认']，分歧已由转换分立承载，非分支维度）。示例：glm5pr:110 状态落点值不作分支值；落点差异经转换分立承载",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核任务结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-001[词], BR-003[词], BR-013[词], BR-006[实体], BR-024[实体], BR-025[实体]; m.add_br(..., note={\"branch_dimension\": \"审核任务结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-022]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=['E-LAB', 'E-STD', 'E-CS', 'E-ZLY']；示例: constrained_entity='E-LAB'",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-028]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=['E-XM', 'E-BMJL', 'E-LAB', 'E-STD', 'E-TASK']；示例: constrained_entity='E-XM'",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-007",
+        "severity": "critical",
+        "concept": "C27",
+        "description": "事件[e47]: E-FY.费用状态 的 '缴费单退款' 未被任何转换/关系 note 消费。修法：确认该事件对应的转换已建且 note.comment 引用其 id",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

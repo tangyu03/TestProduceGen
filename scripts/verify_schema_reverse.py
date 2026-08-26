@@ -40,7 +40,8 @@ COLLS = {
 }
 
 # 确定性加工（无条件执行，注册表 mutation_conditions 豁免条件性检查）
-DETERMINISTIC = {"_assign_ids", "_backfill_branch_coverage"}
+DETERMINISTIC = {"_assign_ids", "_backfill_branch_coverage",
+                 "_backfill_semantic_branch_tt", "_resolve_role_refs"}
 
 
 def snap_model(m):
@@ -161,7 +162,8 @@ def main(build=struct_srs.build) -> int:
             diff(name, before, snap_model(self), trace)
         return wrapper
 
-    for name in ("_assign_ids", "_backfill_branch_coverage"):
+    for name in ("_assign_ids", "_backfill_branch_coverage",
+                 "_backfill_semantic_branch_tt", "_resolve_role_refs"):
         setattr(DomainModel, name, wrap_model(name))
 
     def wrap_validator(cname):

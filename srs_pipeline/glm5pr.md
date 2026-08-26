@@ -28,7 +28,7 @@ def build() -> DomainModel:
     return m
 ```
 
-- 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）。实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，引用一律走 `name`。
+- 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）。实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，角色引用写 `id` 或 `name`。
 - API 形态：全部调用用关键字参数；唯一例外 `state_ref` 三参同型可位置式。
 - source_ref 非空且可定位原文，子项号真实，复合引用以 `；` 分隔。XC 继承宿主 source_ref：镜像/联动取 `source_transition` 所指转换的 ref；4.5判取持有对应 precondition 的转换的 ref。
 - critical （枚举缺失无推据/核心矛盾不可取舍）→ 立即停止，仅输出中断 JSON；其余 minor 假设填充+inferred；口径不一致但不构成矛盾 → 两口径并列写入 `note={"ambiguity": "..."}`，由框架收集。截断续传锚点：`断点位置: Step {N} | 已完成: {标签列表} | 下一个待处理: {标签及未完成字段}`。
@@ -109,7 +109,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 三型：（型别序号写入 evidence）：① 配置型（is_config 属性：创建时定、互斥、影响后续）/ ② 运行时选择型（"根据…选择/分为…情况"）/ ③ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。
 准入判据＝可锚定转换；纯查询/筛选仅作实体属性，影响状态机路径或转换结果的取值维度才是分支维度。分支values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。
-target_transition 前向引用先用语义描述，3.3 回填 tid。指向规则：路径分歧各 value 指向首条转换；结果差异指向共用转换。
+target_transition 前向引用先用语义描述，3.3 回填 tid。指向规则：路径分歧各 value 指向首条转换；结果差异指向共用转换。回填匹配信号按优先级：动作等值 > 「frm 变为 to」路径 > 双向包含（描述含 action 或 action 含描述，描述可为「动作（括注）」形态）；分支值落在某转换 to 时 +2 消歧。唯一候选才回填，0/多候选→inferred＋记偏差（meta.branch_tt_deviations），P2 走 all-values 兜底。指向规则：路径分歧各 value 指向首条转换；结果差异指向共用转换。
 
 ---
 
@@ -180,7 +180,7 @@ invalid → `m.add_invalid()`**：仅明文禁止的状态转换（“不允许/
 XC→ `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（`4.5判` 对应 3.4 鉴别判为约束）。`source_transition` 一律填生产者转换（达 source_state 的转换）。镜像可省略（框架补）；target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 值，即新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
 
 BR → `m.add_br()`：两步判定 ① signal_type＝口吻（field_constraint＞restrictive〔含 X日内/次以内〕＞display＞usability；无命中不生成）；② category＝管什么（timing/notification/computation/authorization/usability/display/validation 默认）。时间/次数/通知/计算只落②。命中词注原词。一句一 BR。
-authorization→角色放 `note.role`；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一+“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 的 `note` 含 `branch_dimension`；系统行为 BR 的 entities_involved＝作用目标业务实体。
+authorization→角色放 `note.role`；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一+“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 声明 `branch_dimensions`（首选 `add_br` 显式参数；`note.branch_dimension` 遗留形态亦归一化——`;`/`；` 分隔、去重保序、note 键自动剥离），且该 BR 的 desc/note 应含维度名或分支值作钩子；**状态落点值不作分支值**；系统行为 BR 的 entities_involved＝作用目标业务实体。
 
 ---
 
@@ -211,7 +211,7 @@ m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expect
 m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None, rollback_propagation=False, confidence="high", note=None)  # frm/to=实体 ID
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity, target_dimension, target_condition, desc, source_ref, target_transition=None, xc_source)
-m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None, constrained_entity=None)
+m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None, constrained_entity=None, branch_dimensions=None)  # branch_dimensions=治理的分支维度名列表（第一优先，并入 note.branch_dimension 遗留形态后去重保序）
 
 N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
 attr(name, desc, is_config=False)

@@ -80,7 +80,9 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("source_ref", "source_ref", LLM, required=True, desc="来源段落/章节"),
     ],
     "permission": [
-        Field("role", "role", LLM, required=True, desc="与 add_role 的 name 逐字对齐"),
+        Field("role", "role", LLM_MUTATED, required=True,
+              mutation_conditions="_resolve_role_refs",
+              desc="引用 add_role 的 id 或 name；assemble 归一为 name 落盘"),
         Field("operations", "operations", LLM, required=True),
     ],
     "prohibition_config": [
@@ -101,8 +103,10 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("state_dimensions", "state_dimensions", LLM,
               desc="嵌套 [{dimension_name,states[],initial,terminal,note}]，"
                    "states 元素为字符串或 {value,inferred?,note?}"),
-        Field("operations", "operations", LLM_MUTATED, mutation_conditions="_assign_ids",
-              desc="嵌套 op(); note.comment 的引用被 _assign_ids 改写"),
+        Field("operations", "operations", LLM_MUTATED,
+              mutation_conditions="_assign_ids; _resolve_role_refs",
+              desc="嵌套 op(); note.comment 的引用被 _assign_ids 改写；"
+                   "note.role 被 _resolve_role_refs 归一为 name"),
     ],
     "structural": [
         Field("from", written_by=LLM, rename_reason="py_keyword", required=True,
@@ -123,8 +127,10 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("values", "values", LLM, required=True),
         Field("impact_scope", "impact_scope", LLM, required=True),
         Field("evidence", "evidence", LLM, required=True),
-        Field("branches", "branches", LLM_MUTATED, required=True, mutation_conditions="_assign_ids",
-              desc="嵌套 [{value,target_transition,desc}]；target_transition 被改写"),
+        Field("branches", "branches", LLM_MUTATED, required=True,
+              mutation_conditions="_assign_ids; _backfill_semantic_branch_tt",
+              desc="嵌套 [{value,target_transition,desc}]；target_transition 被改写"
+                   "（_assign_ids 编号移交 + 3.3 语义回填，无唯一候选标 inferred 偏差）"),
         Field("coverage", None, FRAMEWORK, required=True,
               derived_from="_backfill_branch_coverage", desc="T/XC/BR 三层回填"),
     ],
@@ -137,8 +143,10 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
               desc="创建转换可为 None"),
         Field("to", "to", LLM, required=True),
         Field("action", "action", LLM, required=True),
-        Field("role", "role", LLM, required=True,
-              desc="执行者角色名（引用 name）；协同转换写角色名列表（collaborative，glm5pr §1.3）"),
+        Field("role", "role", LLM_MUTATED, required=True,
+              mutation_conditions="_resolve_role_refs",
+              desc="执行者角色（引用 add_role 的 id 或 name，校验 C01/C18 双键，"
+                   "assemble 归一为 name）；协同转换写角色名列表（collaborative，glm5pr §1.3）"),
         Field("preconditions", "preconditions", LLM_MUTATED, required=True,
               mutation_conditions="C03",
               desc="嵌套 precond(); C03 可将 state_ref 降级 constraint"),
@@ -209,6 +217,9 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("source_ref", "source_ref", LLM, required=True),
         Field("signal_type", "signal_type", LLM, enum=BR_SIGNALS, required=True),
         Field("note", "note", LLM),
+        Field("branch_dimensions", "branch_dimensions", LLM,
+              derived_from="add_br 显式参数第一优先；note.branch_dimension 遗留形态归一化（';'/'；'分隔、去重保序、esc）",
+              desc="该 BR 治理的分支维度名列表（结构关系，非自由文本）。顶层字段，C20 覆盖/C28 钩子校验读此。"),
         Field("enforcement", None, FRAMEWORK, enum=BR_ENFORCEMENTS, required=True,
               derived_from="derive_enforcement(signal_type, desc)"),
     ],

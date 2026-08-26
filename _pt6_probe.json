@@ -1,0 +1,738 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-26T14:01:08+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-ZS.证书状态: 初始状态[有效]无创建转换。修法：补一条 frm=None 的创建转换。示例：add_trans(frm=None, to='有效', …)",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C10",
+        "description": "残留箭头/弯引号 2 处，如 '→'（状态枚举源自 §19.3 项目状态分析；§19.1 流程表未在实施阶段显式标记 …）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.查询项目: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.查询项目: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.新增项目: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.修改项目: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-007",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.删除项目: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-008",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.删除项目: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-009",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.文件整理: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-010",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.机构代码导入: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-011",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.项目批量处理: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-012",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.消息发送: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-013",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.导出项目通知书: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-014",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.上传付款单: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-015",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.下载预通知文件: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-016",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.下载预通知文件: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-017",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.上传结果通知单: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-018",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.上传证书: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-019",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-XM.导出评价结果: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-020",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-YP.样品制备: note.role 引用未声明角色 'r06'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-021",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-YP.样品核查: note.role 引用未声明角色 'r07'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-022",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-YP.样品配置一致性测试: note.role 引用未声明角色 'r06'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-023",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.查询报名信息: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-024",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.查询报名信息: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-025",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.上传报名表: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-026",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.上传缴费证明: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-027",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.上传测试结果: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-028",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.下载结果报告: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-029",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.下载结果通知单: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-030",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.下载合格证书: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-031",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMJL.批量提交审核: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-032",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMYP.样品发放: note.role 引用未声明角色 'r07'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-033",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-BMYP.样品归还登记: note.role 引用未声明角色 'r07'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-034",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-YT.发送预通知: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-035",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-FY.上传付款单: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-036",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-FY.缴费单退款: note.role 引用未声明角色 'r11'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-037",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-FY.修改财务备注: note.role 引用未声明角色 'r11'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-038",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-FY.修改财务备注: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-039",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-FP.发票上传: note.role 引用未声明角色 'r11'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-040",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.新增实验室: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-041",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.修改实验室: note.role 引用未声明角色 'r13'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-042",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.审核实验室: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-043",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.停用实验室: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-044",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.启用实验室: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-045",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-LAB.查询实验室: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-046",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.新增标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-047",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.修改标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-048",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.删除标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-049",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.停用标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-050",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.启用标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-051",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.查询标准库: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-052",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-STD.管理测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-053",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CS.新增测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-054",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CS.修改测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-055",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CS.删除测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-056",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-ZLY.管理子领域测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-057",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-ZLY.新增子领域测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-058",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-ZLY.删除子领域测试项: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-059",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CY.另存常用: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-060",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CY.选择常用项填充: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-061",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-CY.删除常用项: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-062",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.完善测试项目及评价细则: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-063",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.协同评价: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-064",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.评价结果确认: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-065",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.保存历史: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-066",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.调整细则: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-067",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.退回修改: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-068",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.调整统计规则: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-069",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-PJ.导出评价结果: note.role 引用未声明角色 'r08'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-070",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-ZS.发放证书: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-071",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.提交审核任务: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-072",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.提交审核任务: note.role 引用未声明角色 'r04'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-073",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.批量审核: note.role 引用未声明角色 'r14'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-074",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.审批列表导出: note.role 引用未声明角色 'r14'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-075",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.审批列表导出: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-076",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.电子签章: note.role 引用未声明角色 'r14'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-077",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-TASK.自定义流程提交: note.role 引用未声明角色 'r14'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-078",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-MSG.查询信息发送记录: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-079",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-MSG.查询信息发送记录: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-080",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-MSG.查看消息详情: note.role 引用未声明角色 'r12'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-081",
+        "severity": "critical",
+        "concept": "C18",
+        "description": "E-MSG.查看消息详情: note.role 引用未声明角色 'r05'。修法：改为已登记角色或 system。示例：已登记角色: ['实验室负责人', '审核人员', '技术主管', '授权签字人', '样品制备人员', '样品管理员', '策划人员', '系统管理人员', '统计人员', '能力验证参加者', '评价人员', '财务管理人员', '质量专员', '项目管理员']",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-082",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[评分方式]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"评分方式\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-083",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[项目类型]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"项目类型\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-084",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[报名审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"报名审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-085",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[样品归还方式]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"样品归还方式\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-086",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[预通知确认结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"预通知确认结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-087",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[实验室审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"实验室审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-088",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核任务结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：m.add_br(..., note={\"branch_dimension\": \"审核任务结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-089",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-022]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-090",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-028]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：constrained_entity=\"E-XXX\"",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-091",
+        "severity": "critical",
+        "concept": "C27",
+        "description": "事件[e47]: E-FY.费用状态 的 '缴费单退款' 未被任何转换/关系 note 消费。修法：确认该事件对应的转换已建且 note.comment 引用其 id",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

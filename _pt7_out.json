@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-26T16:41:07+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C27",
+        "description": "事件[e47]: E-FY.费用状态 的 '缴费单退款' 未被任何转换/关系 note 消费。修法：确认该事件对应的转换已建且 note.comment 引用其 id",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

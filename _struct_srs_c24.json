@@ -1,0 +1,4827 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-26T16:38:15+08:00",
+    "source": "航天能力验证项目评审系统软件需求规格说明.md",
+    "document_scope": "项目评审管理系统（含项目管理、评审计划管理、评审实施情况和结果汇总、系统管理）",
+    "has_critical_ambiguity": false,
+    "consistency_check": "warnings",
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-FIX-001",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C12: 自动回填 E-DF.打分 变为 T-038",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ],
+    "pipeline_trace": {
+      "step0_events": 0,
+      "step1_entities": [
+        "E-XM",
+        "E-PSJH",
+        "E-JG",
+        "E-DF",
+        "E-ZJ",
+        "E-YH",
+        "E-JS",
+        "E-FSXZ",
+        "E-XTRZ",
+        "E-PFXZ"
+      ],
+      "step2_structural_relations": 9,
+      "step3_branch_dimensions": 1,
+      "step3_branch_tt_backfilled": 0,
+      "step3_branch_tt_deviations": 0,
+      "step4_transitions": 42,
+      "step4_transition_relations": 5,
+      "step4_roles": 6,
+      "step4_precondition_stats": {
+        "total_preconditions": 63,
+        "state_ref_count": 37,
+        "event_ref_count": 1,
+        "constraint_count": 25,
+        "state_ref_resolved_count": 37,
+        "state_ref_unresolved_count": 0
+      },
+      "step5_invalid_transitions": 5,
+      "step5_cross_entity": 10,
+      "step5_business_rules": 68
+    },
+    "branch_dimensions": [
+      {
+        "dimension": "项目归档分支",
+        "entity": "E-XM",
+        "values": [
+          "开题_合格及以上",
+          "开题_不合格或差",
+          "验收_合格及以上",
+          "验收_不合格或差"
+        ],
+        "impact_scope": "项目归档时由待归档状态转入不同目标状态",
+        "evidence": "4.5（5）a）-d）",
+        "branches": [
+          {
+            "value": "开题_合格及以上",
+            "target_transition": "T-007",
+            "desc": "开题阶段评级合格及以上：项目状态由待归档变为已选入，阶段由开题变为验收"
+          },
+          {
+            "value": "开题_不合格或差",
+            "target_transition": "T-008",
+            "desc": "开题阶段评级不合格或差：项目状态由待归档变为待选入，阶段不变"
+          },
+          {
+            "value": "验收_合格及以上",
+            "target_transition": "T-009",
+            "desc": "验收阶段评级合格及以上：项目状态由待归档变为已归档，阶段不变"
+          },
+          {
+            "value": "验收_不合格或差",
+            "target_transition": "T-010",
+            "desc": "验收阶段评级不合格或差：项目状态由待归档变为待选入，阶段不变"
+          }
+        ],
+        "coverage": {
+          "transitions": [
+            "T-007",
+            "T-008",
+            "T-009",
+            "T-010",
+            "T-014"
+          ],
+          "cross_entity": [],
+          "business_rules": [
+            "BR-067",
+            "BR-068"
+          ]
+        }
+      }
+    ],
+    "branch_tt_backfilled": [],
+    "branch_tt_deviations": []
+  },
+  "_context": {
+    "prohibition_config": {
+      "action_verbs": [
+        "选入",
+        "纳入",
+        "启动",
+        "提交",
+        "保存",
+        "删除",
+        "修改",
+        "新增",
+        "归档",
+        "重启",
+        "暂停",
+        "结束",
+        "退出",
+        "登录",
+        "编辑",
+        "查看",
+        "分配",
+        "选出",
+        "下发",
+        "取消",
+        "评级",
+        "评价",
+        "升级",
+        "降级",
+        "锁定",
+        "解锁",
+        "重置",
+        "添加",
+        "查询",
+        "打分",
+        "回避",
+        "组建",
+        "进入",
+        "提为",
+        "升为",
+        "降为"
+      ],
+      "prohibit_keywords": [
+        "不能连续3天晚上分配任务",
+        "只有1次选入机会",
+        "不能提为试用",
+        "不能进行分数修改",
+        "不能编辑或取消",
+        "锁定后不得登录",
+        "不能删除",
+        "不可选入",
+        "不可删除"
+      ]
+    },
+    "permissions": [
+      {
+        "role": "评审管理员",
+        "operations": [
+          "查看项目",
+          "查询项目",
+          "查看项目附件",
+          "查询评审计划",
+          "查看评审计划",
+          "查看评审计划执行信息",
+          "查看专家",
+          "查询专家",
+          "查看专家打分项目",
+          "新增专家",
+          "编辑专家",
+          "删除专家",
+          "回避项目设置",
+          "查看实施情况",
+          "查看结果汇总",
+          "查看项目评价",
+          "查看机构评价",
+          "编辑分数限值",
+          "查看分数限值",
+          "查看首页"
+        ]
+      },
+      {
+        "role": "评审助理",
+        "operations": [
+          "查看项目",
+          "查看项目附件",
+          "上传评审推荐书",
+          "查询评审计划",
+          "查看评审计划",
+          "查看评审计划执行信息",
+          "查看实施情况",
+          "查看首页"
+        ]
+      },
+      {
+        "role": "评审专家",
+        "operations": [
+          "查看首页",
+          "查看评分细则"
+        ]
+      },
+      {
+        "role": "系统管理员",
+        "operations": [
+          "编辑用户",
+          "查询用户",
+          "重置密码",
+          "查看角色",
+          "查询角色",
+          "查看关联用户",
+          "编辑机构",
+          "删除机构",
+          "编辑超时设置",
+          "查看超时设置"
+        ]
+      },
+      {
+        "role": "机构管理员",
+        "operations": [
+          "查看项目",
+          "查询项目",
+          "查看项目附件",
+          "上传附件",
+          "下载附件",
+          "查看首页"
+        ]
+      },
+      {
+        "role": "审计管理员",
+        "operations": [
+          "查看日志",
+          "查询日志",
+          "查看首页"
+        ]
+      }
+    ]
+  },
+  "domain_model": {
+    "entities": [
+      {
+        "id": "E-XM",
+        "name": "项目",
+        "desc": "项目评审的基本单元，由机构管理员新增并管理，经历待选入、已选入、待评审、评审中、待归档、已归档状态，并区分开题与验收两个阶段",
+        "type": "core",
+        "tags": [
+          "multi-state",
+          "approvable",
+          "expirable"
+        ],
+        "attributes": [
+          {
+            "name": "项目名称",
+            "desc": "字符；长度20；必填项",
+            "is_config": false
+          },
+          {
+            "name": "互联网专业领域",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "是否为部级项目",
+            "desc": "布尔；必填项",
+            "is_config": false
+          },
+          {
+            "name": "机构",
+            "desc": "字符；自动继承机构管理员所属机构；不可编辑",
+            "is_config": false
+          },
+          {
+            "name": "研究周期（月）",
+            "desc": "整数；长度2；1-99",
+            "is_config": false
+          },
+          {
+            "name": "技术成熟度",
+            "desc": "字符；长度20",
+            "is_config": false
+          },
+          {
+            "name": "联系人",
+            "desc": "字符；长度10；必填项",
+            "is_config": false
+          },
+          {
+            "name": "方向重点",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "研究内容",
+            "desc": "字符；长度100；必填项",
+            "is_config": false
+          },
+          {
+            "name": "技术指标",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "创新点",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "技术领域",
+            "desc": "字符；必填项；从已有的技术领域进行单选",
+            "is_config": true
+          },
+          {
+            "name": "建议书编码",
+            "desc": "字符；长度30；必填项",
+            "is_config": false
+          },
+          {
+            "name": "互联网专业方向",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "是否专家推荐",
+            "desc": "布尔；默认为否；取值范围：是、否；只能单选",
+            "is_config": false
+          },
+          {
+            "name": "申请经费（万元）",
+            "desc": "整数；长度4；必填项；1-9999",
+            "is_config": false
+          },
+          {
+            "name": "考核方式",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "项目负责人",
+            "desc": "字符；长度10；必填项",
+            "is_config": false
+          },
+          {
+            "name": "联系人电话",
+            "desc": "字符；长度11；必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字",
+            "is_config": false
+          },
+          {
+            "name": "研究目标",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "关键技术",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "主要成果",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "首年研究目标",
+            "desc": "字符；长度100",
+            "is_config": false
+          },
+          {
+            "name": "项目类型",
+            "desc": "枚举；取值范围：基础技术、应用技术；只能选择一个",
+            "is_config": true
+          },
+          {
+            "name": "建议书",
+            "desc": "附件；可上传格式：doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过10MB；多次上传时覆盖上一次附件；必填项",
+            "is_config": false
+          },
+          {
+            "name": "评审推荐书",
+            "desc": "附件；可上传格式：doc、docx、ppt、pdf、png、jpg；评审助理可以上传；大小不超过10MB；多次上传时覆盖上一次附件",
+            "is_config": false
+          },
+          {
+            "name": "研制总结",
+            "desc": "附件；可上传格式：doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过10MB；多次上传时覆盖上一次附件",
+            "is_config": false
+          },
+          {
+            "name": "开题得分",
+            "desc": "数字；长度4；根据打分权重计算所得，见4.9.6部分",
+            "is_config": false
+          },
+          {
+            "name": "验收得分",
+            "desc": "数字；长度4；根据打分权重计算所得，见4.9.6部分",
+            "is_config": false
+          },
+          {
+            "name": "开题评价结果",
+            "desc": "枚举；取值范围：优秀、良好、合格、不合格、差；依据项目评价所得，见4.9.6部分",
+            "is_config": false
+          },
+          {
+            "name": "验收评价结果",
+            "desc": "枚举；取值范围：优秀、良好、合格、不合格、差；依据项目评价所得，见4.9.6部分",
+            "is_config": false
+          },
+          {
+            "name": "开题不合格次数",
+            "desc": "整数",
+            "is_config": false
+          },
+          {
+            "name": "验收不合格次数",
+            "desc": "整数",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "项目状态",
+            "states": [
+              "待选入",
+              "已选入",
+              "待评审",
+              "评审中",
+              "待归档",
+              "已归档"
+            ],
+            "initial": "待选入",
+            "terminal": [
+              "已归档"
+            ],
+            "note": {
+              "inferred": false
+            },
+            "inferred": []
+          },
+          {
+            "dimension_name": "项目阶段",
+            "states": [
+              "开题",
+              "验收"
+            ],
+            "initial": "开题",
+            "terminal": [
+              "验收"
+            ],
+            "note": {
+              "comment": "4.5明确：项目评审阶段包括开题和验收；新建项目初始化为开题阶段；开题合格及以上归档后阶段由开题变为验收，无返回路径，故验收为终态"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "新增项目",
+            "category": "crud",
+            "expected_results": [
+              "项目新增成功，项目状态初始化为待选入，处于开题阶段"
+            ],
+            "source_ref": "4.6（1）a）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t01/T-013",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "删除项目",
+            "category": "crud",
+            "expected_results": [
+              "只能删除待选入且未评价过的项目"
+            ],
+            "source_ref": "4.6（1）b）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；删除前需校验状态与评价历史",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "编辑项目",
+            "category": "crud",
+            "expected_results": [
+              "只可编辑待选入的项目信息；对评价过的项目编辑附件"
+            ],
+            "source_ref": "4.6（1）c）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更不影响状态",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "查看项目",
+            "category": "query",
+            "expected_results": [
+              "显示项目详细信息"
+            ],
+            "source_ref": "4.6（1）d）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "机构管理员",
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          },
+          {
+            "name": "查询项目",
+            "category": "query",
+            "expected_results": [
+              "依据项目名称和技术领域条件返回匹配项目列表"
+            ],
+            "source_ref": "4.6（1）e）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "查看项目附件",
+            "category": "file",
+            "expected_results": [
+              "集中展示项目附件；机构管理员只可查看本机构的项目附件"
+            ],
+            "source_ref": "4.6（2）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "评审管理员",
+                "评审助理",
+                "机构管理员"
+              ]
+            }
+          },
+          {
+            "name": "上传附件",
+            "category": "file",
+            "expected_results": [
+              "附件从本地上传到数据库；多次上传覆盖上一次附件"
+            ],
+            "source_ref": "4.4（10）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "下载附件",
+            "category": "file",
+            "expected_results": [
+              "附件从数据库下载到本地"
+            ],
+            "source_ref": "4.4（11）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "排序",
+            "category": "ui",
+            "expected_results": [
+              "在有排序标识的列表中单击某一个列表头时，可以按照相应列的升序或者降序来显示列表数据"
+            ],
+            "source_ref": "4.4（5）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "重置",
+            "category": "ui",
+            "expected_results": [
+              "清除输入的查询条件，刷新页面"
+            ],
+            "source_ref": "4.4（7）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "分页工具条",
+            "category": "ui",
+            "expected_results": [
+              "支持设置页面展示条数，可以进行上一页、下一页操作，显示当前页及总页数"
+            ],
+            "source_ref": "4.4（8）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          },
+          {
+            "name": "取消/关闭",
+            "category": "ui",
+            "expected_results": [
+              "放弃本次新增、编辑操作或关闭弹窗"
+            ],
+            "source_ref": "4.4（12）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "机构管理员"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-PSJH",
+        "name": "评审计划",
+        "desc": "为管理一批同领域、同阶段项目的评审而提出的特定要求的活动，由评审管理员建立，经历已建立、待启动、待评审、评审中、暂停、已完成、结束、超时结束、取消结束状态",
+        "type": "core",
+        "tags": [
+          "multi-state",
+          "expirable",
+          "collaborative",
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "计划编号",
+            "desc": "字符；自动生成且唯一；不可编辑",
+            "is_config": false
+          },
+          {
+            "name": "计划类型",
+            "desc": "枚举；必填项；取值范围：开题、验收；只能单选；计划保存后不可编辑",
+            "is_config": true
+          },
+          {
+            "name": "技术领域",
+            "desc": "枚举；必填项；从已有的技术领域进行单选；计划保存后不可编辑",
+            "is_config": true
+          },
+          {
+            "name": "专家人数",
+            "desc": "枚举；必填项；见4.8.1（6）部分",
+            "is_config": true
+          },
+          {
+            "name": "专家姓名",
+            "desc": "专家集合；必填项",
+            "is_config": false
+          },
+          {
+            "name": "项目名称",
+            "desc": "项目集合；必填项",
+            "is_config": false
+          },
+          {
+            "name": "预计评审日期",
+            "desc": "日期；必填项；yyyy-mm-dd",
+            "is_config": false
+          },
+          {
+            "name": "评审时段",
+            "desc": "枚举；必填项；取值范围：上午、下午、晚上；只能单选",
+            "is_config": true
+          },
+          {
+            "name": "计划建立时间",
+            "desc": "日期；记录到秒；自动获取计划建立时系统时间",
+            "is_config": false
+          },
+          {
+            "name": "计划下发时间",
+            "desc": "日期；记录到秒；自动获取计划下发时系统时间",
+            "is_config": false
+          },
+          {
+            "name": "计划启动时间",
+            "desc": "日期；记录到秒；自动获取计划启动时系统时间",
+            "is_config": false
+          },
+          {
+            "name": "计划归档时间",
+            "desc": "日期；记录到秒；自动获取计划归档时系统时间",
+            "is_config": false
+          },
+          {
+            "name": "计划状态",
+            "desc": "枚举；见4.8.1部分",
+            "is_config": false
+          },
+          {
+            "name": "计划执行信息",
+            "desc": "提供该计划中项目的状态和打分情况（计划中的专家对项目是否打分或者提交）",
+            "is_config": false
+          },
+          {
+            "name": "下发时限",
+            "desc": "从已建立到下发的时间（单位：天）；1-2；默认为1；超过时限计划自动转为待启动状态",
+            "is_config": true
+          },
+          {
+            "name": "启动时限",
+            "desc": "从下发到启动的时间（单位：天）；1-5；默认为2；超过时限计划自动转为待评审状态",
+            "is_config": true
+          },
+          {
+            "name": "评审时限",
+            "desc": "从待评审到已完成的时间（单位：天）；1-5；默认为2；超过时限计划自动转为已完成状态",
+            "is_config": true
+          },
+          {
+            "name": "归档时限",
+            "desc": "从已完成到结束的时限（单位：天）；1-3；默认为2；超过时限计划自动转为超时结束状态",
+            "is_config": true
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "评审计划状态",
+            "states": [
+              "已建立",
+              "待启动",
+              "待评审",
+              "评审中",
+              "暂停",
+              "已完成",
+              "结束",
+              "超时结束",
+              "取消结束"
+            ],
+            "initial": "已建立",
+            "terminal": [
+              "结束",
+              "超时结束",
+              "取消结束"
+            ],
+            "note": {
+              "inferred": false
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "建立评审计划",
+            "category": "crud",
+            "expected_results": [
+              "保存后评审计划状态为已建立"
+            ],
+            "source_ref": "4.8.2",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t12",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "取消评审计划",
+            "category": "crud",
+            "expected_results": [
+              "评审计划状态由已建立变为取消结束；项目和专家状态返回到该计划建立前的状态"
+            ],
+            "source_ref": "4.8.3（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t13",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "下发评审计划",
+            "category": "crud",
+            "expected_results": [
+              "评审计划状态由已建立变为待启动"
+            ],
+            "source_ref": "4.8.4（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t14",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "启动评审计划",
+            "category": "crud",
+            "expected_results": [
+              "评审计划状态由待启动变为待评审"
+            ],
+            "source_ref": "4.8.5（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t16",
+              "role": "评审助理"
+            }
+          },
+          {
+            "name": "暂停评审计划",
+            "category": "crud",
+            "expected_results": [
+              "计划状态变为暂停；暂停时专家不能对计划中的项目进行评审；评审助理和评审管理员不能对该计划归档；暂停期间计时不停"
+            ],
+            "source_ref": "4.8.7（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t19/T-023/T-024",
+              "role": "评审助理"
+            }
+          },
+          {
+            "name": "重启评审计划",
+            "category": "crud",
+            "expected_results": [
+              "状态返回到暂停前的状态"
+            ],
+            "source_ref": "4.8.7（2）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t22/T-026/T-027",
+              "role": "评审助理"
+            }
+          },
+          {
+            "name": "归档评审计划",
+            "category": "crud",
+            "expected_results": [
+              "评审计划状态由已完成变为结束；对计划中项目按4.5（5）归档；根据项目阶段评价结果对机构进行评价"
+            ],
+            "source_ref": "4.8.9（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t27",
+              "role": [
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          },
+          {
+            "name": "删除评审计划",
+            "category": "crud",
+            "expected_results": [
+              "可删除处于已建立状态和取消结束状态的计划"
+            ],
+            "source_ref": "4.8.10",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；删除前需校验状态",
+              "role": [
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          },
+          {
+            "name": "查看评审计划",
+            "category": "query",
+            "expected_results": [
+              "可对评审计划的状态、评审组的组成和计划的执行信息等进行查看"
+            ],
+            "source_ref": "4.8.11",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          },
+          {
+            "name": "查询评审计划",
+            "category": "query",
+            "expected_results": [
+              "根据专家姓名、项目名称、技术领域和评审时段查询符合条件的计划"
+            ],
+            "source_ref": "4.8.1（3）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          },
+          {
+            "name": "编辑评审计划",
+            "category": "crud",
+            "expected_results": [
+              "处于已建立状态的计划可以进行编辑；下发后不能编辑"
+            ],
+            "source_ref": "4.8.2；4.8.4（3）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "查看评审计划执行信息",
+            "category": "query",
+            "expected_results": [
+              "提供该计划中项目的状态和打分情况"
+            ],
+            "source_ref": "4.8-1 #14",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "评审管理员",
+                "评审助理"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-JG",
+        "name": "机构",
+        "desc": "研制机构，建立后默认为合格，依据项目阶段评价结果累计情况决定机构状态变更，状态分为合格、不合格、试用",
+        "type": "core",
+        "tags": [
+          "multi-state",
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "机构名称",
+            "desc": "字符；长度50；必填项",
+            "is_config": false
+          },
+          {
+            "name": "机构类型",
+            "desc": "枚举；取值范围：研制机构；自动从上级机构继承；不可编辑",
+            "is_config": false
+          },
+          {
+            "name": "机构状态",
+            "desc": "枚举；取值范围：合格、不合格、试用",
+            "is_config": false
+          },
+          {
+            "name": "上级机构",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "不合格次数",
+            "desc": "整数",
+            "is_config": false
+          },
+          {
+            "name": "机构编码",
+            "desc": "字符；自动生成；不可编辑",
+            "is_config": false
+          },
+          {
+            "name": "手机号",
+            "desc": "数字；长度11；数字组成；手机号验证规则：第一位数字1，第二位数字3、4、5、6、7、8、9，共11位数字",
+            "is_config": false
+          },
+          {
+            "name": "传真",
+            "desc": "字符；长度20",
+            "is_config": false
+          },
+          {
+            "name": "地址",
+            "desc": "字符；长度50",
+            "is_config": false
+          },
+          {
+            "name": "备注",
+            "desc": "字符；长度100",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "机构状态",
+            "states": [
+              "合格",
+              "不合格",
+              "试用"
+            ],
+            "initial": "合格",
+            "terminal": [],
+            "note": {
+              "comment": "4.9.7明确：研制机构建立后默认为合格；机构状态可循环变更（合格↔不合格↔试用），无终态"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "添加机构",
+            "category": "crud",
+            "expected_results": [
+              "实现添加研制机构的功能；机构建立后默认为合格状态"
+            ],
+            "source_ref": "4.11.3（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t29",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "编辑机构",
+            "category": "crud",
+            "expected_results": [
+              "实现研制机构信息的修改；不可编辑上级机构、机构编码、不合格次数和机构状态"
+            ],
+            "source_ref": "4.11.3（2）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "删除机构",
+            "category": "crud",
+            "expected_results": [
+              "机构下无项目、无用户、无子机构时才可删除；根机构不可删除"
+            ],
+            "source_ref": "4.11.3（3）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；删除前需校验",
+              "role": "系统管理员"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-DF",
+        "name": "打分",
+        "desc": "评审专家对分配给其的项目进行打分的记录，包含打分项分数、总分、是否提交、专家意见等",
+        "type": "core",
+        "tags": [
+          "multi-state"
+        ],
+        "attributes": [
+          {
+            "name": "专家",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "创新性",
+            "desc": "数字；0.00&lt;=数值&lt;=15.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "应用前景",
+            "desc": "数字；0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "研究目标及技术指标",
+            "desc": "数字；0.00&lt;=数值&lt;=10.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "技术指标达标情况",
+            "desc": "数字；0.00&lt;=数值&lt;=10.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "成果及考核方式",
+            "desc": "数字；0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "成果及其完成情况",
+            "desc": "数字；0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "研究基础和保障条件",
+            "desc": "数字；0.00&lt;=数值&lt;=15.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "研究方案及技术途径",
+            "desc": "数字；0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "研制过程",
+            "desc": "数字；0.00&lt;=数值&lt;=15.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "关键技术",
+            "desc": "数字；0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "总分",
+            "desc": "数字；开题：创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径&lt;=100.00；验收：创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术&lt;=100.00；四舍五入后保留两位小数",
+            "is_config": false
+          },
+          {
+            "name": "是否提交",
+            "desc": "布尔",
+            "is_config": false
+          },
+          {
+            "name": "专家意见",
+            "desc": "字符；长度200",
+            "is_config": false
+          },
+          {
+            "name": "评分细则",
+            "desc": "字符；自动显示当前阶段的评分细则",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "打分状态",
+            "states": [
+              "未打分",
+              "已保存",
+              "已提交"
+            ],
+            "initial": "未打分",
+            "terminal": [
+              "已提交"
+            ],
+            "note": {
+              "comment": "隐式初态：分配打分任务后初始化为未打分，原文4.9.2未命名此状态；依据4.9.2（2）'打分状态变为已保存'反推存在未打分初态"
+            },
+            "inferred": [
+              "未打分"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "打分",
+            "category": "crud",
+            "expected_results": [
+              "专家依据打分规则对项目进行评审打分"
+            ],
+            "source_ref": "4.9.2（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应打分动作，无状态变更；对应转换 T-038",
+              "role": "评审专家"
+            }
+          },
+          {
+            "name": "保存打分",
+            "category": "crud",
+            "expected_results": [
+              "打分状态变为已保存"
+            ],
+            "source_ref": "4.9.2（2）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t35",
+              "role": "评审专家"
+            }
+          },
+          {
+            "name": "提交打分",
+            "category": "crud",
+            "expected_results": [
+              "打分状态变为已提交；已提交的项目不能进行分数修改；项目各项打分全部为零的不能提交，并提示"
+            ],
+            "source_ref": "4.9.2（3）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t36",
+              "role": "评审专家"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-ZJ",
+        "name": "专家",
+        "desc": "评审专家信息，由评审管理员管理，包括新增、编辑、删除、查询、打分项目查看和回避项目设置",
+        "type": "managed",
+        "tags": [
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "姓名",
+            "desc": "字符；长度50；必填项",
+            "is_config": false
+          },
+          {
+            "name": "机构",
+            "desc": "字符；长度50；必填项；从已有研制机构中进行选择，只能单选",
+            "is_config": false
+          },
+          {
+            "name": "手机号",
+            "desc": "数字；长度11；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字；必填项；唯一",
+            "is_config": false
+          },
+          {
+            "name": "技术领域",
+            "desc": "枚举；取值范围：A领域、B领域、C领域、D领域、E领域、F领域、G领域、H领域、I领域、J领域；可选择1-3个技术领域；必填项",
+            "is_config": true
+          },
+          {
+            "name": "评审身份",
+            "desc": "枚举；必填项；取值范围：组长专家、普通专家；只能单选",
+            "is_config": true
+          },
+          {
+            "name": "回避项目",
+            "desc": "项目集合；指定回避项目；只能从已选入且专家技术领域涵盖的非该专家所在机构的项目中选择",
+            "is_config": true
+          },
+          {
+            "name": "性别",
+            "desc": "枚举；取值范围：男、女；只能单选",
+            "is_config": false
+          },
+          {
+            "name": "邮箱",
+            "desc": "字符；必须包含@和.；不能包含中文、特殊符号",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [],
+        "operations": [
+          {
+            "name": "新增专家",
+            "category": "crud",
+            "expected_results": [
+              "实现专家新增的功能；手机号作为账号；密码默认为手机号后六位；操作结果同步到用户管理"
+            ],
+            "source_ref": "4.10（1）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；crud操作",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "编辑专家",
+            "category": "crud",
+            "expected_results": [
+              "实现专家信息的编辑；不能编辑技术领域、机构、评审身份和手机号"
+            ],
+            "source_ref": "4.10（2）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "删除专家",
+            "category": "crud",
+            "expected_results": [
+              "专家有待评审或者评审中的项目时不可以删除，并提示；如删除后同一技术领域的专家不足5人时需进行确认；如删除后同一技术领域中组长专家不足2人时需进行确认"
+            ],
+            "source_ref": "4.10（3）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；删除前需校验",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "查询专家",
+            "category": "query",
+            "expected_results": [
+              "根据姓名、手机号和技术领域进行查询"
+            ],
+            "source_ref": "4.10（4）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "打分项目查看",
+            "category": "query",
+            "expected_results": [
+              "查看该专家参评的项目的打分信息与意见"
+            ],
+            "source_ref": "4.10（5）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "回避项目设置",
+            "category": "config",
+            "expected_results": [
+              "在已选入的项目中进行专家回避项目设置；只对回避项目设置后建立的评审计划有效"
+            ],
+            "source_ref": "4.10（6）",
+            "note": {
+              "inferred": false,
+              "comment": "配置型操作",
+              "role": "评审管理员"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-YH",
+        "name": "用户",
+        "desc": "系统用户信息，由系统管理员管理，包括新增、编辑、锁定、解锁、重置密码、删除、查询",
+        "type": "managed",
+        "tags": [
+          "multi-state"
+        ],
+        "attributes": [
+          {
+            "name": "用户账号",
+            "desc": "字符；长度11；必填项；可以由汉字、字母、数字、下划线组成；不可重复",
+            "is_config": false
+          },
+          {
+            "name": "用户姓名",
+            "desc": "字符；长度50；必填项",
+            "is_config": false
+          },
+          {
+            "name": "头像",
+            "desc": "文件；图片大小不可超过1MB；可上传格式png、jpg；在首页显示",
+            "is_config": false
+          },
+          {
+            "name": "登录密码",
+            "desc": "字符；长度8-18；必填项；只能由数字、字母和特殊符号组成；长度大于等于8个字符小于等于18个字符",
+            "is_config": false
+          },
+          {
+            "name": "确认密码",
+            "desc": "字符；长度8-18；必填项；只能由数字、字母和特殊符号组成；长度大于等于8个字符小于等于18个字符",
+            "is_config": false
+          },
+          {
+            "name": "技术领域",
+            "desc": "枚举；必填项；取值范围：A领域、B领域、C领域、D领域、E领域、F领域、G领域、H领域、I领域、J领域；可选择1-3个技术领域；只有评审专家有该信息",
+            "is_config": true
+          },
+          {
+            "name": "角色",
+            "desc": "枚举；必填项；取值范围：机构管理员、评审专家；选择角色为评审专家时在专家管理处默认为普通专家；只能单选",
+            "is_config": true
+          },
+          {
+            "name": "所属机构",
+            "desc": "字符；必填项；从已有的研制机构中选择，只能单选",
+            "is_config": false
+          },
+          {
+            "name": "手机号码",
+            "desc": "数字；长度11；必填项；数字组成；手机号验证规则：第一位数字1，第二位数字3、4、5、6、7、8、9，一共11位数字；唯一",
+            "is_config": false
+          },
+          {
+            "name": "邮箱",
+            "desc": "字符；必须包含@和.；不能包含中文、特殊符号",
+            "is_config": false
+          },
+          {
+            "name": "出生日期",
+            "desc": "日期；yyyy-mm-dd",
+            "is_config": false
+          },
+          {
+            "name": "性别",
+            "desc": "枚举；取值范围：男、女；只能单选",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "用户状态",
+            "states": [
+              "正常",
+              "锁定"
+            ],
+            "initial": "正常",
+            "terminal": [],
+            "note": {
+              "comment": "隐式初态：新增用户后默认为正常状态；原文4.11.1仅明确'锁定'状态，'正常'由'锁定后不得登录'与'解锁后可以登录'反推"
+            },
+            "inferred": [
+              "正常"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "新增用户",
+            "category": "crud",
+            "expected_results": [
+              "实现用户新增的功能"
+            ],
+            "source_ref": "4.11.1（1）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t37",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "编辑用户",
+            "category": "crud",
+            "expected_results": [
+              "实现用户信息的修改；不可编辑用户账号、手机号、技术领域、所属机构和角色"
+            ],
+            "source_ref": "4.11.1（2）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "锁定用户",
+            "category": "crud",
+            "expected_results": [
+              "实现用户的锁定功能；锁定后不得登录此系统"
+            ],
+            "source_ref": "4.11.1（3）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t38",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "解锁用户",
+            "category": "crud",
+            "expected_results": [
+              "实现对锁定的用户的解锁功能；解锁后可以登录此系统"
+            ],
+            "source_ref": "4.11.1（4）",
+            "note": {
+              "inferred": false,
+              "comment": "对应转换t39",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "重置密码",
+            "category": "crud",
+            "expected_results": [
+              "实现用户密码的重置"
+            ],
+            "source_ref": "4.11.1（5）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；属性变更",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "删除用户",
+            "category": "crud",
+            "expected_results": [
+              "将用户从系统中删除；如有未完成的任务不能删除"
+            ],
+            "source_ref": "4.11.1（6）",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；删除前需校验",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "查询用户",
+            "category": "query",
+            "expected_results": [
+              "根据用户账号、技术领域、角色、机构和状态进行组合和模糊查询"
+            ],
+            "source_ref": "4.11.1（7）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "登录",
+            "category": "session",
+            "expected_results": [
+              "对于未锁定的用户，输入正确的用户账号与相应的密码后可进入本系统；如输入的用户账号或密码错误则系统给出提示"
+            ],
+            "source_ref": "4.3（1）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "system"
+            }
+          },
+          {
+            "name": "注销",
+            "category": "session",
+            "expected_results": [
+              "确认退出后系统将返回登录界面"
+            ],
+            "source_ref": "4.3（2）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "system"
+            }
+          },
+          {
+            "name": "修改密码",
+            "category": "session",
+            "expected_results": [
+              "用户在登录后可以修改自己的密码；需要输入原密码；新密码与原密码应不同；新密码需要确认输入两次且相同"
+            ],
+            "source_ref": "4.3（1）；4.13（10）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "system"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-JS",
+        "name": "角色",
+        "desc": "系统角色信息，包括角色编码、角色名称、创建时间；内置六个角色不可编辑",
+        "type": "managed",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "角色名称",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "角色编码",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "创建时间",
+            "desc": "日期",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [],
+        "operations": [
+          {
+            "name": "查看角色",
+            "category": "query",
+            "expected_results": [
+              "实现查看各角色及其对应的用户信息"
+            ],
+            "source_ref": "4.11.2",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "查询角色",
+            "category": "query",
+            "expected_results": [
+              "系统管理员可根据角色名称查询"
+            ],
+            "source_ref": "4.11.2（2）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "系统管理员"
+            }
+          },
+          {
+            "name": "查看关联用户",
+            "category": "query",
+            "expected_results": [
+              "查看相应角色下的关联用户"
+            ],
+            "source_ref": "4.11.2（1）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "系统管理员"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-FSXZ",
+        "name": "分数限值",
+        "desc": "用于汇总得分（开题或验收）大于等于分数限值的项目；设置后对未产生评价结果的项目立即生效，对已经汇总的项目无影响",
+        "type": "managed",
+        "tags": [
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "分数限值",
+            "desc": "数字；长度4；0.0&lt;分数限值&lt;=100.0；四舍五入后结果保留一位小数",
+            "is_config": true
+          }
+        ],
+        "state_dimensions": [],
+        "operations": [
+          {
+            "name": "设置分数限值",
+            "category": "config",
+            "expected_results": [
+              "分数限值设置后对未产生评价结果的项目立即生效；对已经汇总的项目无影响"
+            ],
+            "source_ref": "4.9.4",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；配置型操作",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "编辑分数限值",
+            "category": "config",
+            "expected_results": [
+              "评审管理员可对分数限值进行编辑"
+            ],
+            "source_ref": "4.9.4",
+            "note": {
+              "inferred": false,
+              "comment": "无对应转换；配置型操作",
+              "role": "评审管理员"
+            }
+          },
+          {
+            "name": "查看结果汇总",
+            "category": "query",
+            "expected_results": [
+              "评审管理员可查看评价分数大于等于分数限值的项目信息"
+            ],
+            "source_ref": "4.9.5",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "评审管理员"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-XTRZ",
+        "name": "系统日志",
+        "desc": "包括登录日志和操作日志类型，记录用户的登录、退出、添加、编辑、删除等操作",
+        "type": "managed",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "日志内容",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "用户账号",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "角色",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "IP",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "日志类型",
+            "desc": "字符；登录日志、操作日志",
+            "is_config": false
+          },
+          {
+            "name": "操作类型",
+            "desc": "字符",
+            "is_config": false
+          },
+          {
+            "name": "创建时间",
+            "desc": "日期",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [],
+        "operations": [
+          {
+            "name": "查看日志",
+            "category": "query",
+            "expected_results": [
+              "审计管理员可查看、查询日志信息"
+            ],
+            "source_ref": "4.11.5；4.12",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "审计管理员"
+            }
+          },
+          {
+            "name": "查询日志",
+            "category": "query",
+            "expected_results": [
+              "可以根据日志内容、创建时间进行组合查询"
+            ],
+            "source_ref": "4.11.5（4）",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": [
+                "审计管理员",
+                "系统管理员"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-PFXZ",
+        "name": "评分细则",
+        "desc": "系统内置的评分规则，描述每项打分项的规则，分为开题和验收两种规则类型",
+        "type": "managed",
+        "tags": [
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "规则类型",
+            "desc": "枚举；取值范围：开题、验收；系统内置",
+            "is_config": true
+          },
+          {
+            "name": "评分细则",
+            "desc": "描述每项打分项的规则；系统内置",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [],
+        "operations": [
+          {
+            "name": "查看评分细则",
+            "category": "query",
+            "expected_results": [
+              "自动显示当前阶段的评分细则"
+            ],
+            "source_ref": "4.9.2；4.9-1 #15",
+            "note": {
+              "inferred": false,
+              "comment": "通用操作",
+              "role": "评审专家"
+            }
+          }
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "id": "r01",
+        "name": "评审管理员",
+        "readonly": false
+      },
+      {
+        "id": "r02",
+        "name": "评审助理",
+        "readonly": false
+      },
+      {
+        "id": "r03",
+        "name": "评审专家",
+        "readonly": false
+      },
+      {
+        "id": "r04",
+        "name": "系统管理员",
+        "readonly": false
+      },
+      {
+        "id": "r05",
+        "name": "机构管理员",
+        "readonly": false
+      },
+      {
+        "id": "r06",
+        "name": "审计管理员",
+        "readonly": false
+      }
+    ],
+    "events": [],
+    "structural_relations": [
+      {
+        "from": "E-JG",
+        "to": "E-XM",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "项目所属机构由机构管理员所属机构自动继承；机构为项目的业务归属容器",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：项目机构自动继承机构管理员所属机构，删除机构需校验项目存在性，确属业务归属；判(c)"
+        }
+      },
+      {
+        "from": "E-PSJH",
+        "to": "E-XM",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "评审计划从已选入项目中选取1-5个项目纳入评审",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：评审计划不拥有项目，仅引用项目进行评审；项目生命周期独立于计划；判(d)"
+        }
+      },
+      {
+        "from": "E-PSJH",
+        "to": "E-ZJ",
+        "relation_type": "reference",
+        "cardinality": "M:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "评审计划的评审组由5、7或9个专家组成；按叙述顺序M:N",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：评审计划不拥有专家，仅引用专家组建评审组；专家生命周期独立；判(d)；M:N无方向动词按叙述顺序"
+        }
+      },
+      {
+        "from": "E-JG",
+        "to": "E-YH",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "用户所属机构从已有研制机构中选择",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：用户绑定所属机构，机构为用户业务归属容器；判(c)"
+        }
+      },
+      {
+        "from": "E-JG",
+        "to": "E-ZJ",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "专家所属机构从已有研制机构中选择",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：专家绑定机构，机构为专家业务归属容器；判(c)"
+        }
+      },
+      {
+        "from": "E-PSJH",
+        "to": "E-DF",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "评审计划启动后为计划中每个项目-专家对分配打分任务",
+        "confidence": "medium",
+        "note": {
+          "comment": "management_dimension复核：打分随评审计划启动而创建，随计划归档而结束；判(b)；confidence=medium因原文未显式说明打分创建时机"
+        }
+      },
+      {
+        "from": "E-YH",
+        "to": "E-ZJ",
+        "relation_type": "reference",
+        "cardinality": "1:1",
+        "ownership_dimension": "configuration_source",
+        "desc": "评审专家角色的用户操作结果同步到专家管理；新增评审专家用户时专家管理处默认为普通专家",
+        "confidence": "medium",
+        "note": {
+          "comment": "management_dimension复核：用户与专家为同一自然人的两套管理视图，非拥有关系；判(d)；双向同步由业务规则承载"
+        }
+      },
+      {
+        "from": "E-JG",
+        "to": "E-JG",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "机构有上级机构；机构类型自动从上级机构继承；根机构不可删除",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：机构树形结构，上级机构为配置源；判(a)参考；自环关系"
+        }
+      },
+      {
+        "from": "E-YH",
+        "to": "E-XTRZ",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "用户登录、退出、添加、编辑、删除等操作自动产生系统日志",
+        "confidence": "high",
+        "note": {
+          "comment": "management_dimension复核：日志由用户操作自动生成，无独立创建；判(b)"
+        }
+      }
+    ],
+    "transition_relations": [
+      {
+        "from": "E-PSJH",
+        "to": "E-XM",
+        "desc": "评审计划状态由待启动变为待评审时项目状态由待评审变为评审中；评审计划状态由已完成变为结束或超时结束，根据项目所处状态、评价结果和所处阶段项目转入不同状态；取消计划后项目状态返回到该计划建立前的状态",
+        "trigger": "评审计划状态由待启动变为待评审；评审计划状态由已完成变为结束或超时结束；评审计划状态变为取消结束",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-019",
+          "T-030",
+          "T-031",
+          "T-016"
+        ],
+        "rollback_propagation": true,
+        "confidence": "high",
+        "note": {
+          "comment": "4.5（3）（5）；4.8.3（2）；4.8.9（3）；同(E-PSJH,E-XM)合并升级"
+        }
+      },
+      {
+        "from": "E-DF",
+        "to": "E-PSJH",
+        "desc": "评审专家对该计划的项目进行打分保存后，评审计划状态由待评审变为评审中",
+        "trigger": "评审专家对该计划的项目进行打分保存",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-038"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "4.8.6"
+        }
+      },
+      {
+        "from": "E-DF",
+        "to": "E-XM",
+        "desc": "评审组全部专家提交了项目打分，则该项目状态由评审中变为待归档，并自动进行项目评价",
+        "trigger": "评审组全部专家提交了项目打分",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-039"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "4.5（4）；需聚合本计划本项目所有专家提交状态"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-PSJH",
+        "desc": "评审计划中所有项目在评审时限内变为待归档状态后，评审计划状态由评审中转为已完成",
+        "trigger": "评审计划中所有项目在评审时限内变为待归档状态",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-006"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "4.8.8（1）；需聚合本计划所有项目状态"
+        }
+      },
+      {
+        "from": "E-PSJH",
+        "to": "E-JG",
+        "desc": "归档时，根据项目阶段评价结果对机构进行评价，按照4.9.7处理",
+        "trigger": "评审计划归档时",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-030",
+          "T-031"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "4.8.9（4）；4.9.7"
+        }
+      }
+    ]
+  },
+  "state_and_flow": {
+    "transitions": [
+      {
+        "id": "T-001",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": null,
+        "to": "待选入",
+        "action": "新增项目",
+        "role": "机构管理员",
+        "preconditions": [],
+        "expected_results": [
+          "项目状态初始化为待选入",
+          "项目阶段初始化为开题"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.6（1）a）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-002",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待选入",
+        "to": "已选入",
+        "action": "项目选入",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "项目处于待选入状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "待选入"
+            }
+          },
+          {
+            "text": "本阶段评价结果为差的项目不可选入",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评级为差禁止选入；评级状态值为派生属性，非状态维度，降级constraint"
+            }
+          },
+          {
+            "text": "对于本阶段不合格评价结果的项目，只有1次选入机会",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "次数限制，无法定位状态维度，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "选入后项目状态变为已选入"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.7.1（1）-（3）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-003",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "已选入",
+        "to": "待选入",
+        "action": "项目选出",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "评审管理员只能对已选入状态的项目进行选出",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "已选入"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态由已选入变为待选入"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "4.7.2",
+        "note": {
+          "comment": "direction判④frm已选入在states列表中后于to待选入；为回退操作"
+        }
+      },
+      {
+        "id": "T-004",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "已选入",
+        "to": "待评审",
+        "action": "纳入评审计划",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "项目处于已选入状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "已选入"
+            }
+          },
+          {
+            "text": "评审管理员从处于已选入状态的项目中选取1-5个项目纳入评审计划",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "项目数范围1-5，非状态条件，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态变为待评审"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（2）；4.8.1（1）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-005",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待评审",
+        "to": "评审中",
+        "action": "进入评审",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由待启动变为待评审",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "待评审"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态由待评审变为评审中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（3）",
+        "note": {
+          "comment": "direction判③frm待评审先于to评审中；由评审计划启动联动触发"
+        }
+      },
+      {
+        "id": "T-006",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "评审中",
+        "to": "待归档",
+        "action": "完成评审打分",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审组全部专家提交了项目打分",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-DF",
+              "dimension": "打分状态",
+              "state": "已提交"
+            },
+            "note": {
+              "comment": "跨实体precondition：本计划中该项目所有评审专家的打分状态为已提交"
+            }
+          },
+          {
+            "text": "自动进行项目评价",
+            "type": "event_ref",
+            "ref": null
+          }
+        ],
+        "expected_results": [
+          "项目状态由评审中变为待归档",
+          "自动进行项目评价"
+        ],
+        "traits": [
+          "data_constraint"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（4）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-007",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待归档",
+        "to": "已选入",
+        "action": "归档-开题合格及以上",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由已完成变为结束或超时结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划归档完成；另可匹配超时结束"
+            }
+          },
+          {
+            "text": "项目处于开题阶段",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目阶段",
+              "state": "开题"
+            }
+          },
+          {
+            "text": "项目评级在合格及以上",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评级为派生属性非状态维度，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "若项目归档分支=开题_合格及以上，则项目状态由待归档变为已选入，阶段由开题变为验收"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（5）a）",
+        "note": {
+          "branch_dimension": "项目归档分支",
+          "comment": "direction判③frm待归档先于to已选入（已选入为循环态）；分支穿透"
+        }
+      },
+      {
+        "id": "T-008",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待归档",
+        "to": "待选入",
+        "action": "归档-开题不合格或差",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由已完成变为结束或超时结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划归档完成"
+            }
+          },
+          {
+            "text": "项目处于开题阶段",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目阶段",
+              "state": "开题"
+            }
+          },
+          {
+            "text": "项目评级为不合格或差",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评级为派生属性非状态维度，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "若项目归档分支=开题_不合格或差，则项目状态由待归档变为待选入，阶段不变"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P0",
+        "source_ref": "4.5（5）b）",
+        "note": {
+          "branch_dimension": "项目归档分支",
+          "comment": "direction判④frm待归档后于to待选入；分支穿透"
+        }
+      },
+      {
+        "id": "T-009",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待归档",
+        "to": "已归档",
+        "action": "归档-验收合格及以上",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由已完成变为结束或超时结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划归档完成"
+            }
+          },
+          {
+            "text": "项目处于验收阶段",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目阶段",
+              "state": "验收"
+            }
+          },
+          {
+            "text": "项目评级在合格及以上",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评级为派生属性非状态维度，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "若项目归档分支=验收_合格及以上，则项目状态由待归档变为已归档，阶段不变"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（5）c）",
+        "note": {
+          "branch_dimension": "项目归档分支",
+          "comment": "direction判③frm待归档先于to已归档；分支穿透；to为终态"
+        }
+      },
+      {
+        "id": "T-010",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待归档",
+        "to": "待选入",
+        "action": "归档-验收不合格或差",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由已完成变为结束或超时结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划归档完成"
+            }
+          },
+          {
+            "text": "项目处于验收阶段",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目阶段",
+              "state": "验收"
+            }
+          },
+          {
+            "text": "项目评级为不合格或差",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评级为派生属性非状态维度，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "若项目归档分支=验收_不合格或差，则项目状态由待归档变为待选入，阶段不变"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P0",
+        "source_ref": "4.5（5）d）",
+        "note": {
+          "branch_dimension": "项目归档分支",
+          "comment": "direction判④frm待归档后于to待选入；分支穿透"
+        }
+      },
+      {
+        "id": "T-011",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "评审中",
+        "to": "已选入",
+        "action": "计划取消回退",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态变为取消结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "取消结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划取消"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态回到该计划建立前的状态"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "4.8.3（2）",
+        "note": {
+          "comment": "direction判④frm评审中后于to已选入；为回退操作；4.8.3（2）取消计划后项目回到建立前状态"
+        }
+      },
+      {
+        "id": "T-012",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "评审中",
+        "to": "已选入",
+        "action": "计划完成结束回退",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态由已完成变为结束或超时结束",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划完成-结束；另可匹配超时结束"
+            }
+          },
+          {
+            "text": "项目处于评审中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "评审中"
+            }
+          }
+        ],
+        "expected_results": [
+          "对已完成计划中包含的处于评审中状态的项目，项目状态回到该计划建立前"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "4.5（5）e）",
+        "note": {
+          "comment": "direction判④frm评审中后于to已选入；为回退操作；4.5（5）e）特殊分支"
+        }
+      },
+      {
+        "id": "T-013",
+        "entity": "E-XM",
+        "dimension": "项目阶段",
+        "from": null,
+        "to": "开题",
+        "action": "新增项目",
+        "role": "机构管理员",
+        "preconditions": [],
+        "expected_results": [
+          "项目阶段初始化为开题"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.6（1）a）；4.5",
+        "note": {
+          "comment": "项目阶段维度的创建转换；与t01同属新增项目动作"
+        }
+      },
+      {
+        "id": "T-014",
+        "entity": "E-XM",
+        "dimension": "项目阶段",
+        "from": "开题",
+        "to": "验收",
+        "action": "阶段转验收",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "项目归档分支为开题_合格及以上",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "结束"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划归档完成且开题评级合格及以上"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目阶段由开题变为验收"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.5（5）a）",
+        "note": {
+          "branch_dimension": "项目归档分支",
+          "comment": "与t07同触发时机；direction判③frm开题先于to验收；to为终态"
+        }
+      },
+      {
+        "id": "T-015",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": null,
+        "to": "已建立",
+        "action": "建立评审计划",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "评审管理员从处于已选入状态的项目中选取1-5个项目纳入评审计划",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "项目数范围1-5，非状态条件，降级constraint"
+            }
+          },
+          {
+            "text": "评审计划的评审组由5、7或9个专家组成，有且只能有一个组长专家",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评审组组成约束，非状态条件，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "保存后评审计划状态为已建立",
+          "处于已建立状态的计划可以进行编辑"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.1（1）；4.8.2",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-016",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已建立",
+        "to": "取消结束",
+        "action": "取消评审计划",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "评审管理员对处于已建立状态的评审计划进行取消",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已建立"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由已建立变为取消结束",
+          "项目和专家状态返回到该计划建立前的状态"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.8.3（1）-（2）",
+        "note": {
+          "comment": "direction判③frm已建立先于to取消结束；虽为回退语义但to为新增终态，按states顺序判forward"
+        }
+      },
+      {
+        "id": "T-017",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已建立",
+        "to": "待启动",
+        "action": "下发评审计划",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "评审管理员对处于已建立状态的评审计划进行下发",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已建立"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由已建立变为待启动",
+          "下发后的评审计划不能编辑或取消"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.4（1）-（3）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-018",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已建立",
+        "to": "待启动",
+        "action": "下发超时",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划处于已建立状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已建立"
+            }
+          },
+          {
+            "text": "超过下发时限",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "下发时限1-2天，时间约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "下发超时后评审计划状态由已建立变为待启动"
+        ],
+        "traits": [
+          "time_sensitive"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.8.1（5）a）；4.8.4（2）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-019",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "待启动",
+        "to": "待评审",
+        "action": "启动评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理对待启动的评审计划进行启动",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "待启动"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由待启动变为待评审",
+          "项目状态由待评审变为评审中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.5（1）；4.5（3）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-020",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "待启动",
+        "to": "待评审",
+        "action": "启动超时",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划处于待启动状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "待启动"
+            }
+          },
+          {
+            "text": "超过启动时限",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "启动时限1-5天，时间约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "启动超时后评审计划状态由待启动变为待评审"
+        ],
+        "traits": [
+          "time_sensitive"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.8.1（5）b）；4.8.5（2）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-021",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "待评审",
+        "to": "评审中",
+        "action": "进入评审中",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审专家对该计划的项目进行打分保存",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-DF",
+              "dimension": "打分状态",
+              "state": "已保存"
+            },
+            "note": {
+              "comment": "跨实体precondition：本计划中至少一个项目-专家对的打分状态为已保存"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由待评审变为评审中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.6",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-022",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "待评审",
+        "to": "暂停",
+        "action": "暂停评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理可对待评审、评审中和已完成的评审计划进行暂停",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "待评审"
+            }
+          }
+        ],
+        "expected_results": [
+          "计划状态变为暂停",
+          "暂停时专家不能对计划中的项目进行评审",
+          "评审助理和评审管理员不能对该计划归档",
+          "暂停期间计时不停"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P1",
+        "source_ref": "4.8.7（1）",
+        "note": {
+          "comment": "direction判②to暂停为侧挂状态；lateral"
+        }
+      },
+      {
+        "id": "T-023",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "评审中",
+        "to": "暂停",
+        "action": "暂停评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理可对待评审、评审中和已完成的评审计划进行暂停",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "评审中"
+            }
+          }
+        ],
+        "expected_results": [
+          "计划状态变为暂停",
+          "暂停时专家不能对计划中的项目进行评审",
+          "评审助理和评审管理员不能对该计划归档",
+          "暂停期间计时不停"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P1",
+        "source_ref": "4.8.7（1）",
+        "note": {
+          "comment": "direction判②to暂停为侧挂状态；lateral"
+        }
+      },
+      {
+        "id": "T-024",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已完成",
+        "to": "暂停",
+        "action": "暂停评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理可对待评审、评审中和已完成的评审计划进行暂停",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已完成"
+            }
+          }
+        ],
+        "expected_results": [
+          "计划状态变为暂停",
+          "暂停期间计时不停"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P1",
+        "source_ref": "4.8.7（1）",
+        "note": {
+          "comment": "direction判②to暂停为侧挂状态；lateral"
+        }
+      },
+      {
+        "id": "T-025",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "暂停",
+        "to": "待评审",
+        "action": "重启评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理对暂停的计划进行重启",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "暂停"
+            }
+          }
+        ],
+        "expected_results": [
+          "状态返回到暂停前的状态"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "resume",
+        "priority": "P1",
+        "source_ref": "4.8.7（2）",
+        "note": {
+          "comment": "direction判②frm暂停为侧挂状态，to为原状态；resume"
+        }
+      },
+      {
+        "id": "T-026",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "暂停",
+        "to": "评审中",
+        "action": "重启评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理对暂停的计划进行重启",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "暂停"
+            }
+          }
+        ],
+        "expected_results": [
+          "状态返回到暂停前的状态"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "resume",
+        "priority": "P1",
+        "source_ref": "4.8.7（2）",
+        "note": {
+          "comment": "direction判②frm暂停为侧挂状态；resume"
+        }
+      },
+      {
+        "id": "T-027",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "暂停",
+        "to": "已完成",
+        "action": "重启评审计划",
+        "role": "评审助理",
+        "preconditions": [
+          {
+            "text": "评审助理对暂停的计划进行重启",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "暂停"
+            }
+          }
+        ],
+        "expected_results": [
+          "状态返回到暂停前的状态"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "resume",
+        "priority": "P1",
+        "source_ref": "4.8.7（2）",
+        "note": {
+          "comment": "direction判②frm暂停为侧挂状态；resume"
+        }
+      },
+      {
+        "id": "T-028",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "评审中",
+        "to": "已完成",
+        "action": "完成评审",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划中所有项目在评审时限内变为待归档状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "待归档"
+            },
+            "note": {
+              "comment": "跨实体precondition：本计划中所有项目状态为待归档"
+            }
+          },
+          {
+            "text": "在评审时限内",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评审时限1-5天，时间约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由评审中转为已完成"
+        ],
+        "traits": [
+          "time_sensitive",
+          "data_constraint"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.8（1）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-029",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "评审中",
+        "to": "已完成",
+        "action": "评审超时完成",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审超时",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "评审时限1-5天，时间约束，降级constraint；原文4.8.8（2）指出当前状态可为待评审、评审中、暂停"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审超时后评审计划状态由当前所处状态（待评审、评审中、暂停）变为已完成状态",
+          "计划中项目状态不变"
+        ],
+        "traits": [
+          "time_sensitive"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.8.8（2）",
+        "note": {
+          "comment": "frm取评审中为代表；原文允许从待评审/评审中/暂停多状态转入已完成"
+        }
+      },
+      {
+        "id": "T-030",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已完成",
+        "to": "结束",
+        "action": "归档评审计划",
+        "role": "评审管理员",
+        "preconditions": [
+          {
+            "text": "评审管理员和评审助理对处于已完成状态的评审计划进行归档",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已完成"
+            }
+          }
+        ],
+        "expected_results": [
+          "评审计划状态由已完成变为结束",
+          "对该计划中项目按照4.5（5）归档",
+          "根据项目阶段评价结果对机构进行评价"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.8.9（1）；4.8.9（3）-（4）",
+        "note": {
+          "comment": "role为评审管理员为代表；原文允许评审助理同样操作"
+        }
+      },
+      {
+        "id": "T-031",
+        "entity": "E-PSJH",
+        "dimension": "评审计划状态",
+        "from": "已完成",
+        "to": "超时结束",
+        "action": "归档超时",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划处于已完成状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "已完成"
+            }
+          },
+          {
+            "text": "超过归档时限",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "归档时限1-3天，时间约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "归档超时后评审计划状态由已完成变为超时结束",
+          "对该计划中项目按照4.5（5）归档",
+          "根据项目阶段评价结果对机构进行评价"
+        ],
+        "traits": [
+          "time_sensitive"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.8.9（2）-（3）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-032",
+        "entity": "E-JG",
+        "dimension": "机构状态",
+        "from": null,
+        "to": "合格",
+        "action": "添加机构",
+        "role": "系统管理员",
+        "preconditions": [],
+        "expected_results": [
+          "机构建立后默认为合格状态"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.11.3（1）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-033",
+        "entity": "E-JG",
+        "dimension": "机构状态",
+        "from": "合格",
+        "to": "不合格",
+        "action": "降为不合格",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "所有项目的阶段评价为差的次数累计达到3次及以上",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          },
+          {
+            "text": "或所有项目的阶段评价为差的次数累计达到1次及以上且评价为不合格次数累计达到3个及以上",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          },
+          {
+            "text": "或所有项目的阶段评价为不合格的次数累计达到5次及以上",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "将合格的研制机构评价为不合格机构"
+        ],
+        "traits": [
+          "data_constraint"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.9.7（1）a）-c）",
+        "note": {
+          "comment": "归档时累计触发；多条precondition为'或'关系"
+        }
+      },
+      {
+        "id": "T-034",
+        "entity": "E-JG",
+        "dimension": "机构状态",
+        "from": "不合格",
+        "to": "试用",
+        "action": "提为试用",
+        "role": "系统管理员",
+        "preconditions": [
+          {
+            "text": "系统管理员可以对不合格机构提为试用机构",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-JG",
+              "dimension": "机构状态",
+              "state": "不合格"
+            }
+          },
+          {
+            "text": "研制机构累计3次评级为不合格，则不能提为试用机构",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "次数限制，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "不合格机构提为试用机构"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.9.7（2）d）",
+        "note": {
+          "comment": "direction判④不合格(1)变为试用(2) to后于from；按forward处理"
+        }
+      },
+      {
+        "id": "T-035",
+        "entity": "E-JG",
+        "dimension": "机构状态",
+        "from": "试用",
+        "to": "合格",
+        "action": "升为合格",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "机构累计10次项目阶段评价结果为优",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          },
+          {
+            "text": "当处于试用状态的机构同时可满足升为合格或降为不合格时，降为不合格",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "优先级约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "试用机构升为合格机构"
+        ],
+        "traits": [
+          "data_constraint"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "4.9.7（3）a）；4.9.7（3）e）",
+        "note": {
+          "comment": "direction判③frm试用后于to合格（合格在states首位）；但语义为升回主线，按forward处理"
+        }
+      },
+      {
+        "id": "T-036",
+        "entity": "E-JG",
+        "dimension": "机构状态",
+        "from": "试用",
+        "to": "不合格",
+        "action": "降为不合格",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "机构累计2次项目阶段评价结果为差",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          },
+          {
+            "text": "或机构累计1次项目阶段评价结果为差且2次及以上项目阶段评价结果为不合格",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          },
+          {
+            "text": "或机构累计4次项目阶段评价结果为不合格",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "累计次数规则，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "将机构降为不合格"
+        ],
+        "traits": [
+          "data_constraint"
+        ],
+        "direction": "backward",
+        "priority": "P0",
+        "source_ref": "4.9.7（3）b）-d）",
+        "note": {
+          "comment": "direction判④frm试用后于to不合格（不合格在states中先于试用）；按backward处理；多条precondition为'或'关系"
+        }
+      },
+      {
+        "id": "T-037",
+        "entity": "E-DF",
+        "dimension": "打分状态",
+        "from": null,
+        "to": "未打分",
+        "action": "分配打分任务",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "评审计划状态变为待评审",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PSJH",
+              "dimension": "评审计划状态",
+              "state": "待评审"
+            },
+            "note": {
+              "comment": "跨实体precondition：评审计划启动后自动分配打分任务"
+            }
+          }
+        ],
+        "expected_results": [
+          "打分状态初始化为未打分"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.9.2",
+        "note": {
+          "comment": "隐式初态转换；4.9.2未显式描述分配时机，依据评审计划启动推导inferred"
+        }
+      },
+      {
+        "id": "T-038",
+        "entity": "E-DF",
+        "dimension": "打分状态",
+        "from": "未打分",
+        "to": "已保存",
+        "action": "保存打分",
+        "role": "评审专家",
+        "preconditions": [
+          {
+            "text": "专家依据打分规则对项目进行评审打分",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "打分规则约束，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "打分状态变为已保存"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.9.2（2）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-039",
+        "entity": "E-DF",
+        "dimension": "打分状态",
+        "from": "已保存",
+        "to": "已提交",
+        "action": "提交打分",
+        "role": "评审专家",
+        "preconditions": [
+          {
+            "text": "可提交一个或多个已保存的项目分数",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-DF",
+              "dimension": "打分状态",
+              "state": "已保存"
+            }
+          },
+          {
+            "text": "项目各项打分全部为零的不能提交",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "提交校验规则，降级constraint"
+            }
+          }
+        ],
+        "expected_results": [
+          "打分状态变为已提交",
+          "已提交的项目不能进行分数修改"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.9.2（3）",
+        "note": {
+          "inferred": false
+        }
+      },
+      {
+        "id": "T-040",
+        "entity": "E-YH",
+        "dimension": "用户状态",
+        "from": null,
+        "to": "正常",
+        "action": "新增用户",
+        "role": "系统管理员",
+        "preconditions": [],
+        "expected_results": [
+          "实现用户新增的功能",
+          "用户状态初始化为正常"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "4.11.1（1）",
+        "note": {
+          "comment": "隐式初态正常；依据4.11.1（3）'锁定后不得登录'反推"
+        }
+      },
+      {
+        "id": "T-041",
+        "entity": "E-YH",
+        "dimension": "用户状态",
+        "from": "正常",
+        "to": "锁定",
+        "action": "锁定用户",
+        "role": "系统管理员",
+        "preconditions": [
+          {
+            "text": "实现用户的锁定功能",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YH",
+              "dimension": "用户状态",
+              "state": "正常"
+            }
+          }
+        ],
+        "expected_results": [
+          "锁定后不得登录此系统"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P1",
+        "source_ref": "4.11.1（3）；4.13（8）",
+        "note": {
+          "comment": "direction判②to锁定为侧挂状态；lateral；另可由连续密码错误3次触发"
+        }
+      },
+      {
+        "id": "T-042",
+        "entity": "E-YH",
+        "dimension": "用户状态",
+        "from": "锁定",
+        "to": "正常",
+        "action": "解锁用户",
+        "role": "系统管理员",
+        "preconditions": [
+          {
+            "text": "实现对锁定的用户的解锁功能",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YH",
+              "dimension": "用户状态",
+              "state": "锁定"
+            }
+          }
+        ],
+        "expected_results": [
+          "解锁后可以登录此系统"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "resume",
+        "priority": "P1",
+        "source_ref": "4.11.1（4）",
+        "note": {
+          "comment": "direction判②frm锁定为侧挂状态；resume"
+        }
+      }
+    ]
+  },
+  "constraints": {
+    "invalid_transitions": [
+      {
+        "id": "IT-001",
+        "entity": "E-PSJH",
+        "from": "待启动",
+        "to": "取消结束",
+        "reason": "下发后的评审计划不能编辑或取消",
+        "source_ref": "4.8.4（3）"
+      },
+      {
+        "id": "IT-002",
+        "entity": "E-PSJH",
+        "from": "待评审",
+        "to": "取消结束",
+        "reason": "下发后的评审计划不能取消",
+        "source_ref": "4.8.4（3）"
+      },
+      {
+        "id": "IT-003",
+        "entity": "E-PSJH",
+        "from": "评审中",
+        "to": "取消结束",
+        "reason": "下发后的评审计划不能取消",
+        "source_ref": "4.8.4（3）"
+      },
+      {
+        "id": "IT-004",
+        "entity": "E-DF",
+        "from": "已提交",
+        "to": "已保存",
+        "reason": "已提交的项目不能进行分数修改",
+        "source_ref": "4.9.2（3）"
+      },
+      {
+        "id": "IT-005",
+        "entity": "E-XM",
+        "from": "已归档",
+        "to": "待选入",
+        "reason": "已归档为终态，项目状态不再变更",
+        "source_ref": "4.5"
+      }
+    ],
+    "cross_entity": [
+      {
+        "id": "XC-001",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-019",
+        "source_state": "待评审",
+        "target_entity": "E-XM",
+        "target_transition": "T-005",
+        "target_dimension": "项目状态",
+        "target_condition": "待评审",
+        "desc": "镜像 T-005 precondition'评审计划状态由待启动变为待评审'",
+        "xc_source": "镜像",
+        "source_ref": "4.5（3）；4.8.5（1）"
+      },
+      {
+        "id": "XC-002",
+        "source_entity": "E-DF",
+        "source_transition": "T-039",
+        "source_state": "已提交",
+        "target_entity": "E-XM",
+        "target_transition": "T-006",
+        "target_dimension": "项目状态",
+        "target_condition": "评审中",
+        "desc": "镜像 T-006 precondition'评审组全部专家提交了项目打分'",
+        "xc_source": "镜像",
+        "source_ref": "4.5（4）"
+      },
+      {
+        "id": "XC-003",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-030",
+        "source_state": "结束",
+        "target_entity": "E-XM",
+        "target_transition": "T-007",
+        "target_dimension": "项目状态",
+        "target_condition": "待归档",
+        "desc": "镜像 T-007 precondition'评审计划状态由已完成变为结束'",
+        "xc_source": "镜像",
+        "source_ref": "4.5（5）；4.8.9（1）"
+      },
+      {
+        "id": "XC-004",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-031",
+        "source_state": "超时结束",
+        "target_entity": "E-XM",
+        "target_transition": "T-007",
+        "target_dimension": "项目状态",
+        "target_condition": "待归档",
+        "desc": "镜像 T-007 precondition'评审计划状态由已完成变为超时结束'",
+        "xc_source": "镜像",
+        "source_ref": "4.5（5）；4.8.9（2）"
+      },
+      {
+        "id": "XC-005",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-016",
+        "source_state": "取消结束",
+        "target_entity": "E-XM",
+        "target_transition": "T-011",
+        "target_dimension": "项目状态",
+        "target_condition": "评审中",
+        "desc": "镜像 T-011 precondition'评审计划状态变为取消结束'",
+        "xc_source": "镜像",
+        "source_ref": "4.8.3（2）"
+      },
+      {
+        "id": "XC-006",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-030",
+        "source_state": "结束",
+        "target_entity": "E-XM",
+        "target_transition": "T-012",
+        "target_dimension": "项目状态",
+        "target_condition": "评审中",
+        "desc": "镜像 T-012 precondition'评审计划状态由已完成变为结束'（评审中项目回退分支）",
+        "xc_source": "镜像",
+        "source_ref": "4.5（5）e）"
+      },
+      {
+        "id": "XC-007",
+        "source_entity": "E-DF",
+        "source_transition": "T-038",
+        "source_state": "已保存",
+        "target_entity": "E-PSJH",
+        "target_transition": "T-021",
+        "target_dimension": "评审计划状态",
+        "target_condition": "待评审",
+        "desc": "镜像 T-021 precondition'评审专家对该计划的项目进行打分保存'",
+        "xc_source": "镜像",
+        "source_ref": "4.8.6"
+      },
+      {
+        "id": "XC-008",
+        "source_entity": "E-XM",
+        "source_transition": "T-006",
+        "source_state": "待归档",
+        "target_entity": "E-PSJH",
+        "target_transition": "T-028",
+        "target_dimension": "评审计划状态",
+        "target_condition": "评审中",
+        "desc": "镜像 T-028 precondition'评审计划中所有项目在评审时限内变为待归档状态'",
+        "xc_source": "镜像",
+        "source_ref": "4.8.8（1）"
+      },
+      {
+        "id": "XC-009",
+        "source_entity": "E-PSJH",
+        "source_transition": "T-019",
+        "source_state": "待评审",
+        "target_entity": "E-DF",
+        "target_transition": "T-037",
+        "target_dimension": "打分状态",
+        "target_condition": "未打分",
+        "desc": "联动: T-019执行后E-DF.打分状态由None变为未打分",
+        "xc_source": "联动",
+        "source_ref": "4.9.2；4.5（3）"
+      },
+      {
+        "id": "XC-010",
+        "source_entity": "E-JG",
+        "source_transition": "T-033",
+        "source_state": "不合格",
+        "target_entity": "E-PSJH",
+        "target_transition": null,
+        "target_dimension": "评审计划状态",
+        "target_condition": "已建立",
+        "desc": "由 Step 4.5 约束-因果鉴别确认：不合格机构所属项目不能纳入评审计划；为门禁约束非因果",
+        "xc_source": "4.5判",
+        "source_ref": "4.9.7（2）a）"
+      }
+    ],
+    "business_rules": [
+      {
+        "id": "BR-001",
+        "category": "validation",
+        "desc": "项目名称为必填项；长度20",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.6-1 #1",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-002",
+        "category": "validation",
+        "desc": "联系人电话必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.6-1 #19",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-003",
+        "category": "validation",
+        "desc": "申请经费（万元）为必填项；整数；长度4；1-9999",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.6-1 #16",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-004",
+        "category": "validation",
+        "desc": "建议书附件可上传格式：doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过10MB；多次上传时覆盖上一次附件；必填项",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.6-1 #25",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-005",
+        "category": "validation",
+        "desc": "只能删除待选入且未评价过的项目",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.6（1）b）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-006",
+        "category": "validation",
+        "desc": "只可编辑待选入的项目信息；对评价过的项目编辑附件",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.6（1）c）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-007",
+        "category": "timing",
+        "desc": "对于本阶段不合格评价结果的项目，只有1次选入机会",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.7.1（2）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-008",
+        "category": "validation",
+        "desc": "对于本阶段评价结果为差的项目，不可选入",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.7.1（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-009",
+        "category": "validation",
+        "desc": "评审管理员只能对已选入状态的项目进行选出",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.7.2",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-010",
+        "category": "validation",
+        "desc": "评审管理员从处于已选入状态的项目中选取1-5个项目纳入评审计划",
+        "entities_involved": [
+          "E-PSJH",
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（1）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-011",
+        "category": "validation",
+        "desc": "评审计划的评审组由5、7或9个专家组成，有且只能有一个组长专家",
+        "entities_involved": [
+          "E-PSJH",
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（6）a）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-012",
+        "category": "validation",
+        "desc": "每个评审专家的技术领域应覆盖评审计划中项目的领域",
+        "entities_involved": [
+          "E-PSJH",
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "conditional",
+        "source_ref": "4.8.1（6）b）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-013",
+        "category": "validation",
+        "desc": "默认回避计划中的项目所属机构的专家；当人为设置了专家回避项目，评审计划中有该项目时，该专家不可选入评审组",
+        "entities_involved": [
+          "E-PSJH",
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（6）c）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-014",
+        "category": "validation",
+        "desc": "一个计划中，评审组专家工作时段相同；专家一个工作时段只能被分配一个评审计划",
+        "entities_involved": [
+          "E-PSJH",
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "conditional",
+        "source_ref": "4.8.1（6）d）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-015",
+        "category": "timing",
+        "desc": "专家不能被连续3天晚上分配任务",
+        "entities_involved": [
+          "E-ZJ",
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（6）e）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-016",
+        "category": "validation",
+        "desc": "下发时限：从已建立到下发的时间（单位：天），1-2，默认为1，超过时限计划自动转为待启动状态",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（5）a）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-017",
+        "category": "validation",
+        "desc": "启动时限：从下发到启动的时间（单位：天），1-5，默认为2，超过时限计划自动转为待评审状态",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（5）b）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-018",
+        "category": "validation",
+        "desc": "评审时限：从待评审到已完成的时间（单位：天），1-5，默认为2，超过时限计划自动转为已完成状态",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（5）c）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-019",
+        "category": "validation",
+        "desc": "归档时限：从已完成到结束的时限（单位：天），1-3，默认为2，超过时限计划自动转为超时结束状态",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.1（5）d）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-020",
+        "category": "validation",
+        "desc": "下发后的评审计划不能编辑或取消",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.4（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-021",
+        "category": "timing",
+        "desc": "暂停时，专家不能对计划中的项目进行评审，评审助理和评审管理员不能对该计划归档，暂停期间计时不停",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.8.7（1）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-022",
+        "category": "validation",
+        "desc": "评审管理员和评审助理可删除处于已建立状态和取消结束状态的计划",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "conditional",
+        "source_ref": "4.8.10",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-023",
+        "category": "validation",
+        "desc": "创新性0.00&lt;=数值&lt;=15.00；应用前景0.00&lt;=数值&lt;=20.00；研究目标及技术指标0.00&lt;=数值&lt;=10.00；技术指标达标情况0.00&lt;=数值&lt;=10.00；成果及考核方式0.00&lt;=数值&lt;=20.00；成果及其完成情况0.00&lt;=数值&lt;=20.00；研究基础和保障条件0.00&lt;=数值&lt;=15.00；研究方案及技术途径0.00&lt;=数值&lt;=20.00；研制过程0.00&lt;=数值&lt;=15.00；关键技术0.00&lt;=数值&lt;=20.00；四舍五入后保留两位小数",
+        "entities_involved": [
+          "E-DF"
+        ],
+        "constrained_entity": "E-DF",
+        "enforcement": "mandatory",
+        "source_ref": "4.9-1 #2-11",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-024",
+        "category": "computation",
+        "desc": "开题：创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径&lt;=100.00；验收：创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术&lt;=100.00；四舍五入后保留两位小数",
+        "entities_involved": [
+          "E-DF"
+        ],
+        "constrained_entity": "E-DF",
+        "enforcement": "mandatory",
+        "source_ref": "4.9-1 #12",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-025",
+        "category": "validation",
+        "desc": "已提交的项目不能进行分数修改；项目各项打分全部为零的不能提交，并提示",
+        "entities_involved": [
+          "E-DF"
+        ],
+        "constrained_entity": "E-DF",
+        "enforcement": "mandatory",
+        "source_ref": "4.9.2（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-026",
+        "category": "validation",
+        "desc": "分数限值0.0&lt;分数限值&lt;=100.0；四舍五入后结果保留一位小数",
+        "entities_involved": [
+          "E-FSXZ"
+        ],
+        "constrained_entity": "E-FSXZ",
+        "enforcement": "mandatory",
+        "source_ref": "4.9-3 #1",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-027",
+        "category": "timing",
+        "desc": "分数限值设置后，对未产生评价结果的项目立即生效，对已经汇总的项目无影响",
+        "entities_involved": [
+          "E-FSXZ",
+          "E-XM"
+        ],
+        "constrained_entity": "E-FSXZ",
+        "enforcement": "conditional",
+        "source_ref": "4.9.4",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-028",
+        "category": "computation",
+        "desc": "优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）；优秀：90.00&lt;=得分且13.00&lt;=创新性且17.00&lt;=应用前景；良好：70.00&lt;=得分且11.00&lt;=创新性且14.00&lt;=应用前景；合格：60.00&lt;=得分且9.00&lt;=创新性且12.00&lt;=应用前景；不合格：30.00&lt;=得分；差：30.00&gt;得分",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "source_ref": "4.9-5",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-029",
+        "category": "computation",
+        "desc": "所有专家打分提交后，本次评审项目的单个打分项分数为所有专家相应项打分的平均分；本次评审项目得分基于各专家对项目的打分进行计算：去掉普通专家的一个最高分和一个最低分，计算剩余普通专家打分的平均分，然后按系统内置打分权重表4.9-4进行计算；5人组：组长40%+普通60%；7人组：组长25%+普通75%；9人组：组长18%+普通82%；计算结果四舍五入保留两位小数",
+        "entities_involved": [
+          "E-DF",
+          "E-XM"
+        ],
+        "constrained_entity": "E-DF",
+        "enforcement": "mandatory",
+        "source_ref": "4.9.6",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-030",
+        "category": "computation",
+        "desc": "对合格机构，评价结果满足下面任一条，将合格的研制机构评价为不合格机构：a）所有项目的阶段评价为差的次数累计达到3次及以上；b）所有项目的阶段评价为差的次数累计达到1次及以上且评价为不合格次数累计达到3个及以上；c）所有项目的阶段评价为不合格的次数累计达到5次及以上",
+        "entities_involved": [
+          "E-JG",
+          "E-XM"
+        ],
+        "constrained_entity": "E-JG",
+        "enforcement": "conditional",
+        "source_ref": "4.9.7（1）a）-c）",
+        "signal_type": "restrictive",
+        "note": {},
+        "branch_dimensions": [
+          "机构状态"
+        ]
+      },
+      {
+        "id": "BR-031",
+        "category": "authorization",
+        "desc": "不能对不合格研制机构所属项目进行评审；已下发的评审计划中的项目不受影响；对未下发计划的项目从计划中去掉，如果某个未下发评审计划中的项目均属于不合格的研制机构，则取消该计划",
+        "entities_involved": [
+          "E-JG",
+          "E-PSJH",
+          "E-XM"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "mandatory",
+        "source_ref": "4.9.7（2）a）-c）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-032",
+        "category": "validation",
+        "desc": "系统管理员可以对不合格机构提为试用机构；研制机构累计3次评级为不合格，则不能提为试用机构",
+        "entities_involved": [
+          "E-JG"
+        ],
+        "constrained_entity": "E-JG",
+        "enforcement": "mandatory",
+        "source_ref": "4.9.7（2）d）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-033",
+        "category": "computation",
+        "desc": "对试用研制机构：a）机构累计10次项目阶段评价结果为优，可以升为合格机构；b）机构累计2次项目阶段评价结果为差，将机构降为不合格；c）机构累计1次项目阶段评价结果为差且2次及以上项目阶段评价结果为不合格，将机构降为不合格；d）机构累计4次项目阶段评价结果为不合格，将机构降为不合格机构；e）当处于试用状态的机构同时可满足升为合格或降为不合格时，降为不合格",
+        "entities_involved": [
+          "E-JG",
+          "E-XM"
+        ],
+        "constrained_entity": "E-JG",
+        "enforcement": "conditional",
+        "source_ref": "4.9.7（3）a）-e）",
+        "signal_type": "restrictive",
+        "note": {},
+        "branch_dimensions": [
+          "机构状态"
+        ]
+      },
+      {
+        "id": "BR-034",
+        "category": "validation",
+        "desc": "实现专家新增的功能，手机号作为账号，密码默认为手机号后六位",
+        "entities_involved": [
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.10（1）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-035",
+        "category": "validation",
+        "desc": "实现专家信息的编辑，不能编辑技术领域、机构、评审身份和手机号",
+        "entities_involved": [
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.10（2）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-036",
+        "category": "validation",
+        "desc": "专家有待评审或者评审中的项目时不可以删除，并提示；如删除后，同一技术领域的专家不足5人时需进行确认；如删除后同一技术领域中组长专家不足2人时需进行确认",
+        "entities_involved": [
+          "E-ZJ",
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.10（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-037",
+        "category": "timing",
+        "desc": "在已选入的项目中进行专家回避项目设置，只对回避项目设置后建立的评审计划有效",
+        "entities_involved": [
+          "E-ZJ",
+          "E-XM",
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "conditional",
+        "source_ref": "4.10（6）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-038",
+        "category": "validation",
+        "desc": "专家邮箱必须包含@和.；不能包含中文、特殊符号",
+        "entities_involved": [
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.10-1 #8",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-039",
+        "category": "validation",
+        "desc": "专家手机号必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字；唯一",
+        "entities_involved": [
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-ZJ",
+        "enforcement": "mandatory",
+        "source_ref": "4.10-1 #3",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-040",
+        "category": "validation",
+        "desc": "用户账号必填项；长度11；可以由汉字、字母、数字、下划线组成；不可重复",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11-1 #1",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-041",
+        "category": "validation",
+        "desc": "登录密码必填项；长度8-18；只能由数字、字母和特殊符号组成；长度大于等于8个字符小于等于18个字符",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11-1 #4；4.13（5）",
+        "signal_type": "field_constraint",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-042",
+        "category": "validation",
+        "desc": "实现用户信息的修改，不可编辑用户账号、手机号、技术领域、所属机构和角色",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.1（2）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-043",
+        "category": "authorization",
+        "desc": "实现用户的锁定功能，锁定后不得登录此系统",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.1（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-044",
+        "category": "validation",
+        "desc": "将用户从系统中删除，如有未完成的任务，不能删除",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.1（6）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-045",
+        "category": "authorization",
+        "desc": "不可对内置的审计管理员、系统管理员、评审管理员、评审助理进行编辑、锁定、重置密码等操作",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.1",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-046",
+        "category": "validation",
+        "desc": "机构下无项目、无用户、无子机构时才可删除；根机构不可删除",
+        "entities_involved": [
+          "E-JG",
+          "E-XM",
+          "E-YH"
+        ],
+        "constrained_entity": "E-JG",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.3（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-047",
+        "category": "validation",
+        "desc": "实现研制机构信息的修改，不可编辑上级机构、机构编码、不合格次数和机构状态",
+        "entities_involved": [
+          "E-JG"
+        ],
+        "constrained_entity": "E-JG",
+        "enforcement": "mandatory",
+        "source_ref": "4.11.3（2）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-048",
+        "category": "timing",
+        "desc": "超时设置完成后，对所有计划立即生效",
+        "entities_involved": [
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "conditional",
+        "source_ref": "4.11.4（3）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-049",
+        "category": "notification",
+        "desc": "登录日志至少记录用户的登录、退出的操作；操作日志应至少记录管理员添加、编辑、删除用户的操作；系统日志记录事件的时间、角色、操作类型、日志内容和日志类型等",
+        "entities_involved": [
+          "E-XTRZ"
+        ],
+        "constrained_entity": "E-XTRZ",
+        "enforcement": "conditional",
+        "source_ref": "4.11.5（1）-（2）；4.13（14）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-050",
+        "category": "authorization",
+        "desc": "系统日志记录只能由系统审计员查看",
+        "entities_involved": [
+          "E-XTRZ"
+        ],
+        "constrained_entity": "E-XTRZ",
+        "enforcement": "conditional",
+        "source_ref": "4.13（13）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-051",
+        "category": "validation",
+        "desc": "登录时，密码不以明文显示",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（2）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-052",
+        "category": "validation",
+        "desc": "用户初次登录时需更改密码",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（4）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-053",
+        "category": "validation",
+        "desc": "用户都应有唯一标识，同一用户同时段不能重复登录",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.13（6）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-054",
+        "category": "timing",
+        "desc": "用户登录系统后，若30分钟内无任何操作，则需要重新登录",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（7）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-055",
+        "category": "timing",
+        "desc": "普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误3次时，锁定该账户，锁定后可由系统管理员解锁",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（8）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-056",
+        "category": "timing",
+        "desc": "普通用户密码有效期为7天，过期后强制对密码进行更改，不能与上一密码相同",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.13（9）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-057",
+        "category": "validation",
+        "desc": "用户修改自己密码时，需要输入原密码，如果输入的原密码不对则给出提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次，且相同，否则系统给出提示",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（10）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-058",
+        "category": "validation",
+        "desc": "对服务端返回客户端的数据进行加密；对客户端提交到服务端的用户相关信息在传输中进行加密",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.13（11）-（12）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-059",
+        "category": "display",
+        "desc": "页面提示信息不能含有系统后台、技术框架等信息",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "mandatory",
+        "source_ref": "4.13（15）",
+        "signal_type": "restrictive",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-060",
+        "category": "usability",
+        "desc": "当输入的用户账号或者密码错时，有提示",
+        "entities_involved": [
+          "E-YH"
+        ],
+        "constrained_entity": "E-YH",
+        "enforcement": "conditional",
+        "source_ref": "4.14（1）",
+        "signal_type": "usability",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-061",
+        "category": "usability",
+        "desc": "日期类数据输入，应提供日历选择功能",
+        "entities_involved": [
+          "E-XM",
+          "E-PSJH",
+          "E-YH"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.14（2）",
+        "signal_type": "usability",
+        "note": {
+          "comment": "UI 对称规则，取代表实体 E-XM"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-062",
+        "category": "usability",
+        "desc": "查询功能中的组合查询支持两个（含）以上字段'与'的查询",
+        "entities_involved": [
+          "E-XM",
+          "E-PSJH",
+          "E-ZJ",
+          "E-YH",
+          "E-XTRZ"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.14（3）",
+        "signal_type": "usability",
+        "note": {
+          "comment": "UI 对称规则，取代表实体 E-XM"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-063",
+        "category": "usability",
+        "desc": "添加、编辑页面中的必填项应给出*标识，对未输入的必填项给出提示",
+        "entities_involved": [
+          "E-XM",
+          "E-PSJH",
+          "E-ZJ",
+          "E-YH",
+          "E-JG"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.14（4）",
+        "signal_type": "usability",
+        "note": {
+          "comment": "UI 对称规则，取代表实体 E-XM"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-064",
+        "category": "usability",
+        "desc": "同页面关联数据刷新后保持一致性，不同页面重新打开关联数据应保持同步",
+        "entities_involved": [
+          "E-XM",
+          "E-PSJH",
+          "E-ZJ",
+          "E-YH"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.14（5）",
+        "signal_type": "usability",
+        "note": {
+          "comment": "UI 对称规则，取代表实体 E-XM"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-065",
+        "category": "notification",
+        "desc": "评审管理员、评审助理和评审专家登录账号时，应有待办任务和距超时5小时内的任务的说明",
+        "entities_involved": [
+          "E-PSJH",
+          "E-DF"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "conditional",
+        "source_ref": "4.14（6）",
+        "signal_type": "usability",
+        "note": {
+          "comment": "待办任务归属评审计划，取 E-PSJH"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-066",
+        "category": "usability",
+        "desc": "在组建评审组时，可以根据项目领域和回避规则显示匹配的评审专家",
+        "entities_involved": [
+          "E-PSJH",
+          "E-ZJ"
+        ],
+        "constrained_entity": "E-PSJH",
+        "enforcement": "conditional",
+        "source_ref": "4.14（7）",
+        "signal_type": "usability",
+        "note": {
+          "inferred": false
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-067",
+        "category": "validation",
+        "desc": "项目归档时根据项目归档分支确定目标状态：开题_合格及以上变为已选入（阶段转验收）；开题_不合格或差变为待选入（阶段不变）；验收_合格及以上变为已归档（阶段不变）；验收_不合格或差变为待选入（阶段不变）",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.5（5）a）-d）",
+        "signal_type": "restrictive",
+        "note": {},
+        "branch_dimensions": [
+          "项目归档分支"
+        ]
+      },
+      {
+        "id": "BR-068",
+        "category": "validation",
+        "desc": "对已完成计划中包含的处于评审中状态的项目，项目状态回到该计划建立前",
+        "entities_involved": [
+          "E-XM",
+          "E-PSJH"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "source_ref": "4.5（5）e）",
+        "signal_type": "restrictive",
+        "note": {},
+        "branch_dimensions": [
+          "项目归档分支"
+        ]
+      }
+    ]
+  }
+}

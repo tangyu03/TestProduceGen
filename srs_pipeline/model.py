@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from .builders import N
 from .constants import LOCAL_LABEL as _LOCAL
-from .constants import XC_DESC_TPL, XC_LEGACY_RE, XC_SOURCES
+from .constants import XC_DESC_TPL, XC_LEGACY_RE
 from .escape import esc
 from .schema import validate_llm
 
@@ -123,7 +123,7 @@ class DomainModel:
                                 "operations": operations})
         dims = [{"dimension_name": d["dimension_name"], "states": list(d["states"]),
                  "initial": d["initial"], "terminal": list(d.get("terminal", [])),
-                 "note": d.get("note") or N(),
+                 "note": _esc_note(d.get("note")),   # 铁律4：状态维度 note 亦须转义
                  "inferred": list(d.get("inferred", []) or [])}
                 for d in (state_dimensions or [])]
         self.entities.append({
@@ -238,21 +238,38 @@ class DomainModel:
         return self
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, note=None, constrained_entity=None):
+               signal_type, note=None, constrained_entity=None,
+               branch_dimensions=None):
         validate_llm("br", {"bid": bid, "category": category, "desc": desc,
                             "entities_involved": entities_involved,
                             "source_ref": source_ref, "signal_type": signal_type,
-                            "note": note, "constrained_entity": constrained_entity})
+                            "note": note, "constrained_entity": constrained_entity,
+                            "branch_dimensions": branch_dimensions})
         # 单实体 BR 的受约束实体是唯一元素：确定性派生（LLM 缺失/多实体时由 C24 兜底）
         if constrained_entity is None and len(entities_involved) == 1:
             constrained_entity = entities_involved[0]
+        # branch_dimensions＝第一优先的显式参数；note.branch_dimension＝遗留形态
+        # （字符串 ';'/'；' 分隔或列表），框架归一化：去重保序、逐项 esc、剥离 note 键。
+        dims = []
+        if branch_dimensions:
+            dims.extend(branch_dimensions)
+        if isinstance(note, dict) and note.get("branch_dimension"):
+            legacy = note["branch_dimension"]
+            if isinstance(legacy, str):
+                legacy = [x.strip() for x in re.split(r"[;；]", legacy)
+                          if x.strip()]
+            dims.extend(legacy)
+        dims = [esc(x) for x in dict.fromkeys(dims)]
+        if isinstance(note, dict) and "branch_dimension" in note:
+            note = {k: v for k, v in note.items()
+                    if k != "branch_dimension"}
         self.business_rules.append({
             "id": bid, "category": category, "desc": esc(desc),
             "entities_involved": list(entities_involved),
             "constrained_entity": constrained_entity,
             "enforcement": derive_enforcement(signal_type, desc),
             "source_ref": esc(source_ref), "signal_type": signal_type,
-            "note": _esc_note(note)})
+            "note": _esc_note(note), "branch_dimensions": dims})
         return self
 
     # ---------- 扩展点 ----------
@@ -337,6 +354,8 @@ class DomainModel:
         # 此前误放 _before_assemble 钩子循环内 —— 无钩子时编号移交失效,
         # 输出残留局部标签(t01/t07a), 下游 P2/S1 无法按 T-xxx 关联。
         self._assign_ids()
+        self._backfill_semantic_branch_tt()   # 3.3 回填：语义描述→精确 tid，须在钩子前
+        self._resolve_role_refs()             # 角色引用 id→name 归一化，输出统一 name
         for fn in self._before_assemble:
             fn(self)
         self._backfill_branch_coverage()
@@ -388,8 +407,9 @@ class DomainModel:
                                 "business_rules": self.business_rules}}
 
     def _backfill_branch_coverage(self):
-        """Step6：按 note.branch_dimension（支持';'分隔多值）与
-        XC 的'分支[维度='前缀或 source_transition 命中，回填三层 coverage。"""
+        """Step6：按转换 note.branch_dimension（支持';'分隔多值）与
+        BR 顶层 branch_dimensions（add_br 归一化）、XC 的'分支[维度='前缀或
+        source_transition 命中，回填三层 coverage。"""
         for d in self.branch_dimensions:
             name = d["dimension"]
             t_ids = [t["id"] for t in self.transitions
@@ -401,9 +421,107 @@ class DomainModel:
                                         if x["desc"].startswith(f"分支[{name}=")
                                         or x["source_transition"] in t_ids}),
                 "business_rules": [b["id"] for b in self.business_rules
-                                   if name in re.split(
-                                       r"[;；]", b["note"].get(
-                                           "branch_dimension", ""))]}
+                                   if name in (b.get("branch_dimensions") or [])]}
+
+    def _backfill_semantic_branch_tt(self):
+        """Step3.3 回填：branch target_transition 语义描述 → 精确 tid（确定性，无 LLM）。
+        glm5pr :112/:155：前向引用先写语义描述，assemble 时框架回填为精确 tid；
+        无唯一候选 → inferred＋记偏差（meta.branch_tt_deviations），P2 走 all-values 兜底。
+
+        描述形态（LLM 前向引用）与匹配信号（按优先级）：
+        - 动作等值：s == action（「报名审核通过」→ t08）
+        - 路径形态：s 含「{frm}变为{to}」（esc 把 → 归一为 变为；
+          「设计方案编制（待开始变为报名中路径）」→ t02，压制仅动作子串命中的 t01）
+        - 动作包含：s 含 action 或 action 含 s（「评价人员开始评价（分值录入）」→
+          action=评价人员开始评价；「实验室审核通过」→ action=审核通过）
+        - 分支值消歧：同动作多候选时，to 为 s 中出现分支值者胜
+          （「参加者测试与结果提交（已还样分支）」→ t19.to=已还样）
+        搜索空间＝标注转换集 ∪ 维度实体全部转换（评分方式 分支指向未标
+        branch_dimension 的 t41 即证——仅按标签作用域会漏）。创建转换（frm=None）
+        不作路径匹配对象。唯一候选才回填，0/多候选一律记偏差（绝不猜）。"""
+        formal_re = re.compile(r"[A-Z]+-\d{3}[a-z]?")
+        backfilled, deviations = [], []
+        for d in self.branch_dimensions:
+            dim = d["dimension"]
+            vals = [b["value"] for b in d["branches"] if b.get("value")]
+            scope = {t["id"]: t for t in self.transitions
+                     if dim in re.split(r"[;；]",
+                                        t["note"].get("branch_dimension", ""))}
+            for t in self.transitions:
+                if t["entity"] == d["entity"]:
+                    scope.setdefault(t["id"], t)
+
+            def match(s):
+                best = {}
+                for t in scope.values():
+                    a = esc(t.get("action", ""))
+                    to = esc(t.get("to", ""))
+                    frm = t.get("from")             # add_trans 参数 frm，落盘键 from
+                    path = bool(frm) and any(
+                        p in s for p in (f"{esc(frm)}变为{to}",
+                                         f"{frm}→{t.get('to')}"))
+                    if s == a:
+                        score = 40
+                    elif path:
+                        score = 30
+                    elif s in a or a in s:
+                        score = 20
+                    else:
+                        continue
+                    if to in s and to in vals:
+                        score += 2          # 分支值落在该转换的 to → 消歧胜出
+                    best.setdefault(score, []).append(t["id"])
+                return sorted(set(best[max(best)])) if best else []
+
+            for br in d["branches"]:
+                tt = br.get("target_transition", "")
+                if not tt or formal_re.fullmatch(tt):   # 空=纯配置/展示；正式号=已回填
+                    continue
+                s = tt                                  # 已 esc（add_branch_dimension）
+                uniq = match(s)
+                if len(uniq) == 1:
+                    br["target_transition"] = uniq[0]
+                    backfilled.append({"dimension": dim, "entity": d["entity"],
+                                       "value": br["value"], "from": s,
+                                       "target_transition": uniq[0]})
+                else:
+                    br["inferred"] = True
+                    deviations.append({"dimension": dim, "entity": d["entity"],
+                                       "value": br["value"], "target_transition": s,
+                                       "reason": "no_candidate" if not uniq
+                                                 else f"ambiguous:{len(uniq)}"})
+                    warnings.warn(
+                        f"branch target_transition={s!r} (dimension={dim!r}, "
+                        f"entity={d['entity']!r}) 非正式号形态，语义回填无唯一候选"
+                        f"（{len(uniq)} 个），已记偏差(inferred=True)，"
+                        f"P2 精确匹配将失败（走 all-values 兜底）", stacklevel=2)
+        self.meta["branch_tt_backfilled"] = backfilled
+        self.meta["branch_tt_deviations"] = deviations
+
+    def _resolve_role_refs(self):
+        """角色引用 id→name 归一化（数据层写 id 或 name，输出统一 name）。
+
+        与编号移交同向（引用→正式形态）：id 是 LLM 自 mint 的精确句柄（r05），
+        name 是原文逐字串——数据作者/LLM 优先写 id，name 引用也保留；
+        输出统一为 name（人读可辨、与 name 系数据文件输出一致、下游透传零改动）。
+        未知引用原样保留（悬空由 C01/C18 双键校验兜底）。确定性，无 LLM。"""
+        name_by_id = {r["id"]: r["name"] for r in self.roles}
+
+        def resolve(v):
+            if isinstance(v, (list, tuple)):
+                return [name_by_id.get(x, x) for x in v]
+            return name_by_id.get(v, v) if isinstance(v, str) else v
+
+        for e in self.entities:
+            for o in e["operations"]:
+                note = o.get("note")
+                if isinstance(note, dict) and note.get("role") is not None:
+                    note["role"] = resolve(note["role"])
+        for p in self.permissions:
+            if p.get("role"):
+                p["role"] = name_by_id.get(p["role"], p["role"])
+        for t in self.transitions:
+            t["role"] = resolve(t["role"])
 
     def _build_trace(self):
         pre = [p for t in self.transitions for p in t["preconditions"]]
@@ -413,6 +531,8 @@ class DomainModel:
             "step1_entities": [e["id"] for e in self.entities],
             "step2_structural_relations": len(self.structural_relations),
             "step3_branch_dimensions": len(self.branch_dimensions),
+            "step3_branch_tt_backfilled": len(self.meta.get("branch_tt_backfilled", [])),
+            "step3_branch_tt_deviations": len(self.meta.get("branch_tt_deviations", [])),
             "step4_transitions": len(self.transitions),
             "step4_transition_relations": len(self.transition_relations),
             "step4_roles": len(self.roles),
@@ -460,9 +580,24 @@ class DomainModel:
         for r in self.transition_relations:
             r["evidence_transitions"] = [rw(e) for e in r["evidence_transitions"]]
             r["desc"], r["trigger"] = rw(r["desc"]), rw(r["trigger"])
+        # 分支 target_transition 三态归一化（在局部标签映射 rw 之上）：
+        #  1) 局部标签（t01）→ rw 映射为正式号
+        #  2) 纯正式号（T-001）→ 原样保留
+        #  3) 「正式号+尾缀」（"T-001 设计方案编制（创建转换）"）→ 剥离尾缀归一到
+        #     正式号（尾缀是语义描述，P2 精确匹配只认 tid；核心号须真实存在才剥离，
+        #     防把任意文本误剥成不存在的号——不存在时留原样交给下方防御校验报错）。
+        formal_ids = set(allmap.values())
+        def _rw_branch_tt(tt):
+            if not isinstance(tt, str):
+                return tt
+            tt = tt.strip()
+            m = re.match(r"^([A-Z]+-\d{3}[a-z]?)\s+\S", tt)
+            if m and m.group(1) in formal_ids:
+                return m.group(1)
+            return rw(tt)
         for d in self.branch_dimensions:
             for br in d["branches"]:
-                br["target_transition"] = rw(br.get("target_transition", ""))
+                br["target_transition"] = _rw_branch_tt(br.get("target_transition", ""))
         for t in self.transitions:
             if t["note"].get("comment"):
                 t["note"]["comment"] = rw(t["note"]["comment"])
@@ -487,21 +622,7 @@ class DomainModel:
         for i in self.invalid_transitions:
             if i.get("reason"):
                 i["reason"] = rw(i["reason"])
-        # 防御性校验（编号移交完成后）：branch_dimension 的 target_transition 须为
-        # 正式号形态（与 renumber 的判据同源）。语义描述不经 _LOCAL 改写 → 残留即
-        # P2 精确匹配(target_transition == tid)失配，落入 all-values 兜底。
-        # 仅警告不报错：兼容旧数据文件仍以语义描述作文档。prompt 侧已禁语义描述
-        # （前向引用直接写局部标签），此处兜底拦截残旧数据。
-        for d in self.branch_dimensions:
-            for br in d["branches"]:
-                tt = br.get("target_transition", "")
-                if tt and not re.fullmatch(r"[A-Z]+-\d{3}[a-z]?", tt):
-                    warnings.warn(
-                        f"branch target_transition={tt!r} "
-                        f"(dimension={d['dimension']!r}, entity={d['entity']!r}) "
-                        f"非正式号形态，编号移交未改写，P2 精确匹配将失败（走 all-values 兜底）",
-                        stacklevel=2,
-                    )
+        # 语义描述拦截已迁至 _backfill_semantic_branch_tt（3.3 回填后残留=真偏差）。
 
     def _rebuild_xc_desc(self, x):
         """按 xc_source 重建 XC desc：前缀（XC_DESC_TPL）+ 注入正式标签。

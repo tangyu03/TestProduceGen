@@ -100,7 +100,8 @@ class Validator:
                   self.c21_inv_label_refs, self.c22_inv_role_coverage,
                   self.c23_inv_xc_desc_prefix, self.c24_inv_br_constrained_entity,
                   self.c25_inv_mirror_target_transition,
-                  self.c26_inv_event_entity, self.c27_inv_event_coverage):
+                  self.c26_inv_event_entity, self.c27_inv_event_coverage,
+                  self.c28_inv_branch_br_hook):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -186,6 +187,9 @@ class Validator:
                     r.warn("C02", f"{key[0]}.{key[1]} 非终态[{s}]无出边（4.4①）")
             for t in list(ts):
                 if t["from"] in terminal:
+                    if t["from"] == t["to"]:
+                        continue  # 自环豁免：属性操作同状态自环（glm5pr:87/:128/:131），
+                                  # 不离开终态、不构成终态出边；删除会连带 C27 事件消费断链
                     if t["to"] in terminal:
                         self.m.transitions.remove(t)
                         r.fix(f"C02 铁律10: 移除终态间转换 {t['id']}"
@@ -712,11 +716,47 @@ class Validator:
             return " ".join(Validator._flatten(v) for v in obj)
         return str(obj)
 
+    @staticmethod
+    def _is_cjk(ch):
+        """汉字判断：CJK 统一表意文字 U+4E00–U+9FFF。
+
+        \\b 对汉字无效，词界须显式界定。上下界用转义字面量书写而非实际汉字：
+        U+9FFF 是 CJK 统一表意文字区最后一个码位，字形极罕见，多数
+        字体/GBK 控制台渲染为方块，源码中易被误读为乱码，故写成
+        \\u4e00/\\u9fff（ASCII 转义，任何字体恒可读）。"""
+        return "\u4e00" <= ch <= "\u9fff"
+
+    @staticmethod
+    def _value_hit(text, value):
+        """分支值在文本中的命中强度：2=独立词、1=复合词内子串、0=未命中。
+
+        CJK 无词界（\b 对汉字失效），「退回」会子串命中「退回修改」「审核退回」。
+        独立词以两侧非汉字界定（标点/空格/引号/行界）；只有子串命中返回 1，
+        供候选排序降权，不参与接受/拒绝判定。"""
+        if not value:
+            return 0
+        found = False
+        i = 0
+        while True:
+            j = text.find(value, i)
+            if j < 0:
+                break
+            found = True
+            before = text[j - 1] if j > 0 else " "
+            after = text[j + len(value)] if j + len(value) < len(text) else " "
+            if not Validator._is_cjk(before) and not Validator._is_cjk(after):
+                return 2
+            i = j + 1
+        return 1 if found else 0
+
     def c18_inv_operations_role(self):
         """INV-6/R-OPROLE：每条 operation 的 note 必须含 role（单角色字符串或
         多角色列表），且逐一命中已声明角色或保留角色。缺失 → entity_obligations
-        actor 为空，静默退化。"""
-        declared = {r["name"] for r in self.m.roles} | set(RESERVED_ROLES)
+        actor 为空，静默退化。角色引用按 add_role 的 id 或 name 双键解析
+        （与 C01 同源：转换侧 C01 已双键，operation 侧对齐）。"""
+        declared = ({r["id"] for r in self.m.roles}
+                    | {r["name"] for r in self.m.roles}
+                    | set(RESERVED_ROLES))
         role_names = sorted({r["name"] for r in self.m.roles})
         for e in self.m.entities:
             for o in e["operations"]:
@@ -736,7 +776,7 @@ class Validator:
                         self.report.error(
                             "C18", self._hint(
                                 ref, f"note.role 引用未声明角色 {r!r}",
-                                "改为已登记角色或 system",
+                                "改为已登记角色（add_role 的 id 或 name）或 system",
                                 f"已登记角色: {role_names}"))
 
     def c19_inv_signal_type(self):
@@ -749,18 +789,64 @@ class Validator:
                         "改为 BR_SIGNALS 之一", f"合法值: {BR_SIGNALS}"))
 
     def c20_inv_branch_br_coverage(self):
-        """INV-7：每个分支维度须在 ≥1 条 BR 的 note.branch_dimension 出现。"""
-        br_dims = {b["note"].get("branch_dimension")
-                   for b in self.m.business_rules
-                   if isinstance(b.get("note"), dict)}
+        """INV-7：每个分支维度须在 ≥1 条 BR 的 note.branch_dimension 出现。
+
+        报错时按文本钩子（独立值词 > 维度名 > 复合词内子串 > 仅实体重叠）列出
+        候选载体，防"随便挑一条 BR 挂上"的挂错；无候选时判别两态——维度值
+        全为该维度标注转换的落点态（如 样品归还方式 已还样/无需还样 = T-021/
+        T-022 的 to）→ 状态落点维度（glm5pr:110「状态落点值不作分支值，落点
+        差异经转换分立承载」），应撤销声明而非补 BR；否则 → 该维度可能本不应
+        为分支维度。实体重叠只是弱候选：分支是流程级决策点，后果可合法传导到
+        下游实体（pt_srsv6 b24 项目类型→E-TASK 即证），不能作为强信号。
+        复合词子串（如「退回修改」含「退回」）可能只是值词碰撞，弱于维度名。"""
+        br_dims = {d for b in self.m.business_rules
+                   for d in (b.get("branch_dimensions") or [])}
         for d in self.m.branch_dimensions:
-            if d["dimension"] not in br_dims:
-                self.report.error(
-                    "C20", self._hint(
-                        f"分支维度[{d['dimension']}]", "无任何 BR 的 note.branch_dimension 承载",
-                        "建/改一条 BR 并在 note 挂 branch_dimension",
-                        f"m.add_br(..., note={{\"branch_dimension\": \"{d['dimension']}\"}})"),
-                    d["entity"])
+            if d["dimension"] in br_dims:
+                continue
+            name = d["dimension"]
+            vals = [x["value"] for x in d["branches"] if x.get("value")]
+            landing = {t["to"] for t in self.m.transitions
+                       if isinstance(t.get("note"), dict)
+                       and name in re.split(r"[;；]",
+                                            t["note"].get("branch_dimension", ""))}
+            is_landing = (bool(vals) and bool(landing)
+                          and all(v in landing for v in vals))
+            cands = []
+            for b in self.m.business_rules:
+                text = (b.get("desc") or "") + " " + self._flatten(b.get("note"))
+                hit = max((self._value_hit(text, v) for v in vals), default=0)
+                if hit >= 2:
+                    cands.append((3, b["id"]))      # 独立词命中
+                elif name in text:
+                    cands.append((2, b["id"]))
+                elif hit == 1:
+                    cands.append((1, b["id"]))      # 复合词内子串（如「退回修改」含「退回」）
+                elif d["entity"] in b.get("entities_involved", []):
+                    cands.append((0, b["id"]))
+            cands.sort(key=lambda x: -x[0])
+            top = ", ".join(
+                f"{bid}" + ("[值]" if s == 3 else "[名]" if s == 2
+                            else "[词]" if s == 1 else "[实体]")
+                for s, bid in cands[:6])
+            if top:
+                fix = "建/改一条 BR 并在 note 挂 branch_dimension"
+                example = (f"候选承载: {top}; "
+                           f"m.add_br(..., note={{\"branch_dimension\": \"{name}\"}})")
+            elif is_landing:
+                fix = (f"撤销 add_branch_dimension 声明（values={vals} 均等于"
+                       f"标注转换落点态 {sorted(landing)}，分歧已由转换分立承载，"
+                       f"非分支维度）")
+                example = "glm5pr:110 状态落点值不作分支值；落点差异经转换分立承载"
+            else:
+                fix = "建/改一条 BR 并在 note 挂 branch_dimension"
+                example = ("无（全库 BR 无该维度名/分支值/实体钩子，"
+                           "该维度可能本不应为分支维度）")
+            self.report.error(
+                "C20", self._hint(
+                    f"分支维度[{name}]", "无任何 BR 的 note.branch_dimension 承载",
+                    fix, example),
+                d["entity"])
 
     def c21_inv_label_refs(self):
         """INV-4：note/comment 中的标签引用须指向已存在条目。正式号（T-xxx…
@@ -812,7 +898,7 @@ class Validator:
         for r in self.m.roles:
             if r["name"] in RESERVED_ROLES or r["readonly"]:
                 continue
-            if r["name"] not in used:
+            if r["name"] not in used and r["id"] not in used:   # 双键：引用可用 id 或 name
                 if any(v in r["name"] for v in verbs):
                     self.report.warn(
                         "C22", self._hint(
@@ -858,12 +944,15 @@ class Validator:
             ce = b.get("constrained_entity")
             inv = b.get("entities_involved", [])
             if ce in (None, ""):
+                # 提示自带 entities_involved，作者免翻文件定位（BR 正式号↔数据文件局部标签）
+                ex = (f"entities_involved={inv}；示例: constrained_entity={inv[0]!r}"
+                      if inv else f"entities_involved={inv}")
                 self.report.error(
                     "C24", self._hint(
                         f"BR[{bid}]", "缺 constrained_entity",
                         "增删改门禁→填操作对象实体；对称规则→取任一 involved 实体"
                         "并在 note.comment 注明'代表实体'",
-                        'constrained_entity="E-XXX"'))
+                        ex))
             elif ce not in inv:
                 self.report.error(
                     "C24", self._hint(
@@ -925,3 +1014,29 @@ class Validator:
                     f"转换[{tid}]", "note 未引用任何事件 id",
                     "note.comment 引用其来源事件 id（如「源自 e03」）；"
                     "状态机闭环转换在 note 注明 inferred 豁免"))
+
+    def c28_inv_branch_br_hook(self):
+        """INV-7 挂错疑似：已挂 branch_dimensions 的 BR，其文本（desc/note）
+        应含该维度名或某分支值作钩子（分支语义的文本证据），且维度须已声明。
+        纯包含匹配、确定性。两个子案均 warn（非 error）——无钩子存在合法静默
+        关联（b23 评分方式 即证，作者声明但文本无声），悬空标签是历史误用
+        （struct_srs b30/b33 把 E-JG 状态维度写进 branch_dimension 键）。
+        局限：维度间值词冲突时无法区分（审核任务结果/报名审核结果 共用
+        「退回」措辞），子串命中即放行——此为语义歧义，超出确定性包含匹配。"""
+        dims = {d["dimension"]: d for d in self.m.branch_dimensions}
+        for b in self.m.business_rules:
+            for tag in (b.get("branch_dimensions") or []):
+                if tag not in dims:
+                    self.report.warn("C28", self._hint(
+                        b["id"], f"branch_dimensions={tag!r} 未声明为分支维度"
+                                 "（挂错疑似）",
+                        "改挂已声明的分支维度，或删该参数（状态维度引用不走此键）",
+                        f"已声明: {sorted(dims) or '无'}"))
+                    continue
+                vals = [x["value"] for x in dims[tag]["branches"] if x.get("value")]
+                text = (b.get("desc") or "") + " " + self._flatten(b.get("note"))
+                if (not any(self._value_hit(text, v) for v in vals)
+                        and tag not in text):
+                    self.report.warn("C28", self._hint(
+                        b["id"], f"挂 {tag!r} 但文本无该维度名/分支值钩子（挂错疑似）",
+                        "复核归属：desc/note 补分支钩子，或改挂正确维度"))
