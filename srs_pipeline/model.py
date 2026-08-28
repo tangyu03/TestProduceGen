@@ -58,9 +58,13 @@ def interrupt_schema(source, items) -> dict:
 # (严格超集，如"不得显示"也归 mandatory)。enforcement 由框架推导，LLM 不手写。
 _STRONG_WORDS = ("必须", "禁止", "不得", "不可", "不能")
 
-def derive_enforcement(signal_type: str, desc: str) -> str:
-    if signal_type == "field_constraint":
-        return "mandatory"
+def derive_enforcement(desc: str, explicit: str | None = None) -> str:
+    """enforcement 派生：显式覆盖第一优先；缺省 desc 强词判断。
+    signal_type 的 field_constraint→mandatory 已由数据迁移固化为显式
+    enforcement="mandatory"（S/T 可分性证明 desc 词检无法复现：v6/v7 短信规则
+    与 v8 同文规则分类相反），故此处不再需要 field_constraint 特判。"""
+    if explicit:
+        return explicit
     if any(w in desc for w in _STRONG_WORDS):
         return "mandatory"
     return "conditional"
@@ -69,7 +73,7 @@ class DomainModel:
     def __init__(self, source, document_scope="", version=SCHEMA_VERSION):
         self.meta = {"version": version, "generated_at": _now(),
                      "source": source or "未命名文档",
-                     "document_scope": document_scope,
+                     "document_scope": esc(document_scope),
                      "has_critical_ambiguity": False,
                      "consistency_check": "passed",
                      "ambiguity_list": [], "pipeline_trace": {},
@@ -238,13 +242,15 @@ class DomainModel:
         return self
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, note=None, constrained_entity=None,
-               branch_dimensions=None):
+               note=None, constrained_entity=None,
+               branch_dimensions=None, enforcement=None, restrictive=False):
         validate_llm("br", {"bid": bid, "category": category, "desc": desc,
                             "entities_involved": entities_involved,
-                            "source_ref": source_ref, "signal_type": signal_type,
+                            "source_ref": source_ref,
                             "note": note, "constrained_entity": constrained_entity,
-                            "branch_dimensions": branch_dimensions})
+                            "branch_dimensions": branch_dimensions,
+                            "enforcement": enforcement,
+                            "restrictive": restrictive})
         # 单实体 BR 的受约束实体是唯一元素：确定性派生（LLM 缺失/多实体时由 C24 兜底）
         if constrained_entity is None and len(entities_involved) == 1:
             constrained_entity = entities_involved[0]
@@ -267,8 +273,9 @@ class DomainModel:
             "id": bid, "category": category, "desc": esc(desc),
             "entities_involved": list(entities_involved),
             "constrained_entity": constrained_entity,
-            "enforcement": derive_enforcement(signal_type, desc),
-            "source_ref": esc(source_ref), "signal_type": signal_type,
+            "enforcement": derive_enforcement(desc, enforcement),
+            "restrictive": bool(restrictive),
+            "source_ref": esc(source_ref),
             "note": _esc_note(note), "branch_dimensions": dims})
         return self
 
@@ -453,6 +460,12 @@ class DomainModel:
 
             def match(s):
                 best = {}
+                d_eq = f"{esc(dim)}={s}"
+                # 描述引用分支值（取最长值，防 需还样⊂无需还样 子串碰撞）→
+                # 命中 {D}={值} 约束前置的转换显著胜出（「…转换（需还样分支）」
+                # → t30 的 还样要求=需还样 前置；描述无动作/落点信号可依）。
+                v_star = max((v for v in vals if v in s), key=len, default=None)
+                v_eq = f"{esc(dim)}={esc(v_star)}" if v_star else None
                 for t in scope.values():
                     a = esc(t.get("action", ""))
                     to = esc(t.get("to", ""))
@@ -460,7 +473,20 @@ class DomainModel:
                     path = bool(frm) and any(
                         p in s for p in (f"{esc(frm)}变为{to}",
                                          f"{frm}→{t.get('to')}"))
-                    if s == a:
+                    cons = [esc(p.get("text", ""))
+                            for p in t.get("preconditions", [])
+                            if p.get("type") in ("constraint", "when")]
+                    if any(d_eq in c for c in cons):
+                        score = 60          # 约束前置精确形态 {D}={S}（最强信号：
+                                            # 「报名审核结果=退回修改」→ t08b，动作层无信号）
+                    elif v_eq and any(v_eq in c for c in cons):
+                        score = 56          # 描述引用分支值 + 转换按 {D}={值} 前置
+                                            # 门控（次强：比子串更具体，比精确 {D}={S} 弱）
+                    elif any(s in c for c in cons):
+                        score = 55          # 约束前置子串兜底
+                    elif s == to:
+                        score = 50          # to 状态相等（落点差异经转换分立承载）
+                    elif s == a:
                         score = 40
                     elif path:
                         score = 30

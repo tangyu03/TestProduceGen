@@ -102,7 +102,7 @@ for ro in d['constraint_obligations']:
             if r not in ro:
                 errors.append(f"RO-IT {ro['id']}: missing field {r}")
     elif ro['type'] == 'business_rule':
-        required = ['id', 'type', 'constraint_id', 'entities_involved', 'category', 'signal_type',
+        required = ['id', 'type', 'constraint_id', 'entities_involved', 'category', 'restrictive',
                     'description', 'enforcement', 'ref_to_existing_br', 'coverage_priority', 'suggested_action', 'source_ref']
         for r in required:
             if r not in ro:

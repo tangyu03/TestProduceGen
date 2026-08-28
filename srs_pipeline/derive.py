@@ -91,7 +91,7 @@ def gen_field_constraint_brs(model, start_seq=1):
                             "desc": f"{e['name']}.{a['name']}：{a['desc']}",
                             "entities_involved": [e["id"]], "enforcement": "mandatory",
                             "source_ref": "属性定义（字段约束回填）",
-                            "signal_type": "field_constraint", "note": N()})
+                            "note": N()})
     return out
 
 def derive_causal_from_results(model):

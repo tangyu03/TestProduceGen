@@ -1,0 +1,5395 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-28T16:27:41+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704.md",
+    "document_scope": "§3.4；§5；§19.1；§19.2（平行流程，差异：编制结果通知单取代编制结果报告；结果通知单审批合并；作业指导书单独走通知状态机；差异在相关转换 note 中标注）；§19.3；§19.4；§20.2；§20.3；§20.4；§20.5；§20.6（测量审核平行模块）；§20.7；§20.9；§20.10；§20.11；§21.3",
+    "has_critical_ambiguity": false,
+    "consistency_check": "warnings",
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-FIX-001",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C04: 补镜像 XC-010（源自 T-003 的跨实体前置条件）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-FIX-002",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C04: 补镜像 XC-011（源自 T-004 的跨实体前置条件）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-FIX-003",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C04: 补镜像 XC-012（源自 T-042 的跨实体前置条件）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-FIX-004",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C08: E-XM 至 E-YP 降级 reference（B 创建依赖 E-BMJL 的后期状态）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-FIX-005",
+        "severity": "minor",
+        "concept": "Step6 自动修复",
+        "description": "C08: E-XM 至 E-PJ 降级 reference（B 创建依赖 E-BMJL 的后期状态）",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ],
+    "pipeline_trace": {
+      "step0_events": 61,
+      "step1_entities": [
+        "E-XM",
+        "E-YP",
+        "E-YT",
+        "E-BMJL",
+        "E-JFTZ",
+        "E-FY",
+        "E-FP",
+        "E-SYS",
+        "E-BZK",
+        "E-PJ",
+        "E-TASK",
+        "E-WJD"
+      ],
+      "step2_structural_relations": 11,
+      "step3_branch_dimensions": 3,
+      "step3_branch_tt_backfilled": 6,
+      "step3_branch_tt_deviations": 0,
+      "step4_transitions": 62,
+      "step4_transition_relations": 5,
+      "step4_roles": 16,
+      "step4_precondition_stats": {
+        "total_preconditions": 81,
+        "state_ref_count": 61,
+        "event_ref_count": 0,
+        "constraint_count": 20,
+        "state_ref_resolved_count": 61,
+        "state_ref_unresolved_count": 0
+      },
+      "step5_invalid_transitions": 0,
+      "step5_cross_entity": 12,
+      "step5_business_rules": 29
+    },
+    "branch_dimensions": [
+      {
+        "dimension": "业务类型",
+        "entity": "E-XM",
+        "values": [
+          "能力验证",
+          "测量审核"
+        ],
+        "impact_scope": "影响项目流程路径：能力验证走§19.1（编制结果报告）；测量审核走§19.2（编制结果通知单，审批合并）",
+        "evidence": "①配置型：§19.1与§19.2平行流程；§20.8.3项目类型选项包括能力验证、测量审核；§20.10.1.1业务类型选项包括能力验证、测量审核",
+        "branches": [
+          {
+            "value": "能力验证",
+            "target_transition": "T-020",
+            "note": "§19.1能力验证提供者流程"
+          },
+          {
+            "value": "测量审核",
+            "target_transition": "T-021",
+            "note": "§19.2测量审核提供者流程，编制结果通知单取代编制结果报告"
+          }
+        ],
+        "coverage": {
+          "transitions": [
+            "T-020",
+            "T-021",
+            "T-050"
+          ],
+          "cross_entity": [
+            "XC-012"
+          ],
+          "business_rules": [
+            "BR-020"
+          ]
+        }
+      },
+      {
+        "dimension": "评分方式",
+        "entity": "E-PJ",
+        "values": [
+          "分值",
+          "权重"
+        ],
+        "impact_scope": "影响评价结果计算方式：分值按累加计算；权重按加权计算",
+        "evidence": "①配置型：§20.7项目列表『支持分值和权重两种评价方式』；§20.7.1.1项目信息展示区包含评分方式字段",
+        "branches": [
+          {
+            "value": "分值",
+            "target_transition": "T-039",
+            "note": "分值按累加计算得分"
+          },
+          {
+            "value": "权重",
+            "target_transition": "T-039",
+            "note": "权重按加权计算得分；落点同，仅措辞异，结果差异型"
+          }
+        ],
+        "coverage": {
+          "transitions": [
+            "T-039"
+          ],
+          "cross_entity": [],
+          "business_rules": [
+            "BR-019"
+          ]
+        }
+      },
+      {
+        "dimension": "还样要求",
+        "entity": "E-YP",
+        "values": [
+          "需还样",
+          "无需还样"
+        ],
+        "impact_scope": "影响样品状态落点：需还样变为待核查（进入下一批次循环）；无需还样变为无需还样（terminal）",
+        "evidence": "②运行时选择型：§19.1表格行12『已还样、待核查/无需还样』斜杠或语义分支",
+        "branches": [
+          {
+            "value": "需还样",
+            "target_transition": "T-035",
+            "note": "已还样变为待核查，循环状态机"
+          },
+          {
+            "value": "无需还样",
+            "target_transition": "T-036",
+            "note": "已还样变为无需还样，terminal"
+          }
+        ],
+        "coverage": {
+          "transitions": [
+            "T-035",
+            "T-036"
+          ],
+          "cross_entity": [],
+          "business_rules": [
+            "BR-029"
+          ]
+        }
+      }
+    ],
+    "branch_tt_backfilled": [
+      {
+        "dimension": "业务类型",
+        "entity": "E-XM",
+        "value": "能力验证",
+        "from": "编制结果报告转换",
+        "target_transition": "T-020"
+      },
+      {
+        "dimension": "业务类型",
+        "entity": "E-XM",
+        "value": "测量审核",
+        "from": "编制结果通知单转换",
+        "target_transition": "T-021"
+      },
+      {
+        "dimension": "评分方式",
+        "entity": "E-PJ",
+        "value": "分值",
+        "from": "评价人员提交评价结果转换",
+        "target_transition": "T-039"
+      },
+      {
+        "dimension": "评分方式",
+        "entity": "E-PJ",
+        "value": "权重",
+        "from": "评价人员提交评价结果转换",
+        "target_transition": "T-039"
+      },
+      {
+        "dimension": "还样要求",
+        "entity": "E-YP",
+        "value": "需还样",
+        "from": "参加者测试与结果提交转换（需还样分支）",
+        "target_transition": "T-035"
+      },
+      {
+        "dimension": "还样要求",
+        "entity": "E-YP",
+        "value": "无需还样",
+        "from": "参加者测试与结果提交转换（无需还样分支）",
+        "target_transition": "T-036"
+      }
+    ],
+    "branch_tt_deviations": []
+  },
+  "_context": {
+    "prohibition_config": {
+      "action_verbs": [
+        "编制",
+        "审核",
+        "批准",
+        "发布",
+        "报名",
+        "缴费",
+        "开具",
+        "核查",
+        "发放",
+        "发送",
+        "提交",
+        "评价",
+        "统计",
+        "整理",
+        "导入",
+        "上传",
+        "下载",
+        "修改",
+        "删除",
+        "新增",
+        "停用",
+        "启用",
+        "退回",
+        "撤销",
+        "回收",
+        "确认",
+        "测试",
+        "还样",
+        "发样",
+        "收样",
+        "退款",
+        "借出",
+        "归还",
+        "维护",
+        "签发",
+        "导出",
+        "选择",
+        "跳转",
+        "回收",
+        "开启",
+        "受理"
+      ],
+      "prohibit_keywords": [
+        "接收人1和接收人2不能同时为空",
+        "含有子项的记录不允许删除",
+        "存在子项的数据不可以删除",
+        "停用的标准库在项目创建等环节不可被选择",
+        "退款金额不能大于当前缴费金额",
+        "评价人员只能对自己的评价结果进行修改",
+        "未结束的项目可以进行消息发送",
+        "仅收集完成业务所必需的最少个人信息",
+        "只有已上传对应文件且未提交审核的记录才可以被选定",
+        "审核结果为通过时可以为空",
+        "退回修改必须填写审核意见"
+      ]
+    },
+    "permissions": [
+      {
+        "role": "项目管理员",
+        "operations": [
+          "查询项目",
+          "新增项目",
+          "文件整理",
+          "代码导入",
+          "批量处理",
+          "消息发送",
+          "上传结果通知单",
+          "上传证书",
+          "提交审核"
+        ]
+      },
+      {
+        "role": "策划人员",
+        "operations": [
+          "查询项目",
+          "编制文件",
+          "上传文件",
+          "下载文件"
+        ]
+      },
+      {
+        "role": "技术主管",
+        "operations": [
+          "查询项目",
+          "审核报告"
+        ]
+      },
+      {
+        "role": "实验室负责人",
+        "operations": [
+          "查询项目",
+          "批准证书"
+        ]
+      },
+      {
+        "role": "授权签字人",
+        "operations": [
+          "查询项目",
+          "批准报告"
+        ]
+      },
+      {
+        "role": "评价人员",
+        "operations": [
+          "查询项目",
+          "评价录入",
+          "导出评价结果"
+        ]
+      },
+      {
+        "role": "评价组长",
+        "operations": [
+          "查询项目",
+          "完善评价细则",
+          "结果确认",
+          "保存历史",
+          "调整细则",
+          "退回修改",
+          "调整统计规则",
+          "导出评价结果"
+        ]
+      },
+      {
+        "role": "样品管理员",
+        "operations": [
+          "查询样品",
+          "样品出入库登记",
+          "样品核查"
+        ]
+      },
+      {
+        "role": "样品制备人员",
+        "operations": [
+          "查询样品",
+          "样品制备",
+          "样品配置"
+        ]
+      },
+      {
+        "role": "财务管理人员",
+        "operations": [
+          "查询缴费",
+          "发票上传",
+          "缴费单退款",
+          "修改备注",
+          "导出缴费信息"
+        ]
+      },
+      {
+        "role": "系统管理人员",
+        "operations": [
+          "查询用户",
+          "新增用户",
+          "修改用户",
+          "删除用户",
+          "查询角色",
+          "新增角色",
+          "修改角色",
+          "查询机构",
+          "查询实验室",
+          "审核实验室",
+          "停用实验室",
+          "启用实验室",
+          "修改实验室",
+          "查询标准库",
+          "新增标准库",
+          "修改标准库",
+          "删除标准库",
+          "停用标准库",
+          "启用标准库",
+          "查询信息发送记录",
+          "批量审核"
+        ]
+      },
+      {
+        "role": "能力验证参加者",
+        "operations": [
+          "查询项目",
+          "报名",
+          "上传付款单",
+          "下载预通知",
+          "提交结果",
+          "上传结果通知单",
+          "上传证书",
+          "下载文件"
+        ]
+      },
+      {
+        "role": "统计人员",
+        "operations": [
+          "查询项目",
+          "查询统计",
+          "导出统计"
+        ]
+      },
+      {
+        "role": "质量专员",
+        "operations": [
+          "查询项目",
+          "查询报告统计"
+        ]
+      },
+      {
+        "role": "机构",
+        "operations": [
+          "查询实验室",
+          "新增实验室",
+          "修改实验室"
+        ]
+      },
+      {
+        "role": "监督员",
+        "operations": [
+          "查询项目"
+        ]
+      }
+    ]
+  },
+  "domain_model": {
+    "entities": [
+      {
+        "id": "E-XM",
+        "name": "能力验证项目",
+        "desc": "能力验证/测量审核业务的载体，承载项目级状态流转",
+        "type": "core",
+        "tags": [
+          "multi-state",
+          "approvable",
+          "expirable"
+        ],
+        "attributes": [
+          {
+            "name": "项目编号",
+            "desc": "项目唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "项目名称",
+            "desc": "项目名称",
+            "is_config": false
+          },
+          {
+            "name": "产品类型",
+            "desc": "项目所属产品类型",
+            "is_config": false
+          },
+          {
+            "name": "项目类型",
+            "desc": "能力验证或测量审核",
+            "is_config": true
+          },
+          {
+            "name": "子领域",
+            "desc": "项目所属子领域",
+            "is_config": false
+          },
+          {
+            "name": "项目费用",
+            "desc": "项目应收金额",
+            "is_config": false
+          },
+          {
+            "name": "所属年度",
+            "desc": "项目所属年度",
+            "is_config": false
+          },
+          {
+            "name": "监督员",
+            "desc": "项目新增表单新增字段",
+            "is_config": false
+          },
+          {
+            "name": "技术主管",
+            "desc": "项目人员，唯一时默认填充",
+            "is_config": false
+          },
+          {
+            "name": "实验室负责人",
+            "desc": "项目人员，唯一时默认填充",
+            "is_config": false
+          },
+          {
+            "name": "授权签字人",
+            "desc": "项目人员，唯一时默认填充",
+            "is_config": false
+          },
+          {
+            "name": "财务备注",
+            "desc": "项目列表新增字段",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "项目状态",
+            "states": [
+              "待开始",
+              "报名中",
+              "进行中",
+              "报告审核中",
+              "已结束"
+            ],
+            "initial": "待开始",
+            "terminal": [
+              "已结束"
+            ],
+            "note": {
+              "comment": "§19.3枚举5值；§19.1表格仅显式覆盖待开始/报名中；进行中/报告审核中/已结束依据§19.3枚举+§19.1阶段名（实施阶段/报告编制和结果通知/结束）推导"
+            },
+            "inferred": [
+              "进行中",
+              "报告审核中",
+              "已结束"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "任务通知书编制",
+            "category": "file",
+            "expected_results": [
+              "生成任务通知书文件"
+            ],
+            "source_ref": "19.1项目准备阶段",
+            "note": {
+              "role": [
+                "策划人员"
+              ],
+              "comment": "表格行1，无状态面变化，非事件； crud 关联 T-001"
+            }
+          },
+          {
+            "name": "设计方案编制",
+            "category": "file",
+            "expected_results": [
+              "生成设计方案文件"
+            ],
+            "source_ref": "19.1方案设计阶段",
+            "note": {
+              "role": [
+                "策划人员"
+              ],
+              "comment": "crud 关联 T-001（项目状态创建边）"
+            }
+          },
+          {
+            "name": "文件整理",
+            "category": "file",
+            "expected_results": [
+              "归档任务已开启，请稍后查看"
+            ],
+            "source_ref": "20.5.1.1文件整理",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "已结束项目可触发；触发 E-WJD 创建"
+            }
+          },
+          {
+            "name": "代码导入",
+            "category": "file",
+            "expected_results": [
+              "报名机构三方代码导入成功"
+            ],
+            "source_ref": "20.5.1.2机构代码导入",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "导入报名机构三方代码；无状态变化"
+            }
+          },
+          {
+            "name": "批量处理",
+            "category": "ui",
+            "expected_results": [
+              "跳转到报名信息批量处理页面"
+            ],
+            "source_ref": "20.5.1.3项目批量操作",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "入口操作；具体上传/提交审核在 E-BMJL 侧"
+            }
+          },
+          {
+            "name": "消息发送",
+            "category": "ui",
+            "expected_results": [
+              "消息按选择方式发送"
+            ],
+            "source_ref": "20.5.1.4优化消息发送功能",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "未结束项目可发送；接收人1和接收人2不能同时为空"
+            }
+          },
+          {
+            "name": "机构代码批量导入",
+            "category": "file",
+            "expected_results": [
+              "批量导入机构代码"
+            ],
+            "source_ref": "20.5.1项目管理",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "新增能力；无状态变化"
+            }
+          },
+          {
+            "name": "项目批量操作",
+            "category": "ui",
+            "expected_results": [
+              "批量处理入口"
+            ],
+            "source_ref": "20.5.1项目管理",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "无状态变化"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-YP",
+        "name": "项目样品",
+        "desc": "能力验证项目中的样品流转载体",
+        "type": "core",
+        "tags": [
+          "multi-state"
+        ],
+        "attributes": [
+          {
+            "name": "样品编号",
+            "desc": "样品唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "批次",
+            "desc": "样品批次",
+            "is_config": false
+          },
+          {
+            "name": "核查记录表",
+            "desc": "样品核查记录",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "样品状态",
+            "states": [
+              "待核查",
+              "已核查",
+              "待发样",
+              "已发样",
+              "已还样",
+              "无需还样"
+            ],
+            "initial": "待核查",
+            "terminal": [
+              "无需还样"
+            ],
+            "note": {
+              "comment": "§19.3枚举仅列待核查/已核查；待发样/已发样/已还样/无需还样依据§19.1表格『样品状态』列实际取值推导；§19.1表格行12『已还样、待核查/无需还样』体现循环状态机（已还样变为待核查）"
+            },
+            "inferred": [
+              "待发样",
+              "已发样",
+              "已还样",
+              "无需还样"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "样品制备",
+            "category": "file",
+            "expected_results": [
+              "生成样品制备方案"
+            ],
+            "source_ref": "5.11样品制备人员",
+            "note": {
+              "role": [
+                "样品制备人员"
+              ],
+              "comment": "样品制备人员编制方案；无状态变化"
+            }
+          },
+          {
+            "name": "样品出入库登记",
+            "category": "file",
+            "expected_results": [
+              "样品出入库记录更新"
+            ],
+            "source_ref": "5.12样品管理员",
+            "note": {
+              "role": [
+                "样品管理员"
+              ],
+              "comment": "样品管理员库存管理"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-YT",
+        "name": "预通知",
+        "desc": "能力验证计划预通知、作业指导书等通知类载体",
+        "type": "core",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "通知编号",
+            "desc": "通知唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "通知类型",
+            "desc": "预通知/作业指导书/结果通知单等",
+            "is_config": false
+          },
+          {
+            "name": "用户信息表",
+            "desc": "预通知附带用户信息表",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "通知状态",
+            "states": [
+              "未发送",
+              "已发送",
+              "待确认",
+              "已确认",
+              "待审核",
+              "退回",
+              "已审核",
+              "已批准"
+            ],
+            "initial": "未发送",
+            "terminal": [
+              "已确认",
+              "已批准"
+            ],
+            "note": {
+              "comment": "§19.3枚举6值（未发送/待确认/待审核/退回/已审核/已批准）；§19.1台账覆盖未发送变为已发送/待确认变为已确认流转；待审核/退回/已审核/已批准在§19.1台账无事件覆盖（孤岛，§19.2作业指导书审核可能覆盖，本DSL未展开）",
+              "ambiguity": "§19.3通知状态枚举与§19.1预通知状态列实际取值口径不一致：§19.3偏审核语义（待审核/已审核/已批准），§19.1偏投递语义（已发送/待确认/已确认），两口径并列保留"
+            },
+            "inferred": [
+              "已发送",
+              "已确认"
+            ]
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "E-BMJL",
+        "name": "报名记录",
+        "desc": "参加者报名能力验证项目的记录，承载多维度状态",
+        "type": "core",
+        "tags": [
+          "multi-state",
+          "collaborative"
+        ],
+        "attributes": [
+          {
+            "name": "报名编号",
+            "desc": "报名记录唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "实验室",
+            "desc": "报名实验室引用",
+            "is_config": false
+          },
+          {
+            "name": "机构代码",
+            "desc": "报名机构三方代码",
+            "is_config": false
+          },
+          {
+            "name": "报名时间",
+            "desc": "报名提交时间",
+            "is_config": false
+          },
+          {
+            "name": "报名表",
+            "desc": "报名表文件",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "报名记录状态",
+            "states": [
+              "报名待审核",
+              "报名退回",
+              "报名成功",
+              "结果待提交",
+              "结果已提交",
+              "结果退回修改",
+              "报告/证书审核中",
+              "报告/证书已发布",
+              "已撤销"
+            ],
+            "initial": "报名待审核",
+            "terminal": [
+              "报告/证书已发布",
+              "已撤销"
+            ],
+            "note": {
+              "comment": "§19.3枚举9值，§19.1台账全覆盖"
+            },
+            "inferred": []
+          },
+          {
+            "dimension_name": "报名记录样品状态",
+            "states": [
+              "待发样",
+              "待收样",
+              "已收样",
+              "已确认"
+            ],
+            "initial": "待发样",
+            "terminal": [
+              "已确认"
+            ],
+            "note": {
+              "comment": "§19.3枚举4值；§19.1台账无事件覆盖（孤岛，参加者侧样品流转状态，可能由§19.4参加者流程承载，本DSL未展开参加者侧状态机）"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "上传付款单",
+            "category": "file",
+            "expected_results": [
+              "付款记录保存，可多次付款"
+            ],
+            "source_ref": "20.5.2.1已报名项目增加多次付款功能",
+            "note": {
+              "role": [
+                "能力验证参加者"
+              ],
+              "comment": "多次付款不对金额校验限制"
+            }
+          },
+          {
+            "name": "下载预通知文件",
+            "category": "file",
+            "expected_results": [
+              "预通知文件下载"
+            ],
+            "source_ref": "20.5.2.2已报名项目详情页面增加预通知文件下载",
+            "note": {
+              "role": [
+                "能力验证参加者"
+              ],
+              "comment": "文件下载Tab下新增"
+            }
+          },
+          {
+            "name": "上传结果通知单",
+            "category": "file",
+            "expected_results": [
+              "结果通知单文件上传"
+            ],
+            "source_ref": "20.5.1.3项目批量操作",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "批量处理页面操作"
+            }
+          },
+          {
+            "name": "上传证书",
+            "category": "file",
+            "expected_results": [
+              "证书文件上传"
+            ],
+            "source_ref": "20.5.1.3项目批量操作",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "批量处理页面操作"
+            }
+          },
+          {
+            "name": "提交审核",
+            "category": "ui",
+            "expected_results": [
+              "选中记录批量提交审核"
+            ],
+            "source_ref": "20.5.1.3项目批量操作",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "需先选择记录；未选择则提示"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-JFTZ",
+        "name": "缴费通知单",
+        "desc": "报名后系统自动生成/发送的缴费通知",
+        "type": "core",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "通知单编号",
+            "desc": "缴费通知单唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "应收金额",
+            "desc": "应缴费用金额",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "缴费通知单状态",
+            "states": [
+              "未发送",
+              "已发送"
+            ],
+            "initial": "未发送",
+            "terminal": [
+              "已发送"
+            ],
+            "note": {
+              "comment": "§19.1表格『缴费通知单』列实际取值；§19.3未单独枚举此维度，依据§19.1推导"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "E-FY",
+        "name": "费用",
+        "desc": "报名记录对应的费用记录",
+        "type": "core",
+        "tags": [
+          "expirable"
+        ],
+        "attributes": [
+          {
+            "name": "付款金额",
+            "desc": "累计付款金额",
+            "is_config": false
+          },
+          {
+            "name": "退款金额",
+            "desc": "累计退款金额，红色字体且大于0时显示",
+            "is_config": false
+          },
+          {
+            "name": "实际付款",
+            "desc": "付款金额-退款金额",
+            "is_config": false
+          },
+          {
+            "name": "管理备注",
+            "desc": "退款原因等",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "费用状态",
+            "states": [
+              "待缴费",
+              "已缴费"
+            ],
+            "initial": "待缴费",
+            "terminal": [],
+            "note": {
+              "comment": "§19.3枚举2值；§19.1表格行7『已缴费/未缴费』中未缴费按§19.3统一为待缴费；§20.10.2.3退款可触发已缴费变为待缴费回退"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "缴费单退款",
+            "category": "ui",
+            "expected_results": [
+              "退款金额累加，实际付款更新"
+            ],
+            "source_ref": "20.10.2.3缴费单退款",
+            "note": {
+              "role": [
+                "财务管理人员"
+              ],
+              "comment": "退款金额不能大于当前缴费金额； crud 关联 T-027（费用状态回退，全额退款时）"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-FP",
+        "name": "发票",
+        "desc": "报名记录对应的发票记录，支持多次分批上传",
+        "type": "core",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "开票时间",
+            "desc": "最后一次开票时间",
+            "is_config": false
+          },
+          {
+            "name": "电子发票",
+            "desc": "发票文件，支持多个",
+            "is_config": false
+          },
+          {
+            "name": "开票类型",
+            "desc": "电子专票/电子普票",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "发票状态",
+            "states": [
+              "待开票",
+              "已开票"
+            ],
+            "initial": "待开票",
+            "terminal": [
+              "已开票"
+            ],
+            "note": {
+              "comment": "§19.3枚举2值；§20.10.2.2支持多次分批上传"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "发票上传",
+            "category": "file",
+            "expected_results": [
+              "发票文件保存到发票列表"
+            ],
+            "source_ref": "20.10.2.2修改发票上传功能使其支持多次分批上传",
+            "note": {
+              "role": [
+                "财务管理人员"
+              ],
+              "comment": "支持多次分批上传；可移除文件"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-SYS",
+        "name": "实验室",
+        "desc": "参加者机构实验室信息，新增/修改需审核通过后方可用于项目报名",
+        "type": "core",
+        "tags": [
+          "approvable",
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "实验室编号",
+            "desc": "实验室唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "实验室名称",
+            "desc": "实验室名称",
+            "is_config": false
+          },
+          {
+            "name": "统一社会信用代码",
+            "desc": "实验室统一社会信用代码",
+            "is_config": false
+          },
+          {
+            "name": "法人名称",
+            "desc": "法人名称",
+            "is_config": false
+          },
+          {
+            "name": "企业类型",
+            "desc": "企业类型",
+            "is_config": false
+          },
+          {
+            "name": "企业规模",
+            "desc": "企业规模",
+            "is_config": false
+          },
+          {
+            "name": "CNAS",
+            "desc": "已获CNAS认可及证书号",
+            "is_config": false
+          },
+          {
+            "name": "CMA",
+            "desc": "已获CMA认可及证书编号",
+            "is_config": false
+          },
+          {
+            "name": "邮箱",
+            "desc": "联系邮箱",
+            "is_config": false
+          },
+          {
+            "name": "座机号码",
+            "desc": "座机号码",
+            "is_config": false
+          },
+          {
+            "name": "地址",
+            "desc": "行政区域+详细地址",
+            "is_config": false
+          },
+          {
+            "name": "联系人",
+            "desc": "联系人",
+            "is_config": false
+          },
+          {
+            "name": "联系电话",
+            "desc": "联系电话",
+            "is_config": false
+          },
+          {
+            "name": "默认实验室",
+            "desc": "是否默认实验室",
+            "is_config": false
+          },
+          {
+            "name": "证明文件",
+            "desc": "营业执照或其他证书材料",
+            "is_config": false
+          },
+          {
+            "name": "快照记录",
+            "desc": "审核通过时生成的数据快照",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "实验室状态",
+            "states": [
+              "待审核",
+              "启用",
+              "停用",
+              "已退回"
+            ],
+            "initial": "待审核",
+            "terminal": [],
+            "note": {
+              "comment": "§20.3.1/§20.4.1.1/§20.4.1.2一致枚举4值；§20.3.1称『退回修改』为描述，正式状态值取§20.4.1.2『已退回』"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "审核实验室",
+            "category": "ui",
+            "expected_results": [
+              "弹出审核窗口，提交审核结果"
+            ],
+            "source_ref": "20.4.1.2实验室审核",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "审核通过生成快照；退回修改必须填写审核意见； crud 关联 T-054/T-055"
+            }
+          },
+          {
+            "name": "修改实验室",
+            "category": "ui",
+            "expected_results": [
+              "修改内容保存，状态变为待审核"
+            ],
+            "source_ref": "20.4.1.3实验室修改",
+            "note": {
+              "role": [
+                "机构",
+                "系统管理人员"
+              ],
+              "comment": "机构修改后需重新审核； crud 关联 T-052/T-053"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-BZK",
+        "name": "标准库",
+        "desc": "标准库基础数据，下属测试项和参数，分层级维护",
+        "type": "managed",
+        "tags": [
+          "configurable"
+        ],
+        "attributes": [
+          {
+            "name": "标准库编号",
+            "desc": "标准库唯一标识",
+            "is_config": false
+          },
+          {
+            "name": "标准库名称",
+            "desc": "标准库名称",
+            "is_config": false
+          },
+          {
+            "name": "描述",
+            "desc": "标准库描述",
+            "is_config": false
+          },
+          {
+            "name": "创建时间",
+            "desc": "创建时间",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "标准库状态",
+            "states": [
+              "启用",
+              "停用"
+            ],
+            "initial": "启用",
+            "terminal": [],
+            "note": {
+              "comment": "§20.4.2.1列表展示字段；§20.4.2.5停用后项目创建等环节不可被选择"
+            },
+            "inferred": []
+          }
+        ],
+        "operations": [
+          {
+            "name": "新增标准库",
+            "category": "ui",
+            "expected_results": [
+              "标准库创建，状态默认启用"
+            ],
+            "source_ref": "20.4.2.2新增标准库",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "crud 关联 T-058"
+            }
+          },
+          {
+            "name": "修改标准库",
+            "category": "ui",
+            "expected_results": [
+              "标准库信息更新"
+            ],
+            "source_ref": "20.4.2.3修改标准库",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "无状态变化"
+            }
+          },
+          {
+            "name": "删除标准库",
+            "category": "ui",
+            "expected_results": [
+              "标准库删除，含子项的记录不允许删除"
+            ],
+            "source_ref": "20.4.2.4删除标准库",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "二次确认；含子项不允许删除"
+            }
+          },
+          {
+            "name": "管理测试项",
+            "category": "ui",
+            "expected_results": [
+              "跳转至测试项管理界面"
+            ],
+            "source_ref": "20.4.2.6进入测试项管理界面",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "导航操作"
+            }
+          },
+          {
+            "name": "新增测试项",
+            "category": "ui",
+            "expected_results": [
+              "测试项加入列表"
+            ],
+            "source_ref": "20.4.2.8新增测试项",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "标号+名称"
+            }
+          },
+          {
+            "name": "修改测试项",
+            "category": "ui",
+            "expected_results": [
+              "测试项信息更新，列表刷新"
+            ],
+            "source_ref": "20.4.2.9修改测试项",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "无状态变化"
+            }
+          },
+          {
+            "name": "删除测试项",
+            "category": "ui",
+            "expected_results": [
+              "测试项删除；含子项的记录不允许删除"
+            ],
+            "source_ref": "20.4.2.10删除测试项",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "含子项不允许删除"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-PJ",
+        "name": "项目评价",
+        "desc": "对报名项目结果进行评价的载体，支持分值/权重两种方式，协同评价",
+        "type": "core",
+        "tags": [
+          "approvable",
+          "multi-state",
+          "collaborative"
+        ],
+        "attributes": [
+          {
+            "name": "评分方式",
+            "desc": "分值或权重",
+            "is_config": true
+          },
+          {
+            "name": "及格分",
+            "desc": "评价组长录入",
+            "is_config": false
+          },
+          {
+            "name": "评价结果",
+            "desc": "最终评价结果",
+            "is_config": false
+          },
+          {
+            "name": "评价历史",
+            "desc": "历次评价结果历史记录",
+            "is_config": false
+          },
+          {
+            "name": "成绩区间统计规则",
+            "desc": "低值/高值组成，大于等于低值小于高值",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "评价状态",
+            "states": [
+              "待评价",
+              "评价中",
+              "评价确认",
+              "已确认"
+            ],
+            "initial": "待评价",
+            "terminal": [
+              "已确认"
+            ],
+            "note": {
+              "comment": "§19.3未枚举；依据§20.7.1.2协同评价+§20.7.1.3评价确认推导；评价组长可在评价确认变为已确认（确认）或评价确认变为评价中（退回修改）"
+            },
+            "inferred": [
+              "待评价",
+              "评价中",
+              "评价确认",
+              "已确认"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "完善评价细则",
+            "category": "ui",
+            "expected_results": [
+              "评价项目及评价细则内容保存"
+            ],
+            "source_ref": "20.7.1.1测试项目评价细则完善",
+            "note": {
+              "role": [
+                "评价组长"
+              ],
+              "comment": "评价组长编辑"
+            }
+          },
+          {
+            "name": "评价录入",
+            "category": "ui",
+            "expected_results": [
+              "评价分数提交"
+            ],
+            "source_ref": "20.7.1.2协同评价",
+            "note": {
+              "role": [
+                "评价人员"
+              ],
+              "comment": "评价人员只能修改自己的评价结果"
+            }
+          },
+          {
+            "name": "保存历史",
+            "category": "ui",
+            "expected_results": [
+              "当前评价结果保存为历史结果"
+            ],
+            "source_ref": "20.7.1.3评价确认",
+            "note": {
+              "role": [
+                "评价组长"
+              ],
+              "comment": "评价组长操作"
+            }
+          },
+          {
+            "name": "调整细则",
+            "category": "ui",
+            "expected_results": [
+              "打开评价细节完善页面"
+            ],
+            "source_ref": "20.7.1.3评价确认",
+            "note": {
+              "role": [
+                "评价组长"
+              ],
+              "comment": "评价组长操作"
+            }
+          },
+          {
+            "name": "调整统计规则",
+            "category": "ui",
+            "expected_results": [
+              "统计规则配置保存"
+            ],
+            "source_ref": "20.7.1.3评价确认",
+            "note": {
+              "role": [
+                "评价组长"
+              ],
+              "comment": "配置成绩区间统计规则"
+            }
+          },
+          {
+            "name": "导出评价结果",
+            "category": "file",
+            "expected_results": [
+              "评价结果文件下载"
+            ],
+            "source_ref": "20.7.1.4评价结果导出",
+            "note": {
+              "role": [
+                "评价人员"
+              ],
+              "comment": "导出评价结果"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-TASK",
+        "name": "审核任务",
+        "desc": "业务审核流程中的任务载体，承载报告/证书/通知单等审批",
+        "type": "core",
+        "tags": [
+          "approvable",
+          "multi-state"
+        ],
+        "attributes": [
+          {
+            "name": "任务类型",
+            "desc": "结果通知单审核/报告审核/证书审核等",
+            "is_config": false
+          },
+          {
+            "name": "审批流程",
+            "desc": "自定义流程（4个以内预设）",
+            "is_config": true
+          },
+          {
+            "name": "签章位置",
+            "desc": "电子签章位置信息",
+            "is_config": false
+          },
+          {
+            "name": "创建时间",
+            "desc": "任务创建时间",
+            "is_config": false
+          },
+          {
+            "name": "审核意见",
+            "desc": "审核反馈意见",
+            "is_config": false
+          },
+          {
+            "name": "签字人顺序",
+            "desc": "提交申请时签字人选择顺序",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "任务审核状态",
+            "states": [
+              "待审核",
+              "通过",
+              "退回"
+            ],
+            "initial": "待审核",
+            "terminal": [
+              "通过",
+              "退回"
+            ],
+            "note": {
+              "comment": "§19.3未枚举；依据§20.9业务审核+§19.1报告编制阶段推导；§20.9.1.1测量审核结果通知单审批合并为一个流程，签字人顺序为提交申请时选择顺序"
+            },
+            "inferred": [
+              "待审核",
+              "通过",
+              "退回"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "批量审核",
+            "category": "ui",
+            "expected_results": [
+              "选中任务批量审核操作"
+            ],
+            "source_ref": "20.9.1.4任务批量处理",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "系统根据节点类型及内容判断是否可批量； crud 关联 T-048/T-049"
+            }
+          },
+          {
+            "name": "导出审批流程",
+            "category": "file",
+            "expected_results": [
+              "满足查询条件的数据导出"
+            ],
+            "source_ref": "20.9.1.5审批流程列表导出",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "新增创建时间查询参数"
+            }
+          },
+          {
+            "name": "预置签章位置",
+            "category": "config",
+            "expected_results": [
+              "签章操作时自动代入位置信息"
+            ],
+            "source_ref": "20.9.1.2预置签章位置信息",
+            "note": {
+              "role": [
+                "系统管理人员"
+              ],
+              "comment": "系统配置；无状态变化"
+            }
+          }
+        ]
+      },
+      {
+        "id": "E-WJD",
+        "name": "文件归档",
+        "desc": "已结束项目的文件归档任务，含分类整理与数字化存储",
+        "type": "managed",
+        "tags": [],
+        "attributes": [
+          {
+            "name": "项目阶段",
+            "desc": "归档文件所属项目阶段",
+            "is_config": false
+          },
+          {
+            "name": "文件名称",
+            "desc": "归档文件名称",
+            "is_config": false
+          },
+          {
+            "name": "份数",
+            "desc": "文件份数",
+            "is_config": false
+          },
+          {
+            "name": "页数",
+            "desc": "文件页数",
+            "is_config": false
+          },
+          {
+            "name": "备注",
+            "desc": "文件备注",
+            "is_config": false
+          }
+        ],
+        "state_dimensions": [
+          {
+            "dimension_name": "归档状态",
+            "states": [
+              "整理中",
+              "已归档"
+            ],
+            "initial": "整理中",
+            "terminal": [
+              "已归档"
+            ],
+            "note": {
+              "comment": "§19.3未枚举；依据§20.5.1.1/§20.6.1.1文件整理推导；整理完成后显示查看归档按钮"
+            },
+            "inferred": [
+              "整理中",
+              "已归档"
+            ]
+          }
+        ],
+        "operations": [
+          {
+            "name": "上传归档文件",
+            "category": "file",
+            "expected_results": [
+              "补充文件保存，项目阶段为其它"
+            ],
+            "source_ref": "20.5.1.1文件整理",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "归档数据查看页面操作"
+            }
+          },
+          {
+            "name": "打包下载",
+            "category": "file",
+            "expected_results": [
+              "归档文件打包下载为zip"
+            ],
+            "source_ref": "20.5.1.1文件整理",
+            "note": {
+              "role": [
+                "项目管理员"
+              ],
+              "comment": "zip内含清单文件和按项目阶段命名的目录"
+            }
+          }
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "id": "r01",
+        "name": "实验室负责人",
+        "readonly": false
+      },
+      {
+        "id": "r02",
+        "name": "技术主管",
+        "readonly": false
+      },
+      {
+        "id": "r03",
+        "name": "授权签字人",
+        "readonly": false
+      },
+      {
+        "id": "r04",
+        "name": "策划人员",
+        "readonly": false
+      },
+      {
+        "id": "r05",
+        "name": "项目管理员",
+        "readonly": false
+      },
+      {
+        "id": "r06",
+        "name": "样品制备人员",
+        "readonly": false
+      },
+      {
+        "id": "r07",
+        "name": "样品管理员",
+        "readonly": false
+      },
+      {
+        "id": "r08",
+        "name": "评价人员",
+        "readonly": false
+      },
+      {
+        "id": "r09",
+        "name": "统计人员",
+        "readonly": false
+      },
+      {
+        "id": "r10",
+        "name": "质量专员",
+        "readonly": false
+      },
+      {
+        "id": "r11",
+        "name": "财务管理人员",
+        "readonly": false
+      },
+      {
+        "id": "r12",
+        "name": "系统管理人员",
+        "readonly": false
+      },
+      {
+        "id": "r13",
+        "name": "能力验证参加者",
+        "readonly": false
+      },
+      {
+        "id": "r14",
+        "name": "评价组长",
+        "readonly": false
+      },
+      {
+        "id": "r15",
+        "name": "监督员",
+        "readonly": false
+      },
+      {
+        "id": "r16",
+        "name": "机构",
+        "readonly": false
+      }
+    ],
+    "events": [
+      {
+        "id": "e01",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "action": "设计方案编制",
+        "actor": "策划人员",
+        "precondition": "初始",
+        "consequence": "待开始",
+        "source_ref": "19.1方案设计阶段"
+      },
+      {
+        "id": "e02",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "action": "能力验证计划发布",
+        "actor": "项目管理员",
+        "precondition": "待开始",
+        "consequence": "报名中",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e03",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "action": "能力验证计划发布",
+        "actor": "项目管理员",
+        "precondition": "初始",
+        "consequence": "未发送",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e04",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "报名",
+        "actor": "能力验证参加者",
+        "precondition": "初始",
+        "consequence": "报名待审核",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e04b",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "报名",
+        "actor": "能力验证参加者",
+        "precondition": "初始",
+        "consequence": "已撤销",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e05",
+        "entity": "E-JFTZ",
+        "dimension": "缴费通知单状态",
+        "action": "报名",
+        "actor": "system",
+        "precondition": "初始",
+        "consequence": "未发送",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e06",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "action": "报名",
+        "actor": "system",
+        "precondition": "初始",
+        "consequence": "待缴费",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e07",
+        "entity": "E-FP",
+        "dimension": "发票状态",
+        "action": "报名",
+        "actor": "system",
+        "precondition": "初始",
+        "consequence": "待开票",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e08",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "报名审核",
+        "actor": "项目管理员",
+        "precondition": "报名待审核",
+        "consequence": "报名退回",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e08b",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "报名审核",
+        "actor": "项目管理员",
+        "precondition": "报名待审核",
+        "consequence": "报名成功",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e09",
+        "entity": "E-JFTZ",
+        "dimension": "缴费通知单状态",
+        "action": "报名审核",
+        "actor": "system",
+        "precondition": "未发送；E-BMJL.报名成功",
+        "consequence": "已发送",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e10",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "缴费",
+        "actor": "样品制备人员",
+        "precondition": "初始；E-BMJL.报名成功",
+        "consequence": "待核查",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e11",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "action": "缴费",
+        "actor": "能力验证参加者",
+        "precondition": "待缴费",
+        "consequence": "已缴费",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e12",
+        "entity": "E-FP",
+        "dimension": "发票状态",
+        "action": "发票开具",
+        "actor": "财务管理人员",
+        "precondition": "待开票",
+        "consequence": "已开票",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e13",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "action": "能力验证预通知",
+        "actor": "项目管理员",
+        "precondition": "未发送",
+        "consequence": "已发送",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e13b",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "action": "能力验证预通知",
+        "actor": "项目管理员",
+        "precondition": "未发送",
+        "consequence": "待确认",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e14",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "能力验证预通知",
+        "actor": "项目管理员",
+        "precondition": "报名成功",
+        "consequence": "结果待提交",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e15",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "样品核查",
+        "actor": "样品管理员",
+        "precondition": "待核查",
+        "consequence": "已核查",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e16",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "样品核查",
+        "actor": "样品管理员",
+        "precondition": "已核查",
+        "consequence": "待发样",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e17",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "样品发放,作业指导书发送",
+        "actor": "项目管理员",
+        "precondition": "待发样",
+        "consequence": "已发样",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e18",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "action": "样品发放,作业指导书发送",
+        "actor": "能力验证参加者",
+        "precondition": "已发送",
+        "consequence": "已确认",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e18b",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "action": "样品发放,作业指导书发送",
+        "actor": "能力验证参加者",
+        "precondition": "待确认",
+        "consequence": "已确认",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e19",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "参加者测试与结果提交",
+        "actor": "能力验证参加者",
+        "precondition": "已发样",
+        "consequence": "已还样",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e20",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "参加者测试与结果提交",
+        "actor": "样品管理员",
+        "precondition": "已还样",
+        "consequence": "待核查",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e20b",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "action": "参加者测试与结果提交",
+        "actor": "样品管理员",
+        "precondition": "已还样",
+        "consequence": "无需还样",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e21",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "参加者测试与结果提交",
+        "actor": "能力验证参加者",
+        "precondition": "结果待提交",
+        "consequence": "结果已提交",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "e22",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "结果报告回收",
+        "actor": "项目管理员",
+        "precondition": "结果已提交",
+        "consequence": "结果退回修改",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e23",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "评价人员进行评价",
+        "actor": "能力验证参加者",
+        "precondition": "结果退回修改",
+        "consequence": "结果已提交",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e24",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "action": "评价人员进行评价",
+        "actor": "评价人员",
+        "precondition": "初始",
+        "consequence": "待评价",
+        "source_ref": "19.1报告编制和结果通知；20.7.1.2协同评价"
+      },
+      {
+        "id": "e25",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "action": "评价人员进行评价",
+        "actor": "评价人员",
+        "precondition": "待评价",
+        "consequence": "评价中",
+        "source_ref": "20.7.1.2协同评价"
+      },
+      {
+        "id": "e26",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "action": "评价人员提交评价结果",
+        "actor": "评价人员",
+        "precondition": "评价中",
+        "consequence": "评价确认",
+        "source_ref": "20.7.1.2协同评价"
+      },
+      {
+        "id": "e27",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "action": "评价组长确认",
+        "actor": "评价组长",
+        "precondition": "评价确认",
+        "consequence": "已确认",
+        "source_ref": "20.7.1.3评价确认"
+      },
+      {
+        "id": "e28",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "action": "评价组长退回修改",
+        "actor": "评价组长",
+        "precondition": "评价确认",
+        "consequence": "评价中",
+        "source_ref": "20.7.1.3评价确认"
+      },
+      {
+        "id": "e29",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "编制结果报告",
+        "actor": "策划人员",
+        "precondition": "结果已提交；E-PJ.已确认",
+        "consequence": "报告/证书审核中",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e30",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "技术主管审核报告",
+        "actor": "策划人员",
+        "precondition": "初始；E-BMJL.报告/证书审核中",
+        "consequence": "待审核",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e31",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "技术主管审核报告",
+        "actor": "技术主管",
+        "precondition": "待审核",
+        "consequence": "通过",
+        "source_ref": "19.1报告编制和结果通知；20.9业务审核"
+      },
+      {
+        "id": "e31b",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "技术主管审核报告",
+        "actor": "技术主管",
+        "precondition": "待审核",
+        "consequence": "退回",
+        "source_ref": "19.1报告编制和结果通知；20.9业务审核"
+      },
+      {
+        "id": "e32",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "授权签字人批准报告和结果通知单",
+        "actor": "授权签字人",
+        "precondition": "待审核；E-TASK.通过",
+        "consequence": "通过",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e33",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "实验室负责人批准证书",
+        "actor": "实验室负责人",
+        "precondition": "待审核；E-TASK.通过",
+        "consequence": "通过",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e34",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "发放结果报告和证书",
+        "actor": "项目管理员",
+        "precondition": "报告/证书审核中；E-TASK.通过",
+        "consequence": "报告/证书已发布",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "e35",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "机构新增实验室信息",
+        "actor": "机构",
+        "precondition": "初始",
+        "consequence": "待审核",
+        "source_ref": "20.3.1实验室信息；20.4.1.2实验室审核"
+      },
+      {
+        "id": "e36",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "机构修改实验室信息",
+        "actor": "机构",
+        "precondition": "启用",
+        "consequence": "待审核",
+        "source_ref": "20.3.1实验室信息；20.4.1.3实验室修改"
+      },
+      {
+        "id": "e37",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "实验室审核通过",
+        "actor": "系统管理人员",
+        "precondition": "待审核",
+        "consequence": "启用",
+        "source_ref": "20.4.1.2实验室审核"
+      },
+      {
+        "id": "e38",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "实验室审核退回",
+        "actor": "系统管理人员",
+        "precondition": "待审核",
+        "consequence": "已退回",
+        "source_ref": "20.4.1.2实验室审核"
+      },
+      {
+        "id": "e39",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "实验室停用",
+        "actor": "系统管理人员",
+        "precondition": "启用",
+        "consequence": "停用",
+        "source_ref": "20.4.1.1实验室列表与查询"
+      },
+      {
+        "id": "e40",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "实验室启用",
+        "actor": "系统管理人员",
+        "precondition": "停用",
+        "consequence": "启用",
+        "source_ref": "20.4.1.1实验室列表与查询"
+      },
+      {
+        "id": "e40b",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "action": "机构修改实验室信息",
+        "actor": "机构",
+        "precondition": "已退回",
+        "consequence": "待审核",
+        "source_ref": "20.4.1.3实验室修改"
+      },
+      {
+        "id": "e41",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "action": "新增标准库",
+        "actor": "系统管理人员",
+        "precondition": "初始",
+        "consequence": "启用",
+        "source_ref": "20.4.2.2新增标准库"
+      },
+      {
+        "id": "e42",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "action": "停用标准库",
+        "actor": "系统管理人员",
+        "precondition": "启用",
+        "consequence": "停用",
+        "source_ref": "20.4.2.5停用启用标准库"
+      },
+      {
+        "id": "e43",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "action": "启用标准库",
+        "actor": "系统管理人员",
+        "precondition": "停用",
+        "consequence": "启用",
+        "source_ref": "20.4.2.5停用启用标准库"
+      },
+      {
+        "id": "e44",
+        "entity": "E-WJD",
+        "dimension": "归档状态",
+        "action": "开启整理任务",
+        "actor": "system",
+        "precondition": "初始；E-XM.已结束",
+        "consequence": "整理中",
+        "source_ref": "20.5.1.1文件整理"
+      },
+      {
+        "id": "e45",
+        "entity": "E-WJD",
+        "dimension": "归档状态",
+        "action": "整理完成",
+        "actor": "system",
+        "precondition": "整理中",
+        "consequence": "已归档",
+        "source_ref": "20.5.1.1文件整理"
+      },
+      {
+        "id": "e46",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "任务创建",
+        "actor": "system",
+        "precondition": "初始",
+        "consequence": "待审核",
+        "source_ref": "20.9.1.3增加任务提醒"
+      },
+      {
+        "id": "e47",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "批量审核同意",
+        "actor": "系统管理人员",
+        "precondition": "待审核",
+        "consequence": "通过",
+        "source_ref": "20.9.1.4任务批量处理"
+      },
+      {
+        "id": "e47b",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "批量审核退回",
+        "actor": "系统管理人员",
+        "precondition": "待审核",
+        "consequence": "退回",
+        "source_ref": "20.9.1.4任务批量处理"
+      },
+      {
+        "id": "e48",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "action": "缴费单退款",
+        "actor": "财务管理人员",
+        "precondition": "已缴费",
+        "consequence": "待缴费",
+        "source_ref": "20.10.2.3缴费单退款"
+      },
+      {
+        "id": "e49",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "action": "项目进入实施阶段",
+        "actor": "system",
+        "precondition": "报名中；E-BMJL.报名成功",
+        "consequence": "进行中",
+        "source_ref": "19.3项目状态分析；19.1实施阶段"
+      },
+      {
+        "id": "e50",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "action": "项目进入报告审核阶段",
+        "actor": "system",
+        "precondition": "进行中；E-BMJL.结果已提交",
+        "consequence": "报告审核中",
+        "source_ref": "19.3项目状态分析；19.1报告编制和结果通知"
+      },
+      {
+        "id": "e51",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "action": "项目结束",
+        "actor": "system",
+        "precondition": "报告审核中；E-BMJL.报告/证书已发布",
+        "consequence": "已结束",
+        "source_ref": "19.3项目状态分析；19.1报告编制和结果通知"
+      },
+      {
+        "id": "e52",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "action": "编制结果通知单",
+        "actor": "策划人员",
+        "precondition": "结果已提交；E-PJ.已确认",
+        "consequence": "报告/证书审核中",
+        "source_ref": "19.2测量审核提供者流程；19.3项目状态分析"
+      },
+      {
+        "id": "e53",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "action": "测量审核结果通知单合并审批",
+        "actor": "授权签字人",
+        "precondition": "待审核",
+        "consequence": "通过",
+        "source_ref": "20.9.1.1测量审核结果通知单审核流程优化"
+      }
+    ],
+    "structural_relations": [
+      {
+        "from": "E-XM",
+        "to": "E-BMJL",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "能力验证项目包含多条报名记录，报名记录有独立创建流程（报名动作），为 core 流程实体",
+        "confidence": "high",
+        "note": {
+          "comment": "判(c)；项目为业务归属容器；management_dimension=业务归属（项目），comment: 报名记录归属项目"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-YP",
+        "relation_type": "reference",
+        "cardinality": "1:1",
+        "ownership_dimension": "configuration_source",
+        "desc": "项目包含一个样品（制备+流转），样品在缴费阶段独立创建",
+        "confidence": "high",
+        "note": {
+          "comment": "判(c)；样品 core 多状态；management_dimension=业务归属（项目），comment: 样品归属项目"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-YT",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "项目可发出多个预通知（计划通知/预通知/作业指导书等）",
+        "confidence": "high",
+        "note": {
+          "comment": "判(c)；预通知 core 多状态；management_dimension=业务归属（项目），comment: 预通知归属项目"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-PJ",
+        "relation_type": "reference",
+        "cardinality": "1:1",
+        "ownership_dimension": "configuration_source",
+        "desc": "项目对应一个项目评价，评价在评价阶段独立创建",
+        "confidence": "high",
+        "note": {
+          "comment": "判(c)；评价 core 多状态含审批；management_dimension=业务归属（项目），comment: 评价归属项目"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-WJD",
+        "relation_type": "reference",
+        "cardinality": "1:1",
+        "ownership_dimension": "configuration_source",
+        "desc": "项目结束后可触发文件整理任务生成归档，归档为可选流程",
+        "confidence": "high",
+        "note": {
+          "comment": "判(d)；归档需用户触发，可能永不创建；management_dimension=配置来源（项目），comment: 归档由项目触发"
+        }
+      },
+      {
+        "from": "E-XM",
+        "to": "E-TASK",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "项目关联多个审核任务（报告/证书/通知单审批），任务按需创建",
+        "confidence": "medium",
+        "note": {
+          "comment": "判(d)；任务按需创建，可能永不创建（无需审批时）；management_dimension=配置来源（项目），comment: 任务由项目审批流程触发；confidence=medium因dependent未直写"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-FY",
+        "relation_type": "composition",
+        "cardinality": "1:1",
+        "ownership_dimension": "business_ownership",
+        "desc": "报名记录创建时自动生成费用记录，初始待缴费",
+        "confidence": "high",
+        "note": {
+          "comment": "判(b)；§19.1行4报名时费用=待缴费；management_dimension=业务归属（报名记录），comment: 费用归属报名记录"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-FP",
+        "relation_type": "composition",
+        "cardinality": "1:N",
+        "ownership_dimension": "business_ownership",
+        "desc": "报名记录创建时自动生成发票记录，初始待开票，支持多次分批上传",
+        "confidence": "high",
+        "note": {
+          "comment": "判(b)；§19.1行4报名时发票=待开票；§20.10.2.2支持多次分批；management_dimension=业务归属（报名记录），comment: 发票归属报名记录"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-JFTZ",
+        "relation_type": "composition",
+        "cardinality": "1:1",
+        "ownership_dimension": "business_ownership",
+        "desc": "报名记录创建时自动生成缴费通知单，初始未发送",
+        "confidence": "high",
+        "note": {
+          "comment": "判(b)；§19.1行4报名时缴费通知单=未发送；management_dimension=业务归属（报名记录），comment: 缴费通知单归属报名记录"
+        }
+      },
+      {
+        "from": "E-SYS",
+        "to": "E-BMJL",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "实验室是报名记录的引用源，实验室独立创建并审核，报名记录引用实验室",
+        "confidence": "high",
+        "note": {
+          "comment": "判(d)；实验室为master数据，独立审核流程；management_dimension=配置来源（实验室），comment: 实验室提供报名记录的实验室引用"
+        }
+      },
+      {
+        "from": "E-BZK",
+        "to": "E-XM",
+        "relation_type": "reference",
+        "cardinality": "1:N",
+        "ownership_dimension": "configuration_source",
+        "desc": "标准库为项目提供测试项依据标准，项目创建时引用标准库",
+        "confidence": "high",
+        "note": {
+          "comment": "判(a)；标准库提供测试项/参数配置；management_dimension=配置来源（标准库），comment: 标准库为项目提供测试标准配置"
+        }
+      }
+    ],
+    "transition_relations": [
+      {
+        "from": "E-BMJL",
+        "to": "E-JFTZ",
+        "desc": "报名记录审核通过后系统自动发送缴费通知单",
+        "trigger": "报名审核通过后缴费通知自动发送",
+        "trigger_source": "expected_results",
+        "evidence_transitions": [
+          "T-024"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "Q1判：X(报名记录)变直接致Y(缴费通知单)变，Y无需额外操作（系统自动）；evidence=T-024；门禁对照：'报名成功后缴费通知单已发送'已由 T-024 precondition 表达，但因果为系统自动推进，写因果"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-FY",
+        "desc": "报名记录创建时系统自动初始化费用记录为待缴费",
+        "trigger": "报名记录创建后费用记录自动初始化",
+        "trigger_source": "expected_results",
+        "evidence_transitions": [
+          "T-025"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "Q1判：X(报名记录)变直接致Y(费用)变，Y无需额外操作；evidence=T-025；structural(b)已表达组成关系"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-FP",
+        "desc": "报名记录创建时系统自动初始化发票记录为待开票",
+        "trigger": "报名记录创建后发票记录自动初始化",
+        "trigger_source": "expected_results",
+        "evidence_transitions": [
+          "T-028"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "Q1判：X(报名记录)变直接致Y(发票)变，Y无需额外操作；evidence=T-028；structural(b)已表达组成关系"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-XM",
+        "desc": "报名记录报告/证书已发布后项目自动进入已结束",
+        "trigger": "报名记录报告/证书已发布后项目状态自动推进为已结束",
+        "trigger_source": "expected_results",
+        "evidence_transitions": [
+          "T-022",
+          "T-005"
+        ],
+        "rollback_propagation": false,
+        "confidence": "medium",
+        "note": {
+          "comment": "Q3判：下级全完成上级自动推进变为因果；evidence=T-022,T-005；confidence=medium因§19.1表格未显式该过渡，依据§19.3枚举+阶段名推导"
+        }
+      },
+      {
+        "from": "E-BMJL",
+        "to": "E-PJ",
+        "desc": "报名记录结果已提交后评价人员可发起评价，评价记录创建为待评价",
+        "trigger": "结果已提交后评价创建",
+        "trigger_source": "desc",
+        "evidence_transitions": [
+          "T-017",
+          "T-037"
+        ],
+        "rollback_propagation": false,
+        "confidence": "high",
+        "note": {
+          "comment": "Q1判：X(报名记录)变直接致Y(评价)创建；evidence=T-017,T-037；门禁对照：'结果已提交后评价'已由 T-037 precondition 表达，但因果为评价记录自动可创建，写因果；comment含BR标签b13"
+        }
+      }
+    ]
+  },
+  "state_and_flow": {
+    "transitions": [
+      {
+        "id": "T-001",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": null,
+        "to": "待开始",
+        "action": "设计方案编制",
+        "role": "策划人员",
+        "preconditions": [],
+        "expected_results": [
+          "项目状态变为待开始"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1方案设计阶段",
+        "note": {
+          "comment": "源自 e01；⓪ frm=None变为forward；项目创建事件"
+        }
+      },
+      {
+        "id": "T-002",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "待开始",
+        "to": "报名中",
+        "action": "能力验证计划发布",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "项目处于待开始状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "待开始"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态变为报名中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e02；③frm先于to变为forward"
+        }
+      },
+      {
+        "id": "T-003",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "报名中",
+        "to": "进行中",
+        "action": "项目进入实施阶段",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "项目处于报名中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "报名中"
+            }
+          },
+          {
+            "text": "报名记录处于报名成功状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名成功"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态变为进行中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.3项目状态分析；19.1实施阶段",
+        "note": {
+          "comment": "源自 e49；③；推断过渡，§19.1表格未显式但§19.3枚举含进行中；inferred",
+          "inferred": true
+        }
+      },
+      {
+        "id": "T-004",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "进行中",
+        "to": "报告审核中",
+        "action": "项目进入报告审核阶段",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "项目处于进行中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "进行中"
+            }
+          },
+          {
+            "text": "报名记录处于结果已提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果已提交"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态变为报告审核中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.3项目状态分析；19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e50；③；推断过渡；inferred",
+          "inferred": true
+        }
+      },
+      {
+        "id": "T-005",
+        "entity": "E-XM",
+        "dimension": "项目状态",
+        "from": "报告审核中",
+        "to": "已结束",
+        "action": "项目结束",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "项目处于报告审核中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "报告审核中"
+            }
+          },
+          {
+            "text": "报名记录处于报告/证书已发布状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报告/证书已发布"
+            }
+          }
+        ],
+        "expected_results": [
+          "项目状态变为已结束"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.3项目状态分析；19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e51；③；推断过渡；terminal=已结束；inferred",
+          "inferred": true
+        }
+      },
+      {
+        "id": "T-006",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "from": null,
+        "to": "未发送",
+        "action": "能力验证计划发布",
+        "role": "项目管理员",
+        "preconditions": [],
+        "expected_results": [
+          "预通知创建，状态为未发送"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e03；⓪ frm=None变为forward；预通知创建事件"
+        }
+      },
+      {
+        "id": "T-007",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "from": "未发送",
+        "to": "已发送",
+        "action": "能力验证预通知",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "预通知处于未发送状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YT",
+              "dimension": "通知状态",
+              "state": "未发送"
+            }
+          },
+          {
+            "text": "还样要求=无需确认",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；无需参加者确认时直接已发送"
+            }
+          }
+        ],
+        "expected_results": [
+          "预通知状态变为已发送"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "通知确认要求",
+          "comment": "源自 e13；分支维度推断为通知确认要求；落点分歧"
+        }
+      },
+      {
+        "id": "T-008",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "from": "未发送",
+        "to": "待确认",
+        "action": "能力验证预通知",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "预通知处于未发送状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YT",
+              "dimension": "通知状态",
+              "state": "未发送"
+            }
+          },
+          {
+            "text": "通知确认要求=需确认",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；需参加者确认时落待确认"
+            }
+          }
+        ],
+        "expected_results": [
+          "预通知状态变为待确认"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "通知确认要求",
+          "comment": "源自 e13b；分支维度推断为通知确认要求；落点分歧"
+        }
+      },
+      {
+        "id": "T-009",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "from": "已发送",
+        "to": "已确认",
+        "action": "样品发放,作业指导书发送",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "预通知处于已发送状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YT",
+              "dimension": "通知状态",
+              "state": "已发送"
+            }
+          }
+        ],
+        "expected_results": [
+          "预通知状态变为已确认"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e18；③；参加者确认"
+        }
+      },
+      {
+        "id": "T-010",
+        "entity": "E-YT",
+        "dimension": "通知状态",
+        "from": "待确认",
+        "to": "已确认",
+        "action": "样品发放,作业指导书发送",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "预通知处于待确认状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YT",
+              "dimension": "通知状态",
+              "state": "待确认"
+            }
+          }
+        ],
+        "expected_results": [
+          "预通知状态变为已确认"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e18b；③；参加者确认"
+        }
+      },
+      {
+        "id": "T-011",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": null,
+        "to": "报名待审核",
+        "action": "报名",
+        "role": "能力验证参加者",
+        "preconditions": [],
+        "expected_results": [
+          "报名记录创建，状态为报名待审核"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e04；⓪ frm=None变为forward；正常报名分支"
+        }
+      },
+      {
+        "id": "T-012",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": null,
+        "to": "已撤销",
+        "action": "报名",
+        "role": "能力验证参加者",
+        "preconditions": [],
+        "expected_results": [
+          "报名记录创建即为已撤销"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e04b；⓪ frm=None变为forward；撤销分支；terminal=已撤销"
+        }
+      },
+      {
+        "id": "T-013",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "报名待审核",
+        "to": "报名退回",
+        "action": "报名审核",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报名待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名待审核"
+            }
+          },
+          {
+            "text": "审核结果=退回",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为报名退回"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e08；①『退回』变为backward；分支路径分歧"
+        }
+      },
+      {
+        "id": "T-014",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "报名待审核",
+        "to": "报名成功",
+        "action": "报名审核",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报名待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名待审核"
+            }
+          },
+          {
+            "text": "审核结果=通过",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为报名成功"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e08b；③；分支路径分歧"
+        }
+      },
+      {
+        "id": "T-015",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "报名退回",
+        "to": "报名待审核",
+        "action": "报名",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "报名记录处于报名退回状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名退回"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录重新提交，状态变为报名待审核"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "③；推断：报名退回后参加者可重新提交；inferred",
+          "inferred": true
+        }
+      },
+      {
+        "id": "T-016",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "报名成功",
+        "to": "结果待提交",
+        "action": "能力验证预通知",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报名成功状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名成功"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为结果待提交"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e14；③"
+        }
+      },
+      {
+        "id": "T-017",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "结果待提交",
+        "to": "结果已提交",
+        "action": "参加者测试与结果提交",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果待提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果待提交"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为结果已提交"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e21；③"
+        }
+      },
+      {
+        "id": "T-018",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "结果已提交",
+        "to": "结果退回修改",
+        "action": "结果报告回收",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果已提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果已提交"
+            }
+          },
+          {
+            "text": "回收判定=退回修改",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；结果报告需退回修改时"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为结果退回修改"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "branch_dimension": "回收判定",
+          "comment": "源自 e22；①『退回』变为backward；分支路径分歧"
+        }
+      },
+      {
+        "id": "T-019",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "结果退回修改",
+        "to": "结果已提交",
+        "action": "评价人员进行评价",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果退回修改状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果退回修改"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为结果已提交"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e23；③；参加者重新提交结果"
+        }
+      },
+      {
+        "id": "T-020",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "结果已提交",
+        "to": "报告/证书审核中",
+        "action": "编制结果报告",
+        "role": "策划人员",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果已提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果已提交"
+            }
+          },
+          {
+            "text": "评价处于已确认状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "已确认"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为报告/证书审核中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "branch_dimension": "业务类型",
+          "comment": "源自 e29；③；跨主体门禁 E-PJ.已确认 落 state_ref；能力验证分支（与 T-021 测量审核分支对称标注）"
+        }
+      },
+      {
+        "id": "T-021",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "结果已提交",
+        "to": "报告/证书审核中",
+        "action": "编制结果通知单",
+        "role": "策划人员",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果已提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果已提交"
+            }
+          },
+          {
+            "text": "评价处于已确认状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "已确认"
+            }
+          },
+          {
+            "text": "业务类型=测量审核",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；测量审核分支编制结果通知单"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为报告/证书审核中"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.2测量审核提供者流程；19.3项目状态分析",
+        "note": {
+          "branch_dimension": "业务类型",
+          "comment": "源自 e52；③；测量审核平行流程，编制结果通知单取代编制结果报告"
+        }
+      },
+      {
+        "id": "T-022",
+        "entity": "E-BMJL",
+        "dimension": "报名记录状态",
+        "from": "报告/证书审核中",
+        "to": "报告/证书已发布",
+        "action": "发放结果报告和证书",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报告/证书审核中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报告/证书审核中"
+            }
+          },
+          {
+            "text": "审核任务处于通过状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "通过"
+            }
+          }
+        ],
+        "expected_results": [
+          "报名记录状态变为报告/证书已发布"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e34；③；跨主体门禁 E-TASK.通过 落 state_ref；terminal=报告/证书已发布"
+        }
+      },
+      {
+        "id": "T-023",
+        "entity": "E-JFTZ",
+        "dimension": "缴费通知单状态",
+        "from": null,
+        "to": "未发送",
+        "action": "报名",
+        "role": "system",
+        "preconditions": [],
+        "expected_results": [
+          "缴费通知单创建，状态为未发送"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e05；⓪ frm=None变为forward；系统自动创建"
+        }
+      },
+      {
+        "id": "T-024",
+        "entity": "E-JFTZ",
+        "dimension": "缴费通知单状态",
+        "from": "未发送",
+        "to": "已发送",
+        "action": "报名审核",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "缴费通知单处于未发送状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-JFTZ",
+              "dimension": "缴费通知单状态",
+              "state": "未发送"
+            }
+          },
+          {
+            "text": "报名记录处于报名成功状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名成功"
+            }
+          }
+        ],
+        "expected_results": [
+          "缴费通知单状态变为已发送"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e09；③；跨主体门禁 E-BMJL.报名成功 落 state_ref；系统自动发送"
+        }
+      },
+      {
+        "id": "T-025",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "from": null,
+        "to": "待缴费",
+        "action": "报名",
+        "role": "system",
+        "preconditions": [],
+        "expected_results": [
+          "费用记录创建，状态为待缴费"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e06；⓪ frm=None变为forward；系统自动创建"
+        }
+      },
+      {
+        "id": "T-026",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "from": "待缴费",
+        "to": "已缴费",
+        "action": "缴费",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "费用处于待缴费状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-FY",
+              "dimension": "费用状态",
+              "state": "待缴费"
+            }
+          }
+        ],
+        "expected_results": [
+          "费用状态变为已缴费"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e11；③；§20.5.2.1多次付款不对金额校验限制"
+        }
+      },
+      {
+        "id": "T-027",
+        "entity": "E-FY",
+        "dimension": "费用状态",
+        "from": "已缴费",
+        "to": "待缴费",
+        "action": "缴费单退款",
+        "role": "财务管理人员",
+        "preconditions": [
+          {
+            "text": "费用处于已缴费状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-FY",
+              "dimension": "费用状态",
+              "state": "已缴费"
+            }
+          },
+          {
+            "text": "退款金额不能大于当前缴费金额",
+            "type": "constraint",
+            "ref": null
+          },
+          {
+            "text": "退款类型=全额退款",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；全额退款触发状态回退"
+            }
+          }
+        ],
+        "expected_results": [
+          "费用状态变为待缴费，退款金额累加，实际付款更新"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "20.10.2.3缴费单退款",
+        "note": {
+          "branch_dimension": "退款类型",
+          "comment": "源自 e48；①『退款』变为backward；推断：全额退款才回退状态；inferred",
+          "inferred": true
+        }
+      },
+      {
+        "id": "T-028",
+        "entity": "E-FP",
+        "dimension": "发票状态",
+        "from": null,
+        "to": "待开票",
+        "action": "报名",
+        "role": "system",
+        "preconditions": [],
+        "expected_results": [
+          "发票记录创建，状态为待开票"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e07；⓪ frm=None变为forward；系统自动创建"
+        }
+      },
+      {
+        "id": "T-029",
+        "entity": "E-FP",
+        "dimension": "发票状态",
+        "from": "待开票",
+        "to": "已开票",
+        "action": "发票开具",
+        "role": "财务管理人员",
+        "preconditions": [
+          {
+            "text": "发票处于待开票状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-FP",
+              "dimension": "发票状态",
+              "state": "待开票"
+            }
+          }
+        ],
+        "expected_results": [
+          "发票状态变为已开票"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e12；③；§20.10.2.2支持多次分批上传"
+        }
+      },
+      {
+        "id": "T-030",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": null,
+        "to": "待核查",
+        "action": "缴费",
+        "role": "样品制备人员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报名成功状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报名成功"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品创建，状态为待核查"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e10；⓪ frm=None变为forward；跨主体门禁 E-BMJL.报名成功 落 state_ref"
+        }
+      },
+      {
+        "id": "T-031",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "待核查",
+        "to": "已核查",
+        "action": "样品核查",
+        "role": "样品管理员",
+        "preconditions": [
+          {
+            "text": "样品处于待核查状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "待核查"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为已核查"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e15；③；顿号快照第1落点"
+        }
+      },
+      {
+        "id": "T-032",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "已核查",
+        "to": "待发样",
+        "action": "样品核查",
+        "role": "样品管理员",
+        "preconditions": [
+          {
+            "text": "样品处于已核查状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "已核查"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为待发样"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e16；③；顿号快照第2落点"
+        }
+      },
+      {
+        "id": "T-033",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "待发样",
+        "to": "已发样",
+        "action": "样品发放,作业指导书发送",
+        "role": "项目管理员",
+        "preconditions": [
+          {
+            "text": "样品处于待发样状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "待发样"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为已发样"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e17；③"
+        }
+      },
+      {
+        "id": "T-034",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "已发样",
+        "to": "已还样",
+        "action": "参加者测试与结果提交",
+        "role": "能力验证参加者",
+        "preconditions": [
+          {
+            "text": "样品处于已发样状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "已发样"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为已还样"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "comment": "源自 e19；③；顿号快照第1落点"
+        }
+      },
+      {
+        "id": "T-035",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "已还样",
+        "to": "待核查",
+        "action": "参加者测试与结果提交",
+        "role": "样品管理员",
+        "preconditions": [
+          {
+            "text": "样品处于已还样状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "已还样"
+            }
+          },
+          {
+            "text": "还样要求=需还样",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；需还样核查"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为待核查，进入下一批次"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "还样要求",
+          "comment": "源自 e20；序判④（已还样后于待核查）但语义forward（循环状态机），语义优先，comment记'序判④，语义forward（循环状态机）'"
+        }
+      },
+      {
+        "id": "T-036",
+        "entity": "E-YP",
+        "dimension": "样品状态",
+        "from": "已还样",
+        "to": "无需还样",
+        "action": "参加者测试与结果提交",
+        "role": "样品管理员",
+        "preconditions": [
+          {
+            "text": "样品处于已还样状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-YP",
+              "dimension": "样品状态",
+              "state": "已还样"
+            }
+          },
+          {
+            "text": "还样要求=无需还样",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；无需还样"
+            }
+          }
+        ],
+        "expected_results": [
+          "样品状态变为无需还样"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "19.1实施阶段",
+        "note": {
+          "branch_dimension": "还样要求",
+          "comment": "源自 e20b；③；terminal=无需还样"
+        }
+      },
+      {
+        "id": "T-037",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "from": null,
+        "to": "待评价",
+        "action": "评价人员进行评价",
+        "role": "评价人员",
+        "preconditions": [
+          {
+            "text": "报名记录处于结果已提交状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "结果已提交"
+            }
+          }
+        ],
+        "expected_results": [
+          "评价创建，状态为待评价"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知；20.7.1.2协同评价",
+        "note": {
+          "comment": "源自 e24；⓪ frm=None变为forward；跨主体门禁 E-BMJL.结果已提交 落 state_ref；inferred状态"
+        }
+      },
+      {
+        "id": "T-038",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "from": "待评价",
+        "to": "评价中",
+        "action": "评价人员进行评价",
+        "role": "评价人员",
+        "preconditions": [
+          {
+            "text": "评价处于待评价状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "待评价"
+            }
+          }
+        ],
+        "expected_results": [
+          "评价状态变为评价中"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.7.1.2协同评价",
+        "note": {
+          "comment": "源自 e25；③；inferred状态"
+        }
+      },
+      {
+        "id": "T-039",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "from": "评价中",
+        "to": "评价确认",
+        "action": "评价人员提交评价结果",
+        "role": "评价人员",
+        "preconditions": [
+          {
+            "text": "评价处于评价中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "评价中"
+            }
+          }
+        ],
+        "expected_results": [
+          "若评分方式=分值，则评价分值按累加计算得分，提交后评价状态变为评价确认",
+          "若评分方式=权重，则评价权重按加权计算得分，提交后评价状态变为评价确认"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.7.1.2协同评价",
+        "note": {
+          "branch_dimension": "评分方式",
+          "comment": "源自 e26；③；结果差异型：落点同（评价确认），仅计算措辞异，用『若』句式"
+        }
+      },
+      {
+        "id": "T-040",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "from": "评价确认",
+        "to": "已确认",
+        "action": "评价组长确认",
+        "role": "评价组长",
+        "preconditions": [
+          {
+            "text": "评价处于评价确认状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "评价确认"
+            }
+          }
+        ],
+        "expected_results": [
+          "评价状态变为已确认，项目评价状态关闭"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.7.1.3评价确认",
+        "note": {
+          "comment": "源自 e27；③；terminal=已确认"
+        }
+      },
+      {
+        "id": "T-041",
+        "entity": "E-PJ",
+        "dimension": "评价状态",
+        "from": "评价确认",
+        "to": "评价中",
+        "action": "评价组长退回修改",
+        "role": "评价组长",
+        "preconditions": [
+          {
+            "text": "评价处于评价确认状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-PJ",
+              "dimension": "评价状态",
+              "state": "评价确认"
+            }
+          }
+        ],
+        "expected_results": [
+          "当前评价结果保存为历史，评价状态变为评价中，开启下一轮评价"
+        ],
+        "traits": [
+          "rollback"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "20.7.1.3评价确认",
+        "note": {
+          "comment": "源自 e28；①『退回』变为backward；traits含rollback"
+        }
+      },
+      {
+        "id": "T-042",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": null,
+        "to": "待审核",
+        "action": "技术主管审核报告",
+        "role": "策划人员",
+        "preconditions": [
+          {
+            "text": "报名记录处于报告/证书审核中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BMJL",
+              "dimension": "报名记录状态",
+              "state": "报告/证书审核中"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务创建，状态为待审核"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e30；⓪ frm=None变为forward；策划人员提交审核；跨主体门禁 E-BMJL.报告/证书审核中 落 state_ref"
+        }
+      },
+      {
+        "id": "T-043",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "通过",
+        "action": "技术主管审核报告",
+        "role": "技术主管",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=通过",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务状态变为通过"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知；20.9业务审核",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e31；③；分支路径分歧"
+        }
+      },
+      {
+        "id": "T-044",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "退回",
+        "action": "技术主管审核报告",
+        "role": "技术主管",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=退回",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务状态变为退回"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "19.1报告编制和结果通知；20.9业务审核",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e31b；①『退回』变为backward；分支路径分歧"
+        }
+      },
+      {
+        "id": "T-045",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "通过",
+        "action": "授权签字人批准报告和结果通知单",
+        "role": "授权签字人",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "技术主管审核已通过",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "通过"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务状态变为通过（授权签字人批准）"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e32；③；跨主体门禁：技术主管通过后授权签字人方可批准；按E-TASK单实体建模，门禁以同实体state_ref表达（同实体前序转换结果）"
+        }
+      },
+      {
+        "id": "T-046",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "通过",
+        "action": "实验室负责人批准证书",
+        "role": "实验室负责人",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "技术主管审核已通过",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "通过"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务状态变为通过（实验室负责人批准证书）"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "19.1报告编制和结果通知",
+        "note": {
+          "comment": "源自 e33；③；授权签字人批报告/通知单，实验室负责人批证书，分立转换；门禁以同实体state_ref表达"
+        }
+      },
+      {
+        "id": "T-047",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": null,
+        "to": "待审核",
+        "action": "任务创建",
+        "role": "system",
+        "preconditions": [],
+        "expected_results": [
+          "审核任务创建，状态为待审核；系统发送短信通知相关负责人"
+        ],
+        "traits": [
+          "time_sensitive"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.9.1.3增加任务提醒",
+        "note": {
+          "comment": "源自 e46；⓪ frm=None变为forward；§20.9.1.3任务创建发送短信通知；traits含time_sensitive（短信即时触发）"
+        }
+      },
+      {
+        "id": "T-048",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "通过",
+        "action": "批量审核同意",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=同意",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          },
+          {
+            "text": "任务节点可被批量处理",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "系统根据任务节点类型及内容判断"
+            }
+          }
+        ],
+        "expected_results": [
+          "选中任务批量状态变为通过"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "20.9.1.4任务批量处理",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e47；③；批量审核分支"
+        }
+      },
+      {
+        "id": "T-049",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "退回",
+        "action": "批量审核退回",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=退回",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          },
+          {
+            "text": "任务节点可被批量处理",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "系统根据任务节点类型及内容判断"
+            }
+          }
+        ],
+        "expected_results": [
+          "选中任务批量状态变为退回"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "20.9.1.4任务批量处理",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e47b；①『退回』变为backward；批量审核分支"
+        }
+      },
+      {
+        "id": "T-050",
+        "entity": "E-TASK",
+        "dimension": "任务审核状态",
+        "from": "待审核",
+        "to": "通过",
+        "action": "测量审核结果通知单合并审批",
+        "role": "授权签字人",
+        "preconditions": [
+          {
+            "text": "审核任务处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-TASK",
+              "dimension": "任务审核状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "业务类型=测量审核",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件；测量审核分支"
+            }
+          }
+        ],
+        "expected_results": [
+          "审核任务状态变为通过；测量审核结果通知单多个流程合并为一个"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.9.1.1测量审核结果通知单审核流程优化",
+        "note": {
+          "branch_dimension": "业务类型",
+          "comment": "源自 e53；③；测量审核分支；签字人顺序为提交申请时选择顺序"
+        }
+      },
+      {
+        "id": "T-051",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": null,
+        "to": "待审核",
+        "action": "机构新增实验室信息",
+        "role": "机构",
+        "preconditions": [],
+        "expected_results": [
+          "实验室创建，状态为待审核"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.3.1实验室信息；20.4.1.2实验室审核",
+        "note": {
+          "comment": "源自 e35；⓪ frm=None变为forward；机构新增"
+        }
+      },
+      {
+        "id": "T-052",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "启用",
+        "to": "待审核",
+        "action": "机构修改实验室信息",
+        "role": "机构",
+        "preconditions": [
+          {
+            "text": "实验室处于启用状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "启用"
+            }
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为待审核"
+        ],
+        "traits": [],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "20.3.1实验室信息；20.4.1.3实验室修改",
+        "note": {
+          "comment": "源自 e36；序判④（启用后于待审核）但语义backward（修改后需重新审核，回退到待审核），语义优先，comment记'序判④，语义backward（修改需重新审核）'"
+        }
+      },
+      {
+        "id": "T-053",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "已退回",
+        "to": "待审核",
+        "action": "机构修改实验室信息",
+        "role": "机构",
+        "preconditions": [
+          {
+            "text": "实验室处于已退回状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "已退回"
+            }
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为待审核"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "20.4.1.3实验室修改",
+        "note": {
+          "comment": "源自 e40b；③；已退回修改后重新提交"
+        }
+      },
+      {
+        "id": "T-054",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "待审核",
+        "to": "启用",
+        "action": "实验室审核通过",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "实验室处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=通过",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为启用；为当前数据生成快照记录"
+        ],
+        "traits": [
+          "branch",
+          "audit"
+        ],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.4.1.2实验室审核",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e37；③；traits含audit（生成快照）"
+        }
+      },
+      {
+        "id": "T-055",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "待审核",
+        "to": "已退回",
+        "action": "实验室审核退回",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "实验室处于待审核状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "待审核"
+            }
+          },
+          {
+            "text": "审核结果=退回修改",
+            "type": "constraint",
+            "ref": null,
+            "note": {
+              "comment": "分支值条件"
+            }
+          },
+          {
+            "text": "退回修改必须填写审核意见",
+            "type": "constraint",
+            "ref": null
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为已退回"
+        ],
+        "traits": [
+          "branch"
+        ],
+        "direction": "backward",
+        "priority": "P1",
+        "source_ref": "20.4.1.2实验室审核",
+        "note": {
+          "branch_dimension": "审核结果",
+          "comment": "源自 e38；①『退回』变为backward；退回修改必须填写审核意见"
+        }
+      },
+      {
+        "id": "T-056",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "启用",
+        "to": "停用",
+        "action": "实验室停用",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "实验室处于启用状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "启用"
+            }
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为停用"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P2",
+        "source_ref": "20.4.1.1实验室列表与查询",
+        "note": {
+          "comment": "源自 e39；①『停用』变为lateral"
+        }
+      },
+      {
+        "id": "T-057",
+        "entity": "E-SYS",
+        "dimension": "实验室状态",
+        "from": "停用",
+        "to": "启用",
+        "action": "实验室启用",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "实验室处于停用状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-SYS",
+              "dimension": "实验室状态",
+              "state": "停用"
+            }
+          }
+        ],
+        "expected_results": [
+          "实验室状态变为启用"
+        ],
+        "traits": [],
+        "direction": "resume",
+        "priority": "P2",
+        "source_ref": "20.4.1.1实验室列表与查询",
+        "note": {
+          "comment": "源自 e40；①『启用』变为resume"
+        }
+      },
+      {
+        "id": "T-058",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "from": null,
+        "to": "启用",
+        "action": "新增标准库",
+        "role": "系统管理人员",
+        "preconditions": [],
+        "expected_results": [
+          "标准库创建，状态默认启用"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P0",
+        "source_ref": "20.4.2.2新增标准库",
+        "note": {
+          "comment": "源自 e41；⓪ frm=None变为forward；新增默认启用"
+        }
+      },
+      {
+        "id": "T-059",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "from": "启用",
+        "to": "停用",
+        "action": "停用标准库",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "标准库处于启用状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BZK",
+              "dimension": "标准库状态",
+              "state": "启用"
+            }
+          }
+        ],
+        "expected_results": [
+          "标准库状态变为停用；停用后在项目创建等环节不可被选择"
+        ],
+        "traits": [],
+        "direction": "lateral",
+        "priority": "P2",
+        "source_ref": "20.4.2.5停用启用标准库",
+        "note": {
+          "comment": "源自 e42；①『停用』变为lateral"
+        }
+      },
+      {
+        "id": "T-060",
+        "entity": "E-BZK",
+        "dimension": "标准库状态",
+        "from": "停用",
+        "to": "启用",
+        "action": "启用标准库",
+        "role": "系统管理人员",
+        "preconditions": [
+          {
+            "text": "标准库处于停用状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-BZK",
+              "dimension": "标准库状态",
+              "state": "停用"
+            }
+          }
+        ],
+        "expected_results": [
+          "标准库状态变为启用"
+        ],
+        "traits": [],
+        "direction": "resume",
+        "priority": "P2",
+        "source_ref": "20.4.2.5停用启用标准库",
+        "note": {
+          "comment": "源自 e43；①『启用』变为resume"
+        }
+      },
+      {
+        "id": "T-061",
+        "entity": "E-WJD",
+        "dimension": "归档状态",
+        "from": null,
+        "to": "整理中",
+        "action": "开启整理任务",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "项目处于已结束状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-XM",
+              "dimension": "项目状态",
+              "state": "已结束"
+            }
+          }
+        ],
+        "expected_results": [
+          "归档任务开启，提示'归档任务已开启，请稍后查看'"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "20.5.1.1文件整理",
+        "note": {
+          "comment": "源自 e44；⓪ frm=None变为forward；跨主体门禁 E-XM.已结束 落 state_ref；系统自动开启"
+        }
+      },
+      {
+        "id": "T-062",
+        "entity": "E-WJD",
+        "dimension": "归档状态",
+        "from": "整理中",
+        "to": "已归档",
+        "action": "整理完成",
+        "role": "system",
+        "preconditions": [
+          {
+            "text": "归档处于整理中状态",
+            "type": "state_ref",
+            "ref": {
+              "entity": "E-WJD",
+              "dimension": "归档状态",
+              "state": "整理中"
+            }
+          }
+        ],
+        "expected_results": [
+          "归档状态变为已归档；操作列显示查看归档按钮"
+        ],
+        "traits": [],
+        "direction": "forward",
+        "priority": "P1",
+        "source_ref": "20.5.1.1文件整理",
+        "note": {
+          "comment": "源自 e45；③；terminal=已归档；系统自动完成"
+        }
+      }
+    ]
+  },
+  "constraints": {
+    "invalid_transitions": [],
+    "cross_entity": [
+      {
+        "id": "XC-001",
+        "source_entity": "E-XM",
+        "source_transition": "T-002",
+        "source_state": "报名中",
+        "target_entity": "E-BMJL",
+        "target_transition": "T-011",
+        "target_dimension": "报名记录状态",
+        "target_condition": "报名待审核",
+        "desc": "镜像 T-011 项目进入报名中后联动开启报名记录创建，新记录初始化为报名待审核",
+        "xc_source": "镜像",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "XC-002",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-014",
+        "source_state": "报名成功",
+        "target_entity": "E-JFTZ",
+        "target_transition": "T-024",
+        "target_dimension": "缴费通知单状态",
+        "target_condition": "已发送",
+        "desc": "联动: T-014报名审核通过后联动发送缴费通知单，缴费通知单状态变为已发送",
+        "xc_source": "联动",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "XC-003",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-014",
+        "source_state": "报名成功",
+        "target_entity": "E-YP",
+        "target_transition": "T-030",
+        "target_dimension": "样品状态",
+        "target_condition": "待核查",
+        "desc": "联动: T-014报名成功后缴费时联动创建样品记录，初始化为待核查",
+        "xc_source": "联动",
+        "source_ref": "19.1实施阶段"
+      },
+      {
+        "id": "XC-004",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-017",
+        "source_state": "结果已提交",
+        "target_entity": "E-PJ",
+        "target_transition": "T-037",
+        "target_dimension": "评价状态",
+        "target_condition": "待评价",
+        "desc": "联动: T-017报名记录结果已提交后联动创建评价记录，初始化为待评价",
+        "xc_source": "联动",
+        "source_ref": "19.1报告编制和结果通知；20.7.1.2协同评价"
+      },
+      {
+        "id": "XC-005",
+        "source_entity": "E-PJ",
+        "source_transition": "T-040",
+        "source_state": "已确认",
+        "target_entity": "E-BMJL",
+        "target_transition": "T-020",
+        "target_dimension": "报名记录状态",
+        "target_condition": "报告/证书审核中",
+        "desc": "联动: T-040评价确认后联动编制结果报告，报名记录状态变为报告/证书审核中",
+        "xc_source": "联动",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "XC-006",
+        "source_entity": "E-TASK",
+        "source_transition": "T-043",
+        "source_state": "通过",
+        "target_entity": "E-TASK",
+        "target_transition": "T-045",
+        "target_dimension": "任务审核状态",
+        "target_condition": "通过",
+        "desc": "由 Step 4.5 约束-因果鉴别确认：技术主管审核通过后方可由授权签字人批准报告和结果通知单",
+        "xc_source": "4.5判",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "XC-007",
+        "source_entity": "E-TASK",
+        "source_transition": "T-045",
+        "source_state": "通过",
+        "target_entity": "E-BMJL",
+        "target_transition": "T-022",
+        "target_dimension": "报名记录状态",
+        "target_condition": "报告/证书已发布",
+        "desc": "由 Step 4.5 约束-因果鉴别确认：审核任务通过后方可发放结果报告和证书，报名记录状态变为报告/证书已发布",
+        "xc_source": "4.5判",
+        "source_ref": "19.1报告编制和结果通知"
+      },
+      {
+        "id": "XC-008",
+        "source_entity": "E-XM",
+        "source_transition": "T-005",
+        "source_state": "已结束",
+        "target_entity": "E-WJD",
+        "target_transition": "T-061",
+        "target_dimension": "归档状态",
+        "target_condition": "整理中",
+        "desc": "镜像 T-061 项目结束后方可触发文件整理任务，归档状态初始化为整理中",
+        "xc_source": "镜像",
+        "source_ref": "20.5.1.1文件整理"
+      },
+      {
+        "id": "XC-009",
+        "source_entity": "E-XM",
+        "source_transition": "T-002",
+        "source_state": "报名中",
+        "target_entity": "E-BMJL",
+        "target_transition": "T-021",
+        "target_dimension": "报名记录状态",
+        "target_condition": "报告/证书审核中",
+        "desc": "分支[T-021]测量审核分支编制结果通知单取代编制结果报告，落点同为报告/证书审核中",
+        "xc_source": "分支差异",
+        "source_ref": "19.2测量审核提供者流程；19.3项目状态分析"
+      },
+      {
+        "id": "XC-010",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-014",
+        "source_state": "报名成功",
+        "target_entity": "E-XM",
+        "target_transition": "T-003",
+        "target_dimension": "项目状态",
+        "target_condition": "状态=报名中",
+        "desc": "precondition'报名记录处于报名成功状态'",
+        "xc_source": "镜像",
+        "source_ref": "19.3项目状态分析；19.1实施阶段"
+      },
+      {
+        "id": "XC-011",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-017",
+        "source_state": "结果已提交",
+        "target_entity": "E-XM",
+        "target_transition": "T-004",
+        "target_dimension": "项目状态",
+        "target_condition": "状态=进行中",
+        "desc": "precondition'报名记录处于结果已提交状态'",
+        "xc_source": "镜像",
+        "source_ref": "19.3项目状态分析；19.1报告编制和结果通知"
+      },
+      {
+        "id": "XC-012",
+        "source_entity": "E-BMJL",
+        "source_transition": "T-020",
+        "source_state": "报告/证书审核中",
+        "target_entity": "E-TASK",
+        "target_transition": "T-042",
+        "target_dimension": "任务审核状态",
+        "target_condition": "状态=None",
+        "desc": "precondition'报名记录处于报告/证书审核中状态'",
+        "xc_source": "镜像",
+        "source_ref": "19.1报告编制和结果通知"
+      }
+    ],
+    "business_rules": [
+      {
+        "id": "BR-001",
+        "category": "display",
+        "desc": "15天内发布的通知在内容前标注'new'标识，超过15天后此标识自动隐藏",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.2.1通知公告",
+        "note": {
+          "comment": "signal_type命中'15天内'；category判显示；时间相关但本质为显示规则"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-002",
+        "category": "validation",
+        "desc": "实验室审核结果为退回修改时必须填写审核意见，审核结果为通过时可以为空",
+        "entities_involved": [
+          "E-SYS"
+        ],
+        "constrained_entity": "E-SYS",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.4.1.2实验室审核",
+        "note": {
+          "role": [
+            "系统管理人员"
+          ],
+          "comment": "signal_type命中'必须'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-003",
+        "category": "computation",
+        "desc": "实验室审核结果为通过时为当前数据生成该数据的快照记录",
+        "entities_involved": [
+          "E-SYS"
+        ],
+        "constrained_entity": "E-SYS",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.4.1.2实验室审核",
+        "note": {
+          "role": [
+            "系统管理人员"
+          ],
+          "comment": "signal_type命中'生成'（取值范围衍生）；category判计算衍生"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-004",
+        "category": "restrictive",
+        "desc": "停用的标准库在项目创建等环节不可被选择",
+        "entities_involved": [
+          "E-BZK",
+          "E-XM"
+        ],
+        "constrained_entity": "E-BZK",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.4.2.5停用启用标准库",
+        "note": {
+          "comment": "signal_type命中'不可被选择'；category判限制；多实体BR，constrained_entity=操作对象（标准库）"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-005",
+        "category": "validation",
+        "desc": "标准库测试项删除时含有子项的记录不允许删除",
+        "entities_involved": [
+          "E-BZK"
+        ],
+        "constrained_entity": "E-BZK",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.4.2.10删除测试项",
+        "note": {
+          "role": [
+            "系统管理人员"
+          ],
+          "comment": "signal_type命中'不允许'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-006",
+        "category": "validation",
+        "desc": "子领域测试项删除时存在子项的数据不可以删除",
+        "entities_involved": [
+          "E-BZK"
+        ],
+        "constrained_entity": "E-BZK",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.4.3.4删除测试项",
+        "note": {
+          "role": [
+            "系统管理人员"
+          ],
+          "comment": "signal_type命中'不可以'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-007",
+        "category": "display",
+        "desc": "项目管理数据列表的操作列仅为已结束的项目记录提供文件整理按钮",
+        "entities_involved": [
+          "E-XM",
+          "E-WJD"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.1.1文件整理",
+        "note": {
+          "comment": "signal_type命中'仅为已结束'；category判显示；多实体BR，constrained_entity=操作对象（项目）"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-008",
+        "category": "validation",
+        "desc": "批量提交审核时只有已上传对应文件且未提交审核的记录才可以被选定，如没有选择记录将提示用户选择记录信息",
+        "entities_involved": [
+          "E-BMJL"
+        ],
+        "constrained_entity": "E-BMJL",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.1.3项目批量操作",
+        "note": {
+          "role": [
+            "项目管理员"
+          ],
+          "comment": "signal_type命中'只有'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-009",
+        "category": "validation",
+        "desc": "消息发送时接收人1和接收人2不能同时为空",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.5.1.4优化消息发送功能",
+        "note": {
+          "role": [
+            "项目管理员"
+          ],
+          "comment": "signal_type命中'不能同时为空'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-010",
+        "category": "usability",
+        "desc": "未结束的项目可以进行消息发送",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.1.4优化消息发送功能",
+        "note": {
+          "role": [
+            "项目管理员"
+          ],
+          "comment": "signal_type命中'未结束'；category判可用性"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-011",
+        "category": "computation",
+        "desc": "项目新增表单中技术主管、实验室负责人、授权签字人字段，如果其备选人有且仅有一个时默认填充为备选值",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.5.1.6默认填充技术主管实验室负责人授权签字人",
+        "note": {
+          "role": [
+            "项目管理员"
+          ],
+          "comment": "signal_type命中'有且仅有一个'（取值范围衍生）；category判计算衍生"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-012",
+        "category": "validation",
+        "desc": "已报名项目支持多次付款，不对付款金额进行校验限制",
+        "entities_involved": [
+          "E-FY"
+        ],
+        "constrained_entity": "E-FY",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.2.1已报名项目增加多次付款功能",
+        "note": {
+          "role": [
+            "能力验证参加者"
+          ],
+          "comment": "signal_type命中'不对'；category判校验；§20.6.2.1同规则"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-013",
+        "category": "notification",
+        "desc": "系统每天上午9点对系统中的证书信息进行查询，如证书距到期时间等于30天则通过邮件方式对用户进行提醒，并抄送项目管理员",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.2.3增加证书到期前30天提醒功能；20.6.2.3",
+        "note": {
+          "comment": "signal_type命中'每天上午9点'+'等于30天'；category判通知；无状态落点，不入台账/operations；系统行为BR；§20.5.2.3和§20.6.2.3同规则合并"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-014",
+        "category": "notification",
+        "desc": "管理人员对用户报名项目操作后使用短信方式对用户进行通知：报名审核通过/退回修改、发样通知、测试结果审核通过/退回、结果通知单发布",
+        "entities_involved": [
+          "E-BMJL"
+        ],
+        "constrained_entity": "E-BMJL",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.5.3.2操作节点增加用户短信通知；20.6.3.2",
+        "note": {
+          "comment": "signal_type命中'使用短信方式'；category判通知；系统行为BR；§20.5.3.2和§20.6.3.2同规则合并"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-015",
+        "category": "authorization",
+        "desc": "评价人员只能对自己的评价结果进行修改，不能查看和修改其他评价人员的评价结果",
+        "entities_involved": [
+          "E-PJ"
+        ],
+        "constrained_entity": "E-PJ",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.7.1.2协同评价",
+        "note": {
+          "role": [
+            "评价人员"
+          ],
+          "comment": "signal_type命中'只能'+'不能'；category判授权"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-016",
+        "category": "computation",
+        "desc": "新建项目时第一个被选择的评价人员默认做为评价组长",
+        "entities_involved": [
+          "E-PJ"
+        ],
+        "constrained_entity": "E-PJ",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.7.1项目列表",
+        "note": {
+          "comment": "signal_type命中'第一个'（取值范围衍生）；category判计算衍生"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-017",
+        "category": "validation",
+        "desc": "每个统计规则由一个低值、一个高值组成，判断规则为大于等于低值，小于高值",
+        "entities_involved": [
+          "E-PJ"
+        ],
+        "constrained_entity": "E-PJ",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.7.1.3评价确认",
+        "note": {
+          "role": [
+            "评价组长"
+          ],
+          "comment": "signal_type命中'大于等于'+'小于'（取值范围）；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-018",
+        "category": "restrictive",
+        "desc": "评价组长点击确认后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭",
+        "entities_involved": [
+          "E-PJ"
+        ],
+        "constrained_entity": "E-PJ",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.7.1.3评价确认",
+        "note": {
+          "role": [
+            "评价组长"
+          ],
+          "comment": "signal_type命中'正式提交'；category判限制"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-019",
+        "category": "computation",
+        "desc": "评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
+        "entities_involved": [
+          "E-PJ"
+        ],
+        "constrained_entity": "E-PJ",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.7.1项目列表",
+        "note": {
+          "role": [
+            "评价人员"
+          ],
+          "comment": "signal_type命中'两种'（取值范围）；category判计算衍生"
+        },
+        "branch_dimensions": [
+          "评分方式"
+        ]
+      },
+      {
+        "id": "BR-020",
+        "category": "restrictive",
+        "desc": "测量审核结果通知单审批流程将原来多个流程合并为一个流程，流程处理人审批顺序为提交申请时签字人的选择顺序",
+        "entities_involved": [
+          "E-TASK"
+        ],
+        "constrained_entity": "E-TASK",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.9.1.1测量审核结果通知单审核流程优化",
+        "note": {
+          "comment": "signal_type命中'合并为一个'；category判限制"
+        },
+        "branch_dimensions": [
+          "业务类型"
+        ]
+      },
+      {
+        "id": "BR-021",
+        "category": "notification",
+        "desc": "用户通过表单或审核一个已存在的任务生成新的审核任务后，系统发送短信通知相关负责人，短信内容：您有一个新的xxx审核任务，请及时处理",
+        "entities_involved": [
+          "E-TASK"
+        ],
+        "constrained_entity": "E-TASK",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.9.1.3增加任务提醒",
+        "note": {
+          "comment": "signal_type命中'发送短信'；category判通知；系统行为BR"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-022",
+        "category": "validation",
+        "desc": "系统会根据任务节点的类型及内容判断当前节点是否可以被批量处理",
+        "entities_involved": [
+          "E-TASK"
+        ],
+        "constrained_entity": "E-TASK",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.9.1.4任务批量处理",
+        "note": {
+          "role": [
+            "系统管理人员"
+          ],
+          "comment": "signal_type命中'判断'（取值范围衍生）；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-023",
+        "category": "validation",
+        "desc": "系统预设若干自定义流程（4个以内），用于用户选择并提交文档审核的自定义流程，并支持相应的签章",
+        "entities_involved": [
+          "E-TASK"
+        ],
+        "constrained_entity": "E-TASK",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.9.1.6增加自定义流程",
+        "note": {
+          "comment": "signal_type命中'4个以内'（取值范围）；category判字段约束"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-024",
+        "category": "validation",
+        "desc": "缴费单退款金额不能大于当前缴费金额，多次退款金额做累加处理",
+        "entities_involved": [
+          "E-FY"
+        ],
+        "constrained_entity": "E-FY",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.10.2.3缴费单退款",
+        "note": {
+          "role": [
+            "财务管理人员"
+          ],
+          "comment": "signal_type命中'不能大于'；category判校验"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-025",
+        "category": "computation",
+        "desc": "实际付款=付款金额-退款金额，退款金额使用红色字体且大于0时显示",
+        "entities_involved": [
+          "E-FY"
+        ],
+        "constrained_entity": "E-FY",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "20.10.2.3缴费单退款",
+        "note": {
+          "role": [
+            "财务管理人员"
+          ],
+          "comment": "signal_type命中'='（计算公式）；category判计算衍生；退款后更新项目费用为实际付款金额"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-026",
+        "category": "authorization",
+        "desc": "系统对关键操作实施留痕机制，自动记录操作者的身份、时间戳、操作细节及结果，生成不可篡改的审计日志",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "mandatory",
+        "restrictive": true,
+        "source_ref": "20.11.1.2安全性相关内容优化",
+        "note": {
+          "comment": "signal_type命中'自动记录'；category判授权（审计）；系统行为BR"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-027",
+        "category": "restrictive",
+        "desc": "平台应支持至少300个同时在线用户数；并发100时每个页面响应时间不超过5秒；单次报名操作成功率应达到95%以上",
+        "entities_involved": [
+          "E-XM"
+        ],
+        "constrained_entity": "E-XM",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "3.4性能要求；21.3性能要求",
+        "note": {
+          "comment": "signal_type命中'至少'+'不超过'+'以上'；category判限制；性能非功能性要求"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-028",
+        "category": "restrictive",
+        "desc": "发票上传支持多次分批上传，点击文件地址后的x可以移除文件（表单提交后生效）",
+        "entities_involved": [
+          "E-FP"
+        ],
+        "constrained_entity": "E-FP",
+        "enforcement": "conditional",
+        "restrictive": true,
+        "source_ref": "20.10.2.2修改发票上传功能使其支持多次分批上传",
+        "note": {
+          "role": [
+            "财务管理人员"
+          ],
+          "comment": "signal_type命中'多次分批'；category判限制"
+        },
+        "branch_dimensions": []
+      },
+      {
+        "id": "BR-029",
+        "category": "computation",
+        "desc": "参加者测试与结果提交后按还样要求分支：需还样则样品归还后样品状态落'待核查'（进入下一批次），无需还样则落'无需还样'（终态）",
+        "entities_involved": [
+          "E-YP"
+        ],
+        "constrained_entity": "E-YP",
+        "enforcement": "mandatory",
+        "restrictive": false,
+        "source_ref": "19.1能力验证提供者流程",
+        "note": {
+          "role": [
+            "能力验证参加者"
+          ],
+          "comment": "signal_type命中'按…分支'（运行时选择）；category判计算（结果差异型）"
+        },
+        "branch_dimensions": [
+          "还样要求"
+        ]
+      }
+    ]
+  }
+}

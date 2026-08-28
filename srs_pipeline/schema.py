@@ -18,7 +18,7 @@ rename_reason（dsl≠out 的两类性质，避免维护时混为一谈）：
 """
 from __future__ import annotations
 
-from .constants import (BR_CATEGORIES, BR_ENFORCEMENTS, BR_SIGNALS, CARDINALITIES,
+from .constants import (BR_CATEGORIES, BR_ENFORCEMENTS, CARDINALITIES,
                         CONFIDENCE, DIRECTIONS, ENTITY_TYPES, EVENT_LABEL,
                         OWNERSHIP_DIMS, PRIORITIES, RELATION_TYPES, TAGS, TRAITS,
                         TRIGGER_SOURCES, XC_SOURCES)
@@ -215,13 +215,18 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
               desc="运行受该规则约束的实体（谁的增删改被门禁）。单实体 BR 由 add_br 派生为唯一元素；"
                    "多实体 BR 必须显式填写增删改 subject 实体；转换/结构/UI 对称规则取任一 involved 实体并在 note 注明。"),
         Field("source_ref", "source_ref", LLM, required=True),
-        Field("signal_type", "signal_type", LLM, enum=BR_SIGNALS, required=True),
         Field("note", "note", LLM),
         Field("branch_dimensions", "branch_dimensions", LLM,
               derived_from="add_br 显式参数第一优先；note.branch_dimension 遗留形态归一化（';'/'；'分隔、去重保序、esc）",
               desc="该 BR 治理的分支维度名列表（结构关系，非自由文本）。顶层字段，C20 覆盖/C28 钩子校验读此。"),
-        Field("enforcement", None, FRAMEWORK, enum=BR_ENFORCEMENTS, required=True,
-              derived_from="derive_enforcement(signal_type, desc)"),
+        Field("enforcement", "enforcement", LLM, enum=BR_ENFORCEMENTS, required=False,
+              derived_from="显式参数第一优先；缺省 derive_enforcement(desc) 强词推导",
+              desc="硬/软执行类别。显式传值第一优先（原 signal_type=field_constraint→mandatory 已迁移固化为显式 enforcement=\"mandatory\"）；"
+                   "缺省按 desc 强词（必须/禁止/不得/不可/不能）推导，否则 conditional。S/T 可分性证明 desc 词检无法复现 field_constraint 语义，"
+                   "故显式传值是唯一可靠途径。"),
+        Field("restrictive", "restrictive", LLM, required=False,
+              desc="拦截性规则布尔标记（原 signal_type=restrictive 信号的替换，S1 负向测试/Type7 闸门经 P2 消费）。"
+                   "默认 False，仅拦截性规则显式 True；desc 词检无法复现（17 条含禁止词而非拦截 + 33 条拦截无禁止词）。"),
     ],
 }
 

@@ -1612,14 +1612,14 @@ def _generate_type1(state: AgentState, indices: dict,
                 for br in br_list:
                     _br_desc = ((br.get("description") or "")
                                 + " " + (br.get("suggested_action") or ""))
-                    _br_signal = br.get("signal_type") or ""
+                    _br_restrictive = br.get("restrictive") or False
                     # v29 修复: 要求 BR 描述含显式禁止词(不可/不能/禁止/只能/
-                    # 才可/只有等)。signal_type=restrictive 的"规则定义型"BR
+                    # 才可/只有等)。restrictive 的"规则定义型"BR
                     # (如 "从已选入状态的项目中选取1-5个项目纳入评审计划")描述
                     # 的是合法操作而非禁止——把它们当负向会误伤正常流程(T-003
                     # 项目纳入评审计划被误判为拒绝)。只有显式禁止的 BR 才阻断
                     # 该操作。
-                    if (_br_signal != "restrictive"
+                    if (not _br_restrictive
                             or not any(kw in _br_desc for kw in _prohibit_kw)):
                         continue
                     if entity not in (br.get("entities_involved") or []):
@@ -3405,7 +3405,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
 
         # ── BDD clauses ──
         br_id = br.get('constraint_id', '')
-        br_signal_type = br.get('signal_type', '')
+        br_restrictive = br.get('restrictive') or False
 
         # v29 修复 (Type7 同义反复): restrictive BR 且能抽取出被禁止操作时,
         # 用确定性负向模板(违规场景 → 拦截断言),不再产出 When/Then 同文
@@ -3415,7 +3415,7 @@ def _generate_type7_standalone(br_classifications: list[dict], state: AgentState
         # 业务动词列表。
         _type7_action_verbs = _get_action_verbs(cm)
         neg_op = (_extract_negative_op(br_desc, _type7_action_verbs)
-                  if br_signal_type == "restrictive" else "")
+                  if br_restrictive else "")
 
         if neg_op:
             # 负向模板: Given=规则原文(作为被测规则上下文), When=尝试违规

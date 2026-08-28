@@ -1972,7 +1972,7 @@ def build() -> DomainModel:
         desc="项目名称为必填项；长度20",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #1",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b02: 联系人电话手机号验证规则
@@ -1982,7 +1982,7 @@ def build() -> DomainModel:
         desc="联系人电话必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #19",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b03: 申请经费范围
@@ -1992,7 +1992,7 @@ def build() -> DomainModel:
         desc="申请经费（万元）为必填项；整数；长度4；1-9999",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #16",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b04: 建议书附件约束
@@ -2002,7 +2002,7 @@ def build() -> DomainModel:
         desc="建议书附件可上传格式：doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过10MB；多次上传时覆盖上一次附件；必填项",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #25",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b05: 项目删除限制
@@ -2012,7 +2012,7 @@ def build() -> DomainModel:
         desc="只能删除待选入且未评价过的项目",
         entities_involved=["E-XM"],
         source_ref="4.6（1）b）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b06: 项目编辑限制
@@ -2022,7 +2022,7 @@ def build() -> DomainModel:
         desc="只可编辑待选入的项目信息；对评价过的项目编辑附件",
         entities_involved=["E-XM"],
         source_ref="4.6（1）c）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b07: 项目选入次数限制
@@ -2032,7 +2032,7 @@ def build() -> DomainModel:
         desc="对于本阶段不合格评价结果的项目，只有1次选入机会",
         entities_involved=["E-XM"],
         source_ref="4.7.1（2）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b08: 项目选入禁止（差评级）
@@ -2042,7 +2042,7 @@ def build() -> DomainModel:
         desc="对于本阶段评价结果为差的项目，不可选入",
         entities_involved=["E-XM"],
         source_ref="4.7.1（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b09: 项目选出限制
@@ -2052,7 +2052,7 @@ def build() -> DomainModel:
         desc="评审管理员只能对已选入状态的项目进行选出",
         entities_involved=["E-XM"],
         source_ref="4.7.2",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b10: 评审计划项目数范围
@@ -2063,7 +2063,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-XM"],
         constrained_entity="E-XM",
         source_ref="4.8.1（1）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b11: 评审组人数与组长
@@ -2074,7 +2074,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-PSJH",
         source_ref="4.8.1（6）a）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b12: 评审专家技术领域覆盖
@@ -2085,7 +2085,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-ZJ",
         source_ref="4.8.1（6）b）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b13: 专家回避规则
@@ -2096,7 +2096,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-ZJ",
         source_ref="4.8.1（6）c）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b14: 专家工作时段互斥
@@ -2107,7 +2107,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-ZJ",
         source_ref="4.8.1（6）d）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b15: 专家不能连续3天晚上分配任务
@@ -2118,7 +2118,7 @@ def build() -> DomainModel:
         entities_involved=["E-ZJ", "E-PSJH"],
         constrained_entity="E-ZJ",
         source_ref="4.8.1（6）e）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b16: 下发时限配置
@@ -2128,7 +2128,7 @@ def build() -> DomainModel:
         desc="下发时限：从已建立到下发的时间（单位：天），1-2，默认为1，超过时限计划自动转为待启动状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）a）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b17: 启动时限配置
@@ -2138,7 +2138,7 @@ def build() -> DomainModel:
         desc="启动时限：从下发到启动的时间（单位：天），1-5，默认为2，超过时限计划自动转为待评审状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）b）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b18: 评审时限配置
@@ -2148,7 +2148,7 @@ def build() -> DomainModel:
         desc="评审时限：从待评审到已完成的时间（单位：天），1-5，默认为2，超过时限计划自动转为已完成状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）c）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b19: 归档时限配置
@@ -2158,7 +2158,7 @@ def build() -> DomainModel:
         desc="归档时限：从已完成到结束的时限（单位：天），1-3，默认为2，超过时限计划自动转为超时结束状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）d）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b20: 评审计划下发后不能编辑或取消
@@ -2168,7 +2168,7 @@ def build() -> DomainModel:
         desc="下发后的评审计划不能编辑或取消",
         entities_involved=["E-PSJH"],
         source_ref="4.8.4（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b21: 评审计划暂停时限制
@@ -2178,7 +2178,7 @@ def build() -> DomainModel:
         desc="暂停时，专家不能对计划中的项目进行评审，评审助理和评审管理员不能对该计划归档，暂停期间计时不停",
         entities_involved=["E-PSJH"],
         source_ref="4.8.7（1）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b22: 评审计划删除限制
@@ -2188,7 +2188,7 @@ def build() -> DomainModel:
         desc="评审管理员和评审助理可删除处于已建立状态和取消结束状态的计划",
         entities_involved=["E-PSJH"],
         source_ref="4.8.10",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b23: 打分项分数限值
@@ -2198,7 +2198,7 @@ def build() -> DomainModel:
         desc="创新性0.00<=数值<=15.00；应用前景0.00<=数值<=20.00；研究目标及技术指标0.00<=数值<=10.00；技术指标达标情况0.00<=数值<=10.00；成果及考核方式0.00<=数值<=20.00；成果及其完成情况0.00<=数值<=20.00；研究基础和保障条件0.00<=数值<=15.00；研究方案及技术途径0.00<=数值<=20.00；研制过程0.00<=数值<=15.00；关键技术0.00<=数值<=20.00；四舍五入后保留两位小数",
         entities_involved=["E-DF"],
         source_ref="4.9-1 #2-11",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b24: 打分总分限值
@@ -2208,7 +2208,7 @@ def build() -> DomainModel:
         desc="开题：创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径<=100.00；验收：创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术<=100.00；四舍五入后保留两位小数",
         entities_involved=["E-DF"],
         source_ref="4.9-1 #12",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b25: 打分提交限制
@@ -2218,7 +2218,7 @@ def build() -> DomainModel:
         desc="已提交的项目不能进行分数修改；项目各项打分全部为零的不能提交，并提示",
         entities_involved=["E-DF"],
         source_ref="4.9.2（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b26: 分数限值范围
@@ -2228,7 +2228,7 @@ def build() -> DomainModel:
         desc="分数限值0.0<分数限值<=100.0；四舍五入后结果保留一位小数",
         entities_involved=["E-FSXZ"],
         source_ref="4.9-3 #1",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b27: 分数限值生效规则
@@ -2239,7 +2239,7 @@ def build() -> DomainModel:
         entities_involved=["E-FSXZ", "E-XM"],
         constrained_entity="E-FSXZ",
         source_ref="4.9.4",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b28: 项目级别评判规则
@@ -2249,7 +2249,7 @@ def build() -> DomainModel:
         desc="优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）；优秀：90.00<=得分且13.00<=创新性且17.00<=应用前景；良好：70.00<=得分且11.00<=创新性且14.00<=应用前景；合格：60.00<=得分且9.00<=创新性且12.00<=应用前景；不合格：30.00<=得分；差：30.00>得分",
         entities_involved=["E-XM"],
         source_ref="4.9-5",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b29: 项目得分计算规则
@@ -2260,7 +2260,7 @@ def build() -> DomainModel:
         entities_involved=["E-DF", "E-XM"],
         constrained_entity="E-DF",
         source_ref="4.9.6",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b30: 合格机构降级规则
@@ -2271,7 +2271,7 @@ def build() -> DomainModel:
         entities_involved=["E-JG", "E-XM"],
         constrained_entity="E-JG",
         source_ref="4.9.7（1）a）-c）",
-        signal_type="restrictive",
+        restrictive=True,
         note={"branch_dimension": "机构状态"},
     )
 
@@ -2283,7 +2283,7 @@ def build() -> DomainModel:
         entities_involved=["E-JG", "E-PSJH", "E-XM"],
         constrained_entity="E-PSJH",
         source_ref="4.9.7（2）a）-c）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b32: 不合格机构提为试用限制
@@ -2293,7 +2293,7 @@ def build() -> DomainModel:
         desc="系统管理员可以对不合格机构提为试用机构；研制机构累计3次评级为不合格，则不能提为试用机构",
         entities_involved=["E-JG"],
         source_ref="4.9.7（2）d）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b33: 试用机构升降级规则
@@ -2304,7 +2304,7 @@ def build() -> DomainModel:
         entities_involved=["E-JG", "E-XM"],
         constrained_entity="E-JG",
         source_ref="4.9.7（3）a）-e）",
-        signal_type="restrictive",
+        restrictive=True,
         note={"branch_dimension": "机构状态"},
     )
 
@@ -2315,7 +2315,7 @@ def build() -> DomainModel:
         desc="实现专家新增的功能，手机号作为账号，密码默认为手机号后六位",
         entities_involved=["E-ZJ"],
         source_ref="4.10（1）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b35: 专家编辑限制
@@ -2325,7 +2325,7 @@ def build() -> DomainModel:
         desc="实现专家信息的编辑，不能编辑技术领域、机构、评审身份和手机号",
         entities_involved=["E-ZJ"],
         source_ref="4.10（2）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b36: 专家删除限制
@@ -2336,7 +2336,7 @@ def build() -> DomainModel:
         entities_involved=["E-ZJ", "E-PSJH"],
         constrained_entity="E-ZJ",
         source_ref="4.10（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b37: 专家回避项目设置生效规则
@@ -2347,7 +2347,7 @@ def build() -> DomainModel:
         entities_involved=["E-ZJ", "E-XM", "E-PSJH"],
         constrained_entity="E-ZJ",
         source_ref="4.10（6）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b38: 专家邮箱格式
@@ -2357,7 +2357,7 @@ def build() -> DomainModel:
         desc="专家邮箱必须包含@和.；不能包含中文、特殊符号",
         entities_involved=["E-ZJ"],
         source_ref="4.10-1 #8",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b39: 专家手机号唯一性
@@ -2367,7 +2367,7 @@ def build() -> DomainModel:
         desc="专家手机号必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字；唯一",
         entities_involved=["E-ZJ"],
         source_ref="4.10-1 #3",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b40: 用户账号规则
@@ -2377,7 +2377,7 @@ def build() -> DomainModel:
         desc="用户账号必填项；长度11；可以由汉字、字母、数字、下划线组成；不可重复",
         entities_involved=["E-YH"],
         source_ref="4.11-1 #1",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b41: 用户密码规则
@@ -2387,7 +2387,7 @@ def build() -> DomainModel:
         desc="登录密码必填项；长度8-18；只能由数字、字母和特殊符号组成；长度大于等于8个字符小于等于18个字符",
         entities_involved=["E-YH"],
         source_ref="4.11-1 #4；4.13（5）",
-        signal_type="field_constraint",
+        enforcement="mandatory",
     )
 
     # b42: 用户编辑限制
@@ -2397,7 +2397,7 @@ def build() -> DomainModel:
         desc="实现用户信息的修改，不可编辑用户账号、手机号、技术领域、所属机构和角色",
         entities_involved=["E-YH"],
         source_ref="4.11.1（2）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b43: 用户锁定登录限制
@@ -2407,7 +2407,7 @@ def build() -> DomainModel:
         desc="实现用户的锁定功能，锁定后不得登录此系统",
         entities_involved=["E-YH"],
         source_ref="4.11.1（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b44: 用户删除限制
@@ -2417,7 +2417,7 @@ def build() -> DomainModel:
         desc="将用户从系统中删除，如有未完成的任务，不能删除",
         entities_involved=["E-YH"],
         source_ref="4.11.1（6）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b45: 内置用户保护
@@ -2427,7 +2427,7 @@ def build() -> DomainModel:
         desc="不可对内置的审计管理员、系统管理员、评审管理员、评审助理进行编辑、锁定、重置密码等操作",
         entities_involved=["E-YH"],
         source_ref="4.11.1",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b46: 机构删除限制
@@ -2438,7 +2438,7 @@ def build() -> DomainModel:
         entities_involved=["E-JG", "E-XM", "E-YH"],
         constrained_entity="E-JG",
         source_ref="4.11.3（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b47: 机构编辑限制
@@ -2448,7 +2448,7 @@ def build() -> DomainModel:
         desc="实现研制机构信息的修改，不可编辑上级机构、机构编码、不合格次数和机构状态",
         entities_involved=["E-JG"],
         source_ref="4.11.3（2）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b48: 超时设置生效规则
@@ -2458,7 +2458,7 @@ def build() -> DomainModel:
         desc="超时设置完成后，对所有计划立即生效",
         entities_involved=["E-PSJH"],
         source_ref="4.11.4（3）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b49: 系统日志记录内容
@@ -2468,7 +2468,7 @@ def build() -> DomainModel:
         desc="登录日志至少记录用户的登录、退出的操作；操作日志应至少记录管理员添加、编辑、删除用户的操作；系统日志记录事件的时间、角色、操作类型、日志内容和日志类型等",
         entities_involved=["E-XTRZ"],
         source_ref="4.11.5（1）-（2）；4.13（14）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b50: 系统日志查看权限
@@ -2478,7 +2478,7 @@ def build() -> DomainModel:
         desc="系统日志记录只能由系统审计员查看",
         entities_involved=["E-XTRZ"],
         source_ref="4.13（13）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b51: 安全-密码不明文显示
@@ -2488,7 +2488,7 @@ def build() -> DomainModel:
         desc="登录时，密码不以明文显示",
         entities_involved=["E-YH"],
         source_ref="4.13（2）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b52: 安全-初次登录改密
@@ -2498,7 +2498,7 @@ def build() -> DomainModel:
         desc="用户初次登录时需更改密码",
         entities_involved=["E-YH"],
         source_ref="4.13（4）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b53: 安全-唯一标识不重复登录
@@ -2508,7 +2508,7 @@ def build() -> DomainModel:
         desc="用户都应有唯一标识，同一用户同时段不能重复登录",
         entities_involved=["E-YH"],
         source_ref="4.13（6）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b54: 安全-30分钟无操作重登
@@ -2518,7 +2518,7 @@ def build() -> DomainModel:
         desc="用户登录系统后，若30分钟内无任何操作，则需要重新登录",
         entities_involved=["E-YH"],
         source_ref="4.13（7）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b55: 安全-3次密码错误锁定
@@ -2528,7 +2528,7 @@ def build() -> DomainModel:
         desc="普通用户（即除了系统管理员和审计管理员外的其他用户）连续密码错误3次时，锁定该账户，锁定后可由系统管理员解锁",
         entities_involved=["E-YH"],
         source_ref="4.13（8）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b56: 安全-密码有效期
@@ -2538,7 +2538,7 @@ def build() -> DomainModel:
         desc="普通用户密码有效期为7天，过期后强制对密码进行更改，不能与上一密码相同",
         entities_involved=["E-YH"],
         source_ref="4.13（9）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b57: 安全-改密校验
@@ -2548,7 +2548,7 @@ def build() -> DomainModel:
         desc="用户修改自己密码时，需要输入原密码，如果输入的原密码不对则给出提示；新密码与原密码应不同，否则系统给出提示；新密码需要确认，输入两次，且相同，否则系统给出提示",
         entities_involved=["E-YH"],
         source_ref="4.13（10）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b58: 安全-数据加密
@@ -2558,7 +2558,7 @@ def build() -> DomainModel:
         desc="对服务端返回客户端的数据进行加密；对客户端提交到服务端的用户相关信息在传输中进行加密",
         entities_involved=["E-YH"],
         source_ref="4.13（11）-（12）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b59: 安全-页面提示不含后台信息
@@ -2568,7 +2568,7 @@ def build() -> DomainModel:
         desc="页面提示信息不能含有系统后台、技术框架等信息",
         entities_involved=["E-YH"],
         source_ref="4.13（15）",
-        signal_type="restrictive",
+        restrictive=True,
     )
 
     # b60: 易用性-登录错误提示
@@ -2578,7 +2578,7 @@ def build() -> DomainModel:
         desc="当输入的用户账号或者密码错时，有提示",
         entities_involved=["E-YH"],
         source_ref="4.14（1）",
-        signal_type="usability",
+
     )
 
     # b61: 易用性-日历选择
@@ -2589,7 +2589,7 @@ def build() -> DomainModel:
         entities_involved=["E-XM", "E-PSJH", "E-YH"],
         constrained_entity="E-XM",
         source_ref="4.14（2）",
-        signal_type="usability",
+
         note={"comment": "UI 对称规则，取代表实体 E-XM"},
     )
 
@@ -2601,7 +2601,7 @@ def build() -> DomainModel:
         entities_involved=["E-XM", "E-PSJH", "E-ZJ", "E-YH", "E-XTRZ"],
         constrained_entity="E-XM",
         source_ref="4.14（3）",
-        signal_type="usability",
+
         note={"comment": "UI 对称规则，取代表实体 E-XM"},
     )
 
@@ -2613,7 +2613,7 @@ def build() -> DomainModel:
         entities_involved=["E-XM", "E-PSJH", "E-ZJ", "E-YH", "E-JG"],
         constrained_entity="E-XM",
         source_ref="4.14（4）",
-        signal_type="usability",
+
         note={"comment": "UI 对称规则，取代表实体 E-XM"},
     )
 
@@ -2625,7 +2625,7 @@ def build() -> DomainModel:
         entities_involved=["E-XM", "E-PSJH", "E-ZJ", "E-YH"],
         constrained_entity="E-XM",
         source_ref="4.14（5）",
-        signal_type="usability",
+
         note={"comment": "UI 对称规则，取代表实体 E-XM"},
     )
 
@@ -2637,7 +2637,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-DF"],
         constrained_entity="E-PSJH",
         source_ref="4.14（6）",
-        signal_type="usability",
+
         note={"comment": "待办任务归属评审计划，取 E-PSJH"},
     )
 
@@ -2649,7 +2649,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-PSJH",
         source_ref="4.14（7）",
-        signal_type="usability",
+
     )
 
     # b67: 项目归档分支约束（含branch_dimension）
@@ -2659,7 +2659,7 @@ def build() -> DomainModel:
         desc="项目归档时根据项目归档分支确定目标状态：开题_合格及以上→已选入（阶段转验收）；开题_不合格或差→待选入（阶段不变）；验收_合格及以上→已归档（阶段不变）；验收_不合格或差→待选入（阶段不变）",
         entities_involved=["E-XM"],
         source_ref="4.5（5）a）-d）",
-        signal_type="restrictive",
+        restrictive=True,
         note={"branch_dimension": "项目归档分支"},
     )
 
@@ -2671,7 +2671,7 @@ def build() -> DomainModel:
         entities_involved=["E-XM", "E-PSJH"],
         constrained_entity="E-XM",
         source_ref="4.5（5）e）",
-        signal_type="restrictive",
+        restrictive=True,
         note={"branch_dimension": "项目归档分支"},
     )
 

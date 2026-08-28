@@ -5,7 +5,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from .constants import (BR_SIGNALS, DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
+from .constants import (DIRECTIONS, LOCAL_LABEL, OP_CATEGORIES,
                         OWNERSHIP_BY_RELATION, PRECOND_TYPES, RESERVED_ROLES,
                         TRIGGER_PRIORITY, TRIGGER_SOURCES, XC_SOURCES)
 from .escape import find_forbidden, find_unescaped
@@ -96,12 +96,12 @@ class Validator:
                   self.c11_null_spec, self.c12_operations, self.c13_direction,
                   self.c14_expected_direction, self.c16_state_whitelist,
                   self.c17_structural_cd_review, self.c18_inv_operations_role,
-                  self.c19_inv_signal_type, self.c20_inv_branch_br_coverage,
+                  self.c20_inv_branch_br_coverage,
                   self.c21_inv_label_refs, self.c22_inv_role_coverage,
                   self.c23_inv_xc_desc_prefix, self.c24_inv_br_constrained_entity,
                   self.c25_inv_mirror_target_transition,
                   self.c26_inv_event_entity, self.c27_inv_event_coverage,
-                  self.c28_inv_branch_br_hook):
+                  self.c28_inv_branch_br_hook, self.c29_inv_op_ref_entity):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -176,6 +176,11 @@ class Validator:
             by_dim.setdefault((t["entity"], t["dimension"]), []).append(t)
         for key, d in self.dims.items():
             ts, terminal = by_dim.get(key, []), set(d["terminal"])
+            if not ts:
+                # 声明但零转换 = 枚举备份/未建模孤岛（glm5pr:94 孤岛处置）：
+                # 非状态机，铁律10 创建转换/出边检查对空机不适用 → 降级警告。
+                r.warn("C02", f"{key[0]}.{key[1]} 声明但零转换（非状态机，枚举备份或遗漏建模）")
+                continue
             if not any(t["from"] is None and t["to"] == d["initial"] for t in ts):
                 r.error("C02", self._hint(
                     f"{key[0]}.{key[1]}", f"初始状态[{d['initial']}]无创建转换",
@@ -779,15 +784,6 @@ class Validator:
                                 "改为已登记角色（add_role 的 id 或 name）或 system",
                                 f"已登记角色: {role_names}"))
 
-    def c19_inv_signal_type(self):
-        """INV-8/BR 信号：signal_type ∈ BR_SIGNALS。"""
-        for b in self.m.business_rules:
-            if b.get("signal_type") not in BR_SIGNALS:
-                self.report.error(
-                    "C19", self._hint(
-                        b["id"], f"signal_type={b.get('signal_type')!r} 非法",
-                        "改为 BR_SIGNALS 之一", f"合法值: {BR_SIGNALS}"))
-
     def c20_inv_branch_br_coverage(self):
         """INV-7：每个分支维度须在 ≥1 条 BR 的 note.branch_dimension 出现。
 
@@ -1040,3 +1036,21 @@ class Validator:
                     self.report.warn("C28", self._hint(
                         b["id"], f"挂 {tag!r} 但文本无该维度名/分支值钩子（挂错疑似）",
                         "复核归属：desc/note 补分支钩子，或改挂正确维度"))
+
+    def c29_inv_op_ref_entity(self):
+        """INV：op note 里的转换引用须落在本实体；跨实体引用必须在 note 点名目标实体。
+        （v9 6 处 crud 关联串号的根因=引用了孪生审核机 E-TASK/E-SYS 的转换；合法跨实体
+        例：E-XM 文件整理→t52 E-WJD，note 已写明'触发 E-WJD 创建'。）不存在的引用由
+        C21 报，不重复。"""
+        for e in self.m.entities:
+            for o in e["operations"]:
+                text = self._flatten(o.get("note")) or ""
+                for ref in LOCAL_LABEL.findall(text):
+                    t = self.trans.get(ref)
+                    if t is None:
+                        continue            # 不存在由 C21 报，不重复
+                    if t["entity"] != e["id"] and t["entity"] not in text:
+                        self.report.warn("C29", self._hint(
+                            f"{e['id']}.{o['name']} 引用转换 {ref!r}",
+                            f"该转换属于 {t['entity']} 非本实体，且 note 未点名该实体",
+                            "改引用本实体的匹配转换；确系跨实体则 note 写明目标实体"))

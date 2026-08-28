@@ -1,0 +1,58 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-27T09:12:55+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C02",
+        "description": "E-BM.报名记录样品状态: 初始状态[待发样]无创建转换。修法：补一条 frm=None 的创建转换。示例：add_trans(frm=None, to='待发样', …)",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[项目类型]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-025[词], BR-013[实体], BR-014[实体], BR-023[实体]; m.add_br(..., note={\"branch_dimension\": \"项目类型\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-025[名], BR-001[词], BR-002[词], BR-003[词], BR-005[词], BR-006[词]; m.add_br(..., note={\"branch_dimension\": \"审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-010]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=[]",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-021]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=[]",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-022]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=[]",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

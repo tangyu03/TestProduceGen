@@ -11,8 +11,9 @@ OBJECT_MUTATION 逐一比对。命中不匹配 = 注册表标注与框架实际�
 - 字段级：written_by 必须 ≠ llm（llm_mutated/framework）；
   条件性改写（C0X）的 mutation_conditions 必须含 trigger；
   _assign_ids/_backfill_branch_coverage 属确定性加工，豁免条件检查。
-- build 期间加工（enforcement 在 add_br 内派生，插桩覆盖不到）做值级验证：
-  每条 BR 的 enforcement == derive_enforcement(signal_type, desc)。
+- build 期间加工（enforcement 在 add_br 内派生，插桩覆盖不到）做枚举存在性
+  验证（validate_llm 已保证取值合法；enforcement 现为作者可选参数 + 缺省派生，
+  无闭式复算，值级校验已随 signal_type 一并移除）。
 
 用法：python -m scripts.verify_schema_reverse
 
@@ -26,7 +27,8 @@ import copy
 import sys
 
 from srs_pipeline.builders import N, precond, state_ref
-from srs_pipeline.model import DomainModel, derive_enforcement
+from srs_pipeline.constants import BR_ENFORCEMENTS
+from srs_pipeline.model import DomainModel
 from srs_pipeline.schema import OBJECT_MUTATION, OBJECT_SCHEMA, out_fields
 from srs_pipeline.validate import Validator
 from srs_data import struct_srs
@@ -135,13 +137,14 @@ def main(build=struct_srs.build) -> int:
     m = build()
     errs: list[str] = []
 
-    # 1. build 期间加工（enforcement）值级验证
+    # 1. build 期间加工（enforcement）枚举存在性验证。
+    #    派生链 = 显式参数第一优先，缺省 derive_enforcement(desc)；显式覆盖的
+    #    原始输入未落盘（无闭式复算），值级校验随 signal_type 移除。枚举合法性
+    #    由 add_br 的 validate_llm 保证，这里只做输出侧存在性兜底。
     bad_enf = [b["id"] for b in m.business_rules
-               if b["enforcement"]
-               != derive_enforcement(b["signal_type"], b["desc"])]
+               if b.get("enforcement") not in BR_ENFORCEMENTS]
     if bad_enf:
-        errs.append(f"[enforcement] {len(bad_enf)} 条 BR 与 derive_enforcement "
-                    f"不一致: {bad_enf}")
+        errs.append(f"[enforcement] {len(bad_enf)} 条 BR 枚举非法: {bad_enf}")
 
     # 1b. build 期间加工（constrained_entity 单实体派生）值级验证
     bad_ce = [b["id"] for b in m.business_rules

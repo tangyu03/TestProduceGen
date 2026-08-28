@@ -1,19 +1,19 @@
 from __future__ import annotations
-"""Signal-Type-Driven Validation Point Generation via LLM.
+"""校验意图驱动（signal-intent）的验证点生成 via LLM。
 
-Each ``signal_type`` from ``constraint_obligations`` encodes a distinct
-"verification intent" — what kind of checking matters for that rule. This
-module maps each signal_type to a specialized LLM prompt so the LLM
-generates richer, more targeted V-steps than deterministic templates can.
+BR 的校验意图由新字段派生（旧 signal_type 税已于 2026-08-25 迁移删除）：
+``restrictive`` (bool) 与 ``category`` (str) 共同决定一条规则属于哪种
+"校验意图"。本模块把每条 BR 映射到专用 LLM prompt，生成比确定性模板
+更丰富、更贴合的 V 步骤。
 
-Signal types and their verification intents::
+校验意图路由（见 _verification_intent）：:
 
-    restrictive       "This operation MUST be blocked"  → negative-test gen
-    field_constraint  "Input MUST match format"         → boundary / equivalence class
-    usability         "User MUST see correct feedback"  → UI-copy verification
-    display           "Page MUST show correct data"     → data-presentation verification
-    computation       "Calculation MUST be correct"     → input→output table
-    None / null       Unclassified                      → lightweight classify-then-route
+    restrictive=True              "This operation MUST be blocked"  → negative-test gen
+    category=validation           "Input MUST match format"         → boundary / equivalence class
+    category=usability            "User MUST see correct feedback"  → UI-copy verification
+    category=display              "Page MUST show correct data"     → data-presentation verification
+    category=computation          "Calculation MUST be correct"     → input→output table
+    其它 category / 无意图映射      Unclassified                      → lightweight classify-then-route
 
 Integration points (called from ``s1_generation.py``):
 
@@ -30,11 +30,39 @@ import time
 from collections import defaultdict
 
 # ---------------------------------------------------------------------------
-# Per-signal-type system prompts
+# 校验意图路由键派生（数据驱动）
+# ---------------------------------------------------------------------------
+# category 承袭旧税值（validation = 旧 field_constraint 等）并新增
+# notification/authorization/timing；restrictive 是 S1 闸门布尔，优先于
+# category 决定负向测试意图。
+_INTENT_BY_CATEGORY = {
+    "validation": "field_constraint",
+    "field_constraint": "field_constraint",  # 旧值兼容（防历史数据残留）
+    "usability": "usability",
+    "display": "display",
+    "computation": "computation",
+    "restrictive": "restrictive",
+}
+
+
+def _verification_intent(br: dict) -> str | None:
+    """从新字段 (restrictive bool + category str) 派生校验意图路由键。
+
+    返回 None = 无专用意图 prompt（notification/authorization/timing 等），
+    走轻量 classify-then-route（_classify_null_brs）或跳过，与旧
+    "Unknown signal_type ... skipping" 行为一致。
+    """
+    if br.get("restrictive"):
+        return "restrictive"
+    return _INTENT_BY_CATEGORY.get(br.get("category") or "")
+
+
+# ---------------------------------------------------------------------------
+# Per-intent system prompts
 # ---------------------------------------------------------------------------
 
 # Each prompt tells the LLM:
-#   1. What this signal_type MEANS (verification intent)
+#   1. What this intent MEANS (verification intent)
 #   2. HOW to generate V-steps for this type
 #   3. WHAT the output format should be
 
@@ -208,8 +236,8 @@ _SIGNAL_SYSTEM_PROMPTS: dict[str, str] = {
 每行一个 JSON 对象（JSONL）。只输出 JSONL，不要数组、不要额外文字、不要代码块。""",
 }
 
-# Prompt for unclassified (null/None) signal_type — lightweight classification
-# before routing to the appropriate specialized prompt.
+# Prompt for unclassified BRs (无 restrictive 且 category 无意图映射) —
+# lightweight classification into a verification intent before routing.
 _NULL_CLASSIFY_PROMPT = """你是一个业务规则分类器。请根据规则描述，判断它属于哪种校验类型。
 
 类型定义：
@@ -248,7 +276,7 @@ def generate_signal_v_steps(
 ) -> dict[str, list[dict]]:
     """Generate signal-type-aware V-steps for all business_rule constraint obligations.
 
-    Groups BRs by signal_type, calls the LLM with the corresponding specialized
+    Groups BRs by verification intent, calls the LLM with the corresponding specialized
     prompt, and returns a ``{constraint_id: [V-step-dict, ...]}`` map.
 
     Args:
@@ -277,13 +305,14 @@ def generate_signal_v_steps(
         print("      [SIGNAL] LLM_API_KEY not set — skipping signal validation")
         return {}
 
-    # Group by signal_type (normalize None → "null")
+    # 按校验意图分组（由 restrictive bool + category 派生，旧 signal_type
+    # 税已删）；无意图映射的 BR 进 unclassified 走轻量 classify-then-route。
     by_signal: dict[str, list[dict]] = defaultdict(list)
     unclassified: list[dict] = []
     for br in brs:
-        st = br.get("signal_type")
-        if st and st != "null":
-            by_signal[st].append(br)
+        intent = _verification_intent(br)
+        if intent:
+            by_signal[intent].append(br)
         else:
             unclassified.append(br)
 
@@ -317,18 +346,18 @@ def generate_signal_v_steps(
                 # use restrictive bucket as a safe default.
                 by_signal.setdefault("restrictive", []).append({"id": br_id, "_orphan": True})
 
-    # Phase 2: generate V-steps per signal_type
+    # Phase 2: generate V-steps per intent
     total_brs = sum(len(v) for v in by_signal.values())
-    print(f"      [SIGNAL] Calling {model}, {total_brs} BRs in {len(by_signal)} signal type(s)...")
+    print(f"      [SIGNAL] Calling {model}, {total_brs} BRs in {len(by_signal)} intent(s)...")
 
-    for signal_type, br_group in sorted(by_signal.items()):
-        prompt = _SIGNAL_SYSTEM_PROMPTS.get(signal_type)
+    for intent, br_group in sorted(by_signal.items()):
+        prompt = _SIGNAL_SYSTEM_PROMPTS.get(intent)
         if not prompt:
-            print(f"      [SIGNAL] Unknown signal_type '{signal_type}' — skipping {len(br_group)} BRs")
+            print(f"      [SIGNAL] Unknown intent '{intent}' — skipping {len(br_group)} BRs")
             continue
 
         n_batches = (len(br_group) + _BATCH_SIZE - 1) // _BATCH_SIZE
-        print(f"      [SIGNAL]   {signal_type}: {len(br_group)} BRs in {n_batches} batch(es)")
+        print(f"      [SIGNAL]   {intent}: {len(br_group)} BRs in {n_batches} batch(es)")
 
         for batch_idx in range(0, len(br_group), _BATCH_SIZE):
             batch = br_group[batch_idx:batch_idx + _BATCH_SIZE]
@@ -336,7 +365,7 @@ def generate_signal_v_steps(
 
             entries = _call_llm_batch(
                 api_base, api_key, model, prompt, batch,
-                batch_num, n_batches, signal_type, entity_name_map,
+                batch_num, n_batches, intent, entity_name_map,
             )
 
             for entry in entries:
@@ -383,7 +412,7 @@ def generate_signal_v_steps(
 
 
 # ---------------------------------------------------------------------------
-# Null-classification (lightweight LLM call to assign signal_type)
+# Unclassified-routing (lightweight LLM call to assign a verification intent)
 # ---------------------------------------------------------------------------
 
 def _classify_null_brs(
@@ -392,9 +421,9 @@ def _classify_null_brs(
     api_key: str,
     model: str,
 ) -> tuple[dict[str, str], list[str]]:
-    """Use a lightweight LLM call to classify unclassified BRs.
+    """Use a lightweight LLM call to classify unclassified BRs into an intent.
 
-    Returns ``({constraint_id: signal_type}, order_list)``.
+    Returns ``({constraint_id: intent}, order_list)``.
     ``order_list`` preserves the LLM output order for position-based
     fallback when the LLM returns IDs that don't match the original data.
     """
@@ -434,12 +463,12 @@ _BATCH_SIZE = 8  # Smaller batches — signal prompts generate more tokens per B
 
 def _build_user_prompt(
     batch: list[dict],
-    signal_type: str,
+    intent: str,
     entity_name_map: dict[str, str],
 ) -> str:
     """Build the user prompt listing BRs with their context."""
     lines = [
-        f"请为以下 {len(batch)} 条 {signal_type} 类型的业务规则生成校验 V 步骤：",
+        f"请为以下 {len(batch)} 条 {intent} 校验意图的业务规则生成校验 V 步骤：",
         "",
     ]
     for i, br in enumerate(batch):
@@ -482,10 +511,10 @@ def _call_llm_batch(
     batch: list[dict],
     batch_num: int,
     total_batches: int,
-    signal_type: str,
+    intent: str,
     entity_name_map: dict[str, str],
 ) -> list[dict]:
-    """Send one batch of BRs to LLM with the signal-specific prompt.
+    """Send one batch of BRs to LLM with the intent-specific prompt.
 
     Returns parsed entries list (each entry is ``{constraint_id, v_steps: [...]}``).
     """
@@ -493,7 +522,7 @@ def _call_llm_batch(
     import urllib.request
 
     url = f"{api_base}/chat/completions"
-    user_prompt = _build_user_prompt(batch, signal_type, entity_name_map)
+    user_prompt = _build_user_prompt(batch, intent, entity_name_map)
 
     body = json.dumps({
         "model": model,

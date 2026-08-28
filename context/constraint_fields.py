@@ -506,8 +506,12 @@ def _derive_anchors(model, spec):
         # state_ref 前提 / expected_results / note，不在 constraint/when 文本，
         # _precondition_texts 扫不到）→ 数据驱动兜底，与文本扫描取并集
         # （防部分打标漏锚；golden 任务级别文本扫描已全覆盖，并集不变）。
+        # 限定本实体：跨实体转换（如 E-YT 预通知审批按 E-XM.项目类型 分支）只
+        # 声明"该转换按此维度分支"，不是字段写点；混入会把对方维度（预通知状态）
+        # 错锚进本实体（anchors 恒 {ent, 转换自身 dimension}，跨实体不可能合法）。
         gated = [t for t in model.transitions
-                 if (t.get("note") or {}).get("branch_dimension") == dim]
+                 if t.get("entity") == ent
+                 and (t.get("note") or {}).get("branch_dimension") == dim]
         if gated:
             is_config = bool(vals) and all(
                 isinstance(v, int) or _is_int_str(v) for v in vals)

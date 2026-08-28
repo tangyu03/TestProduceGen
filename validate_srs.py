@@ -18,7 +18,7 @@
     C6  分支 BR 覆盖：每个 branch_dimension 至少在 1 条 BR 中出现
     C7  XC desc 前缀：每条 XC desc 须带来源前缀
                      （镜像/由 Step 4.5/联动/分支[）
-    C8  signal_type 合法性：每条 BR 的 signal_type ∈ 合法集合
+    C8  enforcement 合法性：每条 BR 的 enforcement ∈ {mandatory, conditional}
     C9  role 一致性：transitions 中的 role 须在 roles 中声明或为 "system"
     C10 direction 一致性：direction 与状态在 states 列表中的相对位置一致
     C11 operations role 字段：每条 operation 的 note 必须含 role 字段
@@ -135,8 +135,8 @@ class DomainModel:
         })
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
-               signal_type, note=None, constrained_entity=None,
-               branch_dimensions=None):
+               note=None, constrained_entity=None,
+               branch_dimensions=None, enforcement=None, restrictive=False):
         # branch_dimensions＝显式参数第一优先；note.branch_dimension＝遗留形态
         # （';'/'；'分隔字符串或列表），归一化去重保序、剥离 note 键。
         import re as _re
@@ -154,7 +154,11 @@ class DomainModel:
         self.brs.append({
             "bid": bid, "category": category, "desc": desc,
             "entities_involved": list(entities_involved),
-            "source_ref": source_ref, "signal_type": signal_type,
+            "source_ref": source_ref,
+            "enforcement": enforcement or ("mandatory" if any(
+                w in desc for w in ("必须", "禁止", "不得", "不可", "不能"))
+                else "conditional"),
+            "restrictive": bool(restrictive),
             "note": note, "branch_dimensions": dims,
         })
 
@@ -449,11 +453,11 @@ def check_c7_xc_desc_prefix(model, report):
 
 
 def check_c8_signal_type(model, report):
-    """C8 signal_type 合法性"""
-    valid = {"restrictive", "usability", "display", "field_constraint"}
+    """C8 enforcement/restrictive 合法性（signal_type 已删，随迁移替换）"""
+    valid = {"mandatory", "conditional"}
     for br in model.brs:
-        if br["signal_type"] not in valid:
-            report.err("C8", f"BR {br['bid']} signal_type='{br['signal_type']}' 不在合法集合 {valid}")
+        if br.get("enforcement") not in valid:
+            report.err("C8", f"BR {br['bid']} enforcement='{br.get('enforcement')}' 不在合法集合 {valid}")
 
 
 def check_c9_role_consistency(model, report):

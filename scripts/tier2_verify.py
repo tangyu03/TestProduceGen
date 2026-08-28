@@ -52,15 +52,18 @@ def main(cm_path: str):
     print("\n=== 2. 全量不变量扫描: 每条 Type5 proc 与 object_existence 一致 ===")
 
     def _has_creation_dep(p, creation_to_ids):
+        # 精确 id 相等, 勿用子串: "T-001" 会误中 "RO-IT-001" 等前缀同尾 id
         for d in (p.get("_S3_fields") or {}).get("dependencies") or []:
             tgt = next((q for q in procs if q["temp_id"] == d), None)
-            if tgt and any(cid in "|".join(tgt.get("source_ids") or []) for cid in creation_to_ids):
+            if tgt and any(cid == sid for cid in creation_to_ids
+                           for sid in (tgt.get("source_ids") or [])):
                 return True
         return False
 
     def _creation_proc_phase(creation_to_ids):
         phs = [phase_of[q["temp_id"]] for q in procs
-               if any(cid in "|".join(q.get("source_ids") or []) for cid in creation_to_ids)]
+               if any(cid == sid for cid in creation_to_ids
+                      for sid in (q.get("source_ids") or []))]
         return max(phs) if phs else 0
 
     mism = []

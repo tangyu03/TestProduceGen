@@ -2441,7 +2441,7 @@ for br in p1_br:
         "entities_involved": br.get("entities_involved", []),
         "constrained_entity": br.get("constrained_entity"),
         "category": br.get("category"),
-        "signal_type": br.get("signal_type"),
+        "restrictive": br.get("restrictive", False),
         "description": br.get("desc"),
         "enforcement": br.get("enforcement"),
         "ref_to_existing_br": None,
@@ -2513,7 +2513,7 @@ for xc in p1_xc:
         "constraint_id": xc["id"],
         "entities_involved": [xc["source_entity"], xc["target_entity"]],
         "category": cat,
-        "signal_type": None,
+        "restrictive": False,
         "description": f"[来源于{xc['id']}] {target_cond}; {desc}",
         "enforcement": "mandatory",
         "ref_to_existing_br": ref_br,
@@ -2906,15 +2906,15 @@ for co in cross_entity_obligations:
             if not any(es in j["desc"] for j in judgments):
                 enabler_state_valid_or_judgment = False
 
-# Check: signal_type_category_preserved
-signal_type_category_preserved = True
+# Check: restrictive_category_preserved
+restrictive_category_preserved = True
 for ro in constraint_obligations:
     if ro["type"] == "business_rule" and ro.get("constraint_id", "").startswith("BR-"):
         # Find original BR
         orig_br = next((b for b in p1_br if b["id"] == ro["constraint_id"]), None)
         if orig_br:
-            if ro.get("signal_type") != orig_br.get("signal_type") or ro.get("category") != orig_br.get("category"):
-                signal_type_category_preserved = False
+            if ro.get("restrictive") != orig_br.get("restrictive") or ro.get("category") != orig_br.get("category"):
+                restrictive_category_preserved = False
                 break
 
 # Check: id_globally_unique
@@ -2932,7 +2932,7 @@ self_check = {
     "no_branch_scenarios": no_branch_scenarios,
     "all_xc_have_status": all_xc_have_status,
     "enabler_state_valid_or_judgment": enabler_state_valid_or_judgment,
-    "signal_type_category_preserved": signal_type_category_preserved,
+    "restrictive_category_preserved": restrictive_category_preserved,
     "id_globally_unique": id_globally_unique,
     "p1_root_nodes_complete": p1_root_nodes_complete,
     "all_skipped_xc_have_br": all_skipped_xc_have_br,

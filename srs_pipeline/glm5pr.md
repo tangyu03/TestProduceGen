@@ -5,7 +5,7 @@
 1. 实体/状态/转换由 §2 事件台账推导，判据唯一，无模式枚举。
 2. 机械项由框架校验（§5 修复）；语义项由你负责（台账完备/情形分合/分类/因果鉴别/标注诚实）。
 3. 顺序：§2 台账 → Step 1 实体 → Step 2 分支 → Step 3 转换 → Step 4 约束；每步以上一步产物为输入。
-4. §2 推导内部可迭代；`build()` 一经写出，仅 3.3 回填与框架回喂可改；动词/权限回写不算回修。
+4. §2 推导内部可迭代；`build()` 一经写出，仅框架回喂可改；动词/权限回写不算回修。
 
 ---
 
@@ -20,55 +20,65 @@
 from srs_pipeline import DomainModel, N, attr, op, precond, state_ref
 
 def build() -> DomainModel:
-    m = DomainModel(source="<文件名，无则填 未命名文档>", document_scope="<覆盖范围>")
+    m = DomainModel(source="<文件名，无则填 未命名文档>", document_scope="<章节号清单>")
     # ===== 事件台账（§2）=====
     m.set_prohibition_config(config={...})
     # Step 1→4
     return m
 ```
 
-- 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）。实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，角色引用写 `id` 或 `name`。
+- 元数据一致性：约束产物行为的元数据参数取结构化形态，供框架校验。document_scope＝章节号清单（"§19.1；§19.3；§20.2–§20.11"，平行流程差异说明附后）；产物 source_ref 须落在声明章节内；收缩平行流程 → 分支降属性或补最小链，差异注于 scope。
+- 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）。实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，引用一律走 `name`。
 - API 形态：全部调用用关键字参数；唯一例外 `state_ref` 三参同型可位置式。
 - source_ref 非空且可定位原文，子项号真实，复合引用以 `；` 分隔。XC 继承宿主 source_ref：镜像/联动取 `source_transition` 所指转换的 ref；4.5判取持有对应 precondition 的转换的 ref。
 - critical（枚举缺失无推据/核心矛盾不可取舍）→ 立即停止，仅输出中断 JSON；其余 minor 假设填充＋inferred；口径不一致但不构成矛盾 → 两口径并列写入 `note={"ambiguity": "..."}`，由框架收集。截断续传锚点：`断点位置: Step {N} | 已完成: {标签列表} | 下一个待处理: {标签及未完成字段}`。
 - 回写：Step 1–4 中发现新动词/新角色/操作归属，在当前位置插入追加调用（注释标来源 Step）。`action_verbs` 追加去重；`permission` 同角色取并集。
-- inferred 标注：
+- inferred 标注（states 与 inferred＋note 依据成对落盘，同一动作的两半）：
+
 | 推断对象 | 标注方式 |
 |---|---|
 | 状态值 | 维度级 `inferred` 列表＋维度级 `note` 写依据 |
 | attr / op | `N(inferred=True, comment="依据…")` |
 | 转换/结构/BR | `note={"inferred": True, "comment": "依据…"}` |
 | XC / IT | 无 note，由源转换/源规则继承 |
-- 判定自报：direction 注命中级次（⓪–⑤）；结构四元注 a/b/c/d；分支三型注型别序号（①②③，写入 evidence）；op category 命中 ①–④ 特殊类时注序号；signal_type 注命中原词。
+
+- 判定自报：direction 注命中级次（⓪–⑤）；结构四元注 a/b/c/d；分支三型注型别序号（①②③，写入 evidence）；op category 命中 ①–④ 特殊类时注序号；signal_type 注命中原词（如"必须"、"每天上午9点"）。
 - 铁律：文档即数据（矛盾→critical）；空值规范（缺省 `[]`，critical 豁免）；不脑补（推断标注）；字符原样转录。
 
 ---
 
 ## 2 事件台账
+
 事件＝业务动作使某主体情形空间变化的记录，每事件一条 `add_event` 调用：
+
 ```python
 m.add_event(eid, entity=E-ID, dimension, action, actor, precondition, consequence, source_ref)
 ```
 
-- consequence：在情形空间取值（停留原情形也算落点，落为自环）；precondition：自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁）。
+- action＝原文动作短语逐字：主语线索承载 actor 语义（“机构新增实验室信息”保留原文，不改写为“实验室新增”）。- consequence： 在情形空间取值（停留原情形也算落点，落为自环）。
+- precondition＝自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁；门禁值取同动作拆行事件中对应分支的 consequence），无内容填字符串 `"初始"`。
 - 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如“到期提醒”）入 Step 4 BR（notification/timing）。
 - 粒度：一事件一 (entity, dimension)；一动作多状态面 → 拆行，每状态面一条 `add_event`，action 与 actor 相同，关联仅由转换 note 互引承载。
-- 表格列：流程表/状态表中某状态列取值随行动作变化 → 逐行逐列登记事件（entity＝该状态面承载主体对应的 E-ID）；自环事件仅落动作的业务对象维度（表格行中其他列的未变值走门禁判定，写入 precondition，不立事件）；其他实体状态列的驻留值，若判定为动作对象/输入前提 → precondition；创建缺失 → 按 minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底。
+- 表格列：流程表/状态表中某状态列取值随行动作变化 → 逐行逐列登记事件（entity＝该状态面承载主体对应的 E-ID）。**单元格多值双形态**：顿号并列（“已核查、待发样”）＝快照，逐值登记落点；斜杠（“待核查/无需还样”）＝或语义分支值，逐值拆行登记。自环事件仅落动作的业务对象维度（表格行中其他列的未变值走门禁判定，写入 precondition，不立事件）；其他实体状态列的驻留值，若判定为动作对象/输入前提 → precondition；创建缺失 → 按 minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底。
 
 ---
 
 ## Step 1 实体
 
 ### 1.0 词表 → `m.set_prohibition_config()`
+
 `action_verbs`＝动作列动词词根（去名词成分，含复合动词）；操作动词经回写补入；无判别力词根（操作/处理/进行类）不入。`prohibit_keywords`＝复杂否定短语；`config` 仅含两键。
 
 ### 1.1 角色 → `m.add_role()` / `m.add_permission()`
-来源 actor ∪ 权限章节；id=r01…；name=原文逐字复制；无执行者 → readonly；system 不入 roles。permission 的 operations＝具体操作名（限 session/ui/file/query/config 及不改状态 crud）。
+
+来源 actor ∪ 权限章节；id=r01…；name＝原文逐字复制；无执行者 → readonly；system 不入 roles。permission 的 operations＝具体操作名（限 session/ui/file/query/config 及不改状态 crud）。
 
 ### 1.2 分组
+
 entity 列即分组结果；分组唯一依据是原文命名；有状态变更事件的分组 → core 候选，仅 CRUD/配置 → managed 候选；多维度逐维推导；确认 E-ID 映射。
 
 ### 1.3 状态推导
+
 为每个事件写出前置情形＝precondition＋先前 consequence。分合判据：
 
 | 比较 | 结果 |
@@ -78,18 +88,20 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 | Accept 皆 ∅ | 比终局语义：异→分立；同→复核 |
 
 - 命名：枚举行原词 > 散见原词（note 出处）> 语义命名（入 inferred，成对标注）。
-- states 顺序＝原文枚举顺序（序判③④的比较基准）；一个状态面仅建在一个实体名下；states 值域＝文档枚举表值 ∪ 台账推导值；枚举有而台账无 → 按孤岛处置。
-- initial＝创建事件落入的状态；每个维度有 `frm=None` 创建转换。
-- 终态：无出边事件的状态为候选；有以其为起点的出边事件 → 回 §2 补事件重跑；全部无出边 → 入 terminal。文档具名终态但推导有出边 → 以推导为准＋note 说明。
-- 孤岛（枚举但无事件覆盖）：①入 states；②note“枚举但无事件覆盖”；③原样保留（框架降级警告）。
+- states 顺序＝原文枚举顺序（序判③④的比较基准）；**状态面唯一承载**：一个状态面仅建在一个实体名下，枚举维度经裁决由他实体承载 → 建维时 note 注明“并入 E-XXX.<维度>”，无并入关系且无事件 → 按孤岛处置；states 值域＝文档枚举表值 ∪ 台账推导值。
+- initial＝创建事件落入的状态；每个**已建模**维度（≥1 转换）有 `frm=None` 创建转换；零转换声明＝枚举备份/孤岛，不要求创建转换（框架降级警告，见 1.3 孤岛处置）。
+- **图完整性（无出边闭合）**：states 值无出边 → 三选一闭合——回 §2 补事件重跑 / 入 terminal / 孤岛标注，非终态同样适用。文档具名终态但推导有出边 → 以推导为准＋note 说明。
+- 孤岛（枚举但无事件覆盖）：①入 states；②note“枚举但无事件覆盖”；③原样保留（框架降级警告：C02 对零转换维度不查创建转换/出边，仅记 warn）。
 - 事件仅变更属性 → 不立状态，入 operations 或同状态自环。
 
 ### 1.4 实体
+
 - 分类（交集归 core）：core＝状态枚举/多步骤多角色/状态自主/审批链/独立载体/可独立循环；managed＝管理员 CRUD/配置字典/状态简单。
 - tags：`approvable`＝存在审批类转换；`multi-state`＝≥2 状态维度；`expirable`＝存在失效/过期转换或 BR；`collaborative`＝多角色操作同一状态维度（转换层多执行者写 role 列表）；`configurable`＝存在 is_config 属性。
 - operations：op 名称同一实体内唯一；通知语义由 BR 承载；category ①file②session③ui④config＞crud＞query；`expected_results` ≥1 逐字取原文可观察结果，未述补＋inferred；note.role 必填。
 
 ### 1.5 结构关系 → `m.add_structural()`
+
 `cardinality ∈ {"1:1", "1:N", "M:N"}`（父→子视角）：`1:1`＝一父一子；`1:N`＝一父多子；`M:N`＝多对多。M:N 无方向动词按叙述顺序定 frm/to。四元判定（首条命中 a→b→c→d，成套取自同一行）：
 
 | 判定 | relation_type | ownership_dimension |
@@ -107,9 +119,9 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 三型（型别序号写入 evidence）：① 配置型（is_config 属性：创建时定、互斥、影响后续）/ ② 运行时选择型（“根据…选择/分为…情况”）/ ③ 隐式分支（表格/权重表列维度、多 BR 共同体现的取值维度）。
 
-准入判据＝可锚定转换：影响状态机路径或转换结果的取值维度才是分支维度；纯查询/筛选仅作实体属性。分支 values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。
+准入判据＝可锚定转换：影响状态机路径或转换结果的取值维度才是分支维度；纯查询/筛选仅作实体属性。分支 values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。**注册前逐 value 自查台账锚点**：value 指向路径在台账无事件 → 该维度降为实体属性，或按 document_scope 补最小创建链。
 
-target_transition 用语义描述，以目标转换的 action 词为锚（如“能力验证计划发布转换”）；同动作多转换时括注 frm→to 或分支值消歧。框架装配时自动匹配为精确 tid，模型免回填。指向规则：路径分歧各 value 指向该分支值路径首条转换；结果差异各 value 指向共用转换。
+target_transition＝语义描述，以目标转换的 action 词为锚（如“能力验证计划发布转换”）；同动作多转换时括注 frm→to 或分支值消歧。框架装配时自动匹配为精确 tid，模型免回填。指向规则：路径分歧各 value 指向该分支值路径首条转换；结果差异各 value 指向共用转换。
 
 ---
 
@@ -147,7 +159,7 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 | 状态值无法消歧 | `constraint` | `null` | `{"comment": "降级理由…"}` |
 | 分支维度取值条件 | `constraint` | `null` | `{"comment": "分支值条件"}` |
 | 独立业务事件已完成（一次性完成信号；持续状态门禁走 state_ref） | `event_ref` | `null` | 缺省 |
-| 含“不可/不得/禁止/累计/按X计算” | `constraint` | `null` | 缺省 |
+| 含"不可/不得/禁止/累计/按X计算" | `constraint` | `null` | 缺省 |
 
 `state_ref` 的 ref 必填；`event_ref`/`constraint` 的 ref 一律 `null`。
 
@@ -156,6 +168,7 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 crud 操作 `note.comment` 回填对应转换标签（多个 `;` 分隔），无对应 → 注明理由；回写遗漏动词/权限。
 
 ### 3.4 因果 → `m.add_causal()` 与鉴别
+
 `frm`/`to`＝实体 ID（E-XXX→E-XXX），描述 X 实体的变化直接致 Y 实体的变化；两实体间的顺序门禁由 precondition/XC 表达。每案依序过 Q1→Q2→Q3，命中即止：
 - Q1：X 变直接致 Y 变？Y 需额外操作 → 约束，标 `[待写入: Step4 XC]`。
 - Q2：门禁已由 Y 侧 precondition 或既有 XC 表达？已表达 → 止于 Q2，不写因果、不标记。
@@ -171,14 +184,14 @@ crud 操作 `note.comment` 回填对应转换标签（多个 `;` 分隔），无
 
 ## Step 4 约束
 
-回访：①检索 `[待写入` 逐条兑现为 XC；②核对 `prohibit_keywords`——每条短语须有产物 source_ref 可定位；③核对 `document_scope`——产物 source_ref 均落在声明范围内。
+回访：①检索 `[待写入` 逐条兑现为 XC；②核对 `prohibit_keywords`——每条短语须有产物 source_ref 可定位；③核对 `document_scope`——产物 source_ref 均落在声明章节内。
 
 invalid → `m.add_invalid()`：仅明文禁止的状态转换（“不允许/不可以从X到Y”）。
 
 XC → `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（`4.5判` 对应 3.4 鉴别判为约束）。`source_transition` 一律填生产者转换（达 source_state 的转换）。镜像可省略（框架补）；target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 值，即新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
 
 BR → `m.add_br()`：两步判定 ① signal_type＝口吻（field_constraint＞restrictive〔含 X日内/次以内〕＞display＞usability；无命中不生成）；② category＝管什么（timing/notification/computation/authorization/usability/display/validation 默认）。时间/次数/通知/计算只落②。命中词注原词。一句一 BR。
-authorization → 角色放 `note.role`；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一＋“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 的 `branch_dimensions` 含该维度（desc 含维度名或分支值作钩子）；系统行为 BR 的 entities_involved＝作用目标业务实体。
+authorization → 角色放 `note.role`（name 列表）；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一＋“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 的 `branch_dimensions` 含该维度（desc 含维度名或分支值作钩子）；系统行为 BR 的 entities_involved＝作用目标业务实体。
 
 ---
 
@@ -191,9 +204,9 @@ authorization → 角色放 `note.role`；多实体 BR 必填 constrained_entity
 ## 6 API
 
 ```python
-m = DomainModel(source, document_scope)
+m = DomainModel(source, document_scope)  # document_scope＝章节号清单
 m.add_event(eid, entity, dimension, action, actor, precondition, consequence, source_ref)
-# entity 用 E-ID；precondition＝"自身状态值"或"自身状态值；E-ID.状态值"（跨主体门禁）
+# entity 用 E-ID；precondition＝"自身状态值"、"自身状态值；E-ID.状态值"（跨主体门禁）或"初始"
 m.set_prohibition_config(config)           # 限调一次
 m.add_action_verbs(verbs); m.add_prohibit_keywords(keywords)
 m.add_role(id, name, readonly=False)       # name＝原文角色名逐字复制
@@ -231,7 +244,13 @@ system 触发：超时/自动触发且改变状态的事件 role="system"，trai
 ## 8 示例
 
 ```python
-# 台账：add_event("e49","E-PJ","评价状态","评价人员评价","评价人员","待评价；E-BMJL.结果已提交","评价中","20.7.1.2")
+# 台账（创建事件；precondition 无内容填字符串"初始"）：
+m.add_event(eid="e01", entity="E-XM", dimension="项目状态", action="设计方案编制",
+            actor="策划人员", precondition="无", consequence="待开始",
+            source_ref="19.1方案设计阶段")
+
+# 台账（跨主体门禁形态）：
+# add_event("e49","E-PJ","评价状态","评价人员评价","评价人员","待评价；E-BMJL.结果已提交","评价中","20.7.1.2")
 m.add_trans(
     tid="t22", entity="E-PJ", dimension="评价状态",
     frm="待评价", to="评价中", action="评价人员评价", role="评价人员",
@@ -316,7 +335,8 @@ m.add_br(
     note={"comment": "signal_type命中'每天上午9点'；category判通知；无状态落点，不入台账/operations"},
 )
 
-# 分支承载＝branch_dimensions 参数：
+# 角色引用一律 name（permission 与 note.role 同源）；note.role 多角色写列表；分支承载＝branch_dimensions 参数：
+m.add_permission(role="项目管理员", operations=["查询项目", "新增项目", "文件整理"])
 m.add_br(
     bid="b23", category="computation",
     desc="评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
