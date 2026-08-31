@@ -29,7 +29,10 @@ OWNERSHIP_BY_RELATION = {"composition": "business_ownership",
 # 铁律14：局部标签形态（t01/t07a/tp01/p04/u01/o01/s01/x01/b01/i01 等），
 # 编号移交前数据文件统一用此形态；编号移交（_assign_ids）按此改写交叉引用。
 # 中文需求文本中"小写字母+数字"几乎必是标签，误伤可忽略。
-LOCAL_LABEL = re.compile(r"\b[a-z]{1,3}\d{2,3}[a-z]?\b")
+# 词界：不可用 \b——CJK 是 Unicode 词字符，「源自e01」中 自→e 无 \b 词界，
+# 标签紧跟中文时匹配不出（v10 全写「源自e01」→ C27 133 条假误报）。用负向
+# 断言（前后非 ASCII 字母/数字），CJK/标点/空格/串首均放行，仍拒 xe01/e012。
+LOCAL_LABEL = re.compile(r"(?<![A-Za-z0-9])[a-z]{1,3}\d{2,3}[a-z]?(?![A-Za-z0-9])")
 
 # 事件标签形态（validate_llm fail-fast；e01/e03b…）。[etxbi] 为可被引用的
 # 局部标签前缀全集（event/transition/xc/br/invalid），事件 id 仅用 e。

@@ -51,23 +51,84 @@ def interrupt_schema(source, items) -> dict:
                       "has_critical_ambiguity": True,
                       "ambiguity_list": list(items)}}
 
-# Step5 enforcement 映射的确定性实现：把 prompt 里 7 行的"severity 默认映射表"
-# 坍缩为 2 条规则——field_constraint 恒 mandatory；desc 含强措辞(必须/禁止/
-# 不得/不可/不能) → mandatory；其余(许可措辞/展示/易用性) → conditional。
-# 注：表内 display/usability 的"升级条件=原文含必须"在此泛化为"含任一强措辞"
-# (严格超集，如"不得显示"也归 mandatory)。enforcement 由框架推导，LLM 不手写。
-_STRONG_WORDS = ("必须", "禁止", "不得", "不可", "不能")
 
-def derive_enforcement(desc: str, explicit: str | None = None) -> str:
-    """enforcement 派生：显式覆盖第一优先；缺省 desc 强词判断。
-    signal_type 的 field_constraint→mandatory 已由数据迁移固化为显式
-    enforcement="mandatory"（S/T 可分性证明 desc 词检无法复现：v6/v7 短信规则
-    与 v8 同文规则分类相反），故此处不再需要 field_constraint 特判。"""
-    if explicit:
-        return explicit
-    if any(w in desc for w in _STRONG_WORDS):
-        return "mandatory"
-    return "conditional"
+# 回喂标签：正式号（BR-008/T-001/XC-001/IT-001）∪ 局部标签（t07/b01/x01/e01…）。
+# 负向断言词界（勿用 \b——CJK 吞界，「源自e01」匹配不出，见 constants.LOCAL_LABEL）。
+_FEEDBACK_LABEL = re.compile(
+    r"(?<![A-Za-z0-9])(?:[A-Z]{2,}-\d{3}[a-z]?|[a-z]{1,3}\d{2,3}[a-z]?)"
+    r"(?![A-Za-z0-9])")
+
+
+def build_feedback(items) -> list:
+    """critical 歧义清单 → glm5pr §5 回喂格式 [{"check","labels","expected"}]。
+
+    确定性，无 LLM：check=校验码（concept）；labels=消息文本抽取的标签
+    （候选承载/被修条目）；expected=消息修法指引全文（C20「修法：…示例：
+    候选承载…」即最小修复指令）。供 CLI --feedback 落盘，直接投给 LLM 触发
+    再生成（回喂触发的补事件/补挂是合法回修通道，glm5pr §5）。
+    """
+    return [{
+        "check": it.get("concept", ""),
+        "labels": sorted(set(_FEEDBACK_LABEL.findall(it.get("description", "")))),
+        "expected": it.get("description", ""),
+    } for it in items]
+
+
+def build_deviation_feedback(deviations) -> list:
+    """分支回填偏差（meta.branch_tt_deviations）→ §5 回喂格式。
+
+    偏差＝LLM 写了匹配器解不开的描述（0/多候选），按 action 词锚重写即解——
+    走与 critical 相同的回喂通道（glm5pr §5），在正常完成路径控制台打印。"""
+    return [{
+        "check": "BRANCH_TT_DEVIATION",
+        "labels": sorted(set(_FEEDBACK_LABEL.findall(d["target_transition"]))),
+        "expected": (
+            f"分支维度[{d['dimension']}] 值[{d['value']}] 的 target_transition 语义描述"
+            f"「{d['target_transition']}」回填无唯一候选（{d['reason']}）。"
+            f"修法：改写描述为动作词锚定形态（如「xxx转换（frm变为to）」），"
+            f"使其唯一命中该维度实体的转换，勿用裸状态名或歧义动作词。"),
+    } for d in deviations]
+
+
+def build_downgrade_feedback(report) -> list:
+    """自动降级事件（C03 锚点/C08 组合降级）→ glm5pr §5 回喂格式。
+
+    降级＝无原文依据的修补（铁律5），须在数据源头修正（契约句）——与 critical/
+    分支偏差同通道，正常完成路径控制台打印。C03 锚点警告消息已含精确修法
+    （端点非法+已建模维度+改指持有该状态的实体），整段作 expected；C08 的
+    fix 是后果描述，补一句标准修法（B 创建转换携带指向父实体 A 的 state_ref，
+    第三方前置视为业务门禁）。labels 用共享正则抽取，命中多少算多少——真正
+    投喂内容是 expected。"""
+    items = []
+    for i in report.warnings:
+        if i.check == "C03" and "降级" in i.message:
+            items.append({
+                "check": "C03",
+                "labels": sorted(set(_FEEDBACK_LABEL.findall(i.message))),
+                "expected": i.message,
+            })
+    for m in report.fixes:
+        if m.startswith("C08"):
+            items.append({
+                "check": "C08",
+                "labels": sorted(set(_FEEDBACK_LABEL.findall(m))),
+                "expected": (
+                    m + "。修法：该关系若确为组合（A 为业务归属容器），令 B 的"
+                    "创建转换携带指向父实体 A 的 state_ref 前置（如 E-XM.项目状态"
+                    "=报名中），第三方前置仅视为业务门禁不影响组合判定；否则降级"
+                    "成立，应改判 (d) reference+configuration_source。"),
+            })
+    return items
+
+# Step5 enforcement 映射的确定性实现：enforcement 由 restrictive 派生——
+# restrictive=True→mandatory，否则 conditional。restrictive 是 LLM 显式给的
+# 拦截性标记（glm5pr :194 强制措辞定义，作者逐条判定），enforcement 是其
+# 确定性子集，LLM 不手写 enforcement。原 desc 强词推导已删（词检不可复现：
+# v6/v7 短信规则与 v8 同文规则分类相反），signal_type 迁移固化的显式
+# enforcement="mandatory" 一并退役（改走 restrictive 通道）。
+def derive_enforcement(restrictive: bool) -> str:
+    """enforcement 派生：restrictive=True→mandatory，否则 conditional。"""
+    return "mandatory" if restrictive else "conditional"
 
 class DomainModel:
     def __init__(self, source, document_scope="", version=SCHEMA_VERSION):
@@ -85,6 +146,7 @@ class DomainModel:
         self.transitions = []
         self.invalid_transitions, self.cross_entity, self.business_rules = [], [], []
         self.branch_dimensions = []
+        self.op_links = []          # op→转换结构化关联（link_op_transition 追加）
         # 项目操作词汇(prohibition_config)由数据模块声明 —— 领域词汇的唯一
         # 真相源在 P1 数据层,而非 P2/S1 引擎硬编码。P2 读取 p1._context.
         # prohibition_config,缺省时用 P2 的通用兜底。
@@ -243,13 +305,12 @@ class DomainModel:
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
                note=None, constrained_entity=None,
-               branch_dimensions=None, enforcement=None, restrictive=False):
+               branch_dimensions=None, restrictive=False):
         validate_llm("br", {"bid": bid, "category": category, "desc": desc,
                             "entities_involved": entities_involved,
                             "source_ref": source_ref,
                             "note": note, "constrained_entity": constrained_entity,
                             "branch_dimensions": branch_dimensions,
-                            "enforcement": enforcement,
                             "restrictive": restrictive})
         # 单实体 BR 的受约束实体是唯一元素：确定性派生（LLM 缺失/多实体时由 C24 兜底）
         if constrained_entity is None and len(entities_involved) == 1:
@@ -273,10 +334,23 @@ class DomainModel:
             "id": bid, "category": category, "desc": esc(desc),
             "entities_involved": list(entities_involved),
             "constrained_entity": constrained_entity,
-            "enforcement": derive_enforcement(desc, enforcement),
+            "enforcement": derive_enforcement(bool(restrictive)),
             "restrictive": bool(restrictive),
             "source_ref": esc(source_ref),
             "note": _esc_note(note), "branch_dimensions": dims})
+        return self
+
+    def link_op_transition(self, entity, op, transitions, note=None):
+        """op→转换结构化关联（glm5pr 3.3 自检 / §5 API）：替代 note.comment
+        自由文本"crud 关联 tXX"约定——引用进参数、注释进 note。3.3 时点追加
+        调用（转换已落盘，无需回改 1.4 的 add_entity）；assemble 时 _assign_ids
+        把 transitions 改写为正式编号，渲染并入 op 记录 linked_transitions。
+        跨实体关联须在 note 点名目标实体（C30 校验）。"""
+        validate_llm("op_link", {"entity": entity, "op": op,
+                                 "transitions": transitions, "note": note})
+        self.op_links.append({"entity": entity, "op": op,
+                              "transitions": list(transitions),
+                              "note": _esc_note(note)})
         return self
 
     # ---------- 扩展点 ----------
@@ -400,11 +474,30 @@ class DomainModel:
 
     def _build_output(self):
         self.meta["pipeline_trace"] = self._build_trace()
+        # op_links → op.linked_transitions 渲染并入（输出侧合流；不反写
+        # self.entities——避免框架改写 LLM 字段被反向校验拒。tid 已由
+        # _assign_ids 统一为正式号）。
+        by_link = {}
+        for link in self.op_links:
+            by_link.setdefault(link["entity"], {}).setdefault(
+                link["op"], []).extend(link["transitions"])
+        entities_out = []
+        for e in self.entities:
+            ops = []
+            for o in e["operations"]:
+                oo = dict(o)
+                lts = by_link.get(e["id"], {}).get(o["name"])
+                if lts:
+                    oo["linked_transitions"] = list(lts)
+                ops.append(oo)
+            ee = dict(e)
+            ee["operations"] = ops
+            entities_out.append(ee)
         return {"_meta": self.meta,
                 "_context": {"prohibition_config": self.prohibition_config,
                             "permissions": self.permissions},
                 "domain_model": {
-                    "entities": self.entities, "roles": self.roles,
+                    "entities": entities_out, "roles": self.roles,
                     "events": self.events,
                     "structural_relations": self.structural_relations,
                     "transition_relations": self.transition_relations},
@@ -444,8 +537,11 @@ class DomainModel:
         - 分支值消歧：同动作多候选时，to 为 s 中出现分支值者胜
           （「参加者测试与结果提交（已还样分支）」→ t19.to=已还样）
         搜索空间＝标注转换集 ∪ 维度实体全部转换（评分方式 分支指向未标
-        branch_dimension 的 t41 即证——仅按标签作用域会漏）。创建转换（frm=None）
-        不作路径匹配对象。唯一候选才回填，0/多候选一律记偏差（绝不猜）。"""
+        branch_dimension 的 t41 即证——仅按标签作用域会漏）。跨实体标注有正当用例：
+        v9「业务类型」(E-XM) 分支目标 t16/t16b 在 E-BMJL（§19.2 平行流程汇合点），
+        故标注集不得收敛为本实体。跨实体候选仅作兜底：本实体有任意正分候选时外实
+        体候选禁入（污染防护——外实体误标同维+动作撞车可唯一但错填）。创建转换
+        （frm=None）不作路径匹配对象。唯一候选才回填，0/多候选一律记偏差（绝不猜）。"""
         formal_re = re.compile(r"[A-Z]+-\d{3}[a-z]?")
         backfilled, deviations = [], []
         for d in self.branch_dimensions:
@@ -459,45 +555,75 @@ class DomainModel:
                     scope.setdefault(t["id"], t)
 
             def match(s):
-                best = {}
+                scored = []             # (id, entity, total)
                 d_eq = f"{esc(dim)}={s}"
                 # 描述引用分支值（取最长值，防 需还样⊂无需还样 子串碰撞）→
                 # 命中 {D}={值} 约束前置的转换显著胜出（「…转换（需还样分支）」
                 # → t30 的 还样要求=需还样 前置；描述无动作/落点信号可依）。
                 v_star = max((v for v in vals if v in s), key=len, default=None)
                 v_eq = f"{esc(dim)}={esc(v_star)}" if v_star else None
+                # 创建转换目标：描述带「初始(变为|→)X」＝创建转换落点唯一锚 →
+                # 仅候选 frm=None 且 to==X 命中（「设计方案编制创建转换（…初始变为
+                # 待开始）」→ t01；frm=None 使 path 信号失效，须此锚；「受理用户
+                # 测量审核报名创建转换（…初始变为报名中）」→ 只有 t40.to=报名中，
+                # 报名创建族 to≠报名中 全让位）。
+                m_init = re.search(r"初始变为([^）\s]+)", s)   # s 已 esc，→ 已归一为 变为
+                init_to = m_init.group(1) if m_init else None
+                self_loop = "自环" in s          # 描述标自环 → 候选 frm==to 命中
                 for t in scope.values():
                     a = esc(t.get("action", ""))
                     to = esc(t.get("to", ""))
                     frm = t.get("from")             # add_trans 参数 frm，落盘键 from
-                    path = bool(frm) and any(
-                        p in s for p in (f"{esc(frm)}变为{to}",
-                                         f"{frm}→{t.get('to')}"))
+                    path = bool(frm) and f"{esc(frm)}变为{to}" in s
+                    # s 已 esc（add_branch_dimension），字面 → 恒不存在；约束前置按
+                    # PRECOND_TYPES 权威枚举只取 constraint（state_ref/event_ref 不承载
+                    # 「{D}={值}」门控文本）。
                     cons = [esc(p.get("text", ""))
                             for p in t.get("preconditions", [])
-                            if p.get("type") in ("constraint", "when")]
+                            if p.get("type") == "constraint"]
+                    total = 0
+                    # 信号叠加而非取最高分：描述常携带多族信号，取最高分会丢弃
+                    # 专属信号（「批量审核退回转换（待审批→审批退回）」的 path 30
+                    # 被跨实体同名维度「审核结果=退回」约束 56 压掉 → 须相加）。
                     if any(d_eq in c for c in cons):
-                        score = 60          # 约束前置精确形态 {D}={S}（最强信号：
+                        total += 60         # 约束前置精确形态 {D}={S}（最强信号：
                                             # 「报名审核结果=退回修改」→ t08b，动作层无信号）
                     elif v_eq and any(v_eq in c for c in cons):
-                        score = 56          # 描述引用分支值 + 转换按 {D}={值} 前置
+                        total += 56         # 描述引用分支值 + 转换按 {D}={值} 前置
                                             # 门控（次强：比子串更具体，比精确 {D}={S} 弱）
                     elif any(s in c for c in cons):
-                        score = 55          # 约束前置子串兜底
-                    elif s == to:
-                        score = 50          # to 状态相等（落点差异经转换分立承载）
-                    elif s == a:
-                        score = 40
-                    elif path:
-                        score = 30
-                    elif s in a or a in s:
-                        score = 20
-                    else:
-                        continue
+                        total += 55         # 约束前置子串兜底
+                    if s == to:
+                        total += 50         # to 状态相等（落点差异经转换分立承载）
+                    if s == a:
+                        total += 40         # action 精确等值
+                    if init_to and frm is None and to == esc(init_to):
+                        total += 45         # 创建转换目标：frm=None 且 to==初始落点
+                    if path:
+                        total += 30         # {frm}变为{to} 路径
+                    if self_loop and frm and frm == t.get("to"):
+                        total += 40         # 描述标自环且候选为自环（自环无状态迁移，
+                                            # 方向词不判，落点差异经转换分立承载）
+                    if (a in s or s in a) and s != a:
+                        total += 20         # action 子串（s==a 已由 40 族承载，不重复）
                     if to in s and to in vals:
-                        score += 2          # 分支值落在该转换的 to → 消歧胜出
-                    best.setdefault(score, []).append(t["id"])
-                return sorted(set(best[max(best)])) if best else []
+                        total += 2          # 分支值落在该转换的 to → 消歧胜出
+                    if dim in re.split(r"[;；]",
+                                       t["note"].get("branch_dimension", "")):
+                        total += 6          # 候选标注同维度 → 跨维度同名候选让位
+                                            # （还样情况「已核查→待核查」t22 胜
+                                            # t24——后者标项目类型非本维）
+                    if total:
+                        scored.append((t["id"], t["entity"], total))
+                # 实体门：本实体有任意正分 → 外实体候选禁入（跨实体汇合仅作兜底，
+                # 6 条合法跨实体回填均发生在本实体零正分时——v9 t16/t16b、v10/v11
+                # t32；外实体靠误标+动作撞车胜出＝污染错填，须让位本实体）。
+                if any(e == d["entity"] for _, e, _ in scored):
+                    scored = [c for c in scored if c[1] == d["entity"]]
+                if not scored:
+                    return []
+                top = max(t for _, _, t in scored)
+                return sorted({i for i, _, t in scored if t == top})
 
             for br in d["branches"]:
                 tt = br.get("target_transition", "")
@@ -631,6 +757,10 @@ class DomainModel:
             for o in e["operations"]:
                 if o["note"].get("comment"):
                     o["note"]["comment"] = rw(o["note"]["comment"])
+        # op_links（结构化 op→转换通道，3.3 追加时点）：局部→正式 tid 改写，
+        # 与 note.comment 文本通道并行，双通道统一编号（渲染并入见 _build_output）。
+        for link in self.op_links:
+            link["transitions"] = [rw(t) for t in link["transitions"]]
         # note 全域改写：结构/因果/BR note 与 invalid reason 补上，避免输出残留
         # 局部标签（如"XC x10"）与正式号不一致（INV-4 依赖此一致性）。
         for rel in self.structural_relations:

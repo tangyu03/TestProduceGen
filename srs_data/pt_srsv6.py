@@ -2153,7 +2153,6 @@ def build() -> DomainModel:
         bid="b01", category="notification",
         desc="报名审核通过后退回修改均需向参加者发送短信：通过则发送'您xxx项目的报名信息审核通过，请知悉'；退回修改则发送'您xxx项目的报名信息审核未通过，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2操作节点增加用户短信通知",
-        enforcement="mandatory",
         note={"role": "r05", "comment": "signal_type 命中'操作节点...通知'；category 判通知；constrained_entity=E-BMJL",
               "branch_dimension": "报名审核结果"},
         constrained_entity="E-BMJL",
@@ -2162,7 +2161,6 @@ def build() -> DomainModel:
         bid="b02", category="notification",
         desc="发样后向参加者发送短信'您xxxx项目的样品已发出，请知悉'",
         entities_involved=["E-BMYP"], source_ref="20.5.3.2操作节点增加用户短信通知",
-        enforcement="mandatory",
         note={"role": "r07", "comment": "category 判通知；constrained_entity=E-BMYP"},
         constrained_entity="E-BMYP",
     )
@@ -2170,7 +2168,6 @@ def build() -> DomainModel:
         bid="b03", category="notification",
         desc="测试结果审核通过/退回均需向参加者发送短信：通过则发送'您xxxx项目的测试报告审核通过，请知悉'；退回则发送'您xxxx项目测试报告审核未通过，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2操作节点增加用户短信通知",
-        enforcement="mandatory",
         note={"role": "r05", "comment": "category 判通知；constrained_entity=E-BMJL"},
         constrained_entity="E-BMJL",
     )
@@ -2178,7 +2175,6 @@ def build() -> DomainModel:
         bid="b04", category="notification",
         desc="结果通知单发布后向参加者发送短信'您xxx项目的结果通知单已发布，请知悉'",
         entities_involved=["E-BMJL"], source_ref="20.5.3.2操作节点增加用户短信通知",
-        enforcement="mandatory",
         note={"role": "r05", "comment": "category 判通知；constrained_entity=E-BMJL"},
         constrained_entity="E-BMJL",
     )
@@ -2193,7 +2189,6 @@ def build() -> DomainModel:
         bid="b06", category="notification",
         desc="用户通过表单或审核一个已存在的任务时生成新的审核任务，系统发送短信通知相关负责人；短信内容'您有一个新的xxx审核任务，请及时处理'，xxx为审核类型名称",
         entities_involved=["E-TASK"], source_ref="20.9.1.3增加任务提醒",
-        enforcement="mandatory",
         note={"comment": "signal_type 命中'发送短信通知'；category 判通知；系统行为 BR"},
     )
     m.add_br(
@@ -2208,7 +2203,7 @@ def build() -> DomainModel:
         bid="b08", category="validation",
         desc="消息发送时接收人1和接收人2不能同时为空",
         entities_involved=["E-XM"], source_ref="20.5.1.4优化消息发送功能",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r05", "comment": "signal_type 命中'不可同时为空'；category 判 validation；constrained_entity=E-XM"},
         constrained_entity="E-XM",
     )
@@ -2224,7 +2219,7 @@ def build() -> DomainModel:
         bid="b10", category="validation",
         desc="删除测试项前会做前置判断，含有子项的数据不可以删除",
         entities_involved=["E-CS", "E-ZLY"], source_ref="20.4.2.10删除测试项；20.4.3.4删除测试项",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r12", "comment": "signal_type 命中'不可以删除'；category 判 validation；多实体 BR 对称规则，constrained_entity 任一代表实体"},
         constrained_entity="E-CS",
     )
@@ -2248,7 +2243,7 @@ def build() -> DomainModel:
         bid="b13", category="validation",
         desc="实验室审核退回修改时必须填写审核意见",
         entities_involved=["E-LAB"], source_ref="20.4.1.2实验室审核",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r12", "comment": "signal_type 命中'必须填写'；category 判 validation；constrained_entity=E-LAB",
               "branch_dimension": "实验室审核结果"},
         constrained_entity="E-LAB",
@@ -2257,7 +2252,7 @@ def build() -> DomainModel:
         bid="b14", category="computation",
         desc="退款金额不可大于当前缴费金额；退款金额做累加处理；实际付款=付款金额-退款金额；退款金额使用红色字体且大于0时显示",
         entities_involved=["E-FY"], source_ref="20.10.2.3缴费单退款",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r11", "comment": "signal_type 命中'不可大于'；category 判 computation（含累计计算）；constrained_entity=E-FY"},
         constrained_entity="E-FY",
     )
@@ -2265,7 +2260,6 @@ def build() -> DomainModel:
         bid="b15", category="validation",
         desc="项目新增表单中技术主管、实验室负责人、授权签字人字段，如果其备选人有且仅有一个时默认填充为备选值",
         entities_involved=["E-XM"], source_ref="20.5.1.6默认填充技术主管实验室负责人授权签字人；20.6.1.4",
-        enforcement="mandatory",
         note={"role": "r05", "comment": "signal_type 命中'有且仅有一个时默认填充'；category 判 validation；constrained_entity=E-XM"},
         constrained_entity="E-XM",
     )
@@ -2273,7 +2267,7 @@ def build() -> DomainModel:
         bid="b16", category="authorization",
         desc="新建项目时第一个被选择的评价人员默认作为评价组长；评价人员只能对自己的评价结果进行修改，不能查看和修改其他评价人员的评价结果",
         entities_involved=["E-PJ"], source_ref="20.7项目列表；20.7.1.2协同评价",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r08", "comment": "signal_type 命中'只能...不能'；category 判 authorization；constrained_entity=E-PJ"},
         constrained_entity="E-PJ",
     )
@@ -2297,7 +2291,6 @@ def build() -> DomainModel:
         bid="b19", category="validation",
         desc="已报名项目支持多次付款，不对付款金额进行校验限制",
         entities_involved=["E-FY"], source_ref="20.5.2.1已报名项目增加多次付款功能；20.6.2.1",
-        enforcement="mandatory",
         note={"role": "r13", "comment": "signal_type 命中'不对...进行校验限制'；category 判 validation；constrained_entity=E-FY"},
         constrained_entity="E-FY",
     )
@@ -2305,7 +2298,6 @@ def build() -> DomainModel:
         bid="b20", category="validation",
         desc="发票上传支持多次分批上传；可移除文件（表单提交后生效）",
         entities_involved=["E-FP"], source_ref="20.10.2.2修改发票上传功能使其支持多次分批上传",
-        enforcement="mandatory",
         note={"role": "r11", "comment": "category 判 validation；constrained_entity=E-FP"},
         constrained_entity="E-FP",
     )
@@ -2328,7 +2320,6 @@ def build() -> DomainModel:
         bid="b23", category="computation",
         desc="评价结果统计规则由低值与高值组成，判断规则为大于等于低值、小于高值；用于动态统计报名实验室得分的区间分布",
         entities_involved=["E-PJ"], source_ref="20.7.1.3评价确认-调整统计规则",
-        enforcement="mandatory",
         note={"role": "r08", "comment": "signal_type 命中'大于等于...小于'；category 判 computation；constrained_entity=E-PJ",
               "branch_dimension": "评分方式"},
         constrained_entity="E-PJ",
@@ -2337,7 +2328,6 @@ def build() -> DomainModel:
         bid="b24", category="validation",
         desc="测量审核结果通知单审批流程合并为一个流程，流程处理人审批顺序为提交申请时签字人的选择顺序",
         entities_involved=["E-TASK"], source_ref="20.9.1.1测量审核结果通知单审核流程优化",
-        enforcement="mandatory",
         note={"role": "r14", "comment": "category 判 validation；constrained_entity=E-TASK",
               "branch_dimension": "项目类型"},
         constrained_entity="E-TASK",
@@ -2346,7 +2336,7 @@ def build() -> DomainModel:
         bid="b25", category="authorization",
         desc="系统预设若干自定义流程（4个以内），用于用户选择并提交文档审核的自定义流程，并支持相应的签章",
         entities_involved=["E-TASK"], source_ref="20.9.1.6增加自定义流程",
-        enforcement="mandatory",
+        restrictive=True,
         note={"role": "r14", "comment": "signal_type 命中'4个以内'；category 判 authorization；constrained_entity=E-TASK"},
         constrained_entity="E-TASK",
     )
@@ -2354,7 +2344,6 @@ def build() -> DomainModel:
         bid="b26", category="validation",
         desc="审核流程列表查询区域支持按任务类型与创建时间筛选，并支持结果导出",
         entities_involved=["E-TASK"], source_ref="20.9.1.5审批流程列表导出",
-        enforcement="mandatory",
         note={"role": "r14", "comment": "category 判 validation；constrained_entity=E-TASK"},
         constrained_entity="E-TASK",
     )
@@ -2377,7 +2366,6 @@ def build() -> DomainModel:
         bid="b29", category="validation",
         desc="对往年项目数据进行分析整理并导入到系统中为数据分析提供关键数据",
         entities_involved=["E-XM"], source_ref="20.11.1.1历史数据列表",
-        enforcement="mandatory",
         note={"role": "r12", "comment": "category 判 validation；constrained_entity=E-XM"},
         constrained_entity="E-XM",
     )
@@ -2385,7 +2373,6 @@ def build() -> DomainModel:
         bid="b30", category="validation",
         desc="评价结果导出按钮位于项目列表操作列，评价人员点击后下载评价结果",
         entities_involved=["E-PJ"], source_ref="20.7.1.4评价结果导出",
-        enforcement="mandatory",
         note={"role": "r08", "comment": "category 判 validation；constrained_entity=E-PJ"},
         constrained_entity="E-PJ",
     )

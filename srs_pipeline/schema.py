@@ -219,14 +219,25 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("branch_dimensions", "branch_dimensions", LLM,
               derived_from="add_br 显式参数第一优先；note.branch_dimension 遗留形态归一化（';'/'；'分隔、去重保序、esc）",
               desc="该 BR 治理的分支维度名列表（结构关系，非自由文本）。顶层字段，C20 覆盖/C28 钩子校验读此。"),
-        Field("enforcement", "enforcement", LLM, enum=BR_ENFORCEMENTS, required=False,
-              derived_from="显式参数第一优先；缺省 derive_enforcement(desc) 强词推导",
-              desc="硬/软执行类别。显式传值第一优先（原 signal_type=field_constraint→mandatory 已迁移固化为显式 enforcement=\"mandatory\"）；"
-                   "缺省按 desc 强词（必须/禁止/不得/不可/不能）推导，否则 conditional。S/T 可分性证明 desc 词检无法复现 field_constraint 语义，"
-                   "故显式传值是唯一可靠途径。"),
+        Field("enforcement", None, FRAMEWORK, enum=BR_ENFORCEMENTS, required=True,
+              derived_from="restrictive=True→mandatory，否则 conditional（add_br 派生）",
+              desc="硬/软执行类别。由 restrictive 确定性派生（True→mandatory，False→conditional），LLM 不写。"
+                   "原 signal_type=field_constraint→mandatory 显式迁移与 desc 强词推导已删（词检不可复现）。"),
         Field("restrictive", "restrictive", LLM, required=False,
               desc="拦截性规则布尔标记（原 signal_type=restrictive 信号的替换，S1 负向测试/Type7 闸门经 P2 消费）。"
-                   "默认 False，仅拦截性规则显式 True；desc 词检无法复现（17 条含禁止词而非拦截 + 33 条拦截无禁止词）。"),
+                   "默认 False，仅拦截性规则显式 True；desc 词检无法复现（17 条含禁止词而非拦截 + 33 条拦截无禁止词）。"
+                   "restrictive 是 enforcement 的派生源（True→mandatory，False→conditional）。"),
+    ],
+    "op_link": [
+        Field("entity", "entity", LLM, required=True,
+              desc="已登记实体 E-XXX id（C30 校验存在性）"),
+        Field("op", "op", LLM, required=True,
+              desc="该实体 operations 中的操作名（按 name 匹配，C30 校验并抓 op 名漂移）"),
+        Field("transitions", "transitions", LLM_MUTATED, required=True,
+              mutation_conditions="_assign_ids",
+              desc="op→转换 tid 列表（非空字符串列表）；_assign_ids 局部→正式改写，渲染并入 op.linked_transitions"),
+        Field("note", "note", LLM,
+              desc="跨实体关联须点名目标实体（C30 warn）；引用进参数、注释进 note"),
     ],
 }
 
@@ -301,6 +312,19 @@ def validate_llm(otype: str, params: dict) -> None:
         if not roles or any(not isinstance(x, str) or not x.strip() for x in roles):
             raise ValueError(f"[schema:trans] role 非法: {role!r}，"
                              f"须为角色名或角色名列表（协同转换，glm5pr §1.3）")
+    # op_link 形状：entity/op 非空字符串；transitions 非空字符串列表
+    # （tid 局部/正式号皆可，_assign_ids 改写）。
+    if otype == "op_link":
+        for k in ("entity", "op"):
+            v = params.get(k)
+            if v is not None and (not isinstance(v, str) or not v.strip()):
+                raise ValueError(f"[schema:op_link] {k} 非法: {v!r}，须为非空字符串")
+        ts = params.get("transitions")
+        if ts is not None:
+            if not isinstance(ts, (list, tuple)) or not ts \
+                    or any(not isinstance(x, str) or not x.strip() for x in ts):
+                raise ValueError(f"[schema:op_link] transitions 非法: {ts!r}，"
+                                 f"须为非空 tid 字符串列表")
     for dsl, f in table.items():
         val = params.get(dsl)
         required = f.required_when(params) if f.required_when else f.required

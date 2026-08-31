@@ -12,8 +12,8 @@ OBJECT_MUTATION 逐一比对。命中不匹配 = 注册表标注与框架实际�
   条件性改写（C0X）的 mutation_conditions 必须含 trigger；
   _assign_ids/_backfill_branch_coverage 属确定性加工，豁免条件检查。
 - build 期间加工（enforcement 在 add_br 内派生，插桩覆盖不到）做枚举存在性
-  验证（validate_llm 已保证取值合法；enforcement 现为作者可选参数 + 缺省派生，
-  无闭式复算，值级校验已随 signal_type 一并移除）。
+  验证（validate_llm 已保证取值合法；enforcement 现为框架从 restrictive 派生
+  （True→mandatory，False→conditional），作者不传 enforcement，无闭式复算）。
 
 用法：python -m scripts.verify_schema_reverse
 
@@ -138,9 +138,9 @@ def main(build=struct_srs.build) -> int:
     errs: list[str] = []
 
     # 1. build 期间加工（enforcement）枚举存在性验证。
-    #    派生链 = 显式参数第一优先，缺省 derive_enforcement(desc)；显式覆盖的
-    #    原始输入未落盘（无闭式复算），值级校验随 signal_type 移除。枚举合法性
-    #    由 add_br 的 validate_llm 保证，这里只做输出侧存在性兜底。
+    #    派生链 = 框架从 restrictive 派生（True→mandatory，False→conditional），
+    #    add_br 内完成，作者不传 enforcement（validate_llm 未知参数拒收）。枚举
+    #    合法性由 add_br 的 validate_llm 保证，这里只做输出侧存在性兜底。
     bad_enf = [b["id"] for b in m.business_rules
                if b.get("enforcement") not in BR_ENFORCEMENTS]
     if bad_enf:

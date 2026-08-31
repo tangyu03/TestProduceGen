@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "version": "19.2",
+    "generated_at": "2026-08-31T11:03:36+08:00",
+    "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704",
+    "has_critical_ambiguity": true,
+    "ambiguity_list": [
+      {
+        "amb_id": "AMB-VAL-001",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[项目类型]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-008[词], BR-010[词], BR-019[词], BR-004[实体], BR-009[实体], BR-011[实体]; m.add_br(..., note={\"branch_dimension\": \"项目类型\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-002",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[报名审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-014[值], BR-002[词], BR-003[词], BR-018[词], BR-013[实体], BR-025[实体]; m.add_br(..., note={\"branch_dimension\": \"报名审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-003",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[测试结果审核]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-002[词], BR-003[词], BR-014[词], BR-018[词], BR-013[实体], BR-025[实体]; m.add_br(..., note={\"branch_dimension\": \"测试结果审核\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-004",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[还样情况]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：无（全库 BR 无该维度名/分支值/实体钩子，该维度可能本不应为分支维度）",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-005",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-014[值], BR-003[名], BR-019[名], BR-002[词], BR-018[词]; m.add_br(..., note={\"branch_dimension\": \"审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-006",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[通知审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-002[词], BR-003[词], BR-014[词], BR-018[词], BR-013[实体], BR-025[实体]; m.add_br(..., note={\"branch_dimension\": \"通知审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-007",
+        "severity": "critical",
+        "concept": "C20",
+        "description": "分支维度[审核结果]: 无任何 BR 的 note.branch_dimension 承载。修法：建/改一条 BR 并在 note 挂 branch_dimension。示例：候选承载: BR-003[名], BR-019[名], BR-014[词], BR-018[实体], BR-020[实体], BR-021[实体]; m.add_br(..., note={\"branch_dimension\": \"审核结果\"})",
+        "assumption": "",
+        "suggestion": ""
+      },
+      {
+        "amb_id": "AMB-VAL-008",
+        "severity": "critical",
+        "concept": "C24",
+        "description": "BR[BR-027]: 缺 constrained_entity。修法：增删改门禁→填操作对象实体；对称规则→取任一 involved 实体并在 note.comment 注明'代表实体'。示例：entities_involved=[]",
+        "assumption": "",
+        "suggestion": ""
+      }
+    ]
+  }
+}

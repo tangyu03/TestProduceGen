@@ -1972,7 +1972,7 @@ def build() -> DomainModel:
         desc="项目名称为必填项；长度20",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #1",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b02: 联系人电话手机号验证规则
@@ -1982,7 +1982,7 @@ def build() -> DomainModel:
         desc="联系人电话必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #19",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b03: 申请经费范围
@@ -1992,7 +1992,7 @@ def build() -> DomainModel:
         desc="申请经费（万元）为必填项；整数；长度4；1-9999",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #16",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b04: 建议书附件约束
@@ -2002,7 +2002,7 @@ def build() -> DomainModel:
         desc="建议书附件可上传格式：doc、docx、ppt、pdf、png、jpg；机构管理员可上传；大小不超过10MB；多次上传时覆盖上一次附件；必填项",
         entities_involved=["E-XM"],
         source_ref="4.6-1 #25",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b05: 项目删除限制
@@ -2063,7 +2063,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-XM"],
         constrained_entity="E-XM",
         source_ref="4.8.1（1）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b11: 评审组人数与组长
@@ -2074,7 +2074,7 @@ def build() -> DomainModel:
         entities_involved=["E-PSJH", "E-ZJ"],
         constrained_entity="E-PSJH",
         source_ref="4.8.1（6）a）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b12: 评审专家技术领域覆盖
@@ -2128,7 +2128,7 @@ def build() -> DomainModel:
         desc="下发时限：从已建立到下发的时间（单位：天），1-2，默认为1，超过时限计划自动转为待启动状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）a）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b17: 启动时限配置
@@ -2138,7 +2138,7 @@ def build() -> DomainModel:
         desc="启动时限：从下发到启动的时间（单位：天），1-5，默认为2，超过时限计划自动转为待评审状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）b）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b18: 评审时限配置
@@ -2148,7 +2148,7 @@ def build() -> DomainModel:
         desc="评审时限：从待评审到已完成的时间（单位：天），1-5，默认为2，超过时限计划自动转为已完成状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）c）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b19: 归档时限配置
@@ -2158,7 +2158,7 @@ def build() -> DomainModel:
         desc="归档时限：从已完成到结束的时限（单位：天），1-3，默认为2，超过时限计划自动转为超时结束状态",
         entities_involved=["E-PSJH"],
         source_ref="4.8.1（5）d）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b20: 评审计划下发后不能编辑或取消
@@ -2198,7 +2198,7 @@ def build() -> DomainModel:
         desc="创新性0.00<=数值<=15.00；应用前景0.00<=数值<=20.00；研究目标及技术指标0.00<=数值<=10.00；技术指标达标情况0.00<=数值<=10.00；成果及考核方式0.00<=数值<=20.00；成果及其完成情况0.00<=数值<=20.00；研究基础和保障条件0.00<=数值<=15.00；研究方案及技术途径0.00<=数值<=20.00；研制过程0.00<=数值<=15.00；关键技术0.00<=数值<=20.00；四舍五入后保留两位小数",
         entities_involved=["E-DF"],
         source_ref="4.9-1 #2-11",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b24: 打分总分限值
@@ -2208,7 +2208,7 @@ def build() -> DomainModel:
         desc="开题：创新性+研究目标及技术指标+研究基础和保障条件+应用前景+成果及考核方式+研究方案及技术途径<=100.00；验收：创新性+技术指标达标情况+成果及其完成情况+应用前景+研制过程+关键技术<=100.00；四舍五入后保留两位小数",
         entities_involved=["E-DF"],
         source_ref="4.9-1 #12",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b25: 打分提交限制
@@ -2228,7 +2228,7 @@ def build() -> DomainModel:
         desc="分数限值0.0<分数限值<=100.0；四舍五入后结果保留一位小数",
         entities_involved=["E-FSXZ"],
         source_ref="4.9-3 #1",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b27: 分数限值生效规则
@@ -2249,7 +2249,6 @@ def build() -> DomainModel:
         desc="优先根据得分匹配可能的最好项目级别，然后判别剩余约束是否全部满足，若全部满足则为相应最好项目级别，否则项目级别降为下一级（只降一级）；优秀：90.00<=得分且13.00<=创新性且17.00<=应用前景；良好：70.00<=得分且11.00<=创新性且14.00<=应用前景；合格：60.00<=得分且9.00<=创新性且12.00<=应用前景；不合格：30.00<=得分；差：30.00>得分",
         entities_involved=["E-XM"],
         source_ref="4.9-5",
-        enforcement="mandatory",
     )
 
     # b29: 项目得分计算规则
@@ -2260,7 +2259,6 @@ def build() -> DomainModel:
         entities_involved=["E-DF", "E-XM"],
         constrained_entity="E-DF",
         source_ref="4.9.6",
-        enforcement="mandatory",
     )
 
     # b30: 合格机构降级规则
@@ -2315,7 +2313,6 @@ def build() -> DomainModel:
         desc="实现专家新增的功能，手机号作为账号，密码默认为手机号后六位",
         entities_involved=["E-ZJ"],
         source_ref="4.10（1）",
-        enforcement="mandatory",
     )
 
     # b35: 专家编辑限制
@@ -2357,7 +2354,7 @@ def build() -> DomainModel:
         desc="专家邮箱必须包含@和.；不能包含中文、特殊符号",
         entities_involved=["E-ZJ"],
         source_ref="4.10-1 #8",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b39: 专家手机号唯一性
@@ -2367,7 +2364,7 @@ def build() -> DomainModel:
         desc="专家手机号必填项；数字组成；手机号验证规则：第一位只能为数字1，第二位数字为3、4、5、6、7、8、9，共11位数字；唯一",
         entities_involved=["E-ZJ"],
         source_ref="4.10-1 #3",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b40: 用户账号规则
@@ -2377,7 +2374,7 @@ def build() -> DomainModel:
         desc="用户账号必填项；长度11；可以由汉字、字母、数字、下划线组成；不可重复",
         entities_involved=["E-YH"],
         source_ref="4.11-1 #1",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b41: 用户密码规则
@@ -2387,7 +2384,7 @@ def build() -> DomainModel:
         desc="登录密码必填项；长度8-18；只能由数字、字母和特殊符号组成；长度大于等于8个字符小于等于18个字符",
         entities_involved=["E-YH"],
         source_ref="4.11-1 #4；4.13（5）",
-        enforcement="mandatory",
+        restrictive=True,
     )
 
     # b42: 用户编辑限制

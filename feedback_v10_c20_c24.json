@@ -1,0 +1,42 @@
+[
+  {
+    "check": "C20",
+    "labels": ["BR-008", "BR-010"],
+    "expected": "分支维度[项目类型](E-XM, 值域: 能力验证/测量审核) 无 BR 承载。最小修复：给一条 desc 已含分支值的 BR 挂 branch_dimensions=[\"项目类型\"]——BR-008 desc 含「能力验证」（能力验证消息发送…接收人1和接收人2不能同时为空）、BR-010 desc 含「测量审核」（测量审核消息发送页面接收人1必填），二选一承载并在 desc 体现两值差异；若单条 BR 不足以覆盖，可对 BR-008、BR-010 各挂一次。勿新建只挂标签无业务语义的 BR。"
+  },
+  {
+    "check": "C20",
+    "labels": ["BR-014"],
+    "expected": "分支维度[报名审核结果](E-BMJL, 值域: 通过/退回修改) 无 BR 承载。BR-014 desc 已含「报名审核通过/退回修改」（值域逐字命中），直接挂 branch_dimensions=[\"报名审核结果\"]。"
+  },
+  {
+    "check": "C20",
+    "labels": ["BR-014"],
+    "expected": "分支维度[测试结果审核](E-BMJL, 值域: 通过/退回) 无 BR 承载。BR-014 desc 含「测试报告审核通过/未通过」钩子，挂 branch_dimensions=[\"测试结果审核\"]；如觉语义不贴合（通知语义），改挂/新建一条 desc 含「测试结果审核 通过/退回」的 BR。"
+  },
+  {
+    "check": "C20",
+    "labels": [],
+    "expected": "分支维度[还样情况](E-YP, 值域: 已还样/无需还样) 全库无任何 BR 钩子（维度名/分支值/实体均无命中）。该维度是 19.1 表格斜杠 or 分支（已还样→t22 待核查、无需还样→t23 自环），属真实流转分支：应新建一条 BR（desc 含「已还样/无需还样」字面量，如样品归还判定规则）挂 branch_dimensions=[\"还样情况\"]；若判定其本不应为分支维度，则撤销该 add_branch_dimension 声明（降为 E-YP 实体属性），并同步处理 t22/t23 的 note.branch_dimension 标注。二选一，给出裁决依据。"
+  },
+  {
+    "check": "C20",
+    "labels": ["BR-003"],
+    "expected": "分支维度[审核结果](E-LAB, 值域: 通过/退回修改) 无 BR 承载。BR-003 desc 含「审核结果为通过」（值域命中，实验室审核提交快照语义），挂 branch_dimensions=[\"审核结果\"]。"
+  },
+  {
+    "check": "C20",
+    "labels": ["BR-014"],
+    "expected": "分支维度[通知审核结果](E-BMJL, 值域: 通过/退回) 无 BR 承载。候选 BR-002/BR-003/BR-014 均为弱钩子（无逐字值命中）。最小修复：挂 branch_dimensions=[\"通知审核结果\"] 到 desc 与预通知审核最贴合的 BR，或新建一条 desc 含「预通知审核 通过/退回」的 BR 承载；给出选择依据。"
+  },
+  {
+    "check": "C20",
+    "labels": ["BR-019"],
+    "expected": "分支维度[审核结果](E-TASK, 值域: 同意/退回, 批量审核分支) 无 BR 承载。注意与 E-LAB 同名维度[审核结果]（通过/退回修改）区分。候选 BR-018/BR-019/BR-020 均属 E-TASK；最小修复：挂 branch_dimensions=[\"审核结果\"] 到 desc 与批量审核流程最贴合的 BR（BR-019 审批流程语义最近），或新建 desc 含「批量审核 同意/退回」的 BR；给出选择依据。"
+  },
+  {
+    "check": "C24",
+    "labels": ["BR-027"],
+    "expected": "BR-027 缺 constrained_entity（且 entities_involved=[]）。BR-027 desc「对关键操作进行留痕处理…生成不可篡改的审计日志」是全局审计语义、无单一操作对象：对称/全局规则 → 取任一 involved 实体填入 constrained_entity，并在 note.comment 注明「代表实体」；同时补 entities_involved（作用目标业务实体列表）。"
+  }
+]

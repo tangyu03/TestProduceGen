@@ -136,9 +136,10 @@ class DomainModel:
 
     def add_br(self, bid, category, desc, entities_involved, source_ref,
                note=None, constrained_entity=None,
-               branch_dimensions=None, enforcement=None, restrictive=False):
+               branch_dimensions=None, restrictive=False):
         # branch_dimensions＝显式参数第一优先；note.branch_dimension＝遗留形态
         # （';'/'；'分隔字符串或列表），归一化去重保序、剥离 note 键。
+        # enforcement 与框架一致：由 restrictive 派生（True→mandatory）。
         import re as _re
         dims = list(branch_dimensions or [])
         if isinstance(note, dict) and note.get("branch_dimension"):
@@ -155,9 +156,7 @@ class DomainModel:
             "bid": bid, "category": category, "desc": desc,
             "entities_involved": list(entities_involved),
             "source_ref": source_ref,
-            "enforcement": enforcement or ("mandatory" if any(
-                w in desc for w in ("必须", "禁止", "不得", "不可", "不能"))
-                else "conditional"),
+            "enforcement": "mandatory" if restrictive else "conditional",
             "restrictive": bool(restrictive),
             "note": note, "branch_dimensions": dims,
         })

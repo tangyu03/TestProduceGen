@@ -101,7 +101,8 @@ class Validator:
                   self.c23_inv_xc_desc_prefix, self.c24_inv_br_constrained_entity,
                   self.c25_inv_mirror_target_transition,
                   self.c26_inv_event_entity, self.c27_inv_event_coverage,
-                  self.c28_inv_branch_br_hook, self.c29_inv_op_ref_entity):
+                  self.c28_inv_branch_br_hook, self.c29_inv_op_ref_entity,
+                  self.c30_inv_op_link, self.c31_inv_branch_tt_deviation):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -235,8 +236,30 @@ class Validator:
                         c = t["note"].get("comment", "")
                         t["note"]["comment"] = (c + "；" if c else "") + \
                             "state_ref 无法解析，降级 constraint（4.2.1）"
-                        r.fix(f"C03: {t['id']} 前置条件[{p['text'][:20]}…] "
-                              f"state_ref 解析失败，已降级 constraint")
+                        # 锚点笔误显式告警（warning 不断中断）：非法端点说明+修法。
+                        # 契约句（glm5pr 1.5 (b)）落地后拆行创建转换的 state_ref
+                        # 必须指向父实体实际持有该状态的维度；此处降级即断伴随证据。
+                        if isinstance(ref, dict):
+                            ent, dim, st = ref.get("entity"), \
+                                ref.get("dimension"), ref.get("state")
+                            if d is None:
+                                owned = sorted({dd for (ee, dd) in self.dims
+                                                if ee == ent})
+                                why = f"端点非法: {ent}.{dim}（{ent} 已建模维度={owned}）"
+                            else:
+                                why = (f"状态非法: {ent}.{dim} 无状态 {st!r}"
+                                       f"（合法={d['states']}）")
+                            r.warn("C03",
+                                   f"{t['id']} 前置[{p['text'][:24]}…] {why}；"
+                                   f"已降级 constraint 自动修复。修法：ref 指向实际"
+                                   f"持有该状态的实体维度（如项目状态在 E-XM 而非 "
+                                   f"E-PJ）", t["id"])
+                        else:
+                            r.warn("C03",
+                                   f"{t['id']} 前置[{p['text'][:24]}…] state_ref 的 "
+                                   f"ref 缺失/非对象，已降级 constraint 自动修复。"
+                                   f"修法：补 ref 指向实际持有该状态的实体维度",
+                                   t["id"])
                 elif p.get("ref") is not None:
                     p["ref"] = None
                     r.fix(f"C03: {t['id']} {ptype} 的 ref 已置空")
@@ -384,16 +407,32 @@ class Validator:
             if rel["relation_type"] == "composition" \
                     and rel["ownership_dimension"] == "business_ownership":
                 a, b = rel["from"], rel["to"]
-                create = next((t for t in self.m.transitions
-                               if t["entity"] == b and t["from"] is None), None)
-                if not create:
+                creates = [t for t in self.m.transitions
+                           if t["entity"] == b and t["from"] is None]
+                if not creates:
                     continue
-                ext = [p for p in create["preconditions"]
+                # A-ref 存在性门：任一创建转换门控于 A → 组合证据成立（伴随/归属），
+                # 第三方前置一律视为业务门禁（如 E-LAB.启用），不降级。与 C17 的
+                # driven_by_a 同判据但各自独立实现——C08 只需裸存在性，不继承 C17
+                # 的 (b) 同源探针语义（探针专判伴随创建，混入会把归属判成 (b)）。
+                gated_by_a = any(
+                    p["type"] == "state_ref" and p.get("ref")
+                    and p["ref"]["entity"] == a
+                    for t in creates for p in t["preconditions"])
+                if gated_by_a:
+                    continue
+                ext = [p for t in creates for p in t["preconditions"]
                        if p["type"] == "state_ref" and p.get("ref")
                        and p["ref"]["entity"] not in (a, b)]
                 if ext:
                     rel["relation_type"] = "reference"
                     rel["ownership_dimension"] = "configuration_source"
+                    note = rel.get("note")
+                    if not isinstance(note, dict):
+                        note, rel["note"] = {}, note or {}
+                    c = note.get("comment", "")
+                    note["comment"] = (c + "；" if c else "") + \
+                        "C08 降级 reference（B 创建未门控于 A，依赖第三方后期状态）"
                     self.report.fix(f"C08: {a} 至 {b} 降级 reference（B 创建依赖 "
                                     f"{ext[0]['ref']['entity']} 的后期状态）")
 
@@ -626,6 +665,8 @@ class Validator:
                 for t in creates_b for p in t["preconditions"])
             if driven_by_a:
                 continue                                  # 创建依赖 A → (b) 豁免
+            if self._c17_bonded_by_shared_event(a, creates_b):
+                continue            # 探针：B 创建与 A 同源事件（拆行）→ (b) 豁免
             be = self.entities.get(b)
             b_type = be["type"] if be else None
             if b in comp_frms or self._a_is_container(a, b):
@@ -637,6 +678,22 @@ class Validator:
                    f"comp_frms={sorted(comp_frms)}），疑似应判 (d) reference"
                    f"+configuration_source（Step 2）",
                    rel.get("desc", f"{a}→{b}"))
+
+    def _c17_bonded_by_shared_event(self, a, creates_b):
+        """收紧探针（契约句的框架侧兜底）：B 的创建转换（frm=None）与父实体 A 的
+        某转换共享 同 action＋同 source_ref 段（同源事件＝拆行），判伴随创建 (b)。
+
+        门＝driven_by_a 失败即启用（强信号缺位），不限空前置——wrong-anchor 的
+        state_ref 经 C03 降级为 constraint 后前置非空，空前置门会漏，故此门按
+        driven_by_a 失败判定。warn 级静默：只消 C17 误报，不吞 error。
+        自灭代码：契约句落地后拆行创建转换携带指向 A 的 state_ref，driven_by_a
+        先命中，本探针自然无对象（退场机制＝数据符合契约）。"""
+        a_pairs = {(t["action"], t.get("source_ref"))
+                   for t in self.m.transitions if t["entity"] == a}
+        if not a_pairs:
+            return False
+        return any((t["action"], t.get("source_ref")) in a_pairs
+                   for t in creates_b)
 
     def _a_is_container(self, a, b):
         """A 是否为 B 的业务归属容器（C17 (c) 豁免代理②）：A 的删除约束涉及 B。
@@ -1054,3 +1111,54 @@ class Validator:
                             f"{e['id']}.{o['name']} 引用转换 {ref!r}",
                             f"该转换属于 {t['entity']} 非本实体，且 note 未点名该实体",
                             "改引用本实体的匹配转换；确系跨实体则 note 写明目标实体"))
+
+    def c30_inv_op_link(self):
+        """INV：结构化 op→转换关联（link_op_transition）校验，C29 的结构化版。
+        C29 保持扫 legacy note 文本，本通道校验 op_links 列表（双通道并行）：
+        entity 已登记（error）；op 存在于该 entity.operations（按 name 匹配，
+        error，顺带抓 op 名漂移）；每个 tid 已声明（error，C21 的结构化版）；
+        tid 属他实体且 note 未点名该实体（warn，C29 的结构化版）。"""
+        entity_ids = set(self.entities)
+        for link in self.m.op_links:
+            eid, op = link["entity"], link["op"]
+            if eid not in entity_ids:
+                self.report.error("C30", self._hint(
+                    f"op_link.entity={eid!r}", "该实体未登记",
+                    "改为已登记实体 E-XXX id"))
+                continue
+            ops = {o["name"] for o in self.entities[eid]["operations"]}
+            if op not in ops:
+                self.report.error("C30", self._hint(
+                    f"{eid}.{op!r} 关联 op 不存在",
+                    f"{eid} 的 operations 无名为 {op!r} 的操作（op 名漂移？）",
+                    "改为 add_entity operations 中实际存在的操作名"))
+            text = self._flatten(link.get("note")) or ""
+            for ref in link["transitions"]:
+                t = self.trans.get(ref)
+                if t is None:
+                    self.report.error("C30", self._hint(
+                        f"{eid}.{op} 关联转换 {ref!r}",
+                        "该 tid 未声明（不存在，或 _assign_ids 未改写为正式号）",
+                        "改引已声明转换的局部/正式标签"))
+                    continue
+                if t["entity"] != eid and t["entity"] not in text:
+                    self.report.warn("C30", self._hint(
+                        f"{eid}.{op} 关联转换 {ref!r}",
+                        f"该转换属于 {t['entity']} 非本实体，且 note 未点名该实体",
+                        "改关联本实体的匹配转换；确系跨实体则 note 写明目标实体"))
+
+    def c31_inv_branch_tt_deviation(self):
+        """INV：分支 target_transition 语义回填偏差（meta.branch_tt_deviations）。
+
+        回填无唯一候选（0/多候选）→ 记偏差 + inferred=True，P2 走 all-values 兜底
+        （优雅降级合法，故 warn 级不断中断）。偏差＝LLM 写了匹配器解不开的描述，
+        属 §5 回喂可修（改写描述即解）；此前仅 UserWarning（不入 CLI warning 计数、
+        不进报告），本检查把它搬进报告使其可数、--strict 可门禁。"""
+        for d in self.m.meta.get("branch_tt_deviations", []):
+            self.report.warn("C31", self._hint(
+                f"分支维度[{d['dimension']}] 值[{d['value']}] 的 target_transition"
+                f"「{d['target_transition']}」",
+                f"语义回填无唯一候选（{d['reason']}），已记偏差(inferred=True)，"
+                f"P2 精确匹配将失败（走 all-values 兜底）",
+                "改写描述为动作词锚定形态（如「xxx转换（frm变为to）」），"
+                "使其唯一命中该维度实体的转换"))

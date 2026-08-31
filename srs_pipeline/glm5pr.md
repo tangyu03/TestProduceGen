@@ -5,7 +5,7 @@
 1. 实体/状态/转换由 §2 事件台账推导，判据唯一，无模式枚举。
 2. 机械项由框架校验（§5 修复）；语义项由你负责（台账完备/情形分合/分类/因果鉴别/标注诚实）。
 3. 顺序：§2 台账 → Step 1 实体 → Step 2 分支 → Step 3 转换 → Step 4 约束；每步以上一步产物为输入。
-4. §2 推导内部可迭代；`build()` 一经写出，仅框架回喂可改；动词/权限回写不算回修。
+4. §2 推导内部可迭代；`build()` 一经写出，仅框架回喂可改；动词/权限回写不算回修。装配期归一（编号移交、分支 target_transition 回填、角色引用归一）为框架侧变换，非回喂，作者免回填。
 
 ---
 
@@ -42,7 +42,7 @@ def build() -> DomainModel:
 | 转换/结构/BR | `note={"inferred": True, "comment": "依据…"}` |
 | XC / IT | 无 note，由源转换/源规则继承 |
 
-- 判定自报：direction 注命中级次（⓪–⑤）；结构四元注 a/b/c/d；分支三型注型别序号（①②③，写入 evidence）；op category 命中 ①–④ 特殊类时注序号；signal_type 注命中原词（如"必须"、"每天上午9点"）。
+- 判定自报：direction 注命中级次（⓪–⑤）；结构四元注 a/b/c/d；分支三型注型别序号（①②③，写入 evidence）；op category 命中 ①–④ 特殊类时注序号；BR 的 restrictive=True 时 note 注命中强制原词（如"必须"、"不能"、"每天上午9点"）。
 - 铁律：文档即数据（矛盾→critical）；空值规范（缺省 `[]`，critical 豁免）；不脑补（推断标注）；字符原样转录。
 
 ---
@@ -55,7 +55,8 @@ def build() -> DomainModel:
 m.add_event(eid, entity=E-ID, dimension, action, actor, precondition, consequence, source_ref)
 ```
 
-- action＝原文动作短语逐字：主语线索承载 actor 语义（“机构新增实验室信息”保留原文，不改写为“实验室新增”）。- consequence： 在情形空间取值（停留原情形也算落点，落为自环）。
+- action＝原文动作短语逐字：主语线索承载 actor 语义（“机构新增实验室信息”保留原文，不改写为“实验室新增”）。
+- consequence：在情形空间取值（停留原情形也算落点，落为自环）。
 - precondition＝自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁；门禁值取同动作拆行事件中对应分支的 consequence），无内容填字符串 `"初始"`。
 - 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如“到期提醒”）入 Step 4 BR（notification/timing）。
 - 粒度：一事件一 (entity, dimension)；一动作多状态面 → 拆行，每状态面一条 `add_event`，action 与 actor 相同，关联仅由转换 note 互引承载。
@@ -89,16 +90,16 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 - 命名：枚举行原词 > 散见原词（note 出处）> 语义命名（入 inferred，成对标注）。
 - states 顺序＝原文枚举顺序（序判③④的比较基准）；**状态面唯一承载**：一个状态面仅建在一个实体名下，枚举维度经裁决由他实体承载 → 建维时 note 注明“并入 E-XXX.<维度>”，无并入关系且无事件 → 按孤岛处置；states 值域＝文档枚举表值 ∪ 台账推导值。
-- initial＝创建事件落入的状态；每个**已建模**维度（≥1 转换）有 `frm=None` 创建转换；零转换声明＝枚举备份/孤岛，不要求创建转换（框架降级警告，见 1.3 孤岛处置）。
+- initial＝创建事件落入的状态；每个**已建模**维度（≥1 转换）有 `frm=None` 创建转换；零转换声明＝枚举备份/孤岛，不要求创建转换（框架降级警告）。
 - **图完整性（无出边闭合）**：states 值无出边 → 三选一闭合——回 §2 补事件重跑 / 入 terminal / 孤岛标注，非终态同样适用。文档具名终态但推导有出边 → 以推导为准＋note 说明。
-- 孤岛（枚举但无事件覆盖）：①入 states；②note“枚举但无事件覆盖”；③原样保留（框架降级警告：C02 对零转换维度不查创建转换/出边，仅记 warn）。
+- 孤岛（枚举但无事件覆盖）：①入 states；②note“枚举但无事件覆盖”；③原样保留（框架降级警告）。
 - 事件仅变更属性 → 不立状态，入 operations 或同状态自环。
 
 ### 1.4 实体
 
 - 分类（交集归 core）：core＝状态枚举/多步骤多角色/状态自主/审批链/独立载体/可独立循环；managed＝管理员 CRUD/配置字典/状态简单。
 - tags：`approvable`＝存在审批类转换；`multi-state`＝≥2 状态维度；`expirable`＝存在失效/过期转换或 BR；`collaborative`＝多角色操作同一状态维度（转换层多执行者写 role 列表）；`configurable`＝存在 is_config 属性。
-- operations：op 名称同一实体内唯一；通知语义由 BR 承载；category ①file②session③ui④config＞crud＞query；`expected_results` ≥1 逐字取原文可观察结果，未述补＋inferred；note.role 必填。
+- operations：op 名称同一实体内唯一；通知语义由 BR 承载；category ①file②session③ui④config＞crud＞query；`expected_results` ≥1 逐字取原文可观察结果，未述补＋inferred；note.role 必填；op note 只写 role 与操作语境注释；op-转换关联在 3.3 经 `link_op_transition` 登记。
 
 ### 1.5 结构关系 → `m.add_structural()`
 
@@ -112,6 +113,8 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 | (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source |
 
 (c) 先于 (d)。A 仅为 B 发起人/持有人/操作对象 → 降 (d)。B 核心产出属第三方 C → 改 C→B。判 (b) 且 1:1 → 复核“每条 A 必有 B”，可能无 B → 归 (d)。dependent 三步判定：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
+
+**编码契约**：判 (b) 的 B（拆行/伴随创建成员），创建转换前置须含指向 A 的 state_ref——状态值＝A 同动作创建转换的 to，锚点实体须真正持有该维度；编码约定而非业务门禁，无条件落盘。
 
 ---
 
@@ -165,7 +168,8 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 
 ### 3.3 自检
 
-crud 操作 `note.comment` 回填对应转换标签（多个 `;` 分隔），无对应 → 注明理由；回写遗漏动词/权限。
+- **op-转换关联**：有状态迁移语义的操作经 `m.link_op_transition(entity=…, op=…, transitions=[…])` 登记——对照本实体 `add_trans` 声明逐条登记，映射依据＝action 语义＋frm→to 方向；跨实体转换在 note 点名目标实体；无对应者不调用。
+- **回写**：遗漏动词/权限按回写协议追加。
 
 ### 3.4 因果 → `m.add_causal()` 与鉴别
 
@@ -190,7 +194,11 @@ invalid → `m.add_invalid()`：仅明文禁止的状态转换（“不允许/�
 
 XC → `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（`4.5判` 对应 3.4 鉴别判为约束）。`source_transition` 一律填生产者转换（达 source_state 的转换）。镜像可省略（框架补）；target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 值，即新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
 
-BR → `m.add_br()`：两步判定 ① signal_type＝口吻（field_constraint＞restrictive〔含 X日内/次以内〕＞display＞usability；无命中不生成）；② category＝管什么（timing/notification/computation/authorization/usability/display/validation 默认）。时间/次数/通知/计算只落②。命中词注原词。一句一 BR。
+BR → `m.add_br()`：仅规范性约束句生成 BR（纯描述性叙述不生成）；一句一 BR。三字段各自判定：
+- **category**＝管什么：`validation`（默认）/`computation`/`authorization`/`timing`/`notification`/`usability`/`display`；纯限制性规则（不属任何业务域）→ `restrictive`。
+- **restrictive**（bool，默认 False）＝强制约束：desc 含强制措辞（必须/不得/仅当/禁止/不能/不可/不超过，及“X日内/X次以内”类量化）→ `True`，note 注命中原词；支持性/功能性规则缺省 False。
+- **enforcement** 免传（框架从 restrictive 派生：True→mandatory，否则 conditional）。
+
 authorization → 角色放 `note.role`（name 列表）；多实体 BR 必填 constrained_entity（增删改→操作对象实体；对称规则→任一＋“代表实体”；单实体不填）；每个 Step 2 分支维度在本步有 ≥1 条 BR 的 `branch_dimensions` 含该维度（desc 含维度名或分支值作钩子）；系统行为 BR 的 entities_involved＝作用目标业务实体。
 
 ---
@@ -198,6 +206,10 @@ authorization → 角色放 `note.role`（name 列表）；多实体 BR 必填 c
 ## 5 修复
 
 回喂格式：`[{"check": "<校验码>", "labels": ["t07"], "expected": "…"}]`。最小修复；修补 confidence≤medium；根源漏事件 → 先补 `add_event` 再补转换（回喂触发的补事件是合法回修）。
+
+CLI 集成：critical 中断时默认**控制台打印**回喂 JSON（不落盘），`--feedback <路径>` 可选显式落盘——由 `build_feedback` 确定性生成，`check`=校验码，`labels`=消息文本抽取的候选/被修条目，`expected`=修法指引全文；将打印的 JSON 投给 LLM 触发再生成，勿手工改数据文件。
+
+分支回填偏差（`target_transition` 语义描述无唯一候选，0/多候选）同样闭合修复回路：正常完成路径若 `meta.branch_tt_deviations` 非空，控制台打印 §5 格式偏差回喂（`check`=BRANCH_TT_DEVIATION，`expected` 写明"按 action 词锚重写描述"），并计入校验报告 C31 warning（可数、`--strict` 门禁）。偏差是优雅降级（P2 走 all-values 兜底），故 C31 为 warn 级不断中断。
 
 ---
 
@@ -222,8 +234,10 @@ m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expect
 m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None, rollback_propagation=False, confidence="high", note=None)  # frm/to＝实体 ID
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity, target_dimension, target_condition, desc, source_ref, target_transition=None, xc_source)
-m.add_br(bid, category, desc, entities_involved, source_ref, signal_type, note=None, constrained_entity=None, branch_dimensions=None)
-# branch_dimensions＝该 BR 承载的分支维度名列表
+m.add_br(bid, category, desc, entities_involved, source_ref, restrictive=False, note=None, constrained_entity=None, branch_dimensions=None)
+# category 八值见 Step 4；restrictive＝强制约束 bool（True 时 note 注命中原词）；enforcement 免传（框架从 restrictive 派生）
+m.link_op_transition(entity, op, transitions, note=None)
+# op→转换关联；3.3 时点追加（转换已落盘）；transitions＝tid 列表；跨实体关联 note 点名目标实体
 
 N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
 attr(name, desc, is_config=False)
@@ -246,9 +260,12 @@ system 触发：超时/自动触发且改变状态的事件 role="system"，trai
 ```python
 # 台账（创建事件；precondition 无内容填字符串"初始"）：
 m.add_event(eid="e01", entity="E-XM", dimension="项目状态", action="设计方案编制",
-            actor="策划人员", precondition="无", consequence="待开始",
+            actor="策划人员", precondition="初始", consequence="待开始",
             source_ref="19.1方案设计阶段")
-
+# 拆行成员（判 b 编码契约——前置携带父记录已存在态）：
+m.add_event(eid="e06", entity="E-JFTZ", dimension="缴费通知单状态", action="报名",
+            actor="能力验证参加者", precondition="初始；E-BMJL.报名待审核", consequence="未发送",
+            source_ref="19.1实施阶段")
 # 台账（跨主体门禁形态）：
 # add_event("e49","E-PJ","评价状态","评价人员评价","评价人员","待评价；E-BMJL.结果已提交","评价中","20.7.1.2")
 m.add_trans(
@@ -307,6 +324,9 @@ m.add_trans(
     note={"comment": "源自 e07；序判④，语义forward（循环状态机），语义优先"},
 )
 
+# op-转换关联（3.3 时点追加；op note 内不写 tid）：
+m.link_op_transition(entity="E-FY", op="缴费单退款", transitions=["t22"])
+
 # 因果（实体级）：
 m.add_causal(
     frm="E-BMJL", to="E-JFTZ",
@@ -327,22 +347,21 @@ m.add_xc(xid="x04", source_entity="E-XM",
          desc="项目进入报名中后联动开启报名记录创建，新记录初始化为报名待审核",
          source_ref="19.1实施阶段")
 
-# 系统行为 BR：
+# 系统行为 BR（restrictive=True 形态：量化强制触发，note 注命中原词；enforcement 免传）：
 m.add_br(
     bid="b15", category="notification",
     desc="系统每天上午9点扫描证书信息，距到期时间等于30天时自动发送邮件提醒用户并抄送项目管理员",
-    entities_involved=["E-BMJL"], source_ref="20.5.2.3", signal_type="restrictive",
-    note={"comment": "signal_type命中'每天上午9点'；category判通知；无状态落点，不入台账/operations"},
+    entities_involved=["E-BMJL"], source_ref="20.5.2.3", restrictive=True,
+    note={"comment": "restrictive命中'每天上午9点'（量化强制触发）；category判通知；无状态落点，不入台账/operations"},
 )
 
-# 角色引用一律 name（permission 与 note.role 同源）；note.role 多角色写列表；分支承载＝branch_dimensions 参数：
+# 角色引用一律 name；note.role 多角色写列表；分支承载＝branch_dimensions 参数；支持性规则 restrictive 缺省：
 m.add_permission(role="项目管理员", operations=["查询项目", "新增项目", "文件整理"])
 m.add_br(
     bid="b23", category="computation",
     desc="评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
     entities_involved=["E-PJ"], source_ref="20.7.1项目列表",
-    signal_type="field_constraint",
-    note={"role": ["评价人员"], "comment": "signal_type命中'两种'（取值范围）；category判计算衍生"},
+    note={"role": ["评价人员"], "comment": "支持性规则，restrictive 缺省；category判计算衍生"},
     branch_dimensions=["评分方式"],
 )
 ```

@@ -338,9 +338,9 @@ def build() -> DomainModel:
         ],
         operations=[
             op(name="任务通知书编制", category="file", expected_results=["生成任务通知书文件"], source_ref="19.1项目准备阶段",
-               note={"role": ["策划人员"], "comment": "表格行1，无状态面变化，非事件； crud 关联 t01"}),
+               note={"role": ["策划人员"], "comment": "表格行1，无状态面变化，非事件（无对应转换，不登记 op 关联）"}),
             op(name="设计方案编制", category="file", expected_results=["生成设计方案文件"], source_ref="19.1方案设计阶段",
-               note={"role": ["策划人员"], "comment": "crud 关联 t01（项目状态创建边）"}),
+               note={"role": ["策划人员"]}),
             op(name="文件整理", category="file", expected_results=["归档任务已开启，请稍后查看"], source_ref="20.5.1.1文件整理",
                note={"role": ["项目管理员"], "comment": "已结束项目可触发；触发 E-WJD 创建"}),
             op(name="代码导入", category="file", expected_results=["报名机构三方代码导入成功"], source_ref="20.5.1.2机构代码导入",
@@ -494,7 +494,7 @@ def build() -> DomainModel:
         ],
         operations=[
             op(name="缴费单退款", category="ui", expected_results=["退款金额累加，实际付款更新"], source_ref="20.10.2.3缴费单退款",
-               note={"role": ["财务管理人员"], "comment": "退款金额不能大于当前缴费金额； crud 关联 t22（费用状态回退，全额退款时）"}),
+               note={"role": ["财务管理人员"], "comment": "退款金额不能大于当前缴费金额"}),
         ],
     )
 
@@ -557,9 +557,9 @@ def build() -> DomainModel:
         ],
         operations=[
             op(name="审核实验室", category="ui", expected_results=["弹出审核窗口，提交审核结果"], source_ref="20.4.1.2实验室审核",
-               note={"role": ["系统管理人员"], "comment": "审核通过生成快照；退回修改必须填写审核意见； crud 关联 t45/t46"}),
+               note={"role": ["系统管理人员"], "comment": "审核通过生成快照；退回修改必须填写审核意见"}),
             op(name="修改实验室", category="ui", expected_results=["修改内容保存，状态变为待审核"], source_ref="20.4.1.3实验室修改",
-               note={"role": ["机构", "系统管理人员"], "comment": "机构修改后需重新审核； crud 关联 t44/t44b"}),
+               note={"role": ["机构", "系统管理人员"], "comment": "机构修改后需重新审核"}),
         ],
     )
 
@@ -585,7 +585,7 @@ def build() -> DomainModel:
         ],
         operations=[
             op(name="新增标准库", category="ui", expected_results=["标准库创建，状态默认启用"], source_ref="20.4.2.2新增标准库",
-               note={"role": ["系统管理人员"], "comment": "crud 关联 t49"}),
+               note={"role": ["系统管理人员"]}),
             op(name="修改标准库", category="ui", expected_results=["标准库信息更新"], source_ref="20.4.2.3修改标准库",
                note={"role": ["系统管理人员"], "comment": "无状态变化"}),
             op(name="删除标准库", category="ui", expected_results=["标准库删除，含子项的记录不允许删除"], source_ref="20.4.2.4删除标准库",
@@ -662,7 +662,7 @@ def build() -> DomainModel:
         ],
         operations=[
             op(name="批量审核", category="ui", expected_results=["选中任务批量审核操作"], source_ref="20.9.1.4任务批量处理",
-               note={"role": ["系统管理人员"], "comment": "系统根据节点类型及内容判断是否可批量； crud 关联 t41/t41b"}),
+               note={"role": ["系统管理人员"], "comment": "系统根据节点类型及内容判断是否可批量"}),
             op(name="导出审批流程", category="file", expected_results=["满足查询条件的数据导出"], source_ref="20.9.1.5审批流程列表导出",
                note={"role": ["系统管理人员"], "comment": "新增创建时间查询参数"}),
             op(name="预置签章位置", category="config", expected_results=["签章操作时自动代入位置信息"], source_ref="20.9.1.2预置签章位置信息",
@@ -1634,15 +1634,19 @@ def build() -> DomainModel:
         note={"comment": "源自 e45；③；terminal=已归档；系统自动完成"},
     )
 
-    # ----- 3.3 自检：crud 操作 note.comment 回填对应转换标签 -----
-    # E-XM.operations 任务通知书编制 → 无对应转换（非事件）
-    # E-XM.operations 设计方案编制 → t01
-    # E-XM.operations 文件整理 → t52（触发 E-WJD 创建）
-    # E-FY.operations 缴费单退款 → t22
-    # E-TASK.operations 批量审核 → t41/t41b
-    # E-SYS.operations 审核实验室 → t45/t46
-    # E-SYS.operations 修改实验室 → t44/t44b
-    # E-BZK.operations 新增标准库 → t49
+    # ----- 3.3 自检：crud 操作 → 转换关联（link_op_transition 结构化登记）-----
+    # 有状态迁移语义的操作逐条登记（映射依据＝action 语义＋frm→to 方向，对照
+    # 本实体 add_trans 声明）；无对应转换者不调用（任务通知书编制＝非事件，仅文件）。
+    m.link_op_transition(entity="E-XM", op="设计方案编制", transitions=["t01"],
+                         note={"comment": "项目状态创建边"})
+    m.link_op_transition(entity="E-XM", op="文件整理", transitions=["t52"],
+                         note={"comment": "触发 E-WJD 创建"})   # 跨实体，note 点名目标实体
+    m.link_op_transition(entity="E-FY", op="缴费单退款", transitions=["t22"],
+                         note={"comment": "费用状态回退，全额退款时"})
+    m.link_op_transition(entity="E-TASK", op="批量审核", transitions=["t41", "t41b"])
+    m.link_op_transition(entity="E-SYS", op="审核实验室", transitions=["t45", "t46"])
+    m.link_op_transition(entity="E-SYS", op="修改实验室", transitions=["t44", "t44b"])
+    m.link_op_transition(entity="E-BZK", op="新增标准库", transitions=["t49"])
 
     # ----- 3.4 因果 → m.add_causal() -----
     # Q1：X 变直接致 Y 变？Y 需额外操作 → 约束，标[待写入: Step4 XC]
@@ -1820,7 +1824,7 @@ def build() -> DomainModel:
     m.add_br(
         bid="b03", category="computation",
         desc="实验室审核结果为通过时为当前数据生成该数据的快照记录",
-        entities_involved=["E-SYS"], source_ref="20.4.1.2实验室审核", enforcement="mandatory",
+        entities_involved=["E-SYS"], source_ref="20.4.1.2实验室审核",
         note={"role": ["系统管理人员"], "comment": "signal_type命中'生成'（取值范围衍生）；category判计算衍生"},
     )
     # §20.4.2.5 停用的标准库不可被选择
@@ -1878,7 +1882,7 @@ def build() -> DomainModel:
     m.add_br(
         bid="b11", category="computation",
         desc="项目新增表单中技术主管、实验室负责人、授权签字人字段，如果其备选人有且仅有一个时默认填充为备选值",
-        entities_involved=["E-XM"], source_ref="20.5.1.6默认填充技术主管实验室负责人授权签字人", enforcement="mandatory",
+        entities_involved=["E-XM"], source_ref="20.5.1.6默认填充技术主管实验室负责人授权签字人",
         note={"role": ["项目管理员"], "comment": "signal_type命中'有且仅有一个'（取值范围衍生）；category判计算衍生"},
     )
     # §20.5.2.1 多次付款不对金额校验限制
@@ -1913,14 +1917,14 @@ def build() -> DomainModel:
     m.add_br(
         bid="b16", category="computation",
         desc="新建项目时第一个被选择的评价人员默认做为评价组长",
-        entities_involved=["E-PJ"], source_ref="20.7.1项目列表", enforcement="mandatory",
+        entities_involved=["E-PJ"], source_ref="20.7.1项目列表",
         note={"comment": "signal_type命中'第一个'（取值范围衍生）；category判计算衍生"},
     )
     # §20.7.1.3 评价确认统计规则
     m.add_br(
         bid="b17", category="validation",
         desc="每个统计规则由一个低值、一个高值组成，判断规则为大于等于低值，小于高值",
-        entities_involved=["E-PJ"], source_ref="20.7.1.3评价确认", enforcement="mandatory",
+        entities_involved=["E-PJ"], source_ref="20.7.1.3评价确认",
         note={"role": ["评价组长"], "comment": "signal_type命中'大于等于'+'小于'（取值范围）；category判校验"},
     )
     # §20.7.1.3 评价组长确认后评价状态关闭
@@ -1934,7 +1938,7 @@ def build() -> DomainModel:
     m.add_br(
         bid="b19", category="computation",
         desc="评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
-        entities_involved=["E-PJ"], source_ref="20.7.1项目列表", enforcement="mandatory",
+        entities_involved=["E-PJ"], source_ref="20.7.1项目列表",
         note={"role": ["评价人员"], "comment": "signal_type命中'两种'（取值范围）；category判计算衍生"},
         branch_dimensions=["评分方式"],
     )
@@ -1957,14 +1961,14 @@ def build() -> DomainModel:
     m.add_br(
         bid="b22", category="validation",
         desc="系统会根据任务节点的类型及内容判断当前节点是否可以被批量处理",
-        entities_involved=["E-TASK"], source_ref="20.9.1.4任务批量处理", enforcement="mandatory",
+        entities_involved=["E-TASK"], source_ref="20.9.1.4任务批量处理",
         note={"role": ["系统管理人员"], "comment": "signal_type命中'判断'（取值范围衍生）；category判校验"},
     )
     # §20.9.1.6 自定义流程预设
     m.add_br(
         bid="b23", category="validation",
         desc="系统预设若干自定义流程（4个以内），用于用户选择并提交文档审核的自定义流程，并支持相应的签章",
-        entities_involved=["E-TASK"], source_ref="20.9.1.6增加自定义流程", enforcement="mandatory",
+        entities_involved=["E-TASK"], source_ref="20.9.1.6增加自定义流程", restrictive=True,
         note={"comment": "signal_type命中'4个以内'（取值范围）；category判字段约束"},
     )
     # §20.10.2.3 退款金额不能大于当前缴费金额
@@ -1978,7 +1982,7 @@ def build() -> DomainModel:
     m.add_br(
         bid="b25", category="computation",
         desc="实际付款=付款金额-退款金额，退款金额使用红色字体且大于0时显示",
-        entities_involved=["E-FY"], source_ref="20.10.2.3缴费单退款", enforcement="mandatory",
+        entities_involved=["E-FY"], source_ref="20.10.2.3缴费单退款",
         note={"role": ["财务管理人员"], "comment": "signal_type命中'='（计算公式）；category判计算衍生；退款后更新项目费用为实际付款金额"},
     )
     # §20.11.1.2 关键操作留痕
@@ -2007,7 +2011,7 @@ def build() -> DomainModel:
     m.add_br(
         bid="b29", category="computation",
         desc="参加者测试与结果提交后按还样要求分支：需还样则样品归还后样品状态落'待核查'（进入下一批次），无需还样则落'无需还样'（终态）",
-        entities_involved=["E-YP"], source_ref="19.1能力验证提供者流程", enforcement="mandatory",
+        entities_involved=["E-YP"], source_ref="19.1能力验证提供者流程",
         note={"role": ["能力验证参加者"], "comment": "signal_type命中'按…分支'（运行时选择）；category判计算（结果差异型）"},
         branch_dimensions=["还样要求"],
     )
