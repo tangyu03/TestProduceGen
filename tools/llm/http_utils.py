@@ -182,7 +182,7 @@ def call_http_api_with_retry(
         headers: Request headers dictionary
         timeout: Request timeout in seconds
         max_retries: Maximum retry attempts (only for 429 errors)
-        backoff_factor: Unused — kept for API compatibility
+        backoff_factor: Exponential backoff multiplier for transient-error retries
         rate_limit_wait: Wait time in seconds for rate limit errors
 
     Returns:
@@ -222,7 +222,12 @@ def call_http_api_with_retry(
         except (urllib.error.URLError, OSError, Exception) as e:
             last_error = str(e)
             if attempt < max_retries:
-                time.sleep(2)
+                # C-11: backoff_factor 之前声明未用——固定 sleep(2) 与配置项
+                # retry_backoff_factor 脱钩，用户调配置完全无效。现在指数退避。
+                delay = min(2.0 * (backoff_factor ** attempt), 60)
+                print(f"      [HTTP] transient error ({e!r}), retrying in {delay:.1f}s "
+                      f"(attempt {attempt + 1}/{max_retries + 1})...")
+                time.sleep(delay)
                 continue
             raise RuntimeError(f"HTTP API call failed after {max_retries + 1} attempts: {last_error}")
 
@@ -238,6 +243,8 @@ def call_llm_api(
     max_tokens: int | None = None,
     timeout: int = 60,
     max_retries: int = 3,
+    backoff_factor: float = 2.0,
+    rate_limit_wait: int = 30,
 ) -> str:
     """Call LLM chat completion API and extract content.
 
@@ -250,6 +257,8 @@ def call_llm_api(
         max_tokens: Maximum tokens to generate
         timeout: Request timeout in seconds
         max_retries: Maximum retry attempts
+        backoff_factor: Exponential backoff multiplier for transient-error retries
+        rate_limit_wait: Wait time in seconds for rate limit errors
 
     Returns:
         LLM response content string
@@ -264,7 +273,8 @@ def call_llm_api(
     }
     body = build_chat_request(model, messages, temperature, max_tokens)
 
-    response = call_http_api_with_retry(url, body, headers, timeout, max_retries)
+    response = call_http_api_with_retry(url, body, headers, timeout, max_retries,
+                                        backoff_factor, rate_limit_wait)
     content = extract_response_content(response)
     if not content:
         # Log response structure for debugging (exclude large fields)

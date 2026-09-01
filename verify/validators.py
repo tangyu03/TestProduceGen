@@ -43,7 +43,18 @@ def run_all(output: dict, spec: dict, model: dict | None = None) -> list:
         output = {**output, "_model": model}
     results = []
     for name in CHECK_MODULES:
-        mod = importlib.import_module(f"verify.checks.{name}")
+        # B-03: 导入移入 try——v03/v07/v08 顶层 import models.schema 会连锁
+        # 拖入 models/__init__ → state.py → langgraph；无 langgraph 的干净
+        # 环境（CI 机）里 import_module 抛 ModuleNotFoundError 曾使整机崩溃、
+        # 10 项检查一个都不跑。现在单个检查器导入失败只记一条 error，
+        # 其余检查照常执行，verdict 仍能产出。
+        try:
+            mod = importlib.import_module(f"verify.checks.{name}")
+        except Exception as e:
+            results.append(CheckResult(check_id=name[:3].upper(), result="error",
+                                       severity="blocker",
+                                       note=f"import failed: {e!r}"))
+            continue
         t0 = time.time()
         try:
             r = mod.check(output, spec)
@@ -74,7 +85,10 @@ def compute_metrics(output: dict, results: list) -> dict:
 
 def aggregate(output: dict, results: list) -> dict:
     import hashlib
-    blockers = [r for r in results if r.result == "fail" and r.severity == "blocker"]
+    # 导入失败（result="error"）必须计入 blocker：门禁在检查器缺失时应
+    # fail-closed，而非把"检查没跑"当作通过。
+    blockers = [r for r in results
+                if r.severity == "blocker" and r.result in ("fail", "error")]
     warnings = [r for r in results if r.result == "fail" and r.severity != "blocker"]
     verdict = {
         "verdict": "fail" if blockers else "pass",

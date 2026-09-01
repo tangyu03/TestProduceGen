@@ -58,26 +58,12 @@ def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
 #   4  ve_co_ids            — Virtual entity CO binding (structural)
 #   3  chain_ordering       — same-dim sort_key ordering (heuristic)
 #   3  guard5_create_use    — create-before-use heuristic (Guard 5)
+#   3  domain_precond       — Guard 7 对象存在性前置 (structural)
 #   2  guard6_precond       — precondition TEXT matching (Guard 6, fragile)
 #   1  weak_side_effect     — weak dep (always lowest)
-DEP_CONFIDENCE: dict[str, int] = {
-    "transition_upstream": 5,
-    "guard1_state_pred": 5,
-    "co_enabler": 4,
-    "co_enabler_both_lateral": 4,
-    "co_enabler_phase_inversion": 4,
-    "ve_co_ids": 4,
-    "chain_ordering": 3,
-    "guard5_create_use": 3,
-    "guard6_precond": 2,
-    "domain_precond": 3,
-    "weak_side_effect": 1,
-}
-
-
-def _confidence_of(origin: str) -> int:
-    """Return confidence score for a dep origin; unknown → 0 (lowest)."""
-    return DEP_CONFIDENCE.get(origin, 0)
+# C-12: 表本身移到 context/dep_confidence.py (曾与 graph_algo 内联表双表漂移,
+# domain_precond 只在 S3 注册 → break_cycles 视作未知 conf 0 优先剪错边)。
+from context.dep_confidence import DEP_CONFIDENCE, confidence_of as _confidence_of
 
 
 # ── Precondition state extraction (for Guard 6) ──────────────────────────

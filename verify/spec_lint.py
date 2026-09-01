@@ -71,13 +71,25 @@ def lint_guard_policies(spec, rep):
             rep.warn("GP", f"{gid}: missing clause")
 
 
+def _entity_name(ent) -> str:
+    """built_in_entities 条目归一：字符串直接取，dict 取 `entity` 键。
+
+    C-06: 与 checks/base.entity_names_of 同契约——case_spec 的 readonly 合法
+    形态含 dict（{"entity","clause","note"} 证据式）；旧 lint 只认非空字符串，
+    把自家合法 spec 判成 8 个 error，契约漂移。
+    """
+    if isinstance(ent, dict):
+        return str(ent.get("entity") or "").strip()
+    return ent.strip() if isinstance(ent, str) else ""
+
+
 def lint_built_in(spec, rep):
     bi = spec.get("built_in_entities") or {}
     for ent in bi.get("readonly") or []:
-        if not (isinstance(ent, str) and ent.strip()):
+        if not _entity_name(ent):
             rep.err("BI", f"readonly entity invalid: {ent!r}")
     for ent in bi.get("no_form_page") or []:
-        if not (isinstance(ent, str) and ent.strip()):
+        if not _entity_name(ent):
             rep.err("BI", f"no_form_page entity invalid: {ent!r}")
 
 

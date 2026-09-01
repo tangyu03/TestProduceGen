@@ -43,14 +43,14 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
     ─────────────────────────────────────────────────────────────────────
     Replaces chain_depth-based ranking with causal confidence ranking.
     Each dep carries an `origin` string (recorded by S3 when the dep was
-    added) that maps to a confidence score (see s3_dependency.DEP_CONFIDENCE):
+    added) that maps to a confidence score (C-12: 单一事实源见
+    context/dep_confidence.DEP_CONFIDENCE):
 
-        5  transition_upstream  (causal chain — authoritative)
-        5  guard1_state_pred    (exact state-machine predecessor)
-        4  co_enabler           (CO enabler_state binding)
-        4  ve_co_ids            (Virtual entity CO binding)
-        3  chain_ordering       (same-dim sort_key ordering)
-        3  guard5_create_use    (create-before-use heuristic)
+        5  transition_upstream / guard1_state_pred (causal chain — authoritative)
+        4  co_enabler / co_enabler_both_lateral / co_enabler_phase_inversion
+           / ve_co_ids  (CO enabler / virtual-entity structural binding)
+        3  chain_ordering / guard5_create_use / domain_precond
+           / guard2_constraint_gate  (heuristics)
         2  guard6_precond       (precondition TEXT matching — fragile)
         1  weak_side_effect     (weak dep)
 
@@ -72,28 +72,12 @@ def break_cycles(procedures: list[dict]) -> tuple[list[dict], list[str]]:
     """
     import networkx as nx
 
-    # Confidence map — kept in sync with s3_dependency.DEP_CONFIDENCE.
-    # Inlined here to avoid a circular import (s3_dependency imports
-    # break_cycles from this module).
-    # 2026-08-14: co_enabler_both_lateral / co_enabler_phase_inversion 必须
-    # 同时注册——缺失任一都会 conf 归 0, break_cycles 优先剪 CO 弱边、恢复
-    # 倒退边 (实测)。双表同步是已知维护陷阱, 详见 DECISIONS。
-    DEP_CONFIDENCE = {
-        "transition_upstream": 5,
-        "guard1_state_pred": 5,
-        "co_enabler": 4,
-        "co_enabler_both_lateral": 4,
-        "co_enabler_phase_inversion": 4,
-        "ve_co_ids": 4,
-        "chain_ordering": 3,
-        "guard5_create_use": 3,
-        "guard6_precond": 2,
-        "weak_side_effect": 1,
-        "guard2_constraint_gate": 3,  # rare/no-op in practice
-    }
-
-    def _confidence(origin: str) -> int:
-        return DEP_CONFIDENCE.get(origin, 0)
+    # C-12: 置信度表单一事实源迁到 context/dep_confidence.py —— 曾在此内联
+    # 双表与 s3_dependency.DEP_CONFIDENCE 漂移 (domain_precond 只注册在 S3,
+    # 这里缺失 → conf 0, break_cycles 优先剪掉 Guard 7 对象存在性前置, 实测
+    # 同 co_enabler 缺表教训)。此处原本为避开 s3_dependency 循环导入而内联,
+    # 独立模块无此问题。
+    from context.dep_confidence import confidence_of as _confidence
 
     warnings: list[str] = []
 

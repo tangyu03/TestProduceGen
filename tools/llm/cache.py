@@ -77,6 +77,12 @@ class CacheManager:
             Cache key string (16-character hash)
         """
         if self._task_type == TaskType.TITLE_GENERATION:
+            # B-02：请求形态不是 procedure 列表（如 LLMClient 传入的
+            # {'messages','temperature',...} 请求 dict）时，不得走标题 key——
+            # _get_title_cache_key 对 dict 取 proc.get('steps', []) 恒为空，
+            # 所有请求会退化为同一个常量 key 互相命中。此时降级为通用 key。
+            if isinstance(request_data, dict) and "messages" in request_data:
+                return self._get_generic_cache_key(request_data)
             return self._get_title_cache_key(request_data)
         elif self._task_type == TaskType.FIELD_VALIDATION:
             return self._get_field_validation_cache_key(request_data)

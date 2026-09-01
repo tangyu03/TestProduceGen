@@ -88,26 +88,49 @@ class WorktreeManager:
         self.snapshot: Path | None = None
         self._use_git = (self.project_dir / ".git").exists()
         self._wt_name = f"loop-{int(time.time())}"
+        self._last_base: str | None = None      # B-05: 上轮快照的提交 SHA，增量修复基底
 
     def create(self) -> Path:
         if self._use_git:
             target = self.project_dir.parent / self._wt_name
-            subprocess.run(["git", "worktree", "add", "--detach", str(target), "HEAD"],
+            # B-05: retry 时以上轮快照的 HEAD 为基底（含 Agent 已做的修改），
+            # 而非每次从原始 HEAD 重建——否则 Agent 修复随快照一起丢失。
+            base = self._last_base or "HEAD"
+            subprocess.run(["git", "worktree", "add", "--detach", str(target), base],
                            cwd=self.project_dir, check=True, capture_output=True)
             self.snapshot = target
         else:
             self.snapshot = Path(tempfile.mkdtemp(prefix="loop-snapshot-"))
-            shutil.copytree(self.project_dir, self.snapshot, dirs_exist_ok=True,
+            base_dir = self._last_base_dir if getattr(self, "_last_base_dir", None) else self.project_dir
+            shutil.copytree(base_dir, self.snapshot, dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns(".git", "verify/runs", "__pycache__"))
         return self.snapshot
 
     def merge_back(self):
         if self._use_git and self.snapshot:
-            subprocess.run(["git", "-C", str(self.snapshot), "add", "-A"], check=True)
-            subprocess.run(["git", "-C", str(self.snapshot), "commit", "-m", "loop: agent fix"],
-                           check=True, capture_output=True)
-            subprocess.run(["git", "merge", "--no-ff", self.snapshot.name],
+            # B-04: worktree add --detach 不产生名为 loop-<时间戳> 的分支/引用，
+            # 目录名不能当 revision 用——取快照 HEAD 的真实 SHA 再 merge。
+            rev = subprocess.run(["git", "-C", str(self.snapshot), "rev-parse", "HEAD"],
+                                 check=True, capture_output=True, text=True).stdout.strip()
+            dirty = subprocess.run(["git", "-C", str(self.snapshot), "status", "--porcelain"],
+                                   capture_output=True, text=True).stdout.strip()
+            if dirty:
+                subprocess.run(["git", "-C", str(self.snapshot), "add", "-A"], check=True)
+                subprocess.run(["git", "-C", str(self.snapshot), "commit",
+                                "-m", "loop: agent fix", "--allow-empty"],
+                               check=True, capture_output=True)
+            subprocess.run(["git", "merge", "--no-ff", rev],
                            cwd=self.project_dir, check=True, capture_output=True)
+
+    def snapshot_commit(self) -> str | None:
+        """把快照当前改动落成一个提交并返回 SHA（供下轮增量基底）。"""
+        if not self._use_git or not self.snapshot:
+            return None
+        subprocess.run(["git", "-C", str(self.snapshot), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(self.snapshot), "commit", "-m", "loop: agent fix (retry base)",
+                        "--allow-empty"], check=True, capture_output=True)
+        return subprocess.run(["git", "-C", str(self.snapshot), "rev-parse", "HEAD"],
+                              check=True, capture_output=True, text=True).stdout.strip()
 
     def discard(self):
         if not self.snapshot:
@@ -171,8 +194,14 @@ def run_code_agent(cfg: LoopConfig, task: dict, cwd: Path) -> dict:
     if not cfg.agent_cmd:
         return {"skipped": True, "reason": "agent_cmd not configured",
                 "confidence": "低", "usage": {"tokens": 0}}
-    proc = subprocess.run(cfg.agent_cmd, input=json.dumps(task, ensure_ascii=False),
-                          cwd=cwd, capture_output=True, text=True, timeout=1800)
+    try:
+        proc = subprocess.run(cfg.agent_cmd, input=json.dumps(task, ensure_ascii=False),
+                              cwd=cwd, capture_output=True, text=True, timeout=1800)
+    except subprocess.TimeoutExpired:
+        # C-07: agent 挂起不得穿透整个 loop 进程——按预算返回 retry。
+        print("[FAIL] code agent timed out after 1800s")
+        return {"skipped": True, "reason": "agent timeout",
+                "confidence": "低", "usage": {"tokens": 0}}
     out = proc.stdout.strip()
     try:                                            # 容错：取第一个 JSON 对象
         start = out.index("{")
@@ -236,6 +265,93 @@ def escalate(cfg: LoopConfig, signature: str, history: History, reason: str):
 
 
 # ───────────────────────── 主循环 ─────────────────────────
+PIPELINE_CRASH = "PIPELINE_CRASH"   # 流水线自身崩溃（可重试，如 LLM 抖动）
+
+
+def _run_pipeline_and_validate(cfg: LoopConfig, history: History, snap: Path,
+                               run_dir: Path, full_pipeline: bool,
+                               stage: str = "baseline") -> dict | None | str:
+    """在快照内跑流水线 + Gate-S 门禁，返回 verdict dict。
+
+    PIPELINE_CRASH — 流水线崩溃（可能是 LLM 抖动，调用方按 retry 处理）；
+    None — 门禁自身无法产出 verdict（已记历史，应 escalated）。
+    B-05: baseline 与 agent 修改后的复检共用此路径，保证两轮口径一致。
+    """
+    verdict_path = run_dir / f"verdict_{stage}.json"
+    output_json = run_dir / f"output_{stage}.json"
+
+    # ── 管线步骤 ──
+    if full_pipeline and cfg.pipeline_cmd_full:
+        pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
+                        for c in cfg.pipeline_cmd_full]
+        try:
+            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
+                               text=True, timeout=3600)
+        except subprocess.TimeoutExpired:                # C-07: 不穿透 loop 进程
+            print(f"[FAIL] {stage} full pipeline timed out after 3600s")
+            return PIPELINE_CRASH
+        (run_dir / f"pipeline_{stage}.log").write_text(
+            r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
+        if r.returncode != 0:
+            print(f"[FAIL] {stage} full pipeline crashed, see pipeline_{stage}.log")
+            return PIPELINE_CRASH
+    elif cfg.pipeline_cmd:
+        pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
+                        for c in cfg.pipeline_cmd]
+        try:
+            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
+                               text=True, timeout=300)
+        except subprocess.TimeoutExpired:                # C-07
+            print(f"[FAIL] {stage} pipeline timed out after 300s")
+            return PIPELINE_CRASH
+        (run_dir / f"pipeline_{stage}.log").write_text(
+            r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
+        if r.returncode != 0:
+            print(f"[FAIL] {stage} pipeline crashed, see pipeline_{stage}.log")
+            return PIPELINE_CRASH
+    else:
+        existing = Path(cfg.project_dir) / "coverage_obligations.json"
+        if not existing.exists():
+            print(f"[FAIL] no existing output found: {existing}")
+            return None
+        shutil.copy(existing, output_json)
+        (run_dir / f"pipeline_{stage}.log").write_text(
+            f"skipped pipeline, copied from {existing}\n", encoding="utf-8")
+
+    v = subprocess.run([sys.executable, "-m", "verify.validators",
+                        "-s", cfg.validator_spec,
+                        "-m", cfg.validator_model,
+                        "-o", str(output_json.resolve()),
+                        "--json", str(verdict_path.resolve())],
+                       cwd=snap, capture_output=True, text=True)
+    (run_dir / f"validator_{stage}.log").write_text(v.stdout, encoding="utf-8")
+    (run_dir / f"validator_{stage}_stderr.log").write_text(v.stderr, encoding="utf-8")
+
+    if v.returncode != 0:
+        if verdict_path.exists():
+            print(f"[WARN] validators exited {v.returncode} but verdict exists, proceeding")
+        else:
+            print(f"[FAIL] validators exited {v.returncode} and no verdict ({stage})")
+            print("── validator stderr (last 2000 chars) ──")
+            print(v.stderr[-2000:])
+            history.append({"signature": f"VALIDATOR_CRASH_{stage}", "verdict": "fail",
+                            "merged": False,
+                            "detail": f"exit={v.returncode}; stderr_tail={v.stderr[-300:]}"})
+            return None
+
+    if not verdict_path.exists():
+        print(f"[FAIL] validators exit 0 but verdict missing: {verdict_path} ({stage})")
+        history.append({"signature": "NO_VERDICT_FILE", "verdict": "fail",
+                        "merged": False, "path": str(verdict_path)})
+        return None
+
+    try:
+        return json.loads(verdict_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        print(f"[FAIL] verdict.json corrupt: {e} ({stage})")
+        return None
+
+
 def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
                 full_pipeline: bool = False) -> str:
     """返回 done | retry | escalated | budget_exceeded。"""
@@ -246,82 +362,11 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
     wt = WorktreeManager(cfg.project_dir)
     snap = wt.create()
     try:
-        verdict_path = run_dir / "verdict.json"
-        output_json = run_dir / "output.json"
-
-        # ── 管线步骤 ──
-        if full_pipeline and cfg.pipeline_cmd_full:
-            # --full: 跑完整 LLM 流水线 (main.py)
-            pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
-                            for c in cfg.pipeline_cmd_full]
-            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
-                               text=True, timeout=3600)
-            (run_dir / "pipeline.log").write_text(
-                r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
-            if r.returncode != 0:
-                print("[FAIL] full pipeline crashed, see pipeline.log")
-                return "retry"
-        elif cfg.pipeline_cmd:
-            # 默认: 跑快速生成 (generate_obligation_model.py)
-            pipeline_cmd = [c.format(run_dir=str(run_dir.resolve()))
-                            for c in cfg.pipeline_cmd]
-            r = subprocess.run(pipeline_cmd, cwd=snap, capture_output=True,
-                               text=True, timeout=300)
-            (run_dir / "pipeline.log").write_text(
-                r.stdout[-8000:] + r.stderr[-8000:], encoding="utf-8")
-            if r.returncode != 0:
-                print("[FAIL] pipeline crashed, see pipeline.log")
-                return "retry"
-        else:
-            # 无 pipeline: 直接读已有结果文件
-            existing = Path(cfg.project_dir) / "coverage_obligations.json"
-            if not existing.exists():
-                print(f"[FAIL] no existing output found: {existing}")
-                return "escalated"
-            shutil.copy(existing, output_json)
-            (run_dir / "pipeline.log").write_text(
-                f"skipped pipeline, copied from {existing}\n", encoding="utf-8")
-
-        v = subprocess.run([sys.executable, "-m", "verify.validators",
-                            "-s", cfg.validator_spec,
-                            "-m", cfg.validator_model,
-                            "-o", str((run_dir / "output.json").resolve()),
-                            "--json", str(verdict_path.resolve())],
-                           cwd=snap, capture_output=True, text=True)
-        (run_dir / "validator_stdout.log").write_text(v.stdout, encoding="utf-8")
-        (run_dir / "validator_stderr.log").write_text(v.stderr, encoding="utf-8")
-
-        if v.returncode != 0:
-            # validators may exit non-zero when failures are found — check if
-            # verdict.json was still produced before treating it as a crash
-            if verdict_path.exists():
-                print(f"[WARN] validators exited {v.returncode} but verdict.json exists, "
-                      f"proceeding with verdict")
-            else:
-                print(f"[FAIL] validators exited {v.returncode} and no verdict.json")
-                print("── validator stderr (last 2000 chars) ──")
-                print(v.stderr[-2000:])
-                print("── validator stdout (last 1000 chars) ──")
-                print(v.stdout[-1000:])
-                history.append({"signature": "VALIDATOR_CRASH", "verdict": "fail",
-                                "merged": False,
-                                "detail": f"exit={v.returncode}; stderr_tail={v.stderr[-300:]}"})
-                return "escalated"
-
-        if not verdict_path.exists():
-            print(f"[FAIL] validators exit 0 but verdict.json missing: {verdict_path}")
-            print("── validator stdout ──")
-            print(v.stdout[-2000:])
-            history.append({"signature": "NO_VERDICT_FILE", "verdict": "fail",
-                            "merged": False, "path": str(verdict_path)})
-            return "escalated"
-
-        try:
-            verdict = json.loads(verdict_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as e:
-            print(f"[FAIL] verdict.json corrupt: {e}")
-            print("── verdict.json content ──")
-            print(verdict_path.read_text(encoding="utf-8")[:1000])
+        verdict = _run_pipeline_and_validate(cfg, history, snap, run_dir,
+                                             full_pipeline, stage="baseline")
+        if verdict == PIPELINE_CRASH:
+            return "retry"          # 流水线崩溃可能是 LLM 抖动，可重试
+        if verdict is None:
             return "escalated"
 
         sig = failure_signature(verdict)
@@ -366,7 +411,10 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
             return "escalated"
 
         if cfg.smoke_cmd:                              # 冒烟不过，直接判失败不重跑流水线
-            s = subprocess.run(cfg.smoke_cmd, cwd=snap, capture_output=True, text=True)
+            try:
+                s = subprocess.run(cfg.smoke_cmd, cwd=snap, capture_output=True, text=True)
+            except subprocess.TimeoutExpired:          # C-07: 冒烟挂起按失败处理
+                s = subprocess.CompletedProcess(cfg.smoke_cmd, returncode=-1)
             if s.returncode != 0:
                 history.append({"signature": sig, "verdict": "smoke_fail",
                                 "diff_hash": diff_hash,
@@ -375,6 +423,33 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
                 print("[FAIL] smoke test failed")
                 return "retry"
 
+        # B-05: Agent 修改后必须立即对快照复检——pass 判定移到 Agent 之后。
+        # 修复只有通过本轮门禁才合并回主干；否则把快照留作下一轮增量基底。
+        verdict2 = _run_pipeline_and_validate(cfg, history, snap, run_dir,
+                                              full_pipeline, stage="agent_fix")
+        if verdict2 == PIPELINE_CRASH:
+            history.append({"signature": sig, "verdict": "pipeline_crash",
+                            "diff_hash": diff_hash,
+                            "diff_summary": declaration.get("deliverable", {})
+                            .get("diff_summary", ""), "merged": False})
+            return "retry"
+        if verdict2 is None:
+            return "escalated"
+
+        if verdict2["skeleton_pass"]:
+            if not dry_run:
+                wt.merge_back()
+                history.append({"signature": None, "verdict": "pass",
+                                "metrics": verdict2["metrics"], "merged": True})
+                print("[PASS] agent fix validated, merged")
+            else:
+                print("[PASS] (dry-run) agent fix validated")
+            return "done"
+
+        # 复检仍失败：快照落一个提交作为下轮基底（dry_run 不落、不入库），
+        # 下轮 create() 从该提交开始，Agent 的修改得以保留继续增量修。
+        if not dry_run:
+            wt._last_base = wt.snapshot_commit()
         history.append({"signature": sig, "verdict": "fail",
                         "diff_hash": diff_hash,
                         "diff_summary": declaration.get("deliverable", {})
@@ -386,6 +461,8 @@ def one_attempt(cfg: LoopConfig, history: History, dry_run: bool,
               f"/{cfg.max_attempts_per_signature}")
         return "retry"
     finally:
+        # B-05: retry 时快照改动已通过 _last_base 提交保留，worktree 可安全移除；
+        # dry_run 保留现场供排查。
         wt.discard() if not dry_run else None
 
 

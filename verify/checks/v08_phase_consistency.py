@@ -209,7 +209,11 @@ def _machines_from_model(model: dict) -> dict:
             dim_name = dim.get("dimension_name", "")
             trans = [t for t in tos
                      if t.get("entity") == ent and t.get("dimension") == dim_name]
-            machines[name] = {
+            # C-05: key 必须带维度——多维实体（如 E-XM 的 项目状态/项目阶段）
+            # 旧实现按实体名作 key，后写维度覆盖先写，主链维度静默丢失校验。
+            key = f"{name}.{dim_name}"
+            machines[key] = {
+                "entity": name,          # 实体名单独存，供相位表候选匹配
                 "dimension": dim_name,
                 "states": dim.get("states", []) or [],
                 "terminal_states": dim.get("terminal", []) or [],
@@ -234,7 +238,8 @@ def check(output: dict, spec: dict) -> CheckResult:
         return res
     hygiene = []  # spec 卫生观察（不阻断，汇总进 res.note，正式检查归 spec_lint）
 
-    for name, m in machines.items():
+    for key, m in machines.items():
+        name = m.get("entity") or key          # C-05: 相位表候选用实体名，非维度限定 key
         pmap = _phase_map(output, m, name)
         derived, anomaly_fw = _derive_phases(m)
         anomaly_fw = set(anomaly_fw)

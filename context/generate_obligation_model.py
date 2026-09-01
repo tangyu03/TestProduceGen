@@ -196,7 +196,7 @@ missing = [name for name, val in required_nodes if val is None]
 if missing:
     out = {"_context": {"fatal_error": "缺少必备节点", "missing_nodes": missing}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(0)
+    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
 
 # Precondition structure check (Step 0.3): preconditions must be object array
 fatal_precond = None
@@ -214,7 +214,7 @@ for t in p1["state_and_flow"]["transitions"]:
 if fatal_precond:
     out = {"_context": {"fatal_error": "P1 preconditions 未结构化，需 P1 v18.4+ 输出", "detail": fatal_precond}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(0)
+    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
 
 # Build state_info index (Step 0.2)
 state_lookup = {}  # entity_id -> {dimension -> set(states)}
@@ -2943,7 +2943,7 @@ self_check = {
 if not id_globally_unique or not p1_root_nodes_complete:
     out = {"_context": {"fatal_error": "self_check failed", "self_check": self_check}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(0)
+    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
 
 # Snapshot
 snapshot = {

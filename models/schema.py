@@ -280,10 +280,20 @@ class Procedure(BaseModel):
     cascade_chain: Optional[str] = None
     embedded_brs: list = Field(default_factory=list)
 
-    # Stage-attached fields (populated progressively)
-    S2_fields: "S2Fields" = Field(alias="_S2_fields")
-    S3_fields: "S3Fields" = Field(alias="_S3_fields")
-    S4_fields: "S4Fields" = Field(alias="_S4_fields")
+    # Stage-attached fields (populated progressively)。
+    # C-02: 全部给默认值——S1 刚产出、S2/S3/S4 尚未运行的中间过程字典不含这些键，
+    # 无默认值时 validate_procedure(S1 形态) 必抛 ValidationError，令所谓的
+    # invariant guard 只能等 S4 之后才跑。默认值即"尚未进入该阶段"的空态。
+    S2_fields: "S2Fields" = Field(
+        default_factory=lambda: S2Fields(
+            phase=0, phase_name="", phase_basis="", topology_level=0,
+            sort_key=[], operation_lifecycle=0, chain_depth=0,
+            type_label="", type_priority=0, dimension_priority=0),
+        alias="_S2_fields")
+    S3_fields: "S3Fields" = Field(default_factory=lambda: S3Fields(),
+                                  alias="_S3_fields")
+    S4_fields: "S4Fields" = Field(default_factory=lambda: S4Fields(),
+                                  alias="_S4_fields")
 
     model_config = {"populate_by_name": True}
 

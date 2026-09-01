@@ -311,3 +311,6 @@ print(f"RO-BR: {len([r for r in d['constraint_obligations'] if r['type']=='busin
 print(f"Judgments: {len(ctx['judgments'])}")
 print(f"Warnings in _context: {len(ctx['warnings'])}")
 print(f"\nSelf-check: {sc}")
+# C-08: 有 error 必须非零退出——CI/脚本靠 $? 判断校验是否通过，
+# 旧实现发现 20+ error 也正常退出 0，门禁形同虚设。
+sys.exit(1 if errors else 0)

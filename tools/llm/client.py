@@ -4,6 +4,7 @@ from __future__ import annotations
 Provides a centralized, reusable LLM client with support for multiple task types,
 caching, configuration management, and monitoring.
 """
+import asyncio
 import json
 import re
 import time
@@ -204,7 +205,9 @@ class LLMClient:
 
         # Check cache
         if use_cache and self._config.cache_enabled:
-            cache_key = {'messages': messages, 'temperature': temperature}
+            # B-02: 通用 key 纳入 model/max_tokens——不同模型/长度不得串读旧缓存
+            cache_key = {'messages': messages, 'temperature': temperature,
+                        'model': self._config.model, 'max_tokens': max_tokens}
             cached = self._cache.load(cache_key)
             if cached is not None:
                 self._record_metric('cache_hit')
@@ -216,7 +219,10 @@ class LLMClient:
         start_time = time.time()
         try:
             self._log(f"Calling {self._config.model}, max_tokens={max_tokens}")
-            response = call_llm_api(
+            # C-10: call_llm_api 是 urllib 同步阻塞调用——直接内联会把事件循环
+            # 卡死 180s，asyncio.gather 并发实际退化为串行且无法取消。丢线程池。
+            response = await asyncio.to_thread(
+                call_llm_api,
                 api_base=self._config.api_base,
                 api_key=self._config.api_key,
                 model=self._config.model,
@@ -225,6 +231,8 @@ class LLMClient:
                 max_tokens=max_tokens,
                 timeout=self._config.timeout,
                 max_retries=self._config.retry_max_attempts,
+                backoff_factor=self._config.retry_backoff_factor,
+                rate_limit_wait=self._config.retry_rate_limit_wait,
             )
 
             duration = time.time() - start_time
@@ -285,7 +293,9 @@ class LLMClient:
 
         # Check cache
         if use_cache and self._config.cache_enabled:
-            cache_key = {'messages': messages, 'temperature': temperature}
+            # B-02: 通用 key 纳入 model/max_tokens——不同模型/长度不得串读旧缓存
+            cache_key = {'messages': messages, 'temperature': temperature,
+                        'model': self._config.model, 'max_tokens': max_tokens}
             cached = self._cache.load(cache_key)
             if cached is not None:
                 self._record_metric('cache_hit')
@@ -297,7 +307,9 @@ class LLMClient:
         start_time = time.time()
         try:
             self._log(f"Calling {self._config.model} (JSON), max_tokens={max_tokens}")
-            response_text = call_llm_api(
+            # C-10: 同步 urllib 调用丢线程池，避免阻塞事件循环。
+            response_text = await asyncio.to_thread(
+                call_llm_api,
                 api_base=self._config.api_base,
                 api_key=self._config.api_key,
                 model=self._config.model,
@@ -306,6 +318,8 @@ class LLMClient:
                 max_tokens=max_tokens,
                 timeout=self._config.timeout,
                 max_retries=self._config.retry_max_attempts,
+                backoff_factor=self._config.retry_backoff_factor,
+                rate_limit_wait=self._config.retry_rate_limit_wait,
             )
 
             duration = time.time() - start_time

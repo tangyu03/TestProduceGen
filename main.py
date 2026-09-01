@@ -1029,6 +1029,25 @@ def _extract_clauses(source_ref: str) -> list[str]:
     return list(set(_CLAUSE_RE.findall(source_ref)))
 
 
+def _parent_of(clause: str) -> str:
+    """条款的直接父级：4.9.7(3)b → 4.9.7(3) → 4.9.7 → 4.9 → 4 → ""。
+
+    逐级剥离：字母子项后缀（b/c…）、(n) 括号子项、'.数字' 点号子项。
+    """
+    import re as _re
+    s = clause
+    m = _re.match(r"^(.*?)[a-z]$", s)
+    if m:
+        return m.group(1)
+    m = _re.match(r"^(.*)\(\d+\)$", s)
+    if m:
+        return m.group(1)
+    m = _re.match(r"^(.*)\.\d+$", s)
+    if m:
+        return m.group(1)
+    return ""
+
+
 def _build_clause_coverage(procedures: list[dict], coverage_model: dict) -> dict:
     """方案 B: 构建 clause → source_ids → proc_ids 追溯索引。
 
@@ -1156,27 +1175,23 @@ def _build_clause_coverage(procedures: list[dict], coverage_model: dict) -> dict
     # Step 5: 条款层级聚合 — 父条款的覆盖状态 = 自身 OR 任一子条款覆盖
     # 例如 4.9.7(3)b 已覆盖 → 4.9.7(3) 和 4.9.7 都视为覆盖
     # 这避免了"父条款 missing 但所有子条款都 covered"的误报
+    # C-01: 旧实现是单遍循环且只认 '(' '[' 后缀——字母后缀（4.9.7(3)b → 4.9.7(3)）
+    # 与 '.' 分隔（4.9.7 → 4.9）永不传播，直接父级恒漏报。改为按父级链
+    # 迭代到不动点：4.9.7(3)b → 4.9.7(3) → 4.9.7 → 4.9 逐级向上传播。
     clause_keys = sorted(clauses_output.keys())
-    for clause in clause_keys:
-        if clauses_output[clause]["covered"]:
-            continue
-        # 检查是否有已覆盖的子条款（clause 后缀匹配）
-        prefix = clause
-        has_covered_child = False
-        for other in clause_keys:
-            if other != clause and other.startswith(prefix):
-                # 确保是子条款（如 4.9.7 的子条款 4.9.7(3)b）
-                rest = other[len(prefix):]
-                if rest and rest[0] in '([':
-                    if clauses_output[other]["covered"]:
-                        has_covered_child = True
-                        break
-        if has_covered_child:
-            clauses_output[clause]["covered"] = True
-            clauses_output[clause]["covered_by_child"] = True
-            # 重新计算 covered_count
-            covered_count += 1
-            uncovered_count -= 1
+    changed = True
+    while changed:
+        changed = False
+        for clause in clause_keys:
+            if not clauses_output[clause]["covered"]:
+                continue
+            p = _parent_of(clause)
+            if p in clauses_output and not clauses_output[p]["covered"]:
+                clauses_output[p]["covered"] = True
+                clauses_output[p]["covered_by_child"] = True
+                covered_count += 1
+                uncovered_count -= 1
+                changed = True
 
     return {
         "summary": {

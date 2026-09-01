@@ -43,6 +43,12 @@ def _givens_text(p) -> str:
 
 def _probe_for_key(key: str, value: str) -> str:
     tpl = _KEY_PROBE_TEMPLATES.get(key, "{}")
+    # C-04: 值已自带模板前缀（spec 中 pre_pause 值形如 "暂停前状态=已建立"，
+    # 模板又是 "暂停前状态={}"）——直接套会拼出 "暂停前状态=暂停前状态=已建立"
+    # 恒不命中，整类组合漏报。若值已带前缀则原样使用，不再重复加。
+    prefix = tpl[:-2]  # "暂停前状态="
+    if prefix and value.startswith(prefix):
+        return normalize_text(value)
     return normalize_text(tpl.format(value))
 
 
@@ -102,7 +108,18 @@ def check(output: dict, spec: dict) -> CheckResult:
                     continue
                 mode = str(combo.get("match_mode", "all")).lower()
                 hits = sum(1 for _, probe in probes if probe and probe in g_text)
-                violated = (hits == len(probes)) if mode == "all" else (hits > 0)
+                # C-03: 只认 all/any/exact 三种模式，未知模式不得静默降级为 any
+                # （旧实现 else 分支把未注册模式全部按 any 处理，两边都不可信）。
+                if mode == "exact":
+                    violated = hits == len(probes)   # 本库探针为子串匹配，exact 即全命中
+                elif mode == "all":
+                    violated = hits == len(probes)
+                elif mode == "any":
+                    violated = hits > 0
+                else:
+                    hygiene.append(f"constraint '{cname}' combo has unknown "
+                                   f"match_mode={mode!r}; skipped (not silent-any)")
+                    violated = False
                 if violated:
                     res.fail({"temp_id": p.get("temp_id"),
                               "constraint": cname,
