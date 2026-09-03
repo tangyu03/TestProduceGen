@@ -50,6 +50,10 @@ class AgentState(MessagesState):
                                     # 否则 LangGraph schema 过滤会剔除 S0 节点返回, 下游
                                     # lifecycle/base_data 判别 (domain_precondition) 拿不到
     virtual_entities: Optional[dict]  # VE name → {original_entity, parent_entity, transitions, context, co_ids, resolved_phase, trigger_source}
+    phase_table_by_branch: Optional[dict]  # branch_value → {primary_dimension, state_to_phase, ...}
+                                          # (branch_values 生命周期归属改造；S0.3b 产出，S1 _resolve_phase 消费)
+    dep_state_phase_map_by_branch: Optional[dict]  # branch_value → entity → dim → state → phase
+                                          # (branch_values 生命周期归属改造；S0.4b 产出，S1/S3 消费)
 
     # ── P2 Coverage Model (consumed by S1) ────────────────────────────
     coverage_model: Optional[dict]  # Full P2 coverage model

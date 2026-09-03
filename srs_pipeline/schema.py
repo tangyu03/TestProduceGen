@@ -155,6 +155,12 @@ OBJECT_SCHEMA: dict[str, list[Field]] = {
         Field("direction", "direction", LLM, enum=DIRECTIONS, required=True),
         Field("priority", "priority", LLM, enum=PRIORITIES, required=True),
         Field("source_ref", "source_ref", LLM, required=True),
+        Field("branch_values", "branch_values", LLM, required=False,
+              desc="分支归属（生命周期身份）：该转换仅在哪些分支值下存在"
+                   "（平行流程分立/分立型专属）。空/缺省＝无归属（共享模板："
+                   "每个分支值下都实例化，或非分支转换）。P2 拆分层消费——"
+                   "有归属不展开变体、直接落 branch_path；S0/S1 相位按归属"
+                   "分支的 lifecycle 链取值"),
         Field("note", "note", LLM_MUTATED, mutation_conditions="C03; _assign_ids",
               desc="C03 追加降级 comment；comment 引用被 _assign_ids 改写"),
     ],

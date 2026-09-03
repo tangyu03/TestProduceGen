@@ -12,7 +12,7 @@ from models.state import AgentState
 from models.schema import ObligationType
 from nodes.s0_topology import (
     _build_entity_name_map, _build_role_map, _build_managed_entities,
-    TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS,
+    TYPE_PRIORITY_MAP, TYPE5_SPECIAL_OPS, _collect_same_action_groups,
 )
 from nodes.field_validation import parse_entity_constraints, enrich_procedure_steps
 from nodes.signal_validation import generate_signal_v_steps
@@ -823,10 +823,30 @@ def _is_type5_retained(eo: dict, state: AgentState) -> bool:
 # Phase resolution
 # ---------------------------------------------------------------------------
 
-def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentState) -> dict:
+def _branch_value_of(to: dict) -> str:
+    """branch_values 生命周期归属改造：取 TO 的分支归属值（branch_path 首个 value）。
+
+    归属式 TO（P2 branch_values 产物）带 branch_path=[{dimension, value}]；
+    共享/非分支 TO 返回空串 → 相位查询走全局链，行为与旧版一致。
+    """
+    for bp in ((to or {}).get("branch_path") or []):
+        v = (bp or {}).get("value")
+        if v:
+            return str(v)
+    return ""
+
+
+def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentState,
+                   branch_value: str = "") -> dict:
     """Phase resolution — V2 logic.
 
+    branch_value（branch_values 生命周期归属改造）：非空时优先在 per-branch
+    视图（phase_table_by_branch / dep_state_phase_map_by_branch）中查询——
+    平行生命周期各分支有自己的相位链（如测量审核链 报名中=0 → 待开始=1），
+    归属转换在链内单调；miss 时落回全局链（退化安全，行为与旧版一致）。
+
     Lookup order:
+    0. Per-branch view (branch_value 非空时)
     1. Primary entity → phase_table.state_to_phase
     2. Dependent / VE entity → dep_state_phase_map
     3. Contextual phase rules → return special contextual marker
@@ -838,6 +858,20 @@ def _resolve_phase(entity: str, dimension: str, state_value: str, state: AgentSt
     ctx_rules = state.get("contextual_phase_rules", {})
     ves = state.get("virtual_entities", {})
     parent_map = state["entity_parent"]
+
+    # 0. Per-branch view（branch_values 改造）
+    if branch_value:
+        ptb = (state.get("phase_table_by_branch") or {}).get(branch_value) or {}
+        b_dim_map = (ptb.get("state_to_phase") or {}).get(dimension, {})
+        if state_value in b_dim_map:
+            return {"phase": b_dim_map[state_value],
+                    "basis": f"phase_table_by_branch.{branch_value}.{dimension}.{state_value}"}
+        b_dep = (state.get("dep_state_phase_map_by_branch") or {}).get(branch_value) or {}
+        if entity in b_dep:
+            b_map = (b_dep.get(entity) or {}).get(dimension, {})
+            if state_value in b_map:
+                return {"phase": b_map[state_value],
+                        "basis": f"dep_state_phase_map_by_branch.{branch_value}.{entity}.{dimension}.{state_value}"}
 
     # Primary entity
     if entity == primary:
@@ -984,7 +1018,8 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
                                   to_state: str, state: AgentState,
                                   is_rollback: bool = False,
                                   preconditions: list[str] | None = None,
-                                  constraint_predicate: dict | None = None) -> dict:
+                                  constraint_predicate: dict | None = None,
+                                  branch_value: str = "") -> dict:
     """Phase assignment for transition procedures.
 
     Forward edges: phase = to_state's phase (entering a new stage).
@@ -999,16 +1034,16 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
     (same-entity state machine progress shouldn't bump).
     """
     if is_rollback and from_state:
-        result = _resolve_phase(entity, dimension, from_state, state)
+        result = _resolve_phase(entity, dimension, from_state, state, branch_value=branch_value)
         if result.get("phase", 0) > 0:
             base_phase = result["phase"]
             base_basis = result["basis"]
         else:
-            result = _resolve_phase(entity, dimension, to_state, state)
+            result = _resolve_phase(entity, dimension, to_state, state, branch_value=branch_value)
             base_phase = result.get("phase", 0)
             base_basis = result.get("basis", "")
     else:
-        result = _resolve_phase(entity, dimension, to_state, state)
+        result = _resolve_phase(entity, dimension, to_state, state, branch_value=branch_value)
         base_phase = result.get("phase", 0)
         base_basis = result.get("basis", "")
 
@@ -1371,6 +1406,7 @@ def _generate_type1(state: AgentState, indices: dict,
                 is_rollback=is_rollback,
                 preconditions=to.get("preconditions"),
                 constraint_predicate=to.get("constraint_predicate"),
+                branch_value=_branch_value_of(to),
             )
             dim_priority = _get_dimension_priority(te["entity"], dimension, state)
 
@@ -2416,6 +2452,218 @@ def _generate_type3(state: AgentState, indices: dict) -> list[dict]:
 # Type5 — CRUD Operation procedures (filtered)
 # ---------------------------------------------------------------------------
 
+def _apply_stage_hint(eo: dict, phase: int, phase_basis: str, givens: list,
+                      state: dict, id_to_zh: dict):
+    """2026-09 排序修复 C：无状态前置操作（file/数据类 EO）的阶段挂载。
+
+    背景：这类 EO（无 dimension/from/to）唯一锚点是 object_existence→
+    创建态，"上传证书/上传结果通知单"等项目末期操作被钉死在项目刚创建
+    的相位（排序问题 2 的根因：一切"对项目的操作"退化为"项目已存在"）。
+
+    stage_hint 由 P1 数据层声明、P2 透传到 EO，形态二选一：
+      {"anchor_state": {"entity": "E-BMJL", "dimension": "报名记录状态",
+                        "state": "报告/证书已发布"}}
+      {"min_phase": 6}
+    解析规则：
+      - anchor_state：相位 = dep_state_phase_map[entity][dim][state]（主实体
+        走 phase_table），并追加该状态的 restatement Given；
+      - min_phase：相位下限；
+      - 最终相位 = max(当前相位, 提示相位)——提示只上提、不前移（对象创建
+        相位仍是硬下限）；无提升时返回原值，行为与旧版一致。
+    """
+    hint = eo.get('stage_hint') if isinstance(eo, dict) else None
+    if not isinstance(hint, dict):
+        return phase, phase_basis, givens
+
+    dep_map = state.get('dep_state_phase_map') or {}
+    phase_table = state.get('phase_table') or {}
+    primary = state.get('primary_entity') or ''
+    hinted = None
+    new_given = None
+
+    a = hint.get('anchor_state')
+    if isinstance(a, dict) and a.get('state'):
+        h_ent = a.get('entity') or (eo.get('entity', '') if isinstance(eo, dict) else '')
+        h_dim = a.get('dimension') or ''
+        h_state = str(a['state']).strip()
+        ph = None
+        if h_ent == primary and h_dim:
+            ph = (phase_table.get('state_to_phase', {}) or {}).get(h_dim, {}).get(h_state)
+        elif h_dim:
+            ph = (dep_map.get(h_ent, {}) or {}).get(h_dim, {}).get(h_state)
+        else:
+            dm_ent = dep_map.get(h_ent, {}) or {}
+            cands = [dm[h_state] for dm in dm_ent.values()
+                     if isinstance(dm, dict) and h_state in dm]
+            ph = min(cands) if cands else None
+        if ph is not None:
+            hinted = int(ph)
+            zh = (id_to_zh or {}).get(h_ent, h_ent)
+            new_given = _make_given(
+                target=h_ent, state=h_state,
+                description=f"{zh}处于{h_state}状态",
+                given_type="restatement",
+            )
+
+    if hinted is None and hint.get('min_phase') is not None:
+        try:
+            hinted = int(hint['min_phase'])
+        except (TypeError, ValueError):
+            hinted = None
+
+    if hinted is None:
+        return phase, phase_basis, givens
+
+    givens2 = list(givens)
+    if new_given is not None and not any(
+        isinstance(g, dict) and g.get('target') == new_given['target']
+        and g.get('state') == new_given['state']
+        for g in givens2
+    ):
+        givens2.append(new_given)
+
+    if hinted > phase:
+        return hinted, f"stage_hint.{eo.get('id', '')}.P{hinted}", givens2
+    return phase, phase_basis, givens2
+
+
+# ── 2026-09 排序修复 A v2：同动作组相位对齐（S1 后、事实相位）──────────
+_TID_RE = __import__('re').compile(r'^(T-\d+)')
+
+
+def _proc_base_tids_s1(proc: dict) -> set:
+    """基础转换号提取（'T-041' ← 'T-041[a]' / 'T-041a'）。与 S3 同规则。"""
+    tids = set()
+    for sid in proc.get('source_ids', []) or []:
+        if isinstance(sid, str):
+            m = _TID_RE.match(sid)
+            if m:
+                tids.add(m.group(1))
+    return tids
+
+
+def _align_same_action_phases_post_s1(
+    proc_dicts: list, cm: dict, state: dict, warnings: list,
+) -> int:
+    """同动作组（link_op_transition 声明绑定）的跨实体视图相位对齐。
+
+    v1 在 S0 内对齐 dep_state_phase_map，已废弃，两个必然缺陷：
+      a) S0 时主实体视图只能读 raw phase_table，真实相位要等 S1 的入口
+         门控/state_ref 提升（收样 084：raw 待发样=P0，经 结果待提交 门
+         → P3）。S0 阶段算不出 P3，对齐目标系统性偏低（实测 P4→P0）；
+      b) 对主实体成员写 dep_state_phase_map[primary] 直接 KeyError（主
+         实体不在 map 中），且 S1 解析主实体相位不读 dep_map，写了无效。
+
+    v2 在 S1 全部过程生成后运行，此时 _S2_fields.phase 已含入口门控
+    提升的真实值（事实相位，无需推断）：
+      组来源     仅 link_op_transition 声明绑定（_collect_same_action_groups
+                 v2 范围）；transition_relations 证据组是同一维度时间线上
+                 的先后状态，不收集。
+      目标相位   组内主实体视图成员的最小真实相位（主时间线=单一事实源）；
+                 组内无主实体视图时取组内最小（入口锚定最接地，默认前向
+                 +1 最不可信）。
+      对齐对象   非主实体的组成员 proc（按 source_ids 基础转换号归属）＋
+                 锚定在被对齐转换 to 态上的同实体 proc（验证类 proc 不携带
+                 组成员 tid，但相位派生自同一 dep_map 条目——以 phase_basis
+                 的 dep_state_phase_map 锚定串或 restatement Given 认定）。
+      不可触碰   主实体成员 proc（它们定义事实相位）与 phase_table。
+    同步更新 dep_state_phase_map 中被对齐的 to 态条目，保持状态一致。
+    Returns aligned proc count.
+    """
+    groups = _collect_same_action_groups(cm)
+    if not groups:
+        return 0
+
+    to_by_tid: dict = {}
+    for to in cm.get('transition_obligations', []) or []:
+        if isinstance(to, dict):
+            tid = to.get('id') or to.get('transition_id') or ''
+            if tid:
+                to_by_tid[tid] = to
+
+    primary = state.get('primary_entity') or ''
+    dep_map = state.get('dep_state_phase_map') or {}
+    aligned = 0
+
+    for group in groups:
+        gset = set(group)
+        members = []
+        for p in proc_dicts:
+            if ((p.get('_S2_fields') or {}).get('phase') is None):
+                continue
+            if _proc_base_tids_s1(p) & gset:
+                members.append(p)
+        if not members:
+            continue
+
+        member_ids = {id(p) for p in members}
+        primary_members = [p for p in members
+                           if primary and p.get('entity', '') == primary]
+        pool = primary_members or members
+        try:
+            target = min(p['_S2_fields']['phase'] for p in pool)
+        except (KeyError, TypeError, ValueError):
+            continue
+
+        def _set_phase(p: dict, new_phase: int, tag: str) -> None:
+            nonlocal aligned
+            s2 = p.setdefault('_S2_fields', {})
+            old = s2.get('phase')
+            if old == new_phase:
+                return
+            s2['phase'] = new_phase
+            s2['phase_name'] = f"P{new_phase}"
+            s2['phase_basis'] = f"align.same_action.P{new_phase}"
+            aligned += 1
+            warnings.append(
+                f"S1.A 同动作相位对齐({tag}): {p.get('temp_id', '?')}"
+                f"({p.get('entity', '?')}) P{old}→P{new_phase} "
+                f"(组 {','.join(group)})")
+
+        # 1) 组成员 proc（主实体成员定义事实相位，永不修改）
+        for p in members:
+            if primary and p.get('entity', '') == primary:
+                continue
+            _set_phase(p, target, '成员')
+
+        # 2) 锚定传播：to 态被对齐的非主实体转换，其同实体锚定 proc 一并对齐
+        for tid in group:
+            t = to_by_tid.get(tid)
+            if not t:
+                continue
+            ent = t.get('entity', '')
+            if not ent or (primary and ent == primary):
+                continue
+            dim = t.get('dimension', '')
+            to_s = t.get('to')
+            to_s = to_s.strip() if isinstance(to_s, str) else ''
+            if not to_s:
+                continue
+            old = (((dep_map.get(ent, {}) or {}).get(dim, {}) or {}).get(to_s))
+            if old is None or old == target:
+                continue
+            anchor_basis = f"dep_state_phase_map.{ent}.{dim}.{to_s}"
+            for p in proc_dicts:
+                if p.get('entity', '') != ent or id(p) in member_ids:
+                    continue
+                s2 = p.get('_S2_fields') or {}
+                if s2.get('phase') != old:
+                    continue
+                gated = any(
+                    isinstance(g, dict) and g.get('target') == ent
+                    and g.get('state') == to_s
+                    for g in (p.get('givens') or []))
+                if gated or anchor_basis in str(s2.get('phase_basis') or ''):
+                    _set_phase(p, target, f'锚定传播 {ent}.{dim}.{to_s}')
+            # dep_map 条目同步（S2 contextual/诊断读取一致性）
+            try:
+                dep_map.setdefault(ent, {}).setdefault(dim, {})[to_s] = target
+            except AttributeError:
+                pass
+
+    return aligned
+
+
 def _creation_proc_phase(creation_to_ids: list | None, prior_procs: list | None) -> int | None:
     """创建转换对应 Type1 过程的实际相位 (经 ⑬ precondition bump 后的真实值).
 
@@ -2611,6 +2859,10 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                     creation_phase = _creation_proc_phase(dp_ref["creation_to_ids"], prior_procs)
                     if creation_phase is not None and creation_phase > ve_phase:
                         ve_phase = creation_phase
+                # 2026-09 排序修复 C：stage_hint 阶段挂载（只上提不前移）
+                ve_phase, _sb, givens = _apply_stage_hint(
+                    eo, ve_phase, f"VE.{ve_name}.resolved_phase", givens,
+                    state, id_to_zh)
                 # 字段数据上下文（同非 VE 分支）：VE 的字段清单属原实体。
                 if op_name.startswith(_FORM_ENTRY_CRUD_VERBS):
                     fg = _field_data_given(
@@ -2697,6 +2949,11 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                     target=entity, state="存在",
                     description="操作入口可用",
                 )]
+            # 2026-09 排序修复 C：stage_hint 阶段挂载（只上提不前移）。
+            # 上传证书/结果通知单等 file/数据类操作由数据层声明目标阶段，
+            # 替代"对象已存在=创建态"的唯一定锚。
+            phase, phase_basis, givens = _apply_stage_hint(
+                eo, phase, phase_basis, givens, state, id_to_zh)
             # 字段数据上下文：创建/编辑表单的字段清单（P1 entity_details 派生）。
             # 数据驱动、无领域词；系统自动赋值字段（申请部门"根据登录用户自动获
             # 取…"）一并列入，补全表单语义。删除/查询/确认等无表单操作不补。
@@ -4416,6 +4673,16 @@ def s1_generation_node(state: AgentState) -> dict:
     # S3 co_enabler 绑定。注入在 model_dump 之后 (dedup/校验都已完成)。
     proc_dicts = [p.model_dump(by_alias=True) for p in valid_procs]
     _inject_co_ids(proc_dicts, cos)
+
+    # ── 2026-09 排序修复 A v2：同动作组相位对齐（S1 后、事实相位）────
+    # 此时全部 proc 的 _S2_fields.phase 已含入口门控/state_ref 提升的真实
+    # 值，对齐目标不再依赖 S0 的 raw phase_table 推断（v1 缺陷，见函数
+    # docstring）。S2 排序消费对齐后的相位。
+    _n_aligned = _align_same_action_phases_post_s1(proc_dicts, cm, state, warnings)
+    if _n_aligned:
+        warnings.append(
+            f"S1.A: aligned {_n_aligned} proc phases across same-action groups")
+
     return {
         # BUGFIX #26: removed dead `hasattr(p, 'model_dump')` branch —
         # validate_procedures always returns Pydantic Procedure models.

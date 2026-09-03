@@ -114,7 +114,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 (c) 先于 (d)。A 仅为 B 发起人/持有人/操作对象 → 降 (d)。B 核心产出属第三方 C → 改 C→B。判 (b) 且 1:1 → 复核“每条 A 必有 B”，可能无 B → 归 (d)。dependent 三步判定：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
 
-**编码契约**：判 (b) 的 B（拆行/伴随创建成员），创建转换前置须含指向 A 的 state_ref——状态值＝A 同动作创建转换的 to，锚点实体须真正持有该维度；编码约定而非业务门禁，无条件落盘。
+**(b) 伴随创建/拆行的编码契约**：判 (b) 的 B 实体（A 创建时 B 自动入 initial），其创建转换（`frm=None`）**一律携带指向父记录已存在态的 `state_ref` 前置**，不论业务上是否另有门禁——例如前置 `ref={entity: A, dimension: <A 的实际状态维度>, state: <A 处该态>}`（t03 的「项目状态=报名中」身兼两职：业务门禁＋伴随证据）。这是**编码约定**（供 C17 driven_by_a 豁免与 C03 端点校验机械识别），不是要求每次都找到独立业务理由。**锚点实体必须指向父实体实际持有该状态的维度**：项目状态挂在 E-XM 而非 E-PJ，写错锚点（如 `E-PJ.项目状态`）会触发 C03 端点告警并把 state_ref 降级为 constraint——伴随证据即断，C17 将回退误判 (d)。
 
 ---
 
@@ -124,7 +124,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 准入判据＝可锚定转换：影响状态机路径或转换结果的取值维度才是分支维度；纯查询/筛选仅作实体属性。分支 values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。**注册前逐 value 自查台账锚点**：value 指向路径在台账无事件 → 该维度降为实体属性，或按 document_scope 补最小创建链。
 
-target_transition＝语义描述，以目标转换的 action 词为锚（如“能力验证计划发布转换”）；同动作多转换时括注 frm→to 或分支值消歧。框架装配时自动匹配为精确 tid，模型免回填。指向规则：路径分歧各 value 指向该分支值路径首条转换；结果差异各 value 指向共用转换。
+target_transition＝语义描述，以目标转换的 action 词为锚（如“能力验证计划发布转换”）；同动作多转换时括注 frm→to 或分支值消歧。框架装配时自动匹配为精确 tid，模型免回填。指向规则：路径分歧各 value 指向该分支值路径**首条（创建）转换**；结果差异各 value 指向共用转换。**target_transition 只锚首条**——分支路径的后续转换归属由转换层 `branch_values` 声明承载（见 §3.1 归属铁律），不在 branches 里重复。
 
 ---
 
@@ -149,8 +149,9 @@ direction（首条命中）：
 priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主路径；P2＝辅助/低频/易用性；无法判定 → P1＋inferred。
 
 分支落盘（同一动作因分支值立出不同转换）：
-- 路径分歧（中间状态或 to 落点不同）→ 分立多条，各 precondition 携带对应分支值（ptype=constraint），role 取该分支值执行者，标签同根后缀（t02/t02b），`traits` 含 `branch`，`note.branch_dimension` 填维度名。表格行并列状态值（如“已核查、待发样”）＝多落点快照 → 按落点分立转换。
-- 结果差异（路径与 to 落点均相同、仅可观察结果的措辞不同）→ 共用一条，`expected_results` 逐值用“若{维度}={值}，则…”，`traits` 含 `branch`，`note.branch_dimension` 填维度名。
+- 路径分歧（中间状态或 to 落点不同）→ 分立多条，各 precondition 携带对应分支值（ptype=constraint），**各声明 `branch_values=[<本条仅在的分支值>]`**，role 取该分支值执行者，标签同根后缀（t02/t02b），`traits` 含 `branch`，`note.branch_dimension` 填维度名。表格行并列状态值（如“已核查、待发样”）＝多落点快照 → 按落点分立转换。
+- 结果差异（路径与 to 落点均相同、仅可观察结果的措辞不同）→ 共用一条，`expected_results` 逐值用“若{维度}={值}，则…”，`traits` 含 `branch`，`note.branch_dimension` 填维度名，**不声明 branch_values**（共享模板，每个分支值下都存在）。
+- **归属铁律（branch_values）**：`branch_values` 是转换的生命周期身份——声明后 P2 不再为它做 all-values 展开（防止单分支专属转换被拆出语义上不存在的伪变体），S0/S1 相位在归属分支的 lifecycle 链内取值。**归属判定自查**：转换的 (frm,to) 路径仅在某分支值的流程表/叙述中出现 → 必须声明；两分支流程表都有该动作与路径 → 共享不声明。**平行流程型分支**（同一实体维度在文档多章节各有完整生命周期，且与首条转换的落点次序互逆，如 §19.1 能力验证“设计方案编制→待开始后计划发布→报名中” vs §19.3 测量审核“受理报名→报名中后设计方案编制→待开始”）：除两条创建转换互为分立外，**每条分支各自的全部后续推进转换都必须声明 `branch_values=[<分支值>]`**（如能力验证链的计划发布/预通知/结果报告，测量审核链的设计方案编制立项/预通知/结果通知单）；仅两分支共有的收尾动作（如发放结果报告和证书）保持共享不声明。漏声明后果：另一分支的子图被污染成环，相位链退化为枚举序（与漏报等价的事故）。
 
 ### 3.2 preconditions → `precond(text, ptype, ref, note)`
 
@@ -230,7 +231,9 @@ m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, op
 #    "inferred": ["进行中"], "note": {"comment": "依据…"}}
 m.add_structural(frm, to, relation_type, cardinality, ownership_dimension, desc, confidence="high", note=None)
 m.add_branch_dimension(dimension, entity, values, impact_scope, evidence, branches)
-m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expected_results, traits, direction, priority, source_ref, note=None)
+m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expected_results, traits, direction, priority, source_ref, note=None, branch_values=None)
+# branch_values＝分支归属（生命周期身份）：仅在哪些分支值下存在；
+# 空/缺省＝共享模板（每个分支值下都实例化）或非分支转换。见 §3.1 归属铁律。
 m.add_causal(frm, to, desc, trigger, trigger_source, evidence_transitions=None, rollback_propagation=False, confidence="high", note=None)  # frm/to＝实体 ID
 m.add_invalid(iid, entity, frm, to, reason, source_ref)
 m.add_xc(xid, source_entity, source_transition, source_state, target_entity, target_dimension, target_condition, desc, source_ref, target_transition=None, xc_source)
@@ -250,7 +253,7 @@ state_ref(entity, dimension, state)
 
 ## 7 专项
 
-分支：途经中间状态或 to 落点不同 → 分立；路径与落点均相同、仅结果措辞不同 → 共用＋“若”句式。
+分支：途经中间状态或 to 落点不同 → 分立；路径与落点均相同、仅结果措辞不同 → 共用＋“若”句式。分立条一律自查归属：单分支专属 → `branch_values=[<分支值>]`；两分支皆有 → 不声明。平行流程型分支的全链归属自查见 §3.1 归属铁律。
 system 触发：超时/自动触发且改变状态的事件 role="system"，traits 可含 `time_sensitive`，走完整推导。
 
 ---
@@ -262,10 +265,7 @@ system 触发：超时/自动触发且改变状态的事件 role="system"，trai
 m.add_event(eid="e01", entity="E-XM", dimension="项目状态", action="设计方案编制",
             actor="策划人员", precondition="初始", consequence="待开始",
             source_ref="19.1方案设计阶段")
-# 拆行成员（判 b 编码契约——前置携带父记录已存在态）：
-m.add_event(eid="e06", entity="E-JFTZ", dimension="缴费通知单状态", action="报名",
-            actor="能力验证参加者", precondition="初始；E-BMJL.报名待审核", consequence="未发送",
-            source_ref="19.1实施阶段")
+
 # 台账（跨主体门禁形态）：
 # add_event("e49","E-PJ","评价状态","评价人员评价","评价人员","待评价；E-BMJL.结果已提交","评价中","20.7.1.2")
 m.add_trans(
@@ -297,7 +297,23 @@ m.add_trans(
     source_ref="4.2审批流程",
     note={"branch_dimension": "任务级别", "comment": "源自 e03；路径分歧：B级分支，Step2 value=B级→本条"},
 )
-# t03b：待审批→待二级审批（C级，action=一级审批通过），同型续写
+# t03b：待审批→待二级审批（C级，action=一级审批通过），同型续写（branch_values=["C级"]）
+
+# 平行流程型（分支归属铁律）：测量审核专属的立项转换——声明 branch_values，
+# P2 不展开变体；若漏声明，能力验证子图会混入本条（报名中→待开始）成环，
+# 相位链退化为枚举序：
+m.add_trans(
+    tid="t44", entity="E-XM", dimension="项目状态",
+    frm="报名中", to="待开始", action="设计方案编制", role="策划人员",
+    preconditions=[precond(text="项目处于报名中状态", ptype="state_ref",
+                           ref=state_ref("E-XM", "项目状态", "报名中"))],
+    expected_results=["项目状态变为待开始"],
+    traits=["branch"], direction="forward", priority="P0",
+    source_ref="19.3项目状态分析",
+    branch_values=["测量审核"],
+    note={"branch_dimension": "项目类型", "comment": "源自e44；序判④，语义forward（测量审核先受理报名后方案设计立项）；测量审核分支（与t01设计方案编制创建分立）"},
+)
+# 共享收尾（两分支流程表都有发放结果报告和证书）→ 不声明 branch_values
 
 # 结果差异型（落点同，仅措辞异）：
 m.add_trans(

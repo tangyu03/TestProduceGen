@@ -196,7 +196,7 @@ missing = [name for name, val in required_nodes if val is None]
 if missing:
     out = {"_context": {"fatal_error": "缺少必备节点", "missing_nodes": missing}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
+    sys.exit(2)  # C-08: fatal 路径必须非零退出（v2 排序修复附带修正：原为 0，fatal_error 无下游消费方，静默产出半截覆盖模型）
 
 # Precondition structure check (Step 0.3): preconditions must be object array
 fatal_precond = None
@@ -214,7 +214,7 @@ for t in p1["state_and_flow"]["transitions"]:
 if fatal_precond:
     out = {"_context": {"fatal_error": "P1 preconditions 未结构化，需 P1 v18.4+ 输出", "detail": fatal_precond}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
+    sys.exit(2)  # C-08: fatal 路径必须非零退出（v2 排序修复附带修正：原为 0，fatal_error 无下游消费方，静默产出半截覆盖模型）
 
 # Build state_info index (Step 0.2)
 state_lookup = {}  # entity_id -> {dimension -> set(states)}
@@ -359,6 +359,23 @@ for e in p1["domain_model"]["entities"]:
             "coverage_priority": "medium",
             "source_ref": op_src
         }
+        # 2026-09 排序修复 · 透传 P1 op→转换关联与阶段挂载提示：
+        #   - linked_transitions: P1 link_op_transition 登记的同动作绑定。
+        #     此前在 P2 边界被丢弃，S0/S3 无法感知"同一因果事件的多个实体
+        #     视图"（如 样品核查→[T-017,T-018]），相位对齐与同动作共置均
+        #     失效（排序问题 1/3 的根因之一）。
+        #   - stage_hint: file/数据类 EO 的阶段挂载提示。无状态前置的操作
+        #     此前一律锚定对象创建态（上传证书被钉死在"待开始"——排序问题
+        #     2 的根因）。数据驱动；无 hint 时行为与旧版一致。
+        if isinstance(op, dict):
+            _lt = op.get("linked_transitions")
+            if _lt:
+                eo["linked_transitions"] = list(_lt)
+            _sh = op.get("stage_hint")
+            if _sh:
+                eo["stage_hint"] = _sh
+                add_judgment("EO-CRU stage_hint",
+                             f"{eo['id']}({op_name}) 透传 stage_hint={_sh}")
         entity_obligations.append(eo)
 
 # ============ Step 2: transition_obligations ============
@@ -1333,6 +1350,46 @@ for t in p1["state_and_flow"]["transitions"]:
     matched_dims = get_matched_dims(t)
     # Derive direction (root-cause replacement for keyword-based edge classification)
     direction = derive_direction(t)
+    # ---- branch_values 归属式（branch_values 生命周期归属改造）----
+    # 转换声明了"仅在哪些分支值下存在"→ 生命周期归属，不做 all-values 展开：
+    # 展开会为单分支专属转换制造语义上不存在的伪变体（如给测量审核专用的
+    # 设计方案编制 报名中→待开始 拆出能力验证变体，与 T-001 创建撞动作撞落点）。
+    # 单一 TO 直接带 branch_path，下游 givens 渲染 / per-branch 相位按归属消费。
+    _bv = t.get("branch_values") or []
+    if _bv:
+        _bd_dim = (t.get("note") or {}).get("branch_dimension", "") or next(
+            (_bd["dimension"] for _bd in p1_bd
+             if any(v in (_bd.get("values") or []) for v in _bv)), "")
+        to = {
+            "id": t["id"],
+            "entity": t["entity"],
+            "dimension": t["dimension"],
+            "from": t["from"],
+            "to": t["to"],
+            "action": t["action"],
+            "role": t["role"],
+            "preconditions": preconds,
+            "expected_results": t.get("expected_results", []),
+            "risk_traits": t.get("traits", []),
+            "direction": direction,
+            "priority": t.get("priority", ""),
+            "source_ref": t.get("source_ref"),
+            "note": t.get("note", {}),
+            "coverage_priority": coverage_priority,
+            "is_repeatable": is_repeat,
+            "repeat_condition": repeat_cond,
+            "side_effects": side_effects,
+            "branch_path": [{"dimension": _bd_dim, "value": v} for v in _bv],
+            "branch_values": list(_bv),
+            "precondition_state_refs": precond_refs,
+        }
+        transition_obligations.append(to)
+        to_index[t["id"]] = to
+        add_judgment(
+            "branch_values owned",
+            f"{t['id']}: 生命周期归属 {_bv}，不展开变体（伪变体抑制）"
+        )
+        continue
     if not matched_dims:
         # No split
         to = {
@@ -2595,7 +2652,11 @@ def _is_resume_transition(t: dict) -> bool:
 
 def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
                                    states: list, initial: str,
-                                   terminals: list) -> dict:
+                                   terminals: list,
+                                   only_branch: str = "") -> dict:
+    # only_branch（branch_values 生命周期归属改造）：非空时仅纳入
+    # 共享转换（无 branch_values 归属）∪ 归属含 only_branch 的转换，
+    # 由此每个分支值得到自己的 lifecycle 子图与相位链。
     """BFS over forward edges to derive {state: phase}.
 
     Returns a dict mapping each state in `states` to an int phase.
@@ -2619,6 +2680,14 @@ def _derive_phase_mapping_for_dim(entity_id: str, dim_name: str,
     for t in p1.get("state_and_flow", {}).get("transitions", []):
         if t.get("entity") != entity_id or t.get("dimension") != dim_name:
             continue
+        # per-branch 子图过滤（branch_values 改造）：共享 ∪ 归属含 only_branch。
+        # 创建转换种子同样被过滤——每条分支以自己的入口转换落点为链 initial
+        # （如测量审核链 报名中=0、待开始=1，能力验证链 待开始=0、报名中=1），
+        # 平行生命周期的次序冲突在链内不再出现。
+        if only_branch:
+            t_bv = t.get("branch_values") or []
+            if t_bv and only_branch not in t_bv:
+                continue
         # Derive direction for this P1 transition (same logic as Step 2)
         direction = derive_direction(t)
         # Skip resume transitions entirely (target already phased)
@@ -2825,6 +2894,62 @@ for entity_id, ent_info in state_info.items():
                 f"terminals pinned to {max(pm.values()) if pm else 0}"
             )
 
+# ---- per-branch phase_mapping（branch_values 生命周期归属改造）----
+# 生命周期型分支维度判据：branches[].target_transition 全部指向 frm=None
+# 创建转换（每条分支有自己的生命周期入口）。运行时选择型（审核通过/退回等）
+# 的 target 指向共用转换或为回填偏差，不建 per-branch 链。
+p1_trans_by_id = {t["id"]: t for t in p1.get("state_and_flow", {}).get("transitions", [])}
+_lifecycle_bds = []
+for bd in p1_bd:
+    branches = bd.get("branches") or []
+    tgt_ids = [br.get("target_transition") for br in branches if br.get("target_transition")]
+    if not tgt_ids:
+        continue
+    if all(
+        tid in p1_trans_by_id and p1_trans_by_id[tid].get("from") is None
+        for tid in tgt_ids
+    ):
+        _lifecycle_bds.append(bd)
+
+_by_branch_count = 0
+for bd in _lifecycle_bds:
+    _ent = bd.get("entity", "")
+    _ent_info = state_info.get(_ent)
+    if not _ent_info:
+        continue
+    # 注意：bd["dimension"] 是分支维度名（如"项目类型"），不是状态维度名。
+    # 相位宿主 = 该实体的状态维度（如"项目状态"）；对该实体的全部状态维度
+    # 建 per-branch 链（lifecycle bd 的实体仅主实体级，维度数≤2，开销可忽略）。
+    for _dim_info in _ent_info.get("dimensions", []):
+        _dim = _dim_info.get("dimension_name", "")
+        by_branch = {}
+        for br in bd.get("branches") or []:
+            b = br.get("value", "")
+            if not b:
+                continue
+            # 分支链 initial = 该分支入口创建转换的落点（如 T-040 → 报名中）
+            tgt_to = (p1_trans_by_id.get(br.get("target_transition", "")) or {}).get("to", "")
+            pm_b = _derive_phase_mapping_for_dim(
+                _ent,
+                _dim,
+                _dim_info.get("states", []),
+                tgt_to or _dim_info.get("initial", ""),
+                _dim_info.get("terminal", []),
+                only_branch=b,
+            )
+            if pm_b:
+                by_branch[b] = pm_b
+        if by_branch:
+            _dim_info["phase_mapping_by_branch"] = by_branch
+            _by_branch_count += 1
+            add_judgment(
+                "phase_mapping_by_branch",
+                f"{_ent}.{_dim}: per-branch lifecycle phases for {sorted(by_branch)}; "
+                + "; ".join(
+                    f"{b} initial={min(v, key=v.get)}" for b, v in by_branch.items() if v
+                )
+            )
+
 # Snapshot extension: include phase_mapping coverage
 _phase_coverage = {
     "dims_with_phase_mapping": _phase_mapping_count,
@@ -2943,7 +3068,7 @@ self_check = {
 if not id_globally_unique or not p1_root_nodes_complete:
     out = {"_context": {"fatal_error": "self_check failed", "self_check": self_check}}
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(2)  # C-08: fatal 路径必须非零退出，CI/脚本靠 $? 感知
+    sys.exit(2)  # C-08: fatal 路径必须非零退出（v2 排序修复附带修正：原为 0，fatal_error 无下游消费方，静默产出半截覆盖模型）
 
 # Snapshot
 snapshot = {

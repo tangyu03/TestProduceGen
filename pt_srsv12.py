@@ -3,7 +3,7 @@ from srs_pipeline import DomainModel, N, attr, op, precond, state_ref
 
 def build() -> DomainModel:
     m = DomainModel(source="网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704",
-                    document_scope="§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样→已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号")
+                    document_scope="§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样），测量审核默认返样并于结果报告回收行复核样品；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号")
     # ===== 事件台账（§2）=====
     m.set_prohibition_config(config={
         "action_verbs": ["编制", "发布", "报名", "审核", "审批", "批准", "缴费", "开具", "核查", "发放", "发送",
@@ -78,13 +78,13 @@ def build() -> DomainModel:
                 actor="能力验证参加者", precondition="结果待提交", consequence="结果已提交",
                 source_ref="19.1实施阶段；19.3项目状态分析")
     m.add_event(eid="e22", entity="E-YP", dimension="样品状态", action="参加者测试与结果提交",
-                actor="能力验证参加者", precondition="已核查", consequence="已还样",
+                actor="能力验证参加者", precondition="已核查", consequence="待核查",
                 source_ref="19.1实施阶段")
     m.add_event(eid="e23", entity="E-YP", dimension="样品状态", action="参加者测试与结果提交",
                 actor="能力验证参加者", precondition="已核查", consequence="已核查",
                 source_ref="19.1实施阶段")
     m.add_event(eid="e24", entity="E-YP", dimension="样品状态", action="参加者测试与结果提交，返样",
-                actor="能力验证参加者", precondition="已核查", consequence="已还样",
+                actor="能力验证参加者", precondition="已核查", consequence="待核查",
                 source_ref="19.3项目状态分析")
     m.add_event(eid="e25", entity="E-BMJL", dimension="报名记录状态", action="结果报告回收",
                 actor="项目管理员", precondition="结果已提交", consequence="结果已提交",
@@ -96,7 +96,7 @@ def build() -> DomainModel:
                 actor="能力验证参加者", precondition="结果退回修改", consequence="结果已提交",
                 source_ref="19.1报告编制和结果通知")
     m.add_event(eid="e28", entity="E-YP", dimension="样品状态", action="结果报告回收",
-                actor="项目管理员", precondition="已还样", consequence="已核查",
+                actor="项目管理员", precondition="待核查", consequence="已核查",
                 source_ref="19.3项目状态分析")
     m.add_event(eid="e29", entity="E-BMJL", dimension="报名记录状态", action="撤销报名",
                 actor="能力验证参加者", precondition="报名待审核", consequence="已撤销",
@@ -372,9 +372,9 @@ def build() -> DomainModel:
         type="core", tags=["collaborative"],
         attributes=[],
         state_dimensions=[
-            {"dimension_name": "样品状态", "states": ["待核查", "已核查", "已还样"],
+            {"dimension_name": "样品状态", "states": ["待核查", "已核查"],
              "initial": "待核查", "terminal": [], "inferred": [],
-             "note": {"comment": "19.3枚举'待核查，已核查'；19.1流程表'已还样、待核查/无需还样'快照限定词'已还样'立为独立状态（返样/归还后待复核，与首次'待核查'区分——19.3返样行'待核查'即此义）；发放前核查（待核查→已核查）与还样后复核（已还样→已核查，t28测量审核）构成批次循环，无终态；流程表'样品状态'列状态值由本维度承载，物流值并入E-BMJL.报名记录样品状态"}},
+             "note": {"comment": "19.3枚举'待核查，已核查'；发放前核查与还样后复核构成批次循环，两状态互有出边，无终态；流程表'样品状态'列状态值由本维度承载，物流值并入E-BMJL.报名记录样品状态"}},
         ],
         operations=[
             op("样品制备", "crud", ["编制样品制备方案，执行样品制备"], "11样品制备人员",
@@ -695,10 +695,10 @@ def build() -> DomainModel:
                                {"value": "退回", "target_transition": "结果报告回收退回转换（结果已提交→结果退回修改）"},
                            ])
     m.add_branch_dimension(dimension="还样情况", entity="E-YP", values=["已还样", "无需还样"],
-                           impact_scope="E-YP.样品状态参加者测试落点分立（已还样/已核查自环）",
+                           impact_scope="E-YP.样品状态参加者测试落点分立（待核查/已核查自环）",
                            evidence="③；隐式分支：19.1参加者测试与结果提交行样品状态列斜杠'已还样、待核查/无需还样'，维度名为语义命名，分支值取表格原文",
                            branches=[
-                               {"value": "已还样", "target_transition": "参加者测试与结果提交转换（已核查→已还样）"},
+                               {"value": "已还样", "target_transition": "参加者测试与结果提交转换（已核查→待核查）"},
                                {"value": "无需还样", "target_transition": "参加者测试与结果提交自环转换（已核查→已核查）"},
                            ])
     m.add_branch_dimension(dimension="审核结果", entity="E-LAB", values=["通过", "退回修改"],
@@ -995,17 +995,17 @@ def build() -> DomainModel:
     )
     m.add_trans(
         tid="t22", entity="E-YP", dimension="样品状态",
-        frm="已核查", to="已还样", action="参加者测试与结果提交", role="能力验证参加者",
+        frm="已核查", to="待核查", action="参加者测试与结果提交", role="能力验证参加者",
         preconditions=[
             precond(text="样品处于已核查状态", ptype="state_ref",
                     ref=state_ref("E-YP", "样品状态", "已核查")),
             precond(text="还样情况=已还样", ptype="constraint",
                     note={"comment": "分支值条件"}),
         ],
-        expected_results=["样品归还后状态变为已还样，待复核"],
+        expected_results=["样品归还后状态变为待核查，进入复核"],
         traits=["branch"], direction="forward", priority="P1",
         source_ref="19.1实施阶段",
-        note={"branch_dimension": "还样情况", "comment": "源自e22；序判④，语义forward（还样复核循环），语义优先；路径分歧：已还样分支，Step2 value=已还样→本条；19.1表格'已还样、待核查'快照限定词'已还样'立为独立状态（与首次待核查区分），复核落点见t28；还样情况维度名为语义命名，分支值取表格原文；19.4'归还样品：参加者归还样品'"},
+        note={"branch_dimension": "还样情况", "comment": "源自e22；序判④，语义forward（还样复核循环），语义优先；路径分歧：已还样分支，Step2 value=已还样→本条；还样情况维度名为语义命名，分支值取19.1表格斜杠原文；19.4'归还样品：参加者归还样品'"},
     )
     m.add_trans(
         tid="t23", entity="E-YP", dimension="样品状态",
@@ -1023,15 +1023,15 @@ def build() -> DomainModel:
     )
     m.add_trans(
         tid="t24", entity="E-YP", dimension="样品状态",
-        frm="已核查", to="已还样", action="参加者测试与结果提交，返样", role="能力验证参加者",
+        frm="已核查", to="待核查", action="参加者测试与结果提交，返样", role="能力验证参加者",
         preconditions=[
             precond(text="样品处于已核查状态", ptype="state_ref",
                     ref=state_ref("E-YP", "样品状态", "已核查")),
         ],
-        expected_results=["返样后样品状态变为已还样，待复核"],
+        expected_results=["返样后样品状态变为待核查"],
         traits=["branch"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "comment": "源自e24；序判④，语义forward（返样复核循环），语义优先；测量审核分支（与t22能力验证已还样分支同落点）；19.3返样行'待核查'按'已还样'立态（返样待复核，与首次待核查区分），复核落点t28"},
+        note={"branch_dimension": "项目类型", "comment": "源自e24；序判④，语义forward（返样复核循环），语义优先；测量审核分支（与t22能力验证已还样分支同落点）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1076,15 +1076,15 @@ def build() -> DomainModel:
     )
     m.add_trans(
         tid="t28", entity="E-YP", dimension="样品状态",
-        frm="已还样", to="已核查", action="结果报告回收", role="项目管理员",
+        frm="待核查", to="已核查", action="结果报告回收", role="项目管理员",
         preconditions=[
-            precond(text="样品处于已还样状态", ptype="state_ref",
-                    ref=state_ref("E-YP", "样品状态", "已还样")),
+            precond(text="样品处于待核查状态", ptype="state_ref",
+                    ref=state_ref("E-YP", "样品状态", "待核查")),
         ],
         expected_results=["回收复核后样品状态变为已核查"],
         traits=[], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"comment": "源自e28；③；测量审核结果报告回收行样品状态列'已核查'（已还样复核）；能力验证同行列空缺，按平行流程共用"},
+        note={"comment": "源自e28；③；测量审核结果报告回收行样品状态列'已核查'（还样后复核）；能力验证同行列空缺，按平行流程共用"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1772,14 +1772,14 @@ def build() -> DomainModel:
              constrained_entity="E-BMJL",
              note={"comment": "'不可篡改'为日志属性描述非禁止措辞，不判强制；平台级留痕机制，作用目标覆盖全部关键操作；§5修复C24：entities_involved补为audit traits覆盖实体（t08/t38→E-BMJL、t17→E-YP、t34→E-PJ、t54→E-LAB、t62→E-TASK）；全局审计规则无单一操作对象，constrained_entity取E-BMJL为代表实体（t08/t38两条审计转换落点，与b25代表实体口径一致）"})
     # —— §5修复新增（C20）：[还样情况]分支维度BR承载 ——
-    # 裁决依据（二选一之「保留维度+新建BR」）：[还样情况]由t22（已核查→已还样）/t23（已核查自环）锚定，
+    # 裁决依据（二选一之「保留维度+新建BR」）：[还样情况]由t22（已核查→待核查）/t23（已核查自环）锚定，
     # 属19.1表格'参加者测试与结果提交'行样品状态列斜杠'/'体现的真实流转路径分歧（非配置项、非快照并列），
     # 降级为属性将丢失t22/t23的路径分歧语义，故保留add_branch_dimension声明、新建b28承载；
     # t22/t23的note.branch_dimension标注已存在，无需同步改动。
     m.add_br(bid="b28", category="validation",
-             desc="参加者测试与结果提交节点样品流转分已还样/无需还样两种情形：已还样的样品归还后状态由已核查变为已还样（返样待复核），测量审核经结果报告回收复核转已核查；无需还样的样品不归还、状态保持已核查",
+             desc="参加者测试与结果提交节点样品流转分已还样/无需还样两种情形：已还样的样品归还后状态由已核查回到待核查进入复核循环，无需还样的样品不归还、状态保持已核查",
              entities_involved=["E-YP"], source_ref="19.1实施阶段；19.4能力验证参加者工作流程分析；19.3项目状态分析", restrictive=False,
-             note={"inferred": True, "comment": "§5修复C20新增：综合19.1表格'参加者测试与结果提交'行样品状态列斜杠'已还样、待核查/无需还样'、19.4'归还样品：参加者归还样品'流程步骤与19.3平行行'参加者测试与结果提交，返样'→已还样（返样待复核，测量审核默认返样）合成，非原文规范性成句故inferred标注；支持性流转规则无强制措辞，restrictive缺省False；category判数据校验（流转情形判定）"},
+             note={"inferred": True, "comment": "§5修复C20新增：综合19.1表格'参加者测试与结果提交'行样品状态列斜杠'已还样、待核查/无需还样'、19.4'归还样品：参加者归还样品'流程步骤与19.3平行行'参加者测试与结果提交，返样'→待核查（测量审核默认返样）合成，非原文规范性成句故inferred标注；支持性流转规则无强制措辞，restrictive缺省False；category判数据校验（流转情形判定）"},
              branch_dimensions=["还样情况"])
     # 回访②：prohibit_keywords核对——7条短语均有产物source_ref可定位（b08不能同时为空/b05不允许删除/b06不可以删除/b04不可被选择/b23不能大于当前缴费金额/b16不能查看和修改其他评价人员的评价结果/b26操作不可恢复）
     # 回访③：document_scope核对——全部产物source_ref均落在声明章节内（§3.2/§3.6/§5–§18/§19.1–§19.4/§20.2–§20.11/§21.3）

@@ -1351,12 +1351,12 @@
     },
     {
       "id": "T-007",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": null,
       "to": "未发送",
-      "action": "报名",
-      "role": "能力验证参加者",
+      "action": "能力验证计划发布",
+      "role": "项目管理员",
       "preconditions": [],
       "expected_results": [
         "通知状态初始化为未发送"
@@ -1366,7 +1366,7 @@
       "priority": "P0",
       "source_ref": "19.1实施阶段",
       "note": {
-        "comment": "源自e07；⓪创建转换；e03同动作拆行；测量审核共用（19.3发票开具行预通知状态列'未发送'为驻留值）；维度名19.3枚举称'通知状态'、流程表列称'预通知状态'，两口径并列"
+        "comment": "源自e07；⓪创建转换；与T-002同动作拆行（一动作多状态面）；测量审核共用（19.3发票开具行预通知状态列'未发送'为驻留值）；维度名19.3枚举称'通知状态'、流程表列称'预通知状态'，两口径并列；§5修复C32：本条原为E-BMJL创建（action=报名，行4），19.1预通知状态列首现于'能力验证计划发布'行（行3，值未发送）早于报名记录创建，出生点被后移，故维度迁E-XM项目级、动作改锚首现动作'能力验证计划发布'，E-BMJL不再承载初始化（e07/T-007同步改写）"
       },
       "coverage_priority": "critical",
       "is_repeatable": false,
@@ -1435,7 +1435,7 @@
         },
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "短信通知：您xxx项目的报名信息审核通过，请知悉"
         }
       ],
@@ -1525,7 +1525,7 @@
       "side_effects": [
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "短信通知：您xxx项目的报名信息审核未通过，请知悉"
         }
       ],
@@ -1785,7 +1785,7 @@
     },
     {
       "id": "T-014",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "未发送",
       "to": "待确认",
@@ -1796,7 +1796,7 @@
           "text": "通知处于未发送状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "未发送"
           }
@@ -1814,7 +1814,7 @@
       "source_ref": "19.1实施阶段",
       "note": {
         "branch_dimension": "项目类型",
-        "comment": "源自e14；③；能力验证分支（与T-050已审核变为待确认分立，同action不同frm），Step2 value=能力验证变为本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值"
+        "comment": "源自e14；③；能力验证分支（与T-050已审核变为待确认分立，同action不同frm），Step2 value=能力验证变为本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -1831,7 +1831,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "未发送",
           "raw_text": "通知处于未发送状态",
@@ -2059,7 +2059,7 @@
     },
     {
       "id": "T-019",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "待确认",
       "to": "已确认",
@@ -2070,7 +2070,7 @@
           "text": "通知处于待确认状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "待确认"
           }
@@ -2084,7 +2084,7 @@
       "priority": "P0",
       "source_ref": "19.1实施阶段；19.4能力验证参加者工作流程分析",
       "note": {
-        "comment": "源自e19；③；落点值取19.1/19.3样品发放行预通知状态列'已确认'，动作短语取19.4参加者流程；两流程共用"
+        "comment": "源自e19；③；落点值取19.1/19.3样品发放行预通知状态列'已确认'，动作短语取19.4参加者流程；两流程共用；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "critical",
       "is_repeatable": false,
@@ -2093,7 +2093,7 @@
       "branch_path": [],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "待确认",
           "raw_text": "通知处于待确认状态",
@@ -2124,7 +2124,7 @@
           "text": "通知处于已确认状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "已确认"
           }
@@ -2153,7 +2153,7 @@
         },
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "短信通知：您xxxx项目的样品已发出，请知悉"
         }
       ],
@@ -2167,7 +2167,7 @@
           "pattern": "p1_inherited"
         },
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "已确认",
           "raw_text": "通知处于已确认状态",
@@ -2520,7 +2520,7 @@
       "side_effects": [
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "短信通知：您xxxx项目测试报告审核未通过，请知悉"
         }
       ],
@@ -3020,7 +3020,7 @@
       "side_effects": [
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "点击后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭"
         }
       ],
@@ -3245,7 +3245,7 @@
       "side_effects": [
         {
           "target_entity": "E-XM",
-          "target_dimension": "项目状态",
+          "target_dimension": "通知状态",
           "effect_desc": "短信通知：您xxx项目的结果通知单已发布，请知悉"
         }
       ],
@@ -3599,7 +3599,7 @@
     },
     {
       "id": "T-046",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "未发送",
       "to": "待审核",
@@ -3610,7 +3610,7 @@
           "text": "通知处于未发送状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "未发送"
           }
@@ -3629,7 +3629,7 @@
       "note": {
         "branch_dimension": "项目类型",
         "inferred": true,
-        "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）"
+        "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3646,7 +3646,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "未发送",
           "raw_text": "通知处于未发送状态",
@@ -3657,7 +3657,7 @@
     },
     {
       "id": "T-047",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "待审核",
       "to": "已审核",
@@ -3668,7 +3668,7 @@
           "text": "通知处于待审核状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "待审核"
           }
@@ -3692,7 +3692,7 @@
       "note": {
         "branch_dimension": "通知审核结果",
         "inferred": true,
-        "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过变为本条"
+        "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过变为本条；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3709,7 +3709,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "待审核",
           "raw_text": "通知处于待审核状态",
@@ -3719,7 +3719,7 @@
       "constraint_predicate": {
         "type": "field_equals",
         "field": {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "name": "通知审核结果"
         },
         "value": "通过"
@@ -3727,7 +3727,7 @@
     },
     {
       "id": "T-048",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "待审核",
       "to": "退回",
@@ -3738,7 +3738,7 @@
           "text": "通知处于待审核状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "待审核"
           }
@@ -3762,7 +3762,7 @@
       "note": {
         "branch_dimension": "通知审核结果",
         "inferred": true,
-        "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回变为本条；退回后修改重提见T-049"
+        "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回变为本条；退回后修改重提见T-049；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3779,7 +3779,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "待审核",
           "raw_text": "通知处于待审核状态",
@@ -3789,7 +3789,7 @@
       "constraint_predicate": {
         "type": "field_equals",
         "field": {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "name": "通知审核结果"
         },
         "value": "退回"
@@ -3797,7 +3797,7 @@
     },
     {
       "id": "T-049",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "退回",
       "to": "待审核",
@@ -3808,7 +3808,7 @@
           "text": "通知处于退回状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "退回"
           }
@@ -3825,7 +3825,7 @@
       "source_ref": "19.3项目状态分析",
       "note": {
         "inferred": true,
-        "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链"
+        "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3842,7 +3842,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "退回",
           "raw_text": "通知处于退回状态",
@@ -3853,7 +3853,7 @@
     },
     {
       "id": "T-050",
-      "entity": "E-BMJL",
+      "entity": "E-XM",
       "dimension": "通知状态",
       "from": "已审核",
       "to": "待确认",
@@ -3864,7 +3864,7 @@
           "text": "通知处于已审核状态",
           "type": "state_ref",
           "ref": {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "已审核"
           }
@@ -3881,7 +3881,7 @@
       "source_ref": "19.3项目状态分析",
       "note": {
         "branch_dimension": "项目类型",
-        "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与T-014未发送变为待确认分立，同action不同frm）"
+        "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与T-014未发送变为待确认分立，同action不同frm）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
       },
       "coverage_priority": "high",
       "is_repeatable": false,
@@ -3898,7 +3898,7 @@
       ],
       "precondition_state_refs": [
         {
-          "entity": "E-BMJL",
+          "entity": "E-XM",
           "dimension": "通知状态",
           "state": "已审核",
           "raw_text": "通知处于已审核状态",
@@ -5747,12 +5747,29 @@
       "type": "business_rule",
       "constraint_id": "XC-004",
       "entities_involved": [
+        "E-XM",
+        "E-BMJL"
+      ],
+      "category": "validation",
+      "restrictive": false,
+      "description": "[来源于XC-004] 状态=待发样; precondition'通知处于已确认状态'",
+      "enforcement": "mandatory",
+      "ref_to_existing_br": null,
+      "coverage_priority": "medium",
+      "suggested_action": "验证跨实体约束: 状态=待发样",
+      "source_ref": "19.1实施阶段；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知"
+    },
+    {
+      "id": "RO-BR-032",
+      "type": "business_rule",
+      "constraint_id": "XC-005",
+      "entities_involved": [
         "E-BMJL",
         "E-PJ"
       ],
       "category": "validation",
       "restrictive": false,
-      "description": "[来源于XC-004] 状态=待评价; precondition'报名记录处于结果已提交状态'",
+      "description": "[来源于XC-005] 状态=待评价; precondition'报名记录处于结果已提交状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
@@ -5760,16 +5777,16 @@
       "source_ref": "20.7.1.2协同评价；20.7.1项目列表"
     },
     {
-      "id": "RO-BR-032",
+      "id": "RO-BR-033",
       "type": "business_rule",
-      "constraint_id": "XC-005",
+      "constraint_id": "XC-006",
       "entities_involved": [
         "E-TASK",
         "E-BMJL"
       ],
       "category": "validation",
       "restrictive": false,
-      "description": "[来源于XC-005] 状态=报告/证书审核中; precondition'审核任务处于审批通过状态'",
+      "description": "[来源于XC-006] 状态=报告/证书审核中; precondition'审核任务处于审批通过状态'",
       "enforcement": "mandatory",
       "ref_to_existing_br": null,
       "coverage_priority": "medium",
@@ -5777,29 +5794,12 @@
       "source_ref": "19.1报告编制和结果通知；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知"
     },
     {
-      "id": "RO-BR-033",
-      "type": "business_rule",
-      "constraint_id": "XC-006",
-      "entities_involved": [
-        "E-LAB",
-        "E-XM"
-      ],
-      "category": "validation",
-      "restrictive": false,
-      "description": "[来源于XC-006] 状态=None; precondition'实验室处于启用状态'",
-      "enforcement": "mandatory",
-      "ref_to_existing_br": null,
-      "coverage_priority": "medium",
-      "suggested_action": "验证跨实体约束: 状态=None",
-      "source_ref": "19.3项目状态分析"
-    },
-    {
       "id": "RO-BR-034",
       "type": "business_rule",
       "constraint_id": "XC-007",
       "entities_involved": [
         "E-LAB",
-        "E-BMJL"
+        "E-XM"
       ],
       "category": "validation",
       "restrictive": false,
@@ -5809,15 +5809,32 @@
       "coverage_priority": "medium",
       "suggested_action": "验证跨实体约束: 状态=None",
       "source_ref": "19.3项目状态分析"
+    },
+    {
+      "id": "RO-BR-035",
+      "type": "business_rule",
+      "constraint_id": "XC-008",
+      "entities_involved": [
+        "E-LAB",
+        "E-BMJL"
+      ],
+      "category": "validation",
+      "restrictive": false,
+      "description": "[来源于XC-008] 状态=None; precondition'实验室处于启用状态'",
+      "enforcement": "mandatory",
+      "ref_to_existing_br": null,
+      "coverage_priority": "medium",
+      "suggested_action": "验证跨实体约束: 状态=None",
+      "source_ref": "19.3项目状态分析"
     }
   ],
   "_context": {
     "source": "P1 v19.2",
-    "generated_at": "2026-09-03T17:14:51.107699+08:00",
+    "generated_at": "2026-09-03T18:04:43.730798+08:00",
     "p1_meta": {
       "version": "19.2",
       "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704",
-      "document_scope": "§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样变为已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号",
+      "document_scope": "§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样变为已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号；§5修复C32：通知状态（流程表列称'预通知状态'）经19.1首现行'能力验证计划发布'（行3，值未发送）判定为项目级状态面，承载实体由E-BMJL迁至E-XM，创建转换t07动作锚定'能力验证计划发布'",
       "has_critical_ambiguity": false,
       "consistency_check": "warnings",
       "ambiguity_list": [
@@ -5833,7 +5850,7 @@
           "amb_id": "AMB-FIX-002",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-004（源自 T-032 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-004（源自 T-020 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -5841,7 +5858,7 @@
           "amb_id": "AMB-FIX-003",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-005（源自 T-038 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-005（源自 T-032 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -5849,7 +5866,7 @@
           "amb_id": "AMB-FIX-004",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-006（源自 T-040 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-006（源自 T-038 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -5857,7 +5874,7 @@
           "amb_id": "AMB-FIX-005",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C04: 补镜像 XC-007（源自 T-041 的跨实体前置条件）",
+          "description": "C04: 补镜像 XC-007（源自 T-040 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -5865,7 +5882,7 @@
           "amb_id": "AMB-FIX-006",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-XM.新增项目 为属性操作",
+          "description": "C04: 补镜像 XC-008（源自 T-041 的跨实体前置条件）",
           "assumption": "",
           "suggestion": ""
         },
@@ -5873,7 +5890,7 @@
           "amb_id": "AMB-FIX-007",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-XM.删除项目 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-XM.新增项目 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5881,7 +5898,7 @@
           "amb_id": "AMB-FIX-008",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BMJL.修改备注 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-XM.删除项目 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5889,7 +5906,7 @@
           "amb_id": "AMB-FIX-009",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 自动回填 E-YP.样品制备 变为 T-012",
+          "description": "C12: 未命中候选，自动标注 E-BMJL.修改备注 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5897,7 +5914,7 @@
           "amb_id": "AMB-FIX-010",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-YP.出入库登记 为属性操作",
+          "description": "C12: 自动回填 E-YP.样品制备 变为 T-012",
           "assumption": "",
           "suggestion": ""
         },
@@ -5905,7 +5922,7 @@
           "amb_id": "AMB-FIX-011",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-PJ.评价 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-YP.出入库登记 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5913,7 +5930,7 @@
           "amb_id": "AMB-FIX-012",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-PJ.保存历史 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-PJ.评价 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5921,7 +5938,7 @@
           "amb_id": "AMB-FIX-013",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-TASK.签章 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-PJ.保存历史 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5929,7 +5946,7 @@
           "amb_id": "AMB-FIX-014",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-JFTZ.编制缴费通知 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-TASK.签章 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5937,7 +5954,7 @@
           "amb_id": "AMB-FIX-015",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-LAB.删除实验室 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-JFTZ.编制缴费通知 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5945,7 +5962,7 @@
           "amb_id": "AMB-FIX-016",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BZ.修改标准库 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-LAB.删除实验室 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5953,7 +5970,7 @@
           "amb_id": "AMB-FIX-017",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BZ.删除标准库 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-BZ.修改标准库 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5961,7 +5978,7 @@
           "amb_id": "AMB-FIX-018",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BZ.新增测试项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-BZ.删除标准库 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5969,7 +5986,7 @@
           "amb_id": "AMB-FIX-019",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BZ.修改测试项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-BZ.新增测试项 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5977,7 +5994,7 @@
           "amb_id": "AMB-FIX-020",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-BZ.删除测试项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-BZ.修改测试项 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5985,7 +6002,7 @@
           "amb_id": "AMB-FIX-021",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-ZLY.新增测试项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-BZ.删除测试项 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -5993,7 +6010,7 @@
           "amb_id": "AMB-FIX-022",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-ZLY.删除测试项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-ZLY.新增测试项 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -6001,7 +6018,7 @@
           "amb_id": "AMB-FIX-023",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-CYX.另存常用 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-ZLY.删除测试项 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
@@ -6009,12 +6026,20 @@
           "amb_id": "AMB-FIX-024",
           "severity": "minor",
           "concept": "Step6 自动修复",
-          "description": "C12: 未命中候选，自动标注 E-CYX.删除常用项 为属性操作",
+          "description": "C12: 未命中候选，自动标注 E-CYX.另存常用 为属性操作",
           "assumption": "",
           "suggestion": ""
         },
         {
           "amb_id": "AMB-FIX-025",
+          "severity": "minor",
+          "concept": "Step6 自动修复",
+          "description": "C12: 未命中候选，自动标注 E-CYX.删除常用项 为属性操作",
+          "assumption": "",
+          "suggestion": ""
+        },
+        {
+          "amb_id": "AMB-FIX-026",
           "severity": "minor",
           "concept": "Step6 自动修复",
           "description": "C12: 未命中候选，自动标注 E-TZGG.维护通知公告 为属性操作",
@@ -6055,7 +6080,7 @@
           "state_ref_unresolved_count": 0
         },
         "step5_invalid_transitions": 0,
-        "step5_cross_entity": 7,
+        "step5_cross_entity": 8,
         "step5_business_rules": 28
       }
     },
@@ -6067,7 +6092,7 @@
           "能力验证",
           "测量审核"
         ],
-        "impact_scope": "E-XM.项目状态、E-BMJL.报名记录状态、E-BMJL.通知状态、E-YP.样品状态路径分立",
+        "impact_scope": "E-XM.项目状态、E-BMJL.报名记录状态、E-XM.通知状态、E-YP.样品状态路径分立",
         "evidence": "③；隐式分支：19.1能力验证与19.3测量审核平行流程表格列体现，20.8.3.1项目类型下拉选项'能力验证、测量审核'命名",
         "branches": [
           {
@@ -6267,9 +6292,9 @@
             "T-063"
           ],
           "cross_entity": [
-            "XC-005",
             "XC-006",
-            "XC-007"
+            "XC-007",
+            "XC-008"
           ],
           "business_rules": [
             "BR-003",
@@ -6287,13 +6312,13 @@
       },
       {
         "dimension": "通知审核结果",
-        "entity": "E-BMJL",
+        "entity": "E-XM",
         "values": [
           "通过",
           "退回"
         ],
-        "impact_scope": "E-BMJL.通知状态预通知审核落点分立（已审核/退回）",
-        "evidence": "③；隐式分支：19.3作业指导书行预通知状态列'待审核/退回/已审核'斜杠取值维度体现",
+        "impact_scope": "E-XM.通知状态预通知审核落点分立（已审核/退回）",
+        "evidence": "③；隐式分支：19.3作业指导书行预通知状态列'待审核/退回/已审核'斜杠取值维度体现；§5修复C32：维度随E-XM.通知状态迁项目级",
         "branches": [
           {
             "value": "通过",
@@ -6379,9 +6404,9 @@
             "T-063"
           ],
           "cross_entity": [
-            "XC-005",
             "XC-006",
-            "XC-007"
+            "XC-007",
+            "XC-008"
           ],
           "business_rules": [
             "BR-003",
@@ -6582,6 +6607,51 @@
                 "已结束": 4
               }
             }
+          },
+          {
+            "dimension_name": "通知状态",
+            "states": [
+              "未发送",
+              "待确认",
+              "待审核",
+              "退回",
+              "已审核",
+              "已批准",
+              "已确认"
+            ],
+            "initial": "未发送",
+            "terminal": [
+              "已确认"
+            ],
+            "phase_mapping": {
+              "未发送": 0,
+              "待确认": 1,
+              "待审核": 2,
+              "退回": 3,
+              "已审核": 4,
+              "已批准": 5,
+              "已确认": 6
+            },
+            "phase_mapping_by_branch": {
+              "能力验证": {
+                "未发送": 0,
+                "待确认": 1,
+                "已确认": 2,
+                "待审核": 0,
+                "退回": 0,
+                "已审核": 0,
+                "已批准": 0
+              },
+              "测量审核": {
+                "未发送": 0,
+                "待确认": 1,
+                "待审核": 2,
+                "退回": 3,
+                "已审核": 4,
+                "已批准": 5,
+                "已确认": 6
+              }
+            }
           }
         ]
       },
@@ -6635,31 +6705,6 @@
               "待收样": 1,
               "已收样": 2,
               "已确认": 3
-            }
-          },
-          {
-            "dimension_name": "通知状态",
-            "states": [
-              "未发送",
-              "待确认",
-              "待审核",
-              "退回",
-              "已审核",
-              "已批准",
-              "已确认"
-            ],
-            "initial": "未发送",
-            "terminal": [
-              "已确认"
-            ],
-            "phase_mapping": {
-              "未发送": 0,
-              "待确认": 1,
-              "待审核": 2,
-              "退回": 3,
-              "已审核": 4,
-              "已批准": 5,
-              "已确认": 6
             }
           },
           {
@@ -6941,7 +6986,7 @@
         "id": "E-XM",
         "name": "项目",
         "type": "core",
-        "desc": "能力验证/测量审核项目载体，承载项目状态流转、评价、报告与证书发放",
+        "desc": "能力验证/测量审核项目载体，承载项目状态流转、项目级预通知状态、评价、报告与证书发放",
         "attributes": [
           {
             "name": "项目类型",
@@ -7009,7 +7054,7 @@
         "id": "E-BMJL",
         "name": "报名记录",
         "type": "core",
-        "desc": "参加者对项目的报名记录，承载报名审核、结果提交、报告/证书发布、费用与发票、样品物流与预通知确认",
+        "desc": "参加者对项目的报名记录，承载报名审核、结果提交、报告/证书发布、费用与发票、样品物流（预通知确认状态面经§5修复C32迁E-XM项目级）",
         "attributes": [
           {
             "name": "报名编号",
@@ -7592,6 +7637,10 @@
       {
         "xc_id": "XC-007",
         "status": "br"
+      },
+      {
+        "xc_id": "XC-008",
+        "status": "br"
       }
     ],
     "judgments": [
@@ -7797,15 +7846,15 @@
       },
       {
         "category": "phase_mapping_derived",
+        "desc": "E-XM.通知状态: derived 7 phases, terminals pinned to 6"
+      },
+      {
+        "category": "phase_mapping_derived",
         "desc": "E-BMJL.报名记录状态: derived 9 phases, terminals pinned to 7"
       },
       {
         "category": "phase_mapping_derived",
         "desc": "E-BMJL.报名记录样品状态: derived 4 phases, terminals pinned to 3"
-      },
-      {
-        "category": "phase_mapping_derived",
-        "desc": "E-BMJL.通知状态: derived 7 phases, terminals pinned to 6"
       },
       {
         "category": "phase_mapping_derived",
@@ -7842,6 +7891,10 @@
       {
         "category": "phase_mapping_by_branch",
         "desc": "E-XM.项目状态: per-branch lifecycle phases for ['测量审核', '能力验证']; 能力验证 initial=待开始; 测量审核 initial=报名中"
+      },
+      {
+        "category": "phase_mapping_by_branch",
+        "desc": "E-XM.通知状态: per-branch lifecycle phases for ['测量审核', '能力验证']; 能力验证 initial=未发送; 测量审核 initial=未发送"
       }
     ],
     "warnings": [
@@ -7851,11 +7904,11 @@
       },
       {
         "category": "phase_mapping cycle detected",
-        "desc": "E-BMJL.报名记录状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+        "desc": "E-XM.通知状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
       },
       {
         "category": "phase_mapping cycle detected",
-        "desc": "E-BMJL.通知状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+        "desc": "E-BMJL.报名记录状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
       },
       {
         "category": "phase_mapping cycle detected",
@@ -7868,15 +7921,19 @@
       {
         "category": "phase_mapping cycle detected",
         "desc": "E-LAB.实验室状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+      },
+      {
+        "category": "phase_mapping cycle detected",
+        "desc": "E-XM.通知状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
       }
     ],
     "snapshot": {
       "to_index_size": 75,
       "co_list_size": 3,
       "xc_status_summary": {
-        "total_xc": 7,
+        "total_xc": 8,
         "as_co": 1,
-        "as_br": 6
+        "as_br": 7
       },
       "precondition_state_refs_coverage": {
         "total_preconditions": 96,
@@ -7927,8 +7984,8 @@
         "populated_anchors": [
           {
             "entity": "E-XM",
-            "dimension": "项目状态",
-            "state": "待开始"
+            "dimension": "通知状态",
+            "state": "未发送"
           },
           {
             "entity": "E-XM",
@@ -7939,6 +7996,16 @@
             "entity": "E-XM",
             "dimension": "项目状态",
             "state": "进行中"
+          },
+          {
+            "entity": "E-XM",
+            "dimension": "通知状态",
+            "state": "已审核"
+          },
+          {
+            "entity": "E-XM",
+            "dimension": "项目状态",
+            "state": "待开始"
           }
         ]
       },
@@ -8053,8 +8120,8 @@
           }
         ]
       },
-      "E-BMJL.通知审核结果": {
-        "entity": "E-BMJL",
+      "E-XM.通知审核结果": {
+        "entity": "E-XM",
         "name": "通知审核结果",
         "kind": "attribute",
         "value_type": "str",
@@ -8073,7 +8140,7 @@
         "value_closed_set": null,
         "populated_anchors": [
           {
-            "entity": "E-BMJL",
+            "entity": "E-XM",
             "dimension": "通知状态",
             "state": "待审核"
           }

@@ -238,7 +238,7 @@ class DomainModel:
 
     def add_trans(self, tid, entity, dimension, frm, to, action, role,
                   preconditions, expected_results, traits, direction,
-                  priority, source_ref, note=None):
+                  priority, source_ref, note=None, branch_values=None):
         validate_llm("trans", {"tid": tid, "entity": entity, "dimension": dimension,
                                "frm": frm, "to": to, "action": action, "role": role,
                                "preconditions": preconditions,
@@ -250,7 +250,10 @@ class DomainModel:
              "preconditions": list(preconditions),
              "expected_results": [esc(e) for e in expected_results],
              "traits": list(traits), "direction": direction, "priority": priority,
-             "source_ref": esc(source_ref), "note": _esc_note(note)}
+             "source_ref": esc(source_ref), "note": _esc_note(note),
+             # 分支归属（生命周期身份）：仅在哪些分支值下存在；空＝共享/非分支。
+             # P2 拆分层消费（有归属不展开变体），S0/S1 相位按归属分支链取值。
+             "branch_values": [str(v) for v in (branch_values or [])]}
         self.transitions.append(t)
         return self
 
@@ -449,10 +452,12 @@ class DomainModel:
 
         # ---- 文档挂载通道（必须在 errors 判断之前，C15 造假要触发中断）----
         if self.doc_text:
-            from .signals import audit_source_refs, scan
+            from .signals import audit_dimension_birth, audit_source_refs, scan
             from .reconcile import reconcile_causal, reconcile_signals
             for msg in audit_source_refs(self, self.doc_text):
                 report.error("C15", msg)                 # 引文造假 = error
+            for msg in audit_dimension_birth(self, self.doc_text):
+                report.error("C32", msg)                 # 状态面挂错实体 = error
             self.review_queue = reconcile_signals(scan(self.doc_text), self) \
                               + reconcile_causal(self)
 

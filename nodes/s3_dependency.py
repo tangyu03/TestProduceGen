@@ -5,6 +5,10 @@ Implements:
 - Strong: transition upstream + same-dim chain ordering + CO enabler + VE.co_ids
 - Weak: cross-entity side_effects (filtered by target state)
 - I23: Business temporal guards (5 rules)
+- Branch-aware binding（branch_values 生命周期归属改造）: 跨分支候选一律不
+  连边；回退边判定用归属分支的相位图；B2 容器创建边按归属消歧。
+  平行生命周期（如 E-XM 能力验证 vs 测量审核）共用同一状态词汇表但推进
+  次序互逆，“实体+状态”全局匹配会把另一分支的 proc 误认成前驱/使能者。
 - Cycle detection via graph_algo.break_cycles() — v29 #3: confidence-based
 - Final topological sort (deps-first, sort_key tiebreaker) + sequential ID assignment
 """
@@ -17,7 +21,7 @@ from context.domain_precondition import object_existence
 
 # v29 Engineering Optimization Gap 1: Fallback Observability
 from tools.fallback_log import record_fallback as _record_fallback
-from nodes.s0_topology import _build_state_pos
+from nodes.s0_topology import _build_state_pos, _collect_same_action_groups
 
 
 def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
@@ -58,12 +62,27 @@ def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
 #   4  ve_co_ids            — Virtual entity CO binding (structural)
 #   3  chain_ordering       — same-dim sort_key ordering (heuristic)
 #   3  guard5_create_use    — create-before-use heuristic (Guard 5)
-#   3  domain_precond       — Guard 7 对象存在性前置 (structural)
 #   2  guard6_precond       — precondition TEXT matching (Guard 6, fragile)
 #   1  weak_side_effect     — weak dep (always lowest)
-# C-12: 表本身移到 context/dep_confidence.py (曾与 graph_algo 内联表双表漂移,
-# domain_precond 只在 S3 注册 → break_cycles 视作未知 conf 0 优先剪错边)。
-from context.dep_confidence import DEP_CONFIDENCE, confidence_of as _confidence_of
+DEP_CONFIDENCE: dict[str, int] = {
+    "transition_upstream": 5,
+    "guard1_state_pred": 5,
+    "co_enabler": 4,
+    "co_enabler_both_lateral": 4,
+    "co_enabler_phase_inversion": 4,
+    "ve_co_ids": 4,
+    "chain_ordering": 3,
+    "guard5_create_use": 3,
+    "guard6_precond": 2,
+    "domain_precond": 3,
+    "composition_container": 3,
+    "weak_side_effect": 1,
+}
+
+
+def _confidence_of(origin: str) -> int:
+    """Return confidence score for a dep origin; unknown → 0 (lowest)."""
+    return DEP_CONFIDENCE.get(origin, 0)
 
 
 # ── Precondition state extraction (for Guard 6) ──────────────────────────
@@ -116,6 +135,391 @@ def preconditions_extract_states(precond: str) -> list[str]:
 
 
 
+# ── 2026-09 排序修复 B：容器创建边 + 同动作共置 ─────────────────────────
+# 排序问题 1（受理报名/预通知排在项目创建前）的根因：组合关系（composition）
+# 从未被排序层消费——"容器先于内容"只存在于 SRS 数据声明里（E-XM
+# —composition(high)→ E-BMJL），t41 受理报名故意不带 E-XM 门禁（诚实建模，
+# 加门禁将时序倒置），父实体绑定只能靠 t40/t41 同动作对与 composition 承载，
+# 而框架两者都不用于排序。
+# B2 把组合关系变成创建序硬约束：对每条 composition P→C，C 的所有"依赖里
+# 不含任何 P 侧 proc"的 proc 补一条指向 P 创建 proc 的硬依赖（单向、逐边
+# 防环，不做全对全——否则 P 的后期 proc 会被拖到 C 之前且易成环）。
+# v2 分支感知：父实体存在多分支创建（如 E-XM 同时有 t01 能力验证创建与
+# t40 测量审核创建）时，v1 取 min sort_key 必然赌错分支（把 PROC-021 注入
+# 测量审核流）；v2 只在唯一创建 proc 时加边，子 proc 自身是创建事件视图
+# （base tids 与创建 proc 重叠，如 026 与 031 同挂 T-040）则跳过。
+# v3（branch_values 生命周期归属改造）：多创建候选按归属消歧，恰一兼容即
+# 命中；多兼容（共享模板，如报名记录维度 proc）或零兼容 → min-sort_key 兜底
+# 挂最早创建（cands[0]），保证「首个项目在报名记录前」不回归。
+# B1 让同动作组（声明式绑定）在最终序列中相邻，组内容器视图在前。
+
+_CREATION_FROM_STATES = {'(初始)', '初始', '(none)', 'none', '(null)', 'null', '(None)', 'None'}
+
+
+def _proc_is_creation(proc: dict) -> bool:
+    """True if proc's transition creates its object (from-state is 初始/None)."""
+    givens = proc.get('givens') or []
+    if not givens or not isinstance(givens[0], dict):
+        return False
+    from_state = str(givens[0].get('state', '') or '').strip()
+    return from_state in _CREATION_FROM_STATES
+
+
+def _proc_base_tids(proc: dict) -> set:
+    """Extract base transition ids ('T-041' ← 'T-041[a]' / 'T-041a') from source_ids."""
+    tids = set()
+    for sid in proc.get('source_ids', []) or []:
+        if not isinstance(sid, str):
+            continue
+        m = re.match(r'^(T-\d+)', sid)
+        if m:
+            tids.add(m.group(1))
+    return tids
+
+
+# ── branch_values 生命周期归属改造：S3 依赖边分支感知 ─────────────────────
+# TO 携带 branch_values/branch_path（生命周期身份，glm5pr §3.1 归属铁律：
+# 平行流程型分支的每条分支后续推进转换都声明 branch_values，共有收尾共享）。
+# proc 的归属 = source_ids 解析到的 TO 归属并集；空 set = 共享模板（每个
+# 分支值下都实例化）或非分支义务。兼容规则：任一方无归属 → 兼容；
+# 两个非空归属不相交 → 不同生命周期，禁止连边。
+# P2 旧输出（无 branch_path/branch_values）时全部 proc 归属为空，
+# 行为退化与改造前完全一致。
+
+
+# P2 多组合展开变体 id 形态（T-032[a]/T-062[b]…）：唯一以 branch_path 取值
+# 为互斥归属的形态。单组合无差异保留（id 无后缀、branch_values 缺省、仅
+# branch_path 记注）与真共享（branch_path=[]）都是共享模板——若把记注值当
+# 身份，跨维度同名词（评审结论'通过' vs 项目类型'能力验证'）会误杀合法依赖。
+_P2_SPLIT_SUFFIX_RE = re.compile(r'\[[a-z]\]$')
+
+
+def _to_branch_values(to: dict | None) -> set:
+    """TO 的分支归属值集（生命周期身份）。
+
+    优先级：branch_values 显式声明 > 展开变体（id 带 [a-z] 后缀）的
+    branch_path 取值 > 空（共享模板）。空 set = 无归属，与所有分支兼容。
+    全部元素 str 化，保证与 S0 dep_state_phase_map_by_branch 的键同空间可比。
+    """
+    if not isinstance(to, dict):
+        return set()
+    declared = {str(bv) for bv in (to.get("branch_values") or []) if bv}
+    if declared:
+        return declared
+    if _P2_SPLIT_SUFFIX_RE.search(str(to.get("id", ""))):
+        return {str(bp["value"]) for bp in (to.get("branch_path") or [])
+                if isinstance(bp, dict) and bp.get("value")}
+    return set()
+
+
+def _proc_branch_values(proc: dict, to_by_id: dict) -> set:
+    """proc 的生命周期归属 = source_ids 解析到的 TO 归属并集。
+
+    无 TO 源的义务（Type5/7/9 的 EO/CO/RO id 查不到 to_by_id）→ 空 set
+    （共享，与所有分支兼容）。"""
+    bvs: set = set()
+    for sid in proc.get("source_ids", []) or []:
+        to = to_by_id.get(sid)
+        if to is not None:
+            bvs |= _to_branch_values(to)
+    return bvs
+
+
+def _branch_compatible(a: set, b: set) -> bool:
+    """共享（空归属）与任何归属兼容；两个非空归属须相交才可连边。"""
+    if not a or not b:
+        return True
+    return bool(a & b)
+
+
+def _composition_parents(cm: dict) -> dict:
+    """entity → composition parent（同对多声明取 confidence 最高者）。"""
+    ctx = cm.get('_context', {}) or {}
+    rank = {'high': 3, 'medium': 2, 'low': 1, '': 0}
+    parents = {}
+    for rel in ctx.get('structural_relations', []) or []:
+        if not isinstance(rel, dict) or rel.get('relation_type') != 'composition':
+            continue
+        f, t = rel.get('from', ''), rel.get('to', '')
+        if not f or not t or f == t:
+            continue
+        r = rank.get(rel.get('confidence', ''), 0)
+        if t not in parents or r > parents[t][0]:
+            parents[t] = (r, f)
+    return {t: f for t, (_, f) in parents.items()}
+
+
+def _bind_container_creation_edges(
+    procedures: list,
+    proc_by_id: dict,
+    cm: dict,
+    warnings: list,
+    proc_bvs: dict | None = None,
+) -> int:
+    """B2 v2: composition P→C ⇒ C 侧无 P 依赖的 proc 补指向 P 创建 proc 的硬依赖。
+
+    v2 分支感知：子 proc 自身是父实体创建事件视图（base tids 重叠）跳过。
+    v3（branch_values 生命周期归属改造）：多创建候选时用生命周期归属消歧——
+    子 proc 归属分支与父创建 proc 归属分支取交集，唯一兼容者入选；仍歧义
+    则按 v1 语义兜底挂最早创建（min sort_key，cands[0]）：
+      * 恰一兼容 → 分支命中（数据驱动消歧，杜绝赌错分支）；
+      * 多兼容 → 子 proc 为共享模板（不属任一分支，如报名记录维度 proc）
+        → min-sort_key 兜底，恢复「首个项目在报名记录前」（Issue 1 语义）；
+      * 零兼容 → 子归属指向不存在的创建分支（理论退化态），同样兜底并告警。
+    Single-level, per-edge cycle-checked（插入前做可达性检查，绝不依赖
+    break_cycles 兜底删除本机制的边）。Returns added edge count.
+    """
+    parents = _composition_parents(cm)
+    if not parents:
+        return 0
+
+    # 每实体的全部创建 proc（按 sort_key 稳定排序）。v1 只取 sort_key 最小
+    # 者充当"唯一创建者"，多分支创建时必赌错分支（v1 实测 021 压过 031）。
+    creation_procs: dict = {}
+    for proc in procedures:
+        if not _proc_is_creation(proc):
+            continue
+        ent = proc.get('entity', '')
+        if not ent:
+            continue
+        creation_procs.setdefault(ent, []).append(proc['temp_id'])
+    for ent in creation_procs:
+        creation_procs[ent].sort(key=lambda pid: list(
+            (proc_by_id.get(pid) or {}).get('_S2_fields', {}).get('sort_key') or []))
+    # 各实体创建事件的全部基础 tid：识别"子 proc 自身是创建事件视图"
+    creation_tids: dict = {}
+    for ent, pids in creation_procs.items():
+        tids: set = set()
+        for pid in pids:
+            tids |= _proc_base_tids(proc_by_id.get(pid) or {})
+        creation_tids[ent] = tids
+
+    def _reaches(src: str, dst: str, seen: set = None) -> bool:
+        """True if dst reachable from src via dependency edges (src 传递依赖 dst)。"""
+        if seen is None:
+            seen = set()
+        if src == dst:
+            return True
+        if src in seen:
+            return False
+        seen.add(src)
+        p = proc_by_id.get(src)
+        if not p:
+            return False
+        for d in (p.get('_S3_fields', {}).get('dependencies', []) or []):
+            if _reaches(d, dst, seen):
+                return True
+        return False
+
+    proc_entity = {p['temp_id']: p.get('entity', '') for p in procedures}
+    added = 0
+    for child_ent, parent_ent in sorted(parents.items()):
+        cands = creation_procs.get(parent_ent) or []
+        if not cands:
+            warnings.append(
+                f"S3.B2 跳过组合 {parent_ent}→{child_ent}: {parent_ent} 无创建 proc")
+            continue
+        parent_tids = creation_tids.get(parent_ent, set())
+        for proc in procedures:
+            if proc.get('entity', '') != child_ent:
+                continue
+            pid = proc['temp_id']
+            if pid in cands:
+                continue
+            # v2: 子 proc 自身是父实体创建事件视图（base tids 与创建 proc 重
+            # 叠，如 PROC-026 与 PROC-031 同挂 T-040）→ 它就是"容器诞生"事
+            # 件本身，不需要容器创建边（v1 会给它补错分支的创建依赖）
+            if parent_tids and (_proc_base_tids(proc) & parent_tids):
+                warnings.append(
+                    f"S3.B2 跳过(自身为创建事件视图): {pid} (组合 {parent_ent}→{child_ent})")
+                continue
+            s3 = proc.setdefault('_S3_fields', {})
+            deps = s3.setdefault('dependencies', [])
+            if any(proc_entity.get(d) == parent_ent for d in deps):
+                continue
+            if len(cands) > 1:
+                # v3: 多创建候选 → 生命周期归属消歧（branch_values 改造，
+                # 数据驱动替代 v2 的无条件留白；v1 取 min sort_key 赌分支
+                # 实测赌错）。恰一兼容→分支命中；多兼容（共享模板）或零兼容
+                # → min-sort_key 兜底（cands[0]=最早创建），恢复 v1 语义
+                # 「首个项目在报名记录前」（Issue 1 修复，报名记录维度 proc
+                # 不属任一 项目状态 分支，必须仍排在项目创建之后）。
+                child_bvs = (proc_bvs or {}).get(pid, set())
+                compat = [c for c in cands
+                          if _branch_compatible(
+                              child_bvs, (proc_bvs or {}).get(c, set()))]
+                if len(compat) == 1:
+                    p_creation = compat[0]
+                    warnings.append(
+                        f"S3.B2 分支消歧: {pid} ← {p_creation} "
+                        f"(子归属 {sorted(child_bvs) or '共享'}，组合 {parent_ent}→{child_ent})")
+                else:
+                    p_creation = cands[0]
+                    if not compat:
+                        warnings.append(
+                            f"S3.B2 兜底(零兼容): {pid} ← {p_creation} "
+                            f"(子归属 {sorted(child_bvs)} 无创建候选，组合 {parent_ent}→{child_ent})")
+            else:
+                p_creation = cands[0]
+            # 逐边防环：若 p_creation 已（传递）依赖 pid，则加边成环 → 跳过
+            if _reaches(p_creation, pid):
+                warnings.append(
+                    f"S3.B2 容器创建边跳过(防环): {pid} ← {p_creation} "
+                    f"(组合 {parent_ent}→{child_ent})")
+                continue
+            deps.append(p_creation)
+            s3.setdefault('dep_origins', {})[p_creation] = 'composition_container'
+            added += 1
+    if added:
+        warnings.append(f"S3.B2: added {added} container-creation ordering edges")
+    return added
+
+
+def _co_locate_same_action_groups(
+    procedures: list,
+    primary: str,
+    cm: dict,
+    warnings: list,
+) -> int:
+    """B1: 同动作组在最终序列中相邻，容器视图在前。
+
+    在 topological_sort_procedures 之后、ID 重编号之前运行。只做可行性
+    检查通过的位置移动，结果仍是合法拓扑序：
+      Pass 1（拉拢）：以组内最早成员为块首，其余成员按当前位置序逐个拉到
+        块尾——仅当 [目标位, 当前位) 窗口内没有该成员的依赖时才前移；
+        否则向后扫描第一个可行位；完全不可行则放弃该成员（组保持部分相邻）。
+      Pass 2（组内排序）：块内冒泡趋向期望序（组合祖先视图在前，其次主实体
+        视图，再次保持相对序）；相邻交换 (a,b)→(b,a) 仅当 a 不被 b 依赖
+        （a ∉ dep_map[b]），保证外部约束不变。
+    返回完成相邻化的组数。
+    """
+    groups = _collect_same_action_groups(cm)
+    if not groups:
+        return 0
+
+    tid_group: dict = {}
+    for gi, g in enumerate(groups):
+        for tid in g:
+            tid_group[tid] = gi
+
+    pos_of: dict = {p['temp_id']: i for i, p in enumerate(procedures)}
+    dep_map: dict = {
+        p['temp_id']: set(p.get('_S3_fields', {}).get('dependencies', []) or [])
+        for p in procedures
+    }
+
+    group_members: dict = {}
+    for p in procedures:
+        for tid in _proc_base_tids(p):
+            gi = tid_group.get(tid)
+            if gi is not None:
+                group_members.setdefault(gi, []).append(p['temp_id'])
+
+    parents = _composition_parents(cm)
+
+    def _entity_of(mid: str) -> str:
+        return procedures[pos_of[mid]].get('entity', '')
+
+    def _ancestor_of(a: str, b: str) -> bool:
+        """True if composition chain from a reaches b（b 是 a 的组合祖先）。"""
+        seen = set()
+        cur = a
+        while cur and cur not in seen:
+            seen.add(cur)
+            cur = parents.get(cur, '')
+            if cur == b:
+                return True
+        return False
+
+    def _apply_move(cur: int, tgt: int) -> None:
+        proc = procedures.pop(cur)
+        procedures.insert(tgt, proc)
+        for i, p in enumerate(procedures):
+            pos_of[p['temp_id']] = i
+
+    done = 0
+    for gi in sorted(group_members.keys()):
+        members = group_members[gi]
+        if len(members) < 2:
+            continue
+        members_by_pos = sorted(members, key=lambda m: pos_of[m])
+        block_start = pos_of[members_by_pos[0]]
+
+        # ── Pass 1: 拉拢相邻 ──
+        # v2: 追踪实际落位的成员 id（v1 只计数，feasible>target 时块出现
+        # 缺口，Pass 2 按下标取块会读写到非成员 proc）
+        placed_ids = [members_by_pos[0]]
+        for mid in members_by_pos[1:]:
+            target = block_start + len(placed_ids)
+            cur = pos_of[mid]
+            if cur == target:
+                placed_ids.append(mid)
+                continue
+            if cur < target:
+                warnings.append(
+                    f"S3.B1 同动作共置跳过: {mid} 位置异常(cur={cur}<target={target})")
+                continue
+            deps = dep_map.get(mid, set())
+            feasible = None
+            for t in range(target, cur):
+                if not any(t <= pos_of[d] < cur for d in deps if d in pos_of):
+                    feasible = t
+                    break
+            if feasible is None:
+                warnings.append(
+                    f"S3.B1 同动作共置部分失败: {mid} 无法前移至 {target}"
+                    f"（依赖边界），组 {groups[gi]} 保持部分相邻")
+                continue
+            if feasible > target:
+                warnings.append(
+                    f"S3.B1 同动作共置: {mid} 落位 {feasible}>目标 {target}"
+                    f"（依赖边界），块出现缺口")
+            _apply_move(cur, feasible)
+            placed_ids.append(mid)
+        if len(placed_ids) < 2:
+            continue
+
+        # ── Pass 2: 组内排序（容器视图在前，其次主实体视图）──
+        # v2: 按成员 id 收集块内实际位置；块不连续（成员被依赖卡住形成缺
+        # 口）时跳过组内重排——位置槽语义不再成立，按下标取块必错。
+        block_positions = sorted(pos_of[m] for m in placed_ids)
+        first_pos = block_positions[0]
+        if block_positions != list(range(first_pos, first_pos + len(placed_ids))):
+            warnings.append(
+                f"S3.B1 组 {groups[gi]} 块不连续（依赖边界），跳过组内排序")
+            continue
+        block_start = first_pos
+        block = list(placed_ids)
+
+        def _rank(mid: str) -> tuple:
+            ent = _entity_of(mid)
+            anc = sum(
+                1 for other in block if other != mid and _ancestor_of(_entity_of(other), ent))
+            is_primary = 0 if (primary and ent == primary) else 1
+            return (-anc, is_primary, pos_of[mid])
+
+        desired = sorted(block, key=_rank)
+        cur_order = list(block)
+        changed = True
+        iters = 0
+        while changed and iters <= len(cur_order) ** 2 + 1:
+            changed = False
+            iters += 1
+            for i in range(len(cur_order) - 1):
+                a, b = cur_order[i], cur_order[i + 1]
+                if desired.index(a) > desired.index(b) and a not in dep_map.get(b, set()):
+                    cur_order[i], cur_order[i + 1] = b, a
+                    changed = True
+        for i, mid in enumerate(cur_order):
+            cur = pos_of[mid]
+            if cur != block_start + i:
+                _apply_move(cur, block_start + i)
+        done += 1
+        warnings.append(
+            f"S3.B1 同动作共置: 组 {groups[gi]} → [{' → '.join(cur_order)}]")
+    return done
+
+
 def s3_dependency_node(state: AgentState) -> dict:
     """S3: Bind dependencies between procedures."""
     procedures = list(state.get("procedures", []))
@@ -143,6 +547,45 @@ def s3_dependency_node(state: AgentState) -> dict:
     co_by_id = {co["id"]: co for co in cos}
     # State lifecycle positions for back-edge detection (Guard 1 / chain)
     state_pos = _build_state_pos(cm.get("_context", {}).get("state_info", {}))
+
+    # ── branch_values 生命周期归属改造：S3 分支感知上下文 ──────────────
+    # proc 级生命周期归属（source_ids → TO.branch_values/branch_path 并集；
+    # 无 TO 源的义务 = 共享）。per-branch 状态位相图 = 全局 state_pos 叠加
+    # S0 dep_state_phase_map_by_branch 中声明了独立相位链的 (entity,dim)
+    # 覆盖项——平行生命周期推进次序互逆，回退边判定与状态链必须用归属
+    # 分支的相位图。
+    proc_bvs: dict[str, set] = {
+        p["temp_id"]: _proc_branch_values(p, to_by_id) for p in procedures
+    }
+    branch_pos: dict[str, dict] = {}
+    for _bv, _dep_map in (state.get("dep_state_phase_map_by_branch") or {}).items():
+        merged = {k: dict(v) for k, v in state_pos.items()}
+        for _ent, _dims in (_dep_map or {}).items():
+            if not isinstance(_dims, dict):
+                continue
+            for _dim, _states in _dims.items():
+                if isinstance(_states, dict) and _states:
+                    merged[(_ent, _dim)] = {
+                        str(s): int(ph) for s, ph in _states.items()
+                        if isinstance(ph, (int, float))
+                    }
+        branch_pos[str(_bv)] = merged
+    branch_skip_stats: dict[str, int] = {}
+
+    def _state_pos_for(p: dict) -> dict:
+        """proc 生效的状态位相图：归属分支视图存在 → 分支视图；否则全局。"""
+        for bv in sorted(proc_bvs.get(p.get("temp_id", ""), set())):
+            if bv in branch_pos:
+                return branch_pos[bv]
+        return state_pos
+
+    def _cross_branch(src_id: str, cand_id: str, origin: str) -> bool:
+        """True = 跨分支候选（不连边）；按 origin 计数供审计。"""
+        if _branch_compatible(proc_bvs.get(src_id, set()),
+                              proc_bvs.get(cand_id, set())):
+            return False
+        branch_skip_stats[origin] = branch_skip_stats.get(origin, 0) + 1
+        return True
 
     def _resolve_to(sid: str) -> dict | None:
         """Resolve a source_id to its transition obligation.
@@ -180,7 +623,9 @@ def s3_dependency_node(state: AgentState) -> dict:
     # ── I23: Business temporal guards (run FIRST — state-machine deps take priority) ──
     _apply_temporal_guards(procedures, proc_by_id, proc_by_entity, co_by_id, cm,
                            phase_table=state.get("phase_table"),
-                           state_pos=state_pos, state=state)
+                           state_pos=state_pos, state=state,
+                           cross_branch=_cross_branch,
+                           state_pos_for=_state_pos_for)
 
     # ── Strong dependencies ──
     for proc in procedures:
@@ -253,7 +698,16 @@ def s3_dependency_node(state: AgentState) -> dict:
                     if "→" in prev_post:
                         prev_post_val = prev_post.split("→")[-1].strip()
                     # ── State-connection validation ──
-                    if curr_from_state is None:
+                    # branch_values 改造：跨分支同名状态汇合点不构成状态链
+                    # （平行生命周期共用词汇表，状态相等 ≠ 同生命周期前驱，
+                    # 如测量审核 T-040 产出的报名中不是能力验证 T-002 的前驱）。
+                    if not _branch_compatible(
+                            proc_bvs.get(proc["temp_id"], set()),
+                            proc_bvs.get(prev_id, set())):
+                        branch_skip_stats["chain_ordering"] = \
+                            branch_skip_stats.get("chain_ordering", 0) + 1
+                        pass  # 跨分支不连边（等价 case d）
+                    elif curr_from_state is None:
                         pass  # case (a): independent op — no chain predecessor
                     elif curr_from_state in ("(初始)", "(None)", "None", ""):
                         pass  # case (b): creation from null — root of chain
@@ -311,6 +765,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                                     and dep_to.get("from") == dep_to.get("to"))
                 for mid in enabler_state_to_procs.get((ee, es), []):
                     if mid != proc["temp_id"]:
+                        # branch_values 改造：使能者须与 dependent 同生命周期
+                        if _cross_branch(proc["temp_id"], mid, "co_enabler"):
+                            continue
                         wd = s3.setdefault("weak_dependencies", [])
                         if both_lateral:
                             # hard 语义不成立 (lateral 不推进状态, 无门控可建)
@@ -346,6 +803,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                 if ee and es:
                     for mid in enabler_state_to_procs.get((ee, es), []):
                         if mid != proc["temp_id"]:
+                            # branch_values 改造：VE 使能者须同生命周期
+                            if _cross_branch(proc["temp_id"], mid, "ve_co_ids"):
+                                continue
                             wd = s3.setdefault("weak_dependencies", [])
                             if mid not in wd:
                                 wd.append(mid)
@@ -375,6 +835,11 @@ def s3_dependency_node(state: AgentState) -> dict:
                 effect = se.get("effect_desc", "")
                 for other in proc_by_entity.get(te, []):
                     if other["temp_id"] == proc["temp_id"]:
+                        continue
+                    # branch_values 改造：side_effect 归属声在 TO 上，随其生命周期；
+                    # 另一分支的 proc 不是正确副作用目标
+                    if _cross_branch(proc["temp_id"], other["temp_id"],
+                                     "weak_side_effect"):
                         continue
                     # BDD: only state-transition / CRUD / config procedures are
                     # valid weak-dep targets.  Rule-validation (Type7/8) and
@@ -429,6 +894,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                                     if p.get("obligation_type") not in (
                                             ObligationType.INVALID, ObligationType.RULE,
                                             ObligationType.FIELD_VALIDATION)
+                                    and _branch_compatible(
+                                        proc_bvs.get(proc["temp_id"], set()),
+                                        proc_bvs.get(p["temp_id"], set()))
                                 ]
                                 if candidates:
                                     closest = min(candidates,
@@ -460,6 +928,12 @@ def s3_dependency_node(state: AgentState) -> dict:
         s3["upstream_deps"] = []
         s3["guard1_deps"] = []
 
+    # ── 2026-09 排序修复 B2：容器创建边（组合关系 → 创建序硬约束）──
+    # 在全部依赖机制之后、break_cycles 之前运行；逐边防环，绝不产生新环。
+    # v3: 传入 proc_bvs，多创建候选按生命周期归属消歧。
+    _bind_container_creation_edges(procedures, proc_by_id, cm, warnings,
+                                   proc_bvs=proc_bvs)
+
     # ── Cycle detection & breaking via graph_algo ──
     procedures, cycle_warnings = break_cycles(procedures)
     warnings.extend(cycle_warnings)
@@ -469,6 +943,11 @@ def s3_dependency_node(state: AgentState) -> dict:
     # hard constraints, sort_key is only a tiebreaker among procedures
     # at the same topological level.
     procedures = topological_sort_procedures(procedures)
+
+    # ── 2026-09 排序修复 B1：同动作组共置（可行性检查的位置移动）──
+    # 拓扑排序后、ID 重编号前运行；只做不破坏依赖序的相邻化移动。
+    _co_locate_same_action_groups(
+        procedures, state.get("primary_entity") or "", cm, warnings)
 
     # ── Re-assign sequential IDs based on final topological order ──
     id_map: dict[str, str] = {}
@@ -524,6 +1003,12 @@ def s3_dependency_node(state: AgentState) -> dict:
         s3_final["upstream_deps"] = []
         s3_final["guard1_deps"] = []
 
+    if branch_skip_stats:
+        _stats_txt = ", ".join(f"{k}×{v}" for k, v in sorted(branch_skip_stats.items()))
+        warnings.append(
+            f"S3.B 分支感知（branch_values 生命周期归属改造）: 跨分支候选剔除 {_stats_txt}——"
+            f"平行生命周期共用状态词汇表，状态匹配限同分支（或共享模板）内生效")
+
     has_strong = sum(1 for p in procedures if p.get("_S3_fields", {}).get("dependencies"))
     has_weak = sum(1 for p in procedures if p.get("_S3_fields", {}).get("weak_dependencies"))
     warnings.append(
@@ -549,6 +1034,8 @@ def _apply_temporal_guards(
     phase_table: dict | None = None,
     state_pos: dict | None = None,
     state: dict | None = None,
+    cross_branch=None,
+    state_pos_for=None,
 ):
     """I23: Apply business temporal guard rules as implicit strong dependencies.
 
@@ -557,7 +1044,11 @@ def _apply_temporal_guards(
 
     state: S0 Engine State (topology_levels / dep_state_phase_map) — used by
     Guard 7 (Tier 2 domain precondition) to identify lifecycle entities.
-    """
+
+    branch_values 生命周期归属改造：cross_branch(src_id, cand_id, origin) 为
+    跨分支候选判定（True=剔除并计数）；state_pos_for(proc) 返回 proc 生效
+    的状态位相图（归属分支视图优先）。两闭包由 s3_dependency_node 注入，
+    缺省 None 时行为与改造前一致。"""
     # to_id → proc temp_ids (Tier 2 Guard 7 dep binding): branch TO ids like
     # T-015[a] map to their own Type1 proc, so binding all same-dim creation
     # branches is unambiguous.
@@ -627,10 +1118,21 @@ def _apply_temporal_guards(
                 # Exclude rejection variants
                 if other.get("risk_trait") == "audit_rejection":
                     continue
+                # branch_values 改造：跨分支候选不连边（平行生命周期共用状态
+                # 词汇表——状态相等 ≠ 同生命周期前驱，如能力验证 T-002 产出的
+                # 报名中不是测量审核 T-044 的前驱）。
+                if cross_branch and cross_branch(proc["temp_id"], other["temp_id"],
+                                                 "guard1_state_pred"):
+                    continue
                 # Back-edge fix: a procedure whose transition loops back to an
                 # EARLIER state (e.g. 归档评级 待归档→已选入) must not be a
                 # predecessor — it would reverse lifecycle order.
-                if _proc_is_back_edge(other, state_pos):
+                # branch_values 改造：按候选归属分支的相位图判定——全局链上
+                # 互逆的推进（如报名中→待开始）在归属分支链内是顺向，全局图
+                # 误判回退会排掉合法前驱。
+                if _proc_is_back_edge(
+                        other,
+                        state_pos_for(other) if state_pos_for else state_pos):
                     continue
                 post = other.get("post_state", "")
                 if "→" in post:
@@ -686,6 +1188,10 @@ def _apply_temporal_guards(
         if not is_creation and dim:
             for other in proc_by_entity.get(entity, []):
                 if other["temp_id"] == proc["temp_id"]:
+                    continue
+                # branch_values 改造：创建者须与使用者同生命周期
+                if cross_branch and cross_branch(proc["temp_id"], other["temp_id"],
+                                                 "guard5_create_use"):
                     continue
                 other_ol = other.get("_S2_fields", {}).get("operation_lifecycle", 0)
                 # Creation proc: operation_lifecycle==1 or from=null in S step
@@ -761,6 +1267,11 @@ def _apply_temporal_guards(
                                 continue
                             if other.get("risk_trait") == "audit_rejection":
                                 continue
+                            # branch_values 改造：前置态产出者须同生命周期
+                            if cross_branch and cross_branch(
+                                    proc["temp_id"], other["temp_id"],
+                                    "guard6_precond"):
+                                continue
                             # If ref_dim is specified, must match
                             if ref_dim and other.get("dimension") != ref_dim:
                                 continue
@@ -783,6 +1294,11 @@ def _apply_temporal_guards(
                                 continue
                             if other.get("risk_trait") == "audit_rejection":
                                 continue
+                            # branch_values 改造：前置态产出者须同生命周期
+                            if cross_branch and cross_branch(
+                                    proc["temp_id"], other["temp_id"],
+                                    "guard6_precond"):
+                                continue
                             if other.get("dimension") != ref_dim:
                                 continue
                             post = other.get("post_state", "")
@@ -803,6 +1319,11 @@ def _apply_temporal_guards(
                             if other["temp_id"] == proc["temp_id"]:
                                 continue
                             if other.get("risk_trait") == "audit_rejection":
+                                continue
+                            # branch_values 改造：前置态产出者须同生命周期
+                            if cross_branch and cross_branch(
+                                    proc["temp_id"], other["temp_id"],
+                                    "guard6_precond"):
                                 continue
                             if ref_dim and other.get("dimension") != ref_dim:
                                 continue
@@ -852,6 +1373,11 @@ def _apply_temporal_guards(
                                 continue
                             if other.get("risk_trait") == "audit_rejection":
                                 continue
+                            # branch_values 改造：前置态产出者须同生命周期
+                            if cross_branch and cross_branch(
+                                    proc["temp_id"], other["temp_id"],
+                                    "guard6_precond"):
+                                continue
                             post = other.get("post_state", "")
                             if "→" not in post:
                                 continue
@@ -872,6 +1398,11 @@ def _apply_temporal_guards(
                             if other.get("entity") == entity:
                                 continue
                             if other.get("risk_trait") == "audit_rejection":
+                                continue
+                            # branch_values 改造：前置态产出者须同生命周期
+                            if cross_branch and cross_branch(
+                                    proc["temp_id"], other["temp_id"],
+                                    "guard6_precond"):
                                 continue
                             post = other.get("post_state", "")
                             if "→" not in post:
@@ -896,6 +1427,10 @@ def _apply_temporal_guards(
                 for cid in dp_ref["creation_to_ids"]:
                     for cand in to_id_to_proc_ids.get(cid, []):
                         if cand == proc["temp_id"]:
+                            continue
+                        # branch_values 改造：对象创建者须与 CRUD 义务同生命周期
+                        if cross_branch and cross_branch(
+                                proc["temp_id"], cand, "domain_precond"):
                             continue
                         if proc_by_id.get(cand, {}).get("risk_trait") == "audit_rejection":
                             continue

@@ -205,6 +205,42 @@ def _get_explicit_phase_mapping(state_info: dict | None, entity: str, dim: str) 
     return None
 
 
+def _get_branch_phase_mappings(state_info: dict | None, entity: str, dim: str) -> dict[str, dict[str, int]]:
+    """branch_values 生命周期归属改造：读取 P2 写入的 phase_mapping_by_branch。
+
+    返回 {branch_value: {state: phase}}；state_info 无该 (entity, dim) 的
+    per-branch 相位时返回 {}（S1 查询 miss 后落回全局链，行为退化安全）。
+    支持 Layout A（state_info[entity][dim]）与 Layout B（dimensions 列表）。
+    """
+    if not state_info or not isinstance(state_info, dict):
+        return {}
+    ent = state_info.get(entity)
+    if not isinstance(ent, dict):
+        return {}
+    candidates: list[dict] = []
+    dim_info = ent.get(dim)
+    if isinstance(dim_info, dict):
+        candidates.append(dim_info)
+    dimensions = _normalize_dim_list(ent.get('dimensions'))
+    if dim in dimensions and isinstance(dimensions[dim], dict):
+        candidates.append(dimensions[dim])
+    if isinstance(ent.get('dimensions'), dict):
+        legacy = ent['dimensions']
+        if dim in legacy and isinstance(legacy[dim], dict):
+            candidates.append(legacy[dim])
+    for dim_info in candidates:
+        pmb = dim_info.get('phase_mapping_by_branch')
+        if isinstance(pmb, dict) and pmb:
+            out: dict[str, dict[str, int]] = {}
+            for b, pm in pmb.items():
+                if isinstance(pm, dict) and pm:
+                    out[str(b)] = {str(k): int(v) for k, v in pm.items()
+                                   if isinstance(v, (int, float))}
+            if out:
+                return out
+    return {}
+
+
 def _build_state_pos(state_info: dict | None) -> dict:
     """Build {(entity_id, dim_name): {state: position}} from _context.state_info.
 
@@ -1759,6 +1795,85 @@ def _lookup_cross_entity_precondition_phase(
     return None
 
 
+# ── 2026-09 排序修复 A：同动作组收集 + 相位对齐 ──────────────────────────
+# 用户报告的三类排序问题中，问题 1/3 的共同根因：SRS 用 link_op_transition
+# （op.linked_transitions）与 transition_relations 声明了"同一因果事件的多
+# 个实体视图"，但 _derive_dep_state_phase_map 只在非显式相位分支消费
+# transition_relations；走 spec-first（显式 phase_mapping + 入口锚定）路径
+# 的维度（如 E-YP.样品状态）完全不感知绑定，叠加默认前向 +1，同一动作的
+# 两个视图相位错档（t17→已核查=P4 vs t18→待发样=P3，核查排在收样后）。
+# 本组函数在 S0 相位推导完成后做一次组内对齐：
+#   组来源（并集，重叠组合并）：
+#     a) _context.transition_relations[].evidence_transitions（跨实体证据组）
+#     b) entity_obligations[].linked_transitions（P1 link_op_transition，
+#        经 P2 透传；亦兼容 _context.op_links）
+#   对齐规则：组内含主实体视图时以其相位为权威（主时间线 = 单一事实源）；
+#   否则取组内最小相位（入口锚定派生最接地，默认前向 +1 最不可信）。
+#   只调整组内各转换 to 态的相位，不修改 phase_table（主实体时间线）。
+
+def _collect_same_action_groups(cm: dict) -> list:
+    """Collect same-action transition groups from declared bindings only.
+
+    v2 scope: link_op_transition 声明绑定 ONLY（eo.linked_transitions /
+    _context.op_links）。transition_relations 的 evidence 组是同一维度
+    时间线上的先后状态（如 缴费通知单 未发送→已发送），非"同一动作的
+    跨实体视图"，不收集（v1 曾消费它，实测把已发送 P3 拉到 P2）。
+    Returns a list of transition-id groups (each ≥2 tids spanning ≥2
+    entities). Overlapping groups are merged. Tolerant to all data
+    shapes: absent fields yield no groups.
+    """
+    tos = cm.get('transition_obligations', []) or []
+    tid_entity = {}
+    for to in tos:
+        if not isinstance(to, dict):
+            continue
+        tid = to.get('id') or to.get('transition_id') or ''
+        if tid:
+            tid_entity[tid] = to.get('entity', '')
+
+    groups = []
+
+    def _add_group(tids):
+        valid = [t for t in tids if t in tid_entity]
+        ents = {tid_entity[t] for t in valid}
+        if len(valid) >= 2 and len(ents) >= 2:
+            groups.append(set(valid))
+
+    ctx = cm.get('_context', {}) or {}
+
+    for eo in cm.get('entity_obligations', []) or []:
+        lt = eo.get('linked_transitions') if isinstance(eo, dict) else None
+        if lt and len(lt) >= 2:
+            _add_group(list(lt))
+
+    for ol in ctx.get('op_links', []) or []:
+        trs = ol.get('transitions', []) or []
+        if len(trs) >= 2:
+            _add_group(list(trs))
+
+    merged = []
+    for g in groups:
+        overlap = [m for m in merged if m & g]
+        if overlap:
+            uni = set.union(g, *overlap)
+            for m in overlap:
+                merged.remove(m)
+            merged.append(uni)
+        else:
+            merged.append(g)
+    return [sorted(m) for m in merged]
+
+
+# v1 的 _align_same_action_phases（S0 内 dep_map 对齐）已删除，两个必然缺陷：
+#   a) S0 时主实体视图只能读 raw phase_table（待发样=0），真实相位（P3）
+#      要等 S1 入口门控/state_ref 提升，S0 阶段算不出 → 对齐目标系统性偏低
+#      （实测 t17/t18 组 已核查 P4→P0）；
+#   b) 对主实体成员写 dep_state_phase_map[primary] 直接 KeyError（主实体
+#      不在 map 中），且 S1 解析主实体相位不读 dep_map，写了也无效。
+# v2 由 s1_generation._align_same_action_phases_post_s1 在 S1 之后按
+# 各 proc 的真实派生相位对齐（事实相位，无需推断）。
+
+
 def _derive_dep_state_phase_map(
     primary: str,
     phase_table: dict,
@@ -1771,8 +1886,13 @@ def _derive_dep_state_phase_map(
     transition_relations: list[dict] = None,
     structural: list[dict] = None,
     state_info: dict = None,
+    branch_value: str = "",
 ) -> tuple[dict, dict]:
     """S0.3 step 3: Dependent entity phase mapping via anchor-entity method.
+
+    branch_value（branch_values 生命周期归属改造）：非空时 dependent 实体的
+    explicit phase_mapping 优先取该分支的 phase_mapping_by_branch 视图。
+    
 
     Includes: from-state补全 (1.2), 从维度 mapping (1.3)
 
@@ -1905,7 +2025,13 @@ def _derive_dep_state_phase_map(
             # If P2 produced phase_mapping for this (entity, dim), use
             # it verbatim and skip the fixpoint / sub-state-machine /
             # cyclic-dim compensation logic below.
-            explicit_pm_dep = _get_explicit_phase_mapping(state_info, entity, dim)
+            explicit_pm_dep = None
+            if branch_value:
+                # branch_values 改造：优先取该分支的 lifecycle 相位链
+                explicit_pm_dep = _get_branch_phase_mappings(
+                    state_info, entity, dim).get(branch_value)
+            if not explicit_pm_dep:
+                explicit_pm_dep = _get_explicit_phase_mapping(state_info, entity, dim)
             if explicit_pm_dep:
                 pm_states = set(explicit_pm_dep.keys())
                 trans_states = set()
@@ -3171,6 +3297,8 @@ def s0_topology_node(state: AgentState) -> dict:
             "primary_entity": result.get("primary_entity"),
             "phase_table": result.get("phase_table"),
             "dep_state_phase_map": result.get("dep_state_phase_map", {}),
+        "phase_table_by_branch": result.get("phase_table_by_branch", {}),
+        "dep_state_phase_map_by_branch": result.get("dep_state_phase_map_by_branch", {}),
             "contextual_phase_rules": result.get("contextual_phase_rules", {}),
             "state_type_map": result.get("state_type_map", {}),
             "dependent_entities": result.get("dependent_entities", []),
@@ -3188,6 +3316,8 @@ def s0_topology_node(state: AgentState) -> dict:
         "primary_entity": result.get("primary_entity"),
         "phase_table": result.get("phase_table"),
         "dep_state_phase_map": result.get("dep_state_phase_map", {}),
+        "phase_table_by_branch": result.get("phase_table_by_branch", {}),
+        "dep_state_phase_map_by_branch": result.get("dep_state_phase_map_by_branch", {}),
         "contextual_phase_rules": result.get("contextual_phase_rules", {}),
         "state_type_map": result.get("state_type_map", {}),
         "dependent_entities": result.get("dependent_entities", []),
@@ -3245,6 +3375,33 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
     phase_table = _derive_phase_table(primary, tos, cos, state_info=state_info,
                                       include_sub_dims=True)
     warnings.append(f"S0.3: primary_dimension={phase_table['primary_dimension']}, phase_count={phase_table['phase_count']}")
+
+    # S0.3b: per-branch phase_table（branch_values 生命周期归属改造）。
+    # 分支值集合扫描全部实体的 phase_mapping_by_branch（per-branch 相位
+    # 建在 lifecycle bd 的宿主实体上，可能是 dependent 如 E-XM，而非主实体）。
+    # 主实体 primary_dimension 有该分支相位时替换视图；S1 相位查询按
+    # TO.branch_path 优先取归属分支链，miss 落回全局 phase_table（退化安全）。
+    phase_table_by_branch: dict[str, dict] = {}
+    if primary and phase_table.get('primary_dimension'):
+        _branch_values_all: set = set()
+        for _ent_info in (state_info or {}).values():
+            for _d in (_ent_info.get('dimensions') or []):
+                _pmb = _d.get('phase_mapping_by_branch') or {}
+                if isinstance(_pmb, dict):
+                    _branch_values_all.update(_pmb.keys())
+        _primary_pms = _get_branch_phase_mappings(
+            state_info, primary, phase_table['primary_dimension'])
+        for _b in sorted(_branch_values_all):
+            _pt_b = dict(phase_table)
+            _stp = dict(phase_table.get('state_to_phase') or {})
+            if _b in _primary_pms:
+                _stp[phase_table['primary_dimension']] = dict(_primary_pms[_b])
+            _pt_b['state_to_phase'] = _stp
+            phase_table_by_branch[_b] = _pt_b
+        if _branch_values_all:
+            warnings.append(
+                f"S0.3b: per-branch phase_table for branch values "
+                f"{sorted(_branch_values_all)} (primary pinned: {sorted(_primary_pms)})")
 
     # S0.4: Dependent entities (cardinality-based)
     dependent_entities, entity_parent, dependency_depth = _detect_dependent_entities(
@@ -3306,6 +3463,33 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         state_info=state_info,
     )
 
+    # S0.4b: per-branch dependent phase map（branch_values 生命周期归属改造）。
+    # 按分支重跑锚点法推导：phase_table 换成该分支视图、tos 过滤为
+    # 共享 ∪ 归属含该分支的子集（_derive_dep_state_phase_map 内部
+    # 消费 tos/phase_table，自身无需改动）。VE 的 resolved_phase 修正
+    # 在 by-branch 视图缺失时由 S1 查询 miss 落回全局 map 兑底。
+    dep_state_phase_map_by_branch: dict[str, dict] = {}
+    if phase_table_by_branch:
+        for _b, _pt_b in phase_table_by_branch.items():
+            _tos_b = [
+                _to for _to in tos
+                if not _to.get('branch_path')
+                or any(bp.get('value') == _b for bp in (_to.get('branch_path') or []))
+            ]
+            _dep_b, _ctx_b = _derive_dep_state_phase_map(
+                primary, _pt_b, _tos_b, dependent_entities, entity_parent,
+                state_type_map, virtual_entities,
+                cos=cos, transition_relations=transition, structural=structural,
+                state_info=state_info, branch_value=_b,
+            )
+            dep_state_phase_map_by_branch[_b] = _dep_b
+        warnings.append(
+            f"S0.4b: per-branch dep_state_phase_map for {sorted(dep_state_phase_map_by_branch)}")
+
+    # 排序修复 A 的相位对齐已迁至 S1 之后（s1_generation.
+    # _align_same_action_phases_post_s1）——S0 阶段真实相位尚未派生完成
+    # （主实体视图需 S1 入口门控提升），此处对齐目标必然失真（v1 缺陷）。
+
     if virtual_entities:
         topology_levels = _compute_topology_levels(
             primary, dependent_entities, entity_parent, dependency_depth,
@@ -3341,6 +3525,8 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
         'primary_entity': primary,
         'phase_table': phase_table,
         'dep_state_phase_map': dep_state_phase_map,
+        'phase_table_by_branch': phase_table_by_branch,
+        'dep_state_phase_map_by_branch': dep_state_phase_map_by_branch,
         'contextual_phase_rules': contextual_phase_rules,
         'state_type_map': state_type_map,
         'dependent_entities': dependent_entities,

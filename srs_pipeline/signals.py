@@ -2,6 +2,7 @@
 双通道的下界通道：①扫描结果可作为结构化线索注入 LLM prompt 压缩其自由度；
 ②与 LLM 产物对账（reconcile），差异即评审队列；③audit_source_refs 反幻觉。"""
 from __future__ import annotations
+import html
 import re
 from dataclasses import dataclass, field
 
@@ -160,4 +161,163 @@ def audit_source_refs(model, doc_text: str) -> list:
     for e in model.entities:
         for o in e["operations"]:
             check(o["source_ref"], f"{e['id']}.{o['name']}")
+    return issues
+
+
+# ============ C32 维度出生行序（状态面挂错实体检测） ============
+# 需求流程表（19.1/19.3 等）状态列在「动作行」逐行取值；某状态列首现所在行的
+# 动作必须就是该维度创建转换的动作。若列首现行早于创建转换动作所在行，说明该
+# 状态面出生点被后移（如预通知状态列首现于「能力验证计划发布」行，却由「报名」
+# 初始化）——状态面挂到了后建的记录实体上。纯数据驱动，无硬编码列名/动作别名。
+
+def _cell_text(body: str) -> str:
+    """HTML <td> 正文 → 纯文本（去标签、解实体、去空白）。"""
+    t = re.sub(r"<[^>]+>", "", body)
+    t = html.unescape(t)
+    return re.sub(r"[\s　]+", "", t)
+
+
+def _table_grid(html_text: str) -> list:
+    """HTML <tr>/<td>（含 rowspan）→ 逐行单元格列表。rowspan 单元在后续行补齐。"""
+    grid = []
+    pending = []                       # (col, value, remaining)
+    for rh in re.findall(r"<tr>(.*?)</tr>", html_text, re.S):
+        row = []
+        cidx = 0
+        while pending and pending[0][0] == cidx:      # 补挂起 rowspan
+            col, val, rem = pending.pop(0)
+            row.append(val)
+            if rem > 1:
+                pending.append((cidx, val, rem - 1))
+            cidx += 1
+        for attrs, body in re.findall(r"<td([^>]*)>(.*?)</td>", rh, re.S):
+            while pending and pending[0][0] == cidx:
+                col, val, rem = pending.pop(0)
+                row.append(val)
+                if rem > 1:
+                    pending.append((cidx, val, rem - 1))
+                cidx += 1
+            rs = re.search(r'rowspan="?(\d+)"?', attrs)
+            span = int(rs.group(1)) if rs else 1
+            row.append(_cell_text(body))
+            if span > 1:
+                pending.append((cidx, row[-1], span - 1))
+            cidx += 1
+        grid.append(row)
+    return grid
+
+
+def _parse_flow_tables(text: str) -> list:
+    """doc 中所有含「动作」列的 HTML 流程表。
+    返回 [{head, rows, act_idx, start_ln}]；head 为列头行，rows 为数据行，
+    act_idx 为动作列下标，start_ln 为表起始行号（章节定位用）。"""
+    out = []
+    for m in re.finditer(r"<table>(.*?)</table>", text, re.S):
+        grid = _table_grid(m.group(1))
+        hdr = next((i for i, r in enumerate(grid)
+                    if any("动作" in c for c in r)), None)
+        if hdr is None:                # 枚举/状态分析表无动作列 → 跳过
+            continue
+        act_idx = next(i for i, c in enumerate(grid[hdr]) if "动作" in c)
+        start_ln = text.count("\n", 0, m.start())
+        out.append({"head": grid[hdr], "rows": grid[hdr + 1:],
+                    "act_idx": act_idx, "start_ln": start_ln})
+    return out
+
+
+def _dimension_by_column(model, col_values: set):
+    """列值集 → 承载维度：与各实体维度 states 交集最大者。
+    数据驱动（列名别名如「预通知状态→通知状态」靠值域重叠自动消解）；
+    交集为零或并列 → None（精度优先，防误报）。返回 (entity_id, dimension_name)。"""
+    best = None
+    best_hit = 0
+    for e in model.entities:
+        for d in e["state_dimensions"]:
+            states = set(d["states"])
+            hit = len(col_values & states)
+            if hit > best_hit:
+                best, best_hit = (e["id"], d["dimension_name"]), hit
+            elif hit and hit == best_hit:
+                best = None
+    return best if best_hit else None
+
+
+def audit_dimension_birth(model, doc_text: str) -> list:
+    """C32 维度出生行序：流程表状态列首现行 vs 维度创建转换动作行。
+    列首现早于创建转换动作所在行 → 状态面出生点被后移，疑似挂错实体。
+    返回 issue 字符串列表（调用方 report.error("C32", msg)）。"""
+    issues = []
+    # 维度创建转换索引：(entity, dimension) → [(action, id), ...]；创建转换 frm 为空
+    # 平行流程分支（能力验证/测量审核）各有创建转换（如 E-XM.项目状态：设计方案编制
+    # vs 受理用户测量审核报名），须按动作集合整体比对，不得 setdefault 只取首个。
+    creation = {}
+    for t in model.transitions:
+        if not t.get("from"):
+            creation.setdefault((t["entity"], t["dimension"]), []).append(
+                (t["action"], t.get("id") or t.get("tid")))
+    # action → 承载实体集（恰一实体时供消息锚定提示）
+    action_entities = {}
+    for t in model.transitions:
+        action_entities.setdefault(t["action"], set()).add(t["entity"])
+
+    # 流程表所在章节（消息上下文用）：标题行号 → 章节号
+    lines = doc_text.splitlines()
+    heading_lines = [(i, m.group(1)) for i, ln in enumerate(lines)
+                     if (m := HEADING.match(ln))]
+
+    for tb in _parse_flow_tables(doc_text):
+        head, rows, act_idx = tb["head"], tb["rows"], tb["act_idx"]
+        # 表所在章节：从表起始行往前找最近的标题
+        sec = next((num for i, num in reversed(heading_lines)
+                    if i <= tb["start_ln"]), "")
+        col_values = {}
+        first_seen = {}                # 列 → (行号, 动作, 首现值)
+        for ri, row in enumerate(rows, 1):
+            if len(row) <= act_idx:
+                continue
+            action = row[act_idx]
+            if not action:
+                continue
+            for ci, ch in enumerate(head):
+                if ci == act_idx or ci >= len(row):
+                    continue
+                if not (("状态" in ch) or ch == "缴费通知单"):
+                    continue
+                v = row[ci]
+                if not v:
+                    continue
+                col_values.setdefault(ch, set()).update(
+                    x for x in re.split(r"[/、，。;；]", v) if x)
+                if ch not in first_seen:
+                    first_seen[ch] = (ri, action, v)
+        for ch, (ri, action, v) in first_seen.items():
+            dim = _dimension_by_column(model, col_values[ch])
+            if dim is None:
+                continue
+            eid, dname = dim
+            inits = creation.get((eid, dname)) or []
+            if not inits:
+                continue
+            init_actions = {a for a, _ in inits}
+            if action in init_actions:      # 首现动作本身就是某创建动作 → 一致
+                continue
+            # 找任一创建动作在表中最早所在行；创建动作不在表中（操作节出生，
+            # 如样品状态/样品制备）→ 跳过
+            r_init = next((ri2 for ri2, row in enumerate(rows, 1)
+                           if len(row) > act_idx and row[act_idx] in init_actions),
+                          None)
+            if r_init is None:
+                continue
+            if ri < r_init:
+                a_init = sorted(init_actions)[0]
+                tid = next((tid for a, tid in inits if a == a_init), "")
+                ents = action_entities.get(action)
+                hint = (f"，应锚定于首现动作所属实体 {next(iter(ents))}（项目级）"
+                        if ents and len(ents) == 1 else "")
+                issues.append(
+                    f"维度[{dname}]（实体[{eid}]）在流程表[{sec}]列[{ch}]首现于动作"
+                    f"[{action}]（行{ri}，值[{v}]），但创建转换(action=[{a_init}]，"
+                    f"{tid})所在行更晚（行{r_init}）。列值早于创建转换出现 → "
+                    f"状态面出生点被后移，疑似挂错实体{hint}；修法：创建转换动作须为"
+                    f"[{action}]，不得由后建记录实体承载初始化。")
     return issues

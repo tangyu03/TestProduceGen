@@ -3,7 +3,7 @@ from srs_pipeline import DomainModel, N, attr, op, precond, state_ref
 
 def build() -> DomainModel:
     m = DomainModel(source="网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704",
-                    document_scope="§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样→已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号")
+                    document_scope="§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样→已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号；§5修复C32：通知状态（流程表列称'预通知状态'）经19.1首现行'能力验证计划发布'（行3，值未发送）判定为项目级状态面，承载实体由E-BMJL迁至E-XM，创建转换t07动作锚定'能力验证计划发布'")
     # ===== 事件台账（§2）=====
     m.set_prohibition_config(config={
         "action_verbs": ["编制", "发布", "报名", "审核", "审批", "批准", "缴费", "开具", "核查", "发放", "发送",
@@ -32,8 +32,8 @@ def build() -> DomainModel:
     m.add_event(eid="e06", entity="E-JFTZ", dimension="缴费通知单状态", action="报名",
                 actor="能力验证参加者", precondition="初始", consequence="未发送",
                 source_ref="19.1实施阶段")
-    m.add_event(eid="e07", entity="E-BMJL", dimension="通知状态", action="报名",
-                actor="能力验证参加者", precondition="初始", consequence="未发送",
+    m.add_event(eid="e07", entity="E-XM", dimension="通知状态", action="能力验证计划发布",
+                actor="项目管理员", precondition="初始", consequence="未发送",
                 source_ref="19.1实施阶段")
     m.add_event(eid="e08", entity="E-BMJL", dimension="报名记录状态", action="报名审核",
                 actor="项目管理员", precondition="报名待审核；E-XM.报名中", consequence="报名成功",
@@ -53,7 +53,7 @@ def build() -> DomainModel:
     m.add_event(eid="e13", entity="E-BMJL", dimension="发票状态", action="发票开具",
                 actor="财务管理人员", precondition="待开票；E-BMJL.报名成功", consequence="已开票",
                 source_ref="19.1实施阶段；19.3项目状态分析")
-    m.add_event(eid="e14", entity="E-BMJL", dimension="通知状态", action="能力验证预通知",
+    m.add_event(eid="e14", entity="E-XM", dimension="通知状态", action="能力验证预通知",
                 actor="项目管理员", precondition="未发送", consequence="待确认",
                 source_ref="19.1实施阶段")
     m.add_event(eid="e15", entity="E-BMJL", dimension="报名记录状态", action="能力验证预通知",
@@ -68,7 +68,7 @@ def build() -> DomainModel:
     m.add_event(eid="e18", entity="E-BMJL", dimension="报名记录样品状态", action="样品核查",
                 actor="样品制备人员", precondition="初始；E-BMJL.结果待提交", consequence="待发样",
                 source_ref="19.1实施阶段；19.3项目状态分析")
-    m.add_event(eid="e19", entity="E-BMJL", dimension="通知状态", action="接收能力验证计划并确认",
+    m.add_event(eid="e19", entity="E-XM", dimension="通知状态", action="接收能力验证计划并确认",
                 actor="能力验证参加者", precondition="待确认", consequence="已确认",
                 source_ref="19.1实施阶段；19.4能力验证参加者工作流程分析")
     m.add_event(eid="e20", entity="E-BMJL", dimension="报名记录样品状态", action="样品发放,作业指导书发送",
@@ -152,19 +152,19 @@ def build() -> DomainModel:
     m.add_event(eid="e45", entity="E-YP", dimension="样品状态", action="样品领用登记",
                 actor="样品管理员", precondition="初始", consequence="待核查",
                 source_ref="19.3项目状态分析")
-    m.add_event(eid="e46", entity="E-BMJL", dimension="通知状态", action="作业指导书编制",
+    m.add_event(eid="e46", entity="E-XM", dimension="通知状态", action="作业指导书编制",
                 actor="策划人员", precondition="未发送", consequence="待审核",
                 source_ref="19.3项目状态分析")
-    m.add_event(eid="e47", entity="E-BMJL", dimension="通知状态", action="审核预通知",
+    m.add_event(eid="e47", entity="E-XM", dimension="通知状态", action="审核预通知",
                 actor="技术主管", precondition="待审核", consequence="已审核",
                 source_ref="19.3项目状态分析；7技术主管")
-    m.add_event(eid="e48", entity="E-BMJL", dimension="通知状态", action="退回预通知",
+    m.add_event(eid="e48", entity="E-XM", dimension="通知状态", action="退回预通知",
                 actor="技术主管", precondition="待审核", consequence="退回",
                 source_ref="19.3项目状态分析")
-    m.add_event(eid="e49", entity="E-BMJL", dimension="通知状态", action="修改预通知",
+    m.add_event(eid="e49", entity="E-XM", dimension="通知状态", action="修改预通知",
                 actor="策划人员", precondition="退回", consequence="待审核",
                 source_ref="19.3项目状态分析")
-    m.add_event(eid="e50", entity="E-BMJL", dimension="通知状态", action="能力验证预通知",
+    m.add_event(eid="e50", entity="E-XM", dimension="通知状态", action="能力验证预通知",
                 actor="项目管理员", precondition="已审核", consequence="待确认",
                 source_ref="19.3项目状态分析")
     # —— 实验室（20.3.1/20.4.1）——
@@ -272,8 +272,8 @@ def build() -> DomainModel:
     m.add_permission(role="监督员", operations=[])
     # 1.2/1.3/1.4 分组与状态推导（entity列即分组结果；状态面唯一承载：流程表'样品状态'列物流值并入E-BMJL.报名记录样品状态）
     m.add_entity(
-        id="E-XM", name="项目", desc="能力验证/测量审核项目载体，承载项目状态流转、评价、报告与证书发放",
-        type="core", tags=["approvable", "collaborative", "configurable"],
+        id="E-XM", name="项目", desc="能力验证/测量审核项目载体，承载项目状态流转、项目级预通知状态、评价、报告与证书发放",
+        type="core", tags=["approvable", "multi-state", "collaborative", "configurable"],
         attributes=[
             attr("项目类型", desc="能力验证/测量审核（20.8.3.1项目类型选项）"),
             attr("产品类型", desc="下拉选项为系统内所有的产品信息（20.8.3.1）"),
@@ -292,6 +292,9 @@ def build() -> DomainModel:
             {"dimension_name": "项目状态", "states": ["待开始", "报名中", "进行中", "报告审核中", "已结束"],
              "initial": "待开始", "terminal": ["已结束"], "inferred": [],
              "note": {"comment": "状态值与顺序取自19.3枚举表；报名中→进行中→报告审核中→已结束链路无显式台账行，由e16/e37/e39（能力验证）与e65/e67/e39（测量审核）推断补链，见转换note；测量审核侧先受理报名（报名中）后经设计方案编制转待开始（序判④语义优先）"}},
+            {"dimension_name": "通知状态", "states": ["未发送", "待确认", "待审核", "退回", "已审核", "已批准", "已确认"],
+             "initial": "未发送", "terminal": ["已确认"], "inferred": [],
+             "note": {"comment": "枚举取19.3通知状态（流程表列称'预通知状态'，两口径并列）；'已确认'为台账推导值（19.1/19.3样品发放行预通知状态列），追加于枚举之后；'已批准'枚举但无事件覆盖，孤岛原样保留（框架降级警告）；§5修复C32：本维度自E-BMJL迁至E-XM项目级——19.1流程表预通知状态列首现于'能力验证计划发布'行（行3，值未发送），早于报名记录创建（行4），报名记录尚不存在不能承载初始化，状态面出生点锚定首现动作（t07，action=能力验证计划发布），E-BMJL不再承载初始化；19.3枚举将通知状态列为报名记录子状态类型，与流程表首现行矛盾，本裁决以流程表首现行为准（文档即数据，矛盾已按C32框架裁决消解）"}},
         ],
         operations=[
             op("新增项目", "crud", ["项目创建并进入状态流转，初始状态为待开始（推断）"], "20.5.1.5项目新增表单增加监督员",
@@ -325,7 +328,7 @@ def build() -> DomainModel:
         ],
     )
     m.add_entity(
-        id="E-BMJL", name="报名记录", desc="参加者对项目的报名记录，承载报名审核、结果提交、报告/证书发布、费用与发票、样品物流与预通知确认",
+        id="E-BMJL", name="报名记录", desc="参加者对项目的报名记录，承载报名审核、结果提交、报告/证书发布、费用与发票、样品物流（预通知确认状态面经§5修复C32迁E-XM项目级）",
         type="core", tags=["approvable", "multi-state", "collaborative", "expirable"],
         attributes=[
             attr("报名编号", desc="报名记录编号（20.8.3.2）"),
@@ -346,9 +349,6 @@ def build() -> DomainModel:
             {"dimension_name": "报名记录样品状态", "states": ["待发样", "待收样", "已收样", "已确认"],
              "initial": "待发样", "terminal": ["已确认"], "inferred": [],
              "note": {"comment": "19.3枚举；维度首落点为样品核查行'已核查、待发样'顿号快照第二值（t18创建转换即该落点）；流程表'样品状态'列'待发样''已发样'等物流值并入本维度承载（状态面唯一承载），'已发样'与'待收样'同节点两口径并列；已收样→已确认由t69推断补链"}},
-            {"dimension_name": "通知状态", "states": ["未发送", "待确认", "待审核", "退回", "已审核", "已批准", "已确认"],
-             "initial": "未发送", "terminal": ["已确认"], "inferred": [],
-             "note": {"comment": "枚举取19.3通知状态（流程表列称'预通知状态'，两口径并列）；'已确认'为台账推导值（19.1/19.3样品发放行预通知状态列），追加于枚举之后；'已批准'枚举但无事件覆盖，孤岛原样保留（框架降级警告）"}},
             {"dimension_name": "费用状态", "states": ["待缴费", "已缴费"],
              "initial": "待缴费", "terminal": ["已缴费"], "inferred": [],
              "note": {"comment": "19.3枚举；退款仅更新项目费用属性为实际付款金额，不改变费用状态（20.10.2.3）"}},
@@ -400,8 +400,8 @@ def build() -> DomainModel:
         ],
         state_dimensions=[
             {"dimension_name": "评价状态", "states": ["待评价", "评价中", "已关闭"],
-             "initial": "待评价", "terminal": ["已关闭"], "inferred": ["已关闭"],
-             "note": {"comment": "文档未枚举评价状态；'待评价''评价中'散见于20.7.1.2协同评价及台账推导；'已关闭'据'项目评价状态关闭'（20.7.1.3）语义命名，inferred成对标注"}},
+             "initial": "待评价", "terminal": ["已关闭"], "inferred": ["待评价", "评价中", "已关闭"],
+             "note": {"comment": "文档未枚举评价状态，三值均为语义命名（inferred成对标注）：'待评价'为评价任务建立后、评价动作开始前的待操作情形（20.7.1.2协同评价页面提供分数录入入口），'评价中'为评价人员进行输入/调整分数的动作进行中情形（20.7.1.2），'已关闭'据'项目评价状态关闭'（20.7.1.3）语义命名；§5修复C16：'待评价''评价中'经原文全文检索无逐字命中，补入inferred声明并修正原note'散见于20.7.1.2'的不实表述"}},
         ],
         operations=[
             op("评价", "crud", ["评价人员找到评价项对应单元格可以输入或调整评价分数", "确定：按钮，点击提交结果"], "20.7.1.2协同评价",
@@ -674,7 +674,7 @@ def build() -> DomainModel:
                      note={"comment": "判定(d)：样品与报名记录为发放关联，报名记录独立创建且可能不涉及样品（无需还样）；management_dimension：发样由项目管理员执行、接收由参加者确认"})
     # ===== Step 2：分支（准入判据＝可锚定转换；各value台账锚点已自查：均指向台账既有事件落点）=====
     m.add_branch_dimension(dimension="项目类型", entity="E-XM", values=["能力验证", "测量审核"],
-                           impact_scope="E-XM.项目状态、E-BMJL.报名记录状态、E-BMJL.通知状态、E-YP.样品状态路径分立",
+                           impact_scope="E-XM.项目状态、E-BMJL.报名记录状态、E-XM.通知状态、E-YP.样品状态路径分立",
                            evidence="③；隐式分支：19.1能力验证与19.3测量审核平行流程表格列体现，20.8.3.1项目类型下拉选项'能力验证、测量审核'命名",
                            branches=[
                                {"value": "能力验证", "target_transition": "设计方案编制创建转换（E-XM.项目状态 初始→待开始）"},
@@ -708,9 +708,9 @@ def build() -> DomainModel:
                                {"value": "通过", "target_transition": "实验室审核转换（待审核→启用）"},
                                {"value": "退回修改", "target_transition": "实验室审核退回转换（待审核→退回修改）"},
                            ])
-    m.add_branch_dimension(dimension="通知审核结果", entity="E-BMJL", values=["通过", "退回"],
-                           impact_scope="E-BMJL.通知状态预通知审核落点分立（已审核/退回）",
-                           evidence="③；隐式分支：19.3作业指导书行预通知状态列'待审核/退回/已审核'斜杠取值维度体现",
+    m.add_branch_dimension(dimension="通知审核结果", entity="E-XM", values=["通过", "退回"],
+                           impact_scope="E-XM.通知状态预通知审核落点分立（已审核/退回）",
+                           evidence="③；隐式分支：19.3作业指导书行预通知状态列'待审核/退回/已审核'斜杠取值维度体现；§5修复C32：维度随E-XM.通知状态迁项目级",
                            branches=[
                                {"value": "通过", "target_transition": "审核预通知转换（待审核→已审核）"},
                                {"value": "退回", "target_transition": "退回预通知转换（待审核→退回）"},
@@ -799,13 +799,13 @@ def build() -> DomainModel:
         note={"comment": "源自e06；⓪创建转换；报名记录创建后系统自动初始化缴费通知单为未发送（联动，见因果E-BMJL→E-JFTZ），role=system；台账行actor为报名动作主体；两流程共用"},
     )
     m.add_trans(
-        tid="t07", entity="E-BMJL", dimension="通知状态",
-        frm=None, to="未发送", action="报名", role="能力验证参加者",
+        tid="t07", entity="E-XM", dimension="通知状态",
+        frm=None, to="未发送", action="能力验证计划发布", role="项目管理员",
         preconditions=[],
         expected_results=["通知状态初始化为未发送"],
         traits=[], direction="forward", priority="P0",
         source_ref="19.1实施阶段",
-        note={"comment": "源自e07；⓪创建转换；e03同动作拆行；测量审核共用（19.3发票开具行预通知状态列'未发送'为驻留值）；维度名19.3枚举称'通知状态'、流程表列称'预通知状态'，两口径并列"},
+        note={"comment": "源自e07；⓪创建转换；与t02同动作拆行（一动作多状态面）；测量审核共用（19.3发票开具行预通知状态列'未发送'为驻留值）；维度名19.3枚举称'通知状态'、流程表列称'预通知状态'，两口径并列；§5修复C32：本条原为E-BMJL创建（action=报名，行4），19.1预通知状态列首现于'能力验证计划发布'行（行3，值未发送）早于报名记录创建，出生点被后移，故维度迁E-XM项目级、动作改锚首现动作'能力验证计划发布'，E-BMJL不再承载初始化（e07/t07同步改写）"},
     )
     m.add_trans(
         tid="t08", entity="E-BMJL", dimension="报名记录状态",
@@ -892,16 +892,16 @@ def build() -> DomainModel:
         note={"comment": "源自e13；③；同行费用状态列原文'已缴费/未缴费'为或值驻留，不构成门禁；20.10.2.2发票上传支持多次分批上传（op发票上传关联本条）；两流程共用"},
     )
     m.add_trans(
-        tid="t14", entity="E-BMJL", dimension="通知状态",
+        tid="t14", entity="E-XM", dimension="通知状态",
         frm="未发送", to="待确认", action="能力验证预通知", role="项目管理员",
         preconditions=[
             precond(text="通知处于未发送状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "未发送")),
+                    ref=state_ref("E-XM", "通知状态", "未发送")),
         ],
         expected_results=["预通知发送，通知状态变为待确认", "生成预通知、用户信息表"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.1实施阶段",
-        note={"branch_dimension": "项目类型", "comment": "源自e14；③；能力验证分支（与t50已审核→待确认分立，同action不同frm），Step2 value=能力验证→本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值"},
+        note={"branch_dimension": "项目类型", "comment": "源自e14；③；能力验证分支（与t50已审核→待确认分立，同action不同frm），Step2 value=能力验证→本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["能力验证"],
     )
     m.add_trans(
@@ -956,16 +956,16 @@ def build() -> DomainModel:
         note={"comment": "源自e18；⓪创建转换；本维度创建转换即样品核查行'已核查、待发样'顿号快照的第二落点（逐值登记）；维度初值=待发样；两流程共用"},
     )
     m.add_trans(
-        tid="t19", entity="E-BMJL", dimension="通知状态",
+        tid="t19", entity="E-XM", dimension="通知状态",
         frm="待确认", to="已确认", action="接收能力验证计划并确认", role="能力验证参加者",
         preconditions=[
             precond(text="通知处于待确认状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "待确认")),
+                    ref=state_ref("E-XM", "通知状态", "待确认")),
         ],
         expected_results=["通知状态变为已确认"],
         traits=[], direction="forward", priority="P0",
         source_ref="19.1实施阶段；19.4能力验证参加者工作流程分析",
-        note={"comment": "源自e19；③；落点值取19.1/19.3样品发放行预通知状态列'已确认'，动作短语取19.4参加者流程；两流程共用"},
+        note={"comment": "源自e19；③；落点值取19.1/19.3样品发放行预通知状态列'已确认'，动作短语取19.4参加者流程；两流程共用；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
     )
     m.add_trans(
         tid="t20", entity="E-BMJL", dimension="报名记录样品状态",
@@ -974,7 +974,7 @@ def build() -> DomainModel:
             precond(text="报名记录样品处于待发样状态", ptype="state_ref",
                     ref=state_ref("E-BMJL", "报名记录样品状态", "待发样")),
             precond(text="通知处于已确认状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "已确认")),
+                    ref=state_ref("E-XM", "通知状态", "已确认")),
         ],
         expected_results=["样品发出，报名记录样品状态变为待收样", "记录快递单号或者软件访问路径", "短信通知：您xxxx项目的样品已发出，请知悉"],
         traits=[], direction="forward", priority="P0",
@@ -1293,72 +1293,72 @@ def build() -> DomainModel:
         branch_values=["测量审核"],
     )
     m.add_trans(
-        tid="t46", entity="E-BMJL", dimension="通知状态",
+        tid="t46", entity="E-XM", dimension="通知状态",
         frm="未发送", to="待审核", action="作业指导书编制", role="策划人员",
         preconditions=[
             precond(text="通知处于未发送状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "未发送")),
+                    ref=state_ref("E-XM", "通知状态", "未发送")),
         ],
         expected_results=["作业指导书/预通知编制完成，提交审核，通知状态变为待审核（推断）", "生成作业指导书"],
         traits=["branch"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "inferred": True, "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）"},
+        note={"branch_dimension": "项目类型", "inferred": True, "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
-        tid="t47", entity="E-BMJL", dimension="通知状态",
+        tid="t47", entity="E-XM", dimension="通知状态",
         frm="待审核", to="已审核", action="审核预通知", role="技术主管",
         preconditions=[
             precond(text="通知处于待审核状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "待审核")),
+                    ref=state_ref("E-XM", "通知状态", "待审核")),
             precond(text="通知审核结果=通过", ptype="constraint",
                     note={"comment": "分支值条件"}),
         ],
         expected_results=["预通知审核通过，通知状态变为已审核（推断）"],
         traits=["branch", "audit"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析；7技术主管",
-        note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过→本条"},
+        note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过→本条；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
-        tid="t48", entity="E-BMJL", dimension="通知状态",
+        tid="t48", entity="E-XM", dimension="通知状态",
         frm="待审核", to="退回", action="退回预通知", role="技术主管",
         preconditions=[
             precond(text="通知处于待审核状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "待审核")),
+                    ref=state_ref("E-XM", "通知状态", "待审核")),
             precond(text="通知审核结果=退回", ptype="constraint",
                     note={"comment": "分支值条件"}),
         ],
         expected_results=["预通知审核退回，通知状态变为退回（推断）"],
         traits=["branch", "rollback"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回→本条；退回后修改重提见t49"},
+        note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回→本条；退回后修改重提见t49；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
-        tid="t49", entity="E-BMJL", dimension="通知状态",
+        tid="t49", entity="E-XM", dimension="通知状态",
         frm="退回", to="待审核", action="修改预通知", role="策划人员",
         preconditions=[
             precond(text="通知处于退回状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "退回")),
+                    ref=state_ref("E-XM", "通知状态", "退回")),
         ],
         expected_results=["修改后重新提交审核（推断）"],
         traits=["rollback"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"inferred": True, "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链"},
+        note={"inferred": True, "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
-        tid="t50", entity="E-BMJL", dimension="通知状态",
+        tid="t50", entity="E-XM", dimension="通知状态",
         frm="已审核", to="待确认", action="能力验证预通知", role="项目管理员",
         preconditions=[
             precond(text="通知处于已审核状态", ptype="state_ref",
-                    ref=state_ref("E-BMJL", "通知状态", "已审核")),
+                    ref=state_ref("E-XM", "通知状态", "已审核")),
         ],
         expected_results=["预通知发送，通知状态变为待确认"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与t14未发送→待确认分立，同action不同frm）"},
+        note={"branch_dimension": "项目类型", "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与t14未发送→待确认分立，同action不同frm）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1710,7 +1710,7 @@ def build() -> DomainModel:
     m.add_br(bid="b14", category="notification",
              desc="管理用户对报名信息操作后使用短信方式对用户进行通知：报名审核通过/退回修改、样品已发出、测试报告审核通过/未通过、结果通知单已发布节点",
              entities_involved=["E-BMJL"], source_ref="20.5.3.2操作节点增加用户短信通知；20.6.3.2操作节点增加用户短信通知", restrictive=False,
-             note={"comment": "支持性规则，无强制原词；category判通知；各节点对应t08/t09/t20/t25/t26/t38；§5修复C20×3：①desc'报名审核通过/退回修改'逐字命中[报名审核结果]值域；②desc'测试报告审核通过/未通过'钩子对应[测试结果审核]（'未通过'≈分支值'退回'，通知文案与分支值同义映射，值域锚点即t25/t26）；③[通知审核结果]（预通知审核 通过/退回，锚点t47/t48，19.3作业指导书行预通知状态列'待审核/退回/已审核'）挂本条依据——desc节点族（报名审核、测试报告审核）与预通知审核同属管理用户对报名信息的审核结果通知节点，且source_ref已含测量审核侧20.6.3.2（预通知审核仅存在于测量审核流程）；b02/b03虽含审核语义但作用对象为E-LAB跨实体，故不取"},
+             note={"comment": "支持性规则，无强制原词；category判通知；各节点对应t08/t09/t20/t25/t26/t38；§5修复C20×3：①desc'报名审核通过/退回修改'逐字命中[报名审核结果]值域；②desc'测试报告审核通过/未通过'钩子对应[测试结果审核]（'未通过'≈分支值'退回'，通知文案与分支值同义映射，值域锚点即t25/t26）；③[通知审核结果]（预通知审核 通过/退回，锚点t47/t48，19.3作业指导书行预通知状态列'待审核/退回/已审核'）挂本条依据——desc节点族（报名审核、测试报告审核）与预通知审核同属审核结果通知节点族，且source_ref已含测量审核侧20.6.3.2（预通知审核仅存在于测量审核流程）；§5修复C32后预通知审核状态面锚定E-XM项目级，本条作为唯一通知类BR仍为该维度承载（维度名不变，挂载有效）；b02/b03虽含审核语义但作用对象为E-LAB跨实体，故不取"},
              branch_dimensions=["报名审核结果", "测试结果审核", "通知审核结果"])
     m.add_br(bid="b15", category="computation",
              desc="评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
