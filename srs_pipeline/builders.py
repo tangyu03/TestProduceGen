@@ -21,7 +21,9 @@ def N(inferred=False, comment="", conflict="", branch_dimension="", role=None) -
 def attr(name, desc, is_config=False) -> dict:
     return {"name": str(name), "desc": esc(desc), "is_config": bool(is_config)}
 
-def op(name, category, expected_results, source_ref, note=None) -> dict:
+def op(name, category, expected_results, source_ref, note=None,
+       linked_transitions=None, stage_hint=None, form_fields=None,
+       page=None) -> dict:
     if category not in OP_CATEGORIES:
         raise ValueError(f"操作[{name}] category 非法: {category!r}，六枚举 {OP_CATEGORIES}")
     if not expected_results:
@@ -34,9 +36,19 @@ def op(name, category, expected_results, source_ref, note=None) -> dict:
         # assemble 后校验器仍以 error 级兜底（validate.py c18_inv_operations_role）。
         warnings.warn(f"op[{name}] note 缺 role 字段，assemble 的 C18 校验将报 error",
                       stacklevel=2)
-    return {"name": str(name), "category": category,
-            "expected_results": [esc(e) for e in expected_results],
-            "source_ref": esc(source_ref), "note": note}
+    d = {"name": str(name), "category": category,
+         "expected_results": [esc(e) for e in expected_results],
+         "source_ref": esc(source_ref), "note": note}
+    # 2026-09 排序修复：操作级挂载/渲染元数据（P1 声明 → P2 透传 → S1/S3 消费）
+    if linked_transitions:
+        d["linked_transitions"] = [str(t) for t in linked_transitions]
+    if stage_hint is not None:
+        d["stage_hint"] = stage_hint                 # 无状态前置操作的阶段锚定
+    if form_fields is not None:
+        d["form_fields"] = list(form_fields)         # 表单字段清单覆盖（实体 attributes）
+    if page:
+        d["page"] = str(page)                        # Type5 导航页面覆盖
+    return d
 
 def precond(text, ptype, ref=None, note=None) -> dict:
     """铁律12：结构化前置条件。ref 合法性由校验器 C03 兜底（补全或降级）。"""

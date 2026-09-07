@@ -48,6 +48,28 @@ def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
     return pt <= pf
 
 
+def _ladder_le(ladder: dict, t_entity: str, t_dim: str,
+               other_to_state: str, my_from_state: str) -> bool | None:
+    """同 (entity,dim) 状态阶梯：other 的 to-state 位相 ≤ 本 proc 的 from-state
+    位相（Guard 1 相位单调性，C7）。
+
+    阶梯缺失（t_dim 空 / (entity,dim) 无阶梯 / 状态不在阶梯）返回 None——
+    调用方回退全局 S2 相位比较。已知时返回 bool。"""
+    if not t_dim or not isinstance(ladder, dict):
+        return None
+    l = ladder.get((t_entity, t_dim))
+    if not isinstance(l, dict):
+        return None
+    a = l.get(other_to_state)
+    b = l.get(my_from_state)
+    if a is None or b is None:
+        return None
+    try:
+        return int(a) <= int(b)
+    except (TypeError, ValueError):
+        return None
+
+
 # ── v29 #3: Causal confidence ranking for cycle breaking ──────────────────
 # Each dependency records its ORIGIN (the mechanism that added it).
 # break_cycles uses this confidence to decide which edge to remove:
@@ -67,6 +89,7 @@ def _proc_is_back_edge(p: dict, state_pos: dict) -> bool:
 DEP_CONFIDENCE: dict[str, int] = {
     "transition_upstream": 5,
     "guard1_state_pred": 5,
+    "then_init_state_pred": 5,
     "co_enabler": 4,
     "co_enabler_both_lateral": 4,
     "co_enabler_phase_inversion": 4,
@@ -204,6 +227,11 @@ def _to_branch_values(to: dict | None) -> set:
     if not isinstance(to, dict):
         return set()
     declared = {str(bv) for bv in (to.get("branch_values") or []) if bv}
+    # A1（v13 评审三/四.4）：S1 合成的分支声明（同动作兄弟传播 + 分支域
+    # 闭包）写在 TO["_synth_branch_values"]，与显式 branch_values 同为该
+    # 转换的生命周期归属——并入后跨分支门禁（_cross_branch）与 B2 归属
+    # 消歧才对共用转换生效（008{能力验证}×021{测量审核} 由此剔除）。
+    declared |= {str(bv) for bv in (to.get("_synth_branch_values") or []) if bv}
     if declared:
         return declared
     if _P2_SPLIT_SUFFIX_RE.search(str(to.get("id", ""))):
@@ -255,6 +283,7 @@ def _bind_container_creation_edges(
     cm: dict,
     warnings: list,
     proc_bvs: dict | None = None,
+    state_pos: dict | None = None,
 ) -> int:
     """B2 v2: composition P→C ⇒ C 侧无 P 依赖的 proc 补指向 P 创建 proc 的硬依赖。
 
@@ -286,6 +315,21 @@ def _bind_container_creation_edges(
     for ent in creation_procs:
         creation_procs[ent].sort(key=lambda pid: list(
             (proc_by_id.get(pid) or {}).get('_S2_fields', {}).get('sort_key') or []))
+    # E1（v13 评审四.6）：父实体各维度的声明序（P1 实体维度声明序，由 S0
+    # _build_state_pos 的键插入序承载）。多创建候选消歧时优先主维度（首个
+    # 声明维度）上的创建 proc——min-sort_key 按 CJK 维度名序会赌到通知状态
+    # （008）等旁支维度，主维度才是"容器对象诞生"的本命状态面。
+    parent_dim_order: dict[str, list] = {}
+    for (_e, _d) in (state_pos or {}):
+        parent_dim_order.setdefault(_e, []).append(_d)
+
+    def _prefer_primary(pids: list, parent_ent: str) -> list:
+        pd = (parent_dim_order.get(parent_ent) or [None])[0]
+        if not pd:
+            return pids
+        pref = [c for c in pids
+                if (proc_by_id.get(c) or {}).get("dimension") == pd]
+        return pref or pids
     # 各实体创建事件的全部基础 tid：识别"子 proc 自身是创建事件视图"
     creation_tids: dict = {}
     for ent, pids in creation_procs.items():
@@ -337,6 +381,13 @@ def _bind_container_creation_edges(
             deps = s3.setdefault('dependencies', [])
             if any(proc_entity.get(d) == parent_ent for d in deps):
                 continue
+            # E2（v13 评审四.6）：无状态维度的义务（CRUD/EO）若已依赖自身
+            # 实体的创建 proc，对象存在性已由其自身创建保证——容器创建边
+            # 是冗余排序噪音（055←012、052/066←008），跳过。转换 proc
+            # （dim≠None）不豁免——090→011、091→031、034→031 状态链保持。
+            if not proc.get('dimension') and any(
+                    d in creation_procs.get(child_ent, []) for d in deps):
+                continue
             if len(cands) > 1:
                 # v3: 多创建候选 → 生命周期归属消歧（branch_values 改造，
                 # 数据驱动替代 v2 的无条件留白；v1 取 min sort_key 赌分支
@@ -353,8 +404,27 @@ def _bind_container_creation_edges(
                     warnings.append(
                         f"S3.B2 分支消歧: {pid} ← {p_creation} "
                         f"(子归属 {sorted(child_bvs) or '共享'}，组合 {parent_ent}→{child_ent})")
+                elif len(compat) > 1 and child_bvs:
+                    # C8: 多兼容候选且子 proc 有分支归属 → 优先分支专用候选
+                    # （非共享∅），取 sort_key 最小者（compat 保序 = cands 排序）。
+                    # v13 评审根因：测量审核子用例（T-041/042/043/066）错挂
+                    # 共享的能力验证计划发布 PROC-010，应挂测量审核受理报名
+                    # PROC-031。
+                    dedicated = [c for c in compat
+                                 if (proc_bvs or {}).get(c, set())]
+                    if dedicated:
+                        # E1：分支专用候选仍可多个（跨维度）→ 主维度优先
+                        p_creation = _prefer_primary(dedicated, parent_ent)[0]
+                        warnings.append(
+                            f"S3.B2 分支专用优先: {pid} ← {p_creation} "
+                            f"(子归属 {sorted(child_bvs)}，组合 {parent_ent}→{child_ent})")
+                    else:
+                        p_creation = _prefer_primary(cands, parent_ent)[0]
+                        warnings.append(
+                            f"S3.B2 兜底(无专用): {pid} ← {p_creation} "
+                            f"(子归属 {sorted(child_bvs)} 多兼容全共享，组合 {parent_ent}→{child_ent})")
                 else:
-                    p_creation = cands[0]
+                    p_creation = _prefer_primary(cands, parent_ent)[0]
                     if not compat:
                         warnings.append(
                             f"S3.B2 兜底(零兼容): {pid} ← {p_creation} "
@@ -625,7 +695,9 @@ def s3_dependency_node(state: AgentState) -> dict:
                            phase_table=state.get("phase_table"),
                            state_pos=state_pos, state=state,
                            cross_branch=_cross_branch,
-                           state_pos_for=_state_pos_for)
+                           state_pos_for=_state_pos_for,
+                           proc_bvs=proc_bvs,
+                           warnings=warnings)
 
     # ── Strong dependencies ──
     for proc in procedures:
@@ -684,46 +756,73 @@ def s3_dependency_node(state: AgentState) -> dict:
             try:
                 idx = same_dim_sorted.index(proc["temp_id"])
                 if idx > 0:
-                    prev_id = same_dim_sorted[idx - 1]
-                    prev_proc = proc_by_id.get(prev_id, {})
                     # BDD: extract from_state from givens[0].state directly
                     # (was: parsing S-step input string in legacy AAA model)
                     curr_from_state = None
                     givens = proc.get("givens", [])
                     if givens:
                         curr_from_state = givens[0].get("state", "")
-                    # Extract predecessor's post_state value (exact, no truncation)
-                    prev_post = prev_proc.get("post_state", "")
-                    prev_post_val = None
-                    if "→" in prev_post:
-                        prev_post_val = prev_post.split("→")[-1].strip()
-                    # ── State-connection validation ──
-                    # branch_values 改造：跨分支同名状态汇合点不构成状态链
-                    # （平行生命周期共用词汇表，状态相等 ≠ 同生命周期前驱，
-                    # 如测量审核 T-040 产出的报名中不是能力验证 T-002 的前驱）。
-                    if not _branch_compatible(
-                            proc_bvs.get(proc["temp_id"], set()),
-                            proc_bvs.get(prev_id, set())):
-                        branch_skip_stats["chain_ordering"] = \
-                            branch_skip_stats.get("chain_ordering", 0) + 1
-                        pass  # 跨分支不连边（等价 case d）
-                    elif curr_from_state is None:
-                        pass  # case (a): independent op — no chain predecessor
-                    elif curr_from_state in ("(初始)", "(None)", "None", ""):
-                        pass  # case (b): creation from null — root of chain
-                    elif prev_post_val and curr_from_state == prev_post_val:
-                        # case (c): valid state chain — but skip if prev already
-                        # depends on curr (Guard 1 created the reverse edge).
-                        # Adding both directions would create a cycle (e.g. 启用↔停用).
-                        prev_deps = prev_proc.get("_S3_fields", {}).get("dependencies", [])
-                        if proc["temp_id"] not in prev_deps:
-                            # Phase guard: skip if predecessor is in a later phase
-                            prev_phase = prev_proc.get("_S2_fields", {}).get("phase", 0)
-                            if prev_phase <= my_phase:
+                    if curr_from_state not in (None, "(初始)", "(None)", "None", ""):
+                        # Fix C（v13 评审四.1/.2）：排序最近邻是回退边/后定义
+                        # 横向边时不连边，沿排序链向回找首个 post==from 的
+                        # 真实状态生产者。透明跳过两类：
+                        #   (a) 严格回退边，且其返工环经消费方同动作兄弟回归
+                        #       （056 批量审核同意 越过 019 批量审核退回）；
+                        #   (b) 横向边（from==post）且定义序在消费方之后
+                        #       （089 越过 085 评价中自环，T-035>T-034）。
+                        # 其余候选不透明：跨分支（等价 case d，占住链位的异
+                        # 分支 proc 即断链）或状态不匹配（case d）都在首个
+                        # 未跳过者处停止——维持改造前的最近邻保守语义
+                        # （078 的 067 退回重提边须入选，不越过）。
+                        for _j in range(idx - 1, -1, -1):
+                            prev_id = same_dim_sorted[_j]
+                            prev_proc = proc_by_id.get(prev_id, {})
+                            # branch_values 改造：跨分支同名状态汇合点不构成
+                            # 状态链（平行生命周期共用词汇表，状态相等 ≠ 同
+                            # 生命周期前驱，如测量审核 T-040 产出的报名中不是
+                            # 能力验证 T-002 的前驱）。
+                            if not _branch_compatible(
+                                    proc_bvs.get(proc["temp_id"], set()),
+                                    proc_bvs.get(prev_id, set())):
+                                branch_skip_stats["chain_ordering"] = \
+                                    branch_skip_stats.get("chain_ordering", 0) + 1
+                                break  # 跨分支不连边（等价 case d，不透明）
+                            prev_post = prev_proc.get("post_state", "")
+                            prev_post_val = (prev_post.split("→")[-1].strip()
+                                             if "→" in prev_post else None)
+                            prev_givens = prev_proc.get("givens", [])
+                            prev_from_val = (prev_givens[0].get("state", "")
+                                             if prev_givens else "")
+                            # Fix C (a)：严格回退边 + 返工环经同动作兄弟回归
+                            # → 透明（本 proc 就是环的回流边）
+                            if _proc_is_back_edge(
+                                    prev_proc,
+                                    _state_pos_for(prev_proc) if _state_pos_for else state_pos
+                            ) and _rework_via_own_action(
+                                    prev_proc, proc, entity_dim_procs, proc_by_id):
+                                continue
+                            # Fix C (b)：横向边且定义序在消费方之后 → 透明
+                            if (prev_from_val and prev_post_val
+                                    and prev_from_val == prev_post_val
+                                    and _max_transition_num(prev_proc)
+                                    > _max_transition_num(proc)):
+                                continue
+                            # case (c)：valid state chain
+                            if prev_post_val and curr_from_state == prev_post_val:
+                                # 防环：prev 已依赖 curr（Guard 1 连了反向边）
+                                # → 更早的生产者可能合法，继续向回走
+                                prev_deps = prev_proc.get("_S3_fields", {}).get(
+                                    "dependencies", [])
+                                if proc["temp_id"] in prev_deps:
+                                    continue
+                                # Phase guard: skip if predecessor is in a later phase
+                                prev_phase = prev_proc.get("_S2_fields", {}).get("phase", 0)
+                                if prev_phase > my_phase:
+                                    continue
                                 deps.add(prev_id)
                                 _record_origin(prev_id, "chain_ordering")
-                    else:
-                        pass  # case (d): states don't match
+                                break
+                            break  # case (d)：状态不匹配 → 不透明断链
             except ValueError:
                 pass
 
@@ -862,48 +961,10 @@ def s3_dependency_node(state: AgentState) -> dict:
                     weak.add(other["temp_id"])
                     weak_origins[other["temp_id"]] = "weak_side_effect"
 
-        # Independent Type7: weak dep to non-primary entity's closest phase proc
-        if proc.get("obligation_type") == ObligationType.RULE:
-            # BUGFIX #20: hoist cm.get out of the source_ids loop
-            ros_raw = cm.get("constraint_obligations", [])
-            if isinstance(ros_raw, dict):
-                ros_all = [item for sublist in ros_raw.values() for item in sublist]
-            elif isinstance(ros_raw, list):
-                ros_all = ros_raw
-            else:
-                ros_all = []
-            for sid in proc.get("source_ids", []):
-                for r in ros_all:
-                    if r.get("id") == sid or r.get("constraint_id") == sid:
-                        entities_raw = r.get("entities_involved", r.get("entities", ""))
-                        # BUGFIX #9: handle Chinese commas/顿号 via regex split
-                        if isinstance(entities_raw, list):
-                            br_entities = entities_raw
-                        elif isinstance(entities_raw, str):
-                            br_entities = re.split(r'[,，、\s]+', entities_raw)
-                        else:
-                            br_entities = []
-                        for be in br_entities[1:]:
-                            be = be.strip()
-                            if be in proc_by_entity:
-                                # BDD: only state-transition / CRUD / config
-                                # procedures are valid weak-dep targets.
-                                # Exclude Type7/8/9 (rule/field validation).
-                                candidates = [
-                                    p for p in proc_by_entity[be]
-                                    if p.get("obligation_type") not in (
-                                            ObligationType.INVALID, ObligationType.RULE,
-                                            ObligationType.FIELD_VALIDATION)
-                                    and _branch_compatible(
-                                        proc_bvs.get(proc["temp_id"], set()),
-                                        proc_bvs.get(p["temp_id"], set()))
-                                ]
-                                if candidates:
-                                    closest = min(candidates,
-                                                  key=lambda p: p.get("_S2_fields", {}).get("phase", 999))
-                                    if closest:
-                                        weak.add(closest["temp_id"])
-                                        weak_origins[closest["temp_id"]] = "weak_side_effect"
+        # v13 评审四.5：删除 Independent Type7 次实体弱绑定循环（原
+        # entities_involved[1:] → min-phase 任意维度 proc）。该绑定无从数据
+        # 判别语义（同实体多维度时 min-phase 纯赌），v13 全库仅产出
+        # 121←013 噪音；弱依赖语义由上方 side_effect 通道承载。
 
         s3["weak_dependencies"] = _sort_deps(weak)
         s3["weak_origins"] = weak_origins  # v29 #3: persist for break_cycles
@@ -932,7 +993,62 @@ def s3_dependency_node(state: AgentState) -> dict:
     # 在全部依赖机制之后、break_cycles 之前运行；逐边防环，绝不产生新环。
     # v3: 传入 proc_bvs，多创建候选按生命周期归属消歧。
     _bind_container_creation_edges(procedures, proc_by_id, cm, warnings,
-                                   proc_bvs=proc_bvs)
+                                   proc_bvs=proc_bvs, state_pos=state_pos)
+
+    # ── Fix F（v13 评审二①）：同动作兄弟依赖继承 ──
+    # 同 (action, entity) 组内，无任何状态前置的创建 proc（一动作多状态面
+    # 拆行：t04 费用/t05 发票/t07 通知/t42/t43 记录面）与有前置的 donor 共享
+    # 同一业务上下文，但其前置为空（C04 禁创建转换跨实体 state_ref）→ 成为
+    # 依赖孤岛。继承 donor 的全部依赖（此时已在 B2 之后，donor deps 是合并
+    # 后全集；去重、防自指、驳回变体不继承、跨分支不继承）。origin
+    # same_action_sibling（conf 3，不进保护通道）。必须在 B2 之后运行——
+    # 若在 B2 前，012/013 会先拿到自身实体创建 017 而 E2 豁免会吞掉其 B2 边。
+    _sib_groups: dict = {}
+    for p in procedures:
+        act = (p.get("when") or {}).get("action") or ""
+        if act:
+            _sib_groups.setdefault((act, p.get("entity", "")), []).append(p)
+    for (act, ent), members in _sib_groups.items():
+        if len(members) < 2:
+            continue
+        donors: list = []
+        receivers: list = []
+        for p in members:
+            has_state_precond = any(
+                g.get("given_type") in ("state", "event", "")
+                and str(g.get("state", "") or "").strip() not in
+                ("", "(初始)", "初始", "(None)", "None", "存在")
+                for g in (p.get("givens") or []))
+            if has_state_precond:
+                donors.append(p)
+            elif _proc_is_creation(p):
+                receivers.append(p)
+        for rp in receivers:
+            rs3 = rp.setdefault("_S3_fields", {})
+            rdeps = set(rs3.get("dependencies", []))
+            inherited: list = []
+            for dp in donors:
+                if dp.get("temp_id") == rp.get("temp_id"):
+                    continue
+                for did in (dp.get("_S3_fields", {}).get("dependencies", []) or []):
+                    if did == rp.get("temp_id") or did in rdeps:
+                        continue
+                    dp_proc = proc_by_id.get(did)
+                    if dp_proc is None:
+                        continue
+                    if dp_proc.get("risk_trait") == "audit_rejection":
+                        continue
+                    if not _branch_compatible(proc_bvs.get(rp.get("temp_id", ""), set()),
+                                              proc_bvs.get(did, set())):
+                        continue
+                    rdeps.add(did)
+                    rs3.setdefault("dep_origins", {})[did] = "same_action_sibling"
+                    inherited.append(did)
+            if inherited:
+                rs3["dependencies"] = _sort_deps(rdeps)
+                warnings.append(
+                    f"S3.F 同动作兄弟继承: {rp.get('temp_id')} ← {sorted(inherited)} "
+                    f"(组 {act}@{ent})")
 
     # ── Cycle detection & breaking via graph_algo ──
     procedures, cycle_warnings = break_cycles(procedures)
@@ -1025,6 +1141,97 @@ def s3_dependency_node(state: AgentState) -> dict:
     }
 
 
+def _post_triple(p: dict | None) -> tuple | None:
+    """proc 的 post_state 三元组 (实体, 维度, 状态)；无 → 形态视为 None。"""
+    if not p:
+        return None
+    post = p.get("post_state", "")
+    if "→" not in post:
+        return None
+    head = post.split("→")[0].strip()
+    d = head.split(".")[-1] if "." in head else ""
+    return (p.get("entity", ""), d, post.split("→")[-1].strip())
+
+
+def _then_init_producers(
+    entity: str,
+    dim: str | None,
+    state: str | None,
+    *,
+    proc_by_entity: dict,
+    cross_branch=None,
+    my_phase: int = 0,
+    self_id: str = "",
+) -> list[str]:
+    """Fix G（v13 评审三）：then 级初始化声明生产者回退。
+
+    前置状态 (entity, dim, state) 的 post_state 生产者全被跨分支门禁剔除时
+    （guard1/guard5 调用），扫描该实体各 proc 的 then 断言：expectation 同时
+    含「初始」、维度名（"预通知状态"⊃"通知状态"，子串）与状态名（state=None
+    的 guard5 变体只查前两者）→ 该 proc 是该状态的出生点（如 t40 的
+    "项目创建后预通知状态初始为未发送"）。生产者索引只认 post_state，then
+    级初始化不在其中，故须回退扫描。驳回变体/跨分支/相位门禁照用。
+    """
+    if not entity or not dim:
+        return []
+    out: list[str] = []
+    for other in proc_by_entity.get(entity, []):
+        oid = other.get("temp_id", "")
+        if not oid or oid == self_id:
+            continue
+        if other.get("risk_trait") == "audit_rejection":
+            continue
+        if cross_branch and cross_branch(self_id, oid, "then_init_state_pred"):
+            continue
+        if other.get("_S2_fields", {}).get("phase", 0) > my_phase:
+            continue
+        for tn in other.get("thens", []) or []:
+            exp = str(tn.get("expectation", "") or "")
+            if "初始" in exp and dim in exp and (not state or state in exp):
+                out.append(oid)
+                break
+    return out
+
+
+def _max_transition_num(proc: dict) -> int:
+    """proc 源转换的最大 T 序号（定义序代理；无 T 源返回 -1）。"""
+    nums = []
+    for sid in proc.get("source_ids", []) or []:
+        m = re.match(r"^T-(\d+)", str(sid))
+        if m:
+            nums.append(int(m.group(1)))
+    return max(nums) if nums else -1
+
+
+def _rework_via_own_action(prev_proc: dict, consumer: dict,
+                           entity_dim_procs: dict, proc_by_id: dict) -> bool:
+    """Fix C (a)：回退边候选的返工环是否经消费方自身的 (action, entity) 回归。
+
+    回退边候选 R 的 from 状态若由与消费方同 action 同实体的 proc（同动作
+    分支兄弟：审核通过/审核退回 拆行；含消费方自身）生产，则该返工环的
+    回流边就是消费方自己（056 批量审核同意 的前置 审批退回 由同动作 019
+    批量审核退回 生产）→ 排序链上的该回退边候选对消费方透明，继续向回找
+    真实状态生产者。"""
+    prev_givens = prev_proc.get("givens", [])
+    prev_from = prev_givens[0].get("state", "") if prev_givens else ""
+    if not prev_from or prev_from in ("(初始)", "(None)", "None", ""):
+        return False
+    c_action = (consumer.get("when") or {}).get("action") or ""
+    if not c_action:
+        return False
+    key = f"{consumer.get('entity', '')}.{consumer.get('dimension', '')}"
+    for pid in entity_dim_procs.get(key, []):
+        p = proc_by_id.get(pid) or {}
+        post = p.get("post_state", "")
+        if "→" not in post:
+            continue
+        if post.split("→")[-1].strip() != prev_from:
+            continue
+        if ((p.get("when") or {}).get("action") or "") == c_action:
+            return True
+    return False
+
+
 def _apply_temporal_guards(
     procedures: list[dict],
     proc_by_id: dict,
@@ -1036,6 +1243,8 @@ def _apply_temporal_guards(
     state: dict | None = None,
     cross_branch=None,
     state_pos_for=None,
+    proc_bvs: dict | None = None,
+    warnings: list | None = None,
 ):
     """I23: Apply business temporal guard rules as implicit strong dependencies.
 
@@ -1071,6 +1280,19 @@ def _apply_temporal_guards(
 
         # Guard 1 deps are protected like upstream_deps (real business deps)
         guard1_deps = set(s3.get("guard1_deps", []))
+
+        def _covered_by_guard1(cand: dict) -> bool:
+            """guard6 冗余去重（v13 评审四.3）：候选的 post 三元组 (实体,维度,
+            状态) 已被 guard1 保护通道中的既有 dep 覆盖 → 跳过（同一状态已有
+            更强机制连边，guard6 再连是冗余——030/031/034 的 029、082 的
+            075/077）。只对 guard1 去重，guard6 自身的多生产者语义不动。"""
+            t = _post_triple(cand)
+            if not t:
+                return False
+            for did in guard1_deps:
+                if _post_triple(proc_by_id.get(did)) == t:
+                    return True
+            return False
         entity = proc["entity"]
         dim = proc.get("dimension", "")
         s2 = proc.get("_S2_fields", {})
@@ -1103,16 +1325,56 @@ def _apply_temporal_guards(
         for s_step in s_steps:
             from_state = s_step.get("state", "")
             # Only use explicit state value (Strategy A)
-            if not from_state or from_state in ("(初始)", "(None)", "None", ""):
+            if not from_state or from_state in ("(初始)", "(None)", "None", "", "存在"):
                 continue
+            # C6.2: 仅状态/事件形态 given 参与状态前置匹配。branch/flow/
+            # constraint/field_data 的值词非业务状态（v13 评审
+            # PROC-091 根因：分支 given「还样情况=已还样」的分支值 ≠ 样品状态
+            # =已还样，却被当 from_state 匹配测量审核返样）。
+            # Fix D（v13 评审二②-⑤）：restatement 例外放行——其 state 是已
+            # 提取的业务状态值（"报名记录处于报名成功状态"→报名成功），与
+            # state given 同源、仅 given_type 标记不同，与状态/事件同路匹配
+            # （既有"多生产者全收"语义，参考 049 收 017+031）。
+            if s_step.get("given_type") not in ("state", "event", ""):
+                if s_step.get("given_type") != "restatement":
+                    continue
+            # C6.1: 目标感知——given.target 带维度（跨实体 state_ref）时，
+            # 候选桶换到目标实体、候选 post_state 维度限同维度（v13 评审
+            # PROC-096 根因：given「项目.通知状态=已确认」误匹配 E-BMJL 样品
+            # 状态=已确认 的 PROC-072）。
+            _t_target = str(s_step.get("target", "") or "")
+            _t_parts = _t_target.split(".")
+            t_entity = _t_parts[0] if _t_parts and _t_parts[0] else entity
+            t_dim = _t_parts[1] if len(_t_parts) > 1 and _t_parts[1] else None
+            if s_step.get("given_type") == "restatement" and not t_dim:
+                # Fix D 续：restatement 目标为裸实体（无维度）→ 按全局状态
+                # 位相图解析唯一所属维度；跨维度歧义（CJK 值词碰撞）跳过并
+                # 告警，零命中不设限（维持宽松匹配）。
+                _rs_dims = sorted({d for (e, d) in (state_pos or {})
+                                   if e == t_entity
+                                   and from_state in ((state_pos or {}).get((e, d)) or {})})
+                if len(_rs_dims) > 1:
+                    if warnings is not None:
+                        warnings.append(
+                            f"S3.guard1 restatement 状态 {from_state} 在 {t_entity} "
+                            f"跨维度歧义 {_rs_dims}，跳过 {proc['temp_id']}")
+                    continue
+                if len(_rs_dims) == 1:
+                    t_dim = _rs_dims[0]
+            bucket = proc_by_entity.get(t_entity, [])
             # Collect all candidate predecessors for this from_state
-            # v29 #26i: deduplicate by (from_state, to_state) — multiple
+            # v29 #26i: deduplicate by (other_from, other_to) — multiple
             # branch variants of the same transition (e.g. T-PROJ-007a×10)
             # produce the same (from, to) pair. Only keep one representative
             # per unique pair, replacing the hard-coded _GUARD1_MAX_PREDS=3.
+            # v13 评审二④补：分桶键并入生命周期归属——同形 (from,to) 的
+            # 平行分支变体（T-037 能力验证 / T-067 测量审核，同产出
+            # 报告审核中）语义上是不同前驱，不塌缩；实例变体（同转换多
+            # 实例）归属相同 → 仍按原样去重。
             seen_pairs: set[tuple[str, str]] = set()
             candidates_for_state: list[tuple[int, int, str]] = []  # (phase_diff, gen_seq, temp_id)
-            for other in proc_by_entity.get(entity, []):
+            g1_branch_blocked = False  # Fix G：是否有候选被跨分支门禁剔除
+            for other in bucket:
                 if other["temp_id"] == proc["temp_id"]:
                     continue
                 # Exclude rejection variants
@@ -1123,6 +1385,7 @@ def _apply_temporal_guards(
                 # 报名中不是测量审核 T-044 的前驱）。
                 if cross_branch and cross_branch(proc["temp_id"], other["temp_id"],
                                                  "guard1_state_pred"):
+                    g1_branch_blocked = True
                     continue
                 # Back-edge fix: a procedure whose transition loops back to an
                 # EARLIER state (e.g. 归档评级 待归档→已选入) must not be a
@@ -1135,34 +1398,64 @@ def _apply_temporal_guards(
                         state_pos_for(other) if state_pos_for else state_pos):
                     continue
                 post = other.get("post_state", "")
-                if "→" in post:
-                    post_state_val = post.split("→")[-1].strip()
-                    if post_state_val == from_state:
-                        # v29 #26i: deduplicate by (other_from, other_to)
-                        other_givens = other.get("givens", [])
-                        other_from = other_givens[0].get("state", "") if other_givens else ""
-                        pair_key = (other_from, post_state_val)
-                        if pair_key in seen_pairs:
-                            continue  # already have a representative for this pair
-                        # Check reverse: if other already depends on proc, skip
-                        other_deps = other.get("_S3_fields", {}).get("dependencies", [])
-                        if proc["temp_id"] in other_deps:
-                            continue  # bidirectional inverse — skip
-                        # v29 #3补强: Phase monotonicity check
-                        other_phase = other.get("_S2_fields", {}).get("phase", 0)
-                        if other_phase > my_phase:
-                            continue
-                        # v29 #26i: mark this pair as seen
-                        seen_pairs.add(pair_key)
-                        # v29 #23: collect candidates, sort by phase proximity
-                        phase_diff = my_phase - other_phase
-                        other_gen_seq = other.get("gen_seq", 0)
-                        candidates_for_state.append((phase_diff, other_gen_seq, other["temp_id"]))
+                if "→" not in post:
+                    continue
+                post_state_val = post.split("→")[-1].strip()
+                if post_state_val != from_state:
+                    continue
+                # C6.1 维度过滤：候选 post_state 的维度须等于 given 目标维度
+                # （Type1 post_state="实体.维度→状态"，末段即维度）。
+                _o_pre = post.split("→")[0].strip()
+                o_dim = _o_pre.split(".")[-1] if "." in _o_pre else ""
+                if t_dim and o_dim != t_dim:
+                    continue
+                # v29 #26i: deduplicate by (other_from, other_to)
+                other_givens = other.get("givens", [])
+                other_from = other_givens[0].get("state", "") if other_givens else ""
+                pair_key = (other_from, post_state_val,
+                            frozenset((proc_bvs or {}).get(other["temp_id"], set())))
+                if pair_key in seen_pairs:
+                    continue  # already have a representative for this pair
+                # Check reverse: if other already depends on proc, skip
+                other_deps = other.get("_S3_fields", {}).get("dependencies", [])
+                if proc["temp_id"] in other_deps:
+                    continue  # bidirectional inverse — skip
+                # v29 #3补强: Phase monotonicity check
+                # C7: 同 (entity,dim) 状态阶梯已知时用位相比较——other 的
+                # to-state 位相 ≤ 本 proc 的 from-state 位相。全局 S2 相位被
+                # 跨实体提升污染（PROC-096 因给定「项目.通知状态=已确认」提到
+                # P6，仍须作 PROC-071 的 待收样 前驱）；阶梯未知才回退全局相位。
+                other_phase = other.get("_S2_fields", {}).get("phase", 0)
+                _ladder = state_pos_for(proc) if state_pos_for else state_pos
+                _ladder_ok = _ladder_le(
+                    _ladder, t_entity, t_dim, post_state_val, from_state)
+                if _ladder_ok is None:
+                    if other_phase > my_phase:
+                        continue
+                elif not _ladder_ok:
+                    continue
+                # v29 #26i: mark this pair as seen (分桶键并入归属，见上)
+                seen_pairs.add(pair_key)
+                # v29 #23: collect candidates, sort by phase proximity
+                phase_diff = my_phase - other_phase
+                other_gen_seq = other.get("gen_seq", 0)
+                candidates_for_state.append((phase_diff, other_gen_seq, other["temp_id"]))
             # v29 #26i: no hard cap — dedup by (from, to) pair is sufficient
             candidates_for_state.sort()
             for _, _, tid in candidates_for_state:
                 guard1_deps.add(tid)
                 _record(tid, "guard1_state_pred")
+            # Fix G（v13 评审三）：前置状态的 post 生产者全被跨分支门禁剔除
+            # （测量审核侧 021/022/067/078/079 的 未发送 生产者 008 属能力
+            # 验证分支）→ 回退扫描 then 级初始化声明生产者（031 的
+            # "项目创建后预通知状态初始为未发送"）。入 guard1_deps 保护通道。
+            if not candidates_for_state and g1_branch_blocked:
+                for tid in _then_init_producers(
+                        t_entity, t_dim, from_state,
+                        proc_by_entity=proc_by_entity, cross_branch=cross_branch,
+                        my_phase=my_phase, self_id=proc["temp_id"]):
+                    guard1_deps.add(tid)
+                    _record(tid, "then_init_state_pred")
 
         # Guard 2: Constraint gate (Type4a) before Type1
         if proc.get("obligation_type") == ObligationType.TRANSITION:
@@ -1186,12 +1479,16 @@ def _apply_temporal_guards(
         # More comprehensive: check if this proc's from-state matches a create proc's to-state
         is_creation = s2.get("operation_lifecycle") == 1
         if not is_creation and dim:
+            g5_added = False        # Fix G：本维度是否已连到创建者
+            g5_branch_blocked = False
             for other in proc_by_entity.get(entity, []):
                 if other["temp_id"] == proc["temp_id"]:
                     continue
                 # branch_values 改造：创建者须与使用者同生命周期
                 if cross_branch and cross_branch(proc["temp_id"], other["temp_id"],
                                                  "guard5_create_use"):
+                    if other.get("dimension") == dim and _proc_is_creation(other):
+                        g5_branch_blocked = True
                     continue
                 other_ol = other.get("_S2_fields", {}).get("operation_lifecycle", 0)
                 # Creation proc: operation_lifecycle==1 or from=null in S step
@@ -1212,6 +1509,18 @@ def _apply_temporal_guards(
                         continue
                     deps.add(other["temp_id"])
                     _record(other["temp_id"], "guard5_create_use")
+                    g5_added = True
+            # Fix G（v13 评审三）guard5 变体：本维度的创建者全被跨分支门禁
+            # 剔除（022/067/078/079 的 通知状态 创建者 008 属能力验证分支）
+            # 且未连到任何创建者 → 回退扫描 then 级初始化声明（state=None，
+            # 只查「初始」+维度名）。入 guard1_deps 保护通道。
+            if g5_branch_blocked and not g5_added:
+                for tid in _then_init_producers(
+                        entity, dim, None,
+                        proc_by_entity=proc_by_entity, cross_branch=cross_branch,
+                        my_phase=my_phase, self_id=proc["temp_id"]):
+                    guard1_deps.add(tid)
+                    _record(tid, "then_init_state_pred")
 
         # ── Guard 6: Cross-dimension and cross-entity precondition state dependency ──
         #
@@ -1283,6 +1592,8 @@ def _apply_temporal_guards(
                                 other_phase = other.get("_S2_fields", {}).get("phase", 0)
                                 if other_phase > my_phase:
                                     continue
+                                if _covered_by_guard1(other):
+                                    continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")
                     elif ref_entity == entity:
@@ -1308,6 +1619,8 @@ def _apply_temporal_guards(
                             if post_val == ref_state_clean and post_val != "(初始)":
                                 other_phase = other.get("_S2_fields", {}).get("phase", 0)
                                 if other_phase > my_phase:
+                                    continue
+                                if _covered_by_guard1(other):
                                     continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")
@@ -1336,6 +1649,8 @@ def _apply_temporal_guards(
                             if post_val == ref_state_clean and post_val != "(初始)":
                                 other_phase = other.get("_S2_fields", {}).get("phase", 0)
                                 if other_phase > my_phase:
+                                    continue
+                                if _covered_by_guard1(other):
                                     continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")
@@ -1388,6 +1703,8 @@ def _apply_temporal_guards(
                                 other_phase = other.get("_S2_fields", {}).get("phase", 0)
                                 if other_phase > my_phase:
                                     continue
+                                if _covered_by_guard1(other):
+                                    continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")
 
@@ -1411,6 +1728,8 @@ def _apply_temporal_guards(
                             if post_val and post_val == prec_state_clean and post_val != "(初始)":
                                 other_phase = other.get("_S2_fields", {}).get("phase", 0)
                                 if other_phase > my_phase:
+                                    continue
+                                if _covered_by_guard1(other):
                                     continue
                                 deps.add(other["temp_id"])
                                 _record(other["temp_id"], "guard6_precond")

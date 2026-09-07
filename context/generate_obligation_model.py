@@ -376,6 +376,12 @@ for e in p1["domain_model"]["entities"]:
                 eo["stage_hint"] = _sh
                 add_judgment("EO-CRU stage_hint",
                              f"{eo['id']}({op_name}) 透传 stage_hint={_sh}")
+            _ff = op.get("form_fields")
+            if _ff:
+                eo["form_fields"] = list(_ff)          # 表单字段清单覆盖（实体 attributes）
+            _pg = op.get("page")
+            if _pg:
+                eo["page"] = _pg                       # Type5 导航页面覆盖
         entity_obligations.append(eo)
 
 # ============ Step 2: transition_obligations ============
@@ -1316,6 +1322,24 @@ def get_matched_dims(t):
             for bd in p1_bd:
                 if bd["dimension"] in bn:
                     matched.append(bd)
+    # A2 同名消歧安全网：coverage/note 兜底命中多个同名维度 BD（如 E-LAB 与
+    # E-TASK 两处「审核结果」）时，按 branches[].target_transition == tid 优先，
+    # 次之 bd.entity == t.entity；仍多则全留（交给 split 的取值为空分支）。
+    # 防 A1 修复回归——若 coverage 回填再因改名/漏实体作用域退化为同名全吞，
+    # 这里仍能把 E-LAB 的 t54/55 与 E-TASK 的 t62/63 各归其位。
+    for dim, bds in {d: [b for b in matched if b["dimension"] == d]
+                     for d in {b["dimension"] for b in matched}}.items():
+        if len(bds) <= 1:
+            continue
+        explicit = [b for b in bds if any(
+            str(br.get("target_transition") or "") == tid
+            for br in (b.get("branches") or []) if isinstance(br, dict))]
+        if explicit:
+            matched = [b for b in matched if b["dimension"] != dim] + explicit
+            continue
+        entity_hits = [b for b in bds if b.get("entity") == t["entity"]]
+        if entity_hits:
+            matched = [b for b in matched if b["dimension"] != dim] + entity_hits
     # 初始化守卫：自身维度 from=None 的转移（如 T-013 新增项目 → 项目阶段初始化为开题）
     # 没有"既有状态"可分支——coverage 命中只是因为该维度被初始化，不是条件分支。
     # 按其维度值拆分只会伪造矛盾场景（如"新增项目 [项目阶段=验收] → 开题"，

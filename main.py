@@ -329,47 +329,77 @@ def _display_id(tid) -> str:
 def _correct_branch_titles(procedures: list[dict]) -> None:
     """Fix-2: 分支感知标题修正（确定性、幂等、数据驱动）。
 
-    分支用例（givens 含 given_type='branch'）的标题曾在 LLM 生成/归档回放时
-    锚定基准分支取值——C 级分支继承 B 级标题（如"级别为B级时"、PROC-165 系列）。
+    分支用例（givens 含 given_type='branch'）的标题可能在 LLM 生成/归档回放时
+    锚定兄弟分支取值——C 级分支继承 B 级标题（"级别为B级时"、PROC-165 系列），
+    项目类型为能力验证 却实际是 测量审核（v13 PROC-012），审核结果为通过 而
+    分支是 退回（v13 PROC-049）。本函数把标题里的兄弟分支值替换为本用例自己的
+    分支值。
 
-    层级取值不从常量表硬编码（[A-C]级 曾致非 A/B/C 分级的需求失配），而全部
-    从该用例自己的 givens 推导：
-      - 权威分支值 = branch given 的 state（如 "C级"）；
-      - 候选层级值 = 各 given 描述里跟在分隔符（为/=//或 等）后的 "<设计符>级"
-        记号（如约束行 "任务级别为B级或C级" → {B级, C级}），以及 given state
-        自身（"C级"）。"<设计符>" 只认表面形态（拉丁/数字/中文数字，≤2 字符），
-        是表层语法，不是业务分级表。
-    然后用分支值覆盖标题中所有 ≠ 分支值的候选（= 兄弟分支的取值）。无 branch
-    given、标题无候选则原样保留（幂等：已正确标题不受影响）。
+    数据驱动（2026-09 F19 泛化，从「只认 <设计符>级」扩到任意分支维度值）：
+      - 值域从全量 procs 的 branch given state 按维度聚合（项目类型=能力验证/
+        测量审核、审核结果=通过/退回修改/同意/退回、还样情况=已还样/无需还样、
+        任务级别=A级/B级/C级…）；同名维度值碰撞无妨——每 proc 只替换 ≠ 自身值
+        的兄弟；
+      - 替换仅发生在分隔符（为/＝/=或/，/；/:/：）之后（(?<=SEP)），避免破坏
+        「审批通过」「无需还样」等含值词的复合词；兄弟值按长度降序替换，防止
+        「退回修改」⊃「退回」子串互相污染；
+      - 无 branch given 或标题无兄弟值则原样保留（幂等：已正确标题不受影响）。
 
     与 TITLE_SYSTEM_PROMPT 第 8 条规则配套：前者约束 LLM 源头，后者兜底
     覆盖 LLM 走偏或归档回放（确定性路径不跑 LLM）产出的标题。
     """
-    # 表层语法：设计符（拉丁/数字/中文数字 1-2 字符）+ "级"。识别仅依赖
-    # 形态，字母表内容由数据给定，禁止在此枚举业务分级名。
-    _DESIGNATOR = r"[A-Za-z0-9一二三四五六七八九十]{1,2}"
-    _SEP = r"(?:为|＝|=|或|，|；|:|：)"
+    _SEP_LOOKBEHIND = r"(?<=[为＝=或，；:：])"
+    # 1. 按维度聚合全量分支值域。
+    dim_values: dict[str, set[str]] = {}
+    for proc in procedures:
+        for g in proc.get("givens") or []:
+            if not isinstance(g, dict) or g.get("given_type") != "branch":
+                continue
+            target_dim = str(g.get("target") or "").split(".")[-1].strip()
+            val = (g.get("state") or "").strip()
+            if target_dim and val:
+                dim_values.setdefault(target_dim, set()).add(val)
+    # 2. 逐 proc 修正（兄弟值长度降序，避免子串互相污染）。
     for proc in procedures:
         givens = proc.get("givens") or []
-        branch_val = ""
-        candidates: set[str] = set()
-        for g in givens:
-            if g.get("given_type") == "branch":
-                branch_val = (g.get("state") or "").strip()
-            desc = g.get("description") or ""
-            for m in re.finditer(rf"{_SEP}\s*({_DESIGNATOR})级", desc):
-                candidates.add(m.group(1) + "级")
-            state = (g.get("state") or "").strip()
-            if re.fullmatch(rf"{_DESIGNATOR}级", state):
-                candidates.add(state)
-        if not branch_val:
+        if not any(isinstance(g, dict) and g.get("given_type") == "branch"
+                   for g in givens):
             continue
         title = proc.get("title") or ""
         if not title:
             continue
         new_title = title
-        for tok in sorted(candidates - {branch_val}):
-            new_title = new_title.replace(tok, branch_val)
+        # 保护动作名：动作名里的分支值词是操作名（如 T-065「能力验证预通知」
+        # 动作 vs 项目类型=测量审核 分支），不是分支引用，禁止被替换成兄弟值。
+        # 摘出→替换→放回。占位符用极不可能出现在标题中的标记串。
+        action = str(proc.get("when", {}).get("action") or "").strip()
+        _ACTION_PH = "<<ZZBRACT>>"
+        protected = bool(action and action in new_title)
+        if protected:
+            new_title = new_title.replace(action, _ACTION_PH, 1)
+        for g in givens:
+            if not isinstance(g, dict) or g.get("given_type") != "branch":
+                continue
+            target_dim = str(g.get("target") or "").split(".")[-1].strip()
+            branch_val = (g.get("state") or "").strip()
+            if not target_dim or not branch_val:
+                continue
+            siblings = sorted(
+                (v for v in dim_values.get(target_dim, set())
+                 if v and v != branch_val),
+                key=len, reverse=True)
+            for sib in siblings:
+                # 兄弟值为分支值前缀时（如 退回 ⊂ 退回修改），禁止命中分支值
+                # 自身——标题里正确的「退回修改」不能把「退回」当兄弟替换成
+                # 「退回修改修改」。负向先行挡住分支值剩余部分。
+                ahead = ""
+                if len(branch_val) > len(sib) and branch_val.startswith(sib):
+                    ahead = r"(?!" + re.escape(branch_val[len(sib):]) + ")"
+                new_title = re.sub(
+                    _SEP_LOOKBEHIND + re.escape(sib) + ahead,
+                    branch_val, new_title)
+        if protected:
+            new_title = new_title.replace(_ACTION_PH, action)
         if new_title != title:
             proc["title"] = new_title
 
@@ -399,30 +429,39 @@ def _generate_titles(procedures: list[dict],
     # be misleading (e.g. "归档项目" when the actual operation is "评审计划
     # 归档联动"). For these, use the action itself as the title subject.
     _CASCADE_ACTION_MARKERS = ('联动', '自动转换', '系统触发', '级联')
+
+    def _build_fallback_title(proc: dict) -> str:
+        """确定性兜底标题（条件+动作+结果 模板）。
+
+        cascade 预生成与 LLM 后空标题补齐共用。condition 取前 2 个 givens
+        （优先分支条件描述，其次状态）；expectation 取首个非空 then 期望。
+        """
+        action = proc.get('when', {}).get('action', '') or ''
+        givens = proc.get('givens', [])
+        condition_parts = []
+        for g in givens[:3]:  # cap at 3 to keep title short
+            state = g.get('state', '')
+            desc = g.get('description', '')
+            # Prefer branch condition desc; else use state
+            if '分支条件' in desc:
+                condition_parts.append(desc.replace('分支条件: ', ''))
+            elif state and state not in ('(初始)', '(None)'):
+                condition_parts.append(state)
+        condition = '且'.join(condition_parts[:2]) if condition_parts else '初始状态'
+        # Then expectation (first non-empty)
+        then_exp = ''
+        for t in proc.get('thens', []):
+            exp = t.get('expectation', '')
+            if exp:
+                then_exp = exp
+                break
+        # Title: "{condition}时，{action}，验证{expectation}"
+        return f"{condition}时，{action}，验证{then_exp}"
+
     for proc in procedures:
         action = proc.get('when', {}).get('action', '') or ''
         if any(m in action for m in _CASCADE_ACTION_MARKERS):
-            # Build a deterministic title from givens + action + thens
-            givens = proc.get('givens', [])
-            condition_parts = []
-            for g in givens[:3]:  # cap at 3 to keep title short
-                state = g.get('state', '')
-                desc = g.get('description', '')
-                # Prefer branch condition desc; else use state
-                if '分支条件' in desc:
-                    condition_parts.append(desc.replace('分支条件: ', ''))
-                elif state and state not in ('(初始)', '(None)'):
-                    condition_parts.append(state)
-            condition = '且'.join(condition_parts[:2]) if condition_parts else '初始状态'
-            # Then expectation (first non-empty)
-            then_exp = ''
-            for t in proc.get('thens', []):
-                exp = t.get('expectation', '')
-                if exp:
-                    then_exp = exp
-                    break
-            # Title: "{condition}时，{action}，验证{expectation}"
-            proc['title'] = f"{condition}时，{action}，验证{then_exp}"
+            proc['title'] = _build_fallback_title(proc)
 
     # Fix-2: 确定性分支标题修正——在无 LLM 路径下先兜底一次
     _correct_branch_titles(procedures)
@@ -496,6 +535,15 @@ def _generate_titles(procedures: list[dict],
     print(f"      [TITLE] Done: {with_title} generated, {without_title} fallback to post_state")
 
     # Fix-2: LLM 标题落地后，再确定性覆盖分支取值，保证正确性不依赖 LLM
+    _correct_branch_titles(procedures)
+
+    # Fix-7: LLM 个别返回空（batch 失败/模型走偏）时，确定性兜底补齐，
+    # 空标题不落地（v13 曾现 5 个空标题：上传缴费证明/预通知/批量审核等）。
+    for proc in procedures:
+        if not (proc.get('title') or '').strip():
+            proc['title'] = _build_fallback_title(proc)
+
+    # Fix-7 兜底标题落地在 Fix-2 之后，分支值纠正对其同样生效（保持幂等）。
     _correct_branch_titles(procedures)
 
     return procedures

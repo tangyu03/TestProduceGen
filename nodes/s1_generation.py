@@ -735,6 +735,212 @@ def _extract_branch_givens(
     return givens
 
 
+def _compute_synth_branch_declarations(
+    tos: list[dict], bds: list[dict], warnings: list
+) -> None:
+    """S1-a/S1-b: 为共享 TO 合成生命周期分支声明（原位写回 TO）。
+
+    背景（v13 依赖评审 四.4）：P2 只透传转换自带的 branch_values/branch_path；
+    共用转换（t08 报名审核 / t21 参加者测试与结果提交族）在两个流程分支下都
+    实例化，却不声明 项目类型 归属 → 渲染无分支 Given、S3 跨分支门禁拿不到
+    归属。两个互补机制，全部数据驱动（无硬编码维度名/值）：
+
+    S1-a 同动作兄弟传播：precondition_state_refs 与分支归属皆空的 TO，采纳
+      同 (action, entity) 已归属兄弟的生命周期维度值（t07 ← t02 同动作拆行，
+      拆行本身不带归属）。只采生命周期维度值，避免把兄弟的配置分支值
+      （报名审核结果=…）误当流程归属。t06（缴费通知单，异实体同动作）不入组，
+      保持共享——否则 054 会被门禁错杀 034 依赖。
+
+    S1-b 分支域闭包声明：domain(t) = 自身归属 ∪ 前置状态引用生产者的 domain
+      （不动点）。自身无生命周期归属值、闭包在该维度 ≥2 值的状态机 TO →
+      声明 "分支条件: <dim>=A/B"。覆盖直接命中（t08/t09/t30 的前置
+      报名中/报名待审核 由两分支转换生产）与闭包命中（t15/t21/t25/t26/t27
+      沿状态链上溯到两分支创建）。
+
+    生命周期维度 = 本实体创建转换（from 为空）的 note.branch_dimension。
+    写回：TO["_synth_branch_givens"]（渲染 Given，挂载点见 s1 proc 组装
+    _extract_branch_givens 之后）+ TO["_synth_branch_values"]（结构化归属，
+    S3 _to_branch_values 并集消费——不做 Given 文本反解析，规避 CJK 值词
+    碰撞）。
+    """
+    # 生产者索引: (entity, dimension, to_state) -> [TO]
+    producers: dict = {}
+    for t in tos:
+        to_state = t.get("to")
+        if to_state:
+            producers.setdefault(
+                (t.get("entity"), t.get("dimension"), to_state), []).append(t)
+
+    # 生命周期维度（per 实体）：创建转换的 note.branch_dimension
+    lifecycle_dim: dict = {}
+    for t in tos:
+        if t.get("from") is None:
+            bd = (t.get("note") or {}).get("branch_dimension") or ""
+            if bd and t.get("entity") not in lifecycle_dim:
+                lifecycle_dim[t["entity"]] = bd
+
+    def _own_pairs(t: dict) -> set:
+        pairs = {(bp.get("dimension"), str(bp.get("value")))
+                 for bp in (t.get("branch_path") or [])
+                 if isinstance(bp, dict) and bp.get("dimension") and bp.get("value")}
+        if t.get("branch_values"):
+            dim = (t.get("note") or {}).get("branch_dimension") or ""
+            pairs |= {(dim, str(v)) for v in t["branch_values"] if v}
+        return pairs
+
+    # 维度值排序基准：branch_dimensions 元数据的 values 序（缺省 sorted 兜底）
+    dim_value_order: dict = {}
+    for bd in bds or []:
+        dim = bd.get("dimension", "")
+        if dim and dim not in dim_value_order:
+            dim_value_order[dim] = list(bd.get("values", []) or [])
+
+    def _ordered(dim: str, vals: set) -> list:
+        order = dim_value_order.get(dim) or []
+        known = [v for v in order if v in vals]
+        rest = sorted(vals - set(known))
+        return known + rest
+
+    def _attach(t: dict, dim: str, vals: set, kind: str) -> None:
+        ordered = _ordered(dim, vals)
+        state_str = "/".join(ordered)
+        t["_synth_branch_givens"] = [_make_given(
+            target=f"{t.get('entity')}.{dim}",
+            state=state_str,
+            description=f"分支条件: {dim}={state_str}",
+            given_type="branch",
+        )]
+        t["_synth_branch_values"] = ordered
+        warnings.append(
+            f"S1.分支声明({kind}): {t.get('id')} {dim}={state_str}")
+
+    # ── S1-a: 同动作兄弟传播（用自身归属，先于闭包） ──
+    groups: dict = {}
+    for t in tos:
+        groups.setdefault((t.get("action"), t.get("entity")), []).append(t)
+    own = {id(t): _own_pairs(t) for t in tos}
+    for t in tos:
+        if own[id(t)] or (t.get("precondition_state_refs") or []):
+            continue
+        ld = lifecycle_dim.get(t.get("entity"))
+        if not ld:
+            continue
+        sib_vals = set()
+        for sib in groups.get((t.get("action"), t.get("entity")), ()):
+            if sib is not t:
+                sib_vals |= {v for d, v in own[id(sib)] if d == ld}
+        if sib_vals:
+            _attach(t, ld, sib_vals, "propagate")
+            own[id(t)] = {(ld, v) for v in sib_vals}
+
+    # ── S1-b: 分支域闭包声明（不动点） ──
+    domain = {id(t): set(own[id(t)]) for t in tos}
+    for _ in range(len(tos) + 2):
+        changed = False
+        for t in tos:
+            d = domain[id(t)]
+            for ref in (t.get("precondition_state_refs") or []):
+                key = (ref.get("entity"), ref.get("dimension"), ref.get("state"))
+                for p in producers.get(key, ()):
+                    if p is t:
+                        continue
+                    # v13 评审三补：生命周期已归属的生产者只传播自身归属，
+                    # 不传播它从上游吸入的闭包值——T-046 自带 项目类型=
+                    # 测量审核，其 domain 经生产者 T-007（S1-a 能力验证）
+                    # 吸入对侧分支值；整体下传会给消费方 T-048 注入
+                    # 能力验证/测量审核 双值 → S3 跨分支门禁放行 T-007
+                    # （022/067/078 guard5 错挂根因）。
+                    p_ld = lifecycle_dim.get(p.get("entity"))
+                    p_pairs = own[id(p)]
+                    contrib = (p_pairs
+                               if p_ld and any(dd == p_ld for dd, _ in p_pairs)
+                               else domain[id(p)])
+                    before = len(d)
+                    d |= contrib
+                    if len(d) != before:
+                        changed = True
+        if not changed:
+            break
+    # v13 评审四.4 补充：自身已有**生命周期维度**归属（如 t40 显式声明
+    # 测量审核）→ 不动，保留专用身份（B2 分支消歧依赖它）。自身只有配置
+    # 分支条件（审核结果=通过 等，t08/t09/t25/t26）→ 生命周期维度无归属，
+    # 闭包声明与配置分支并存：渲两个分支 Given + 注入生命周期归属值。
+    for t in tos:
+        ld = lifecycle_dim.get(t.get("entity"))
+        if not ld:
+            continue
+        own_ld = {v for d, v in own[id(t)] if d == ld}
+        if own_ld:
+            continue
+        vals = {v for d, v in domain[id(t)] if d == ld}
+        if len(vals) >= 2:
+            _attach(t, ld, vals, "closure")
+
+
+def _warn_undeclared_birth_states(tos: list[dict], warnings: list) -> None:
+    """分支出生态初始值未声明的确定性告警（warning 非 error，不中断）。
+
+    背景（v13 评审三防线②）：消费转换 t 的前置 state_ref (E, D, S) 若无
+    同分支 post_state 生产者，S3 的 then 级初始化回退只能依赖创建转换
+    expected_results 的「…{D}…初始为{S}」声明（glm5pr §3.1 多状态面出生
+    值契约）。声明缺失时 S3 静默丢根（021→031 根边消失，无任何告警）——
+    本检查在 S1 层提前暴露，使上游 LLM 漏报在正确的层被看见。
+
+    判据与 S3 then_init 回退同源：声明 = expected_results 条目同时含
+    「初始」+ 维度名 + 状态值（子串，CJK 无词界——「预通知状态」含
+    「通知状态」是有意放行）；分支兼容 = 空归属共享、非空须相交
+    （与 S3 _branch_compatible 同口径，消费 _synth_branch_values）。
+    """
+    producers: dict = {}
+    creations: dict = {}
+    for t in tos:
+        if t.get("to"):
+            producers.setdefault(
+                (t.get("entity"), t.get("dimension"), t.get("to")), []).append(t)
+        if t.get("from") is None:
+            creations.setdefault(t.get("entity"), []).append(t)
+
+    def _bv(t: dict) -> set:
+        vals = {str(v) for v in (t.get("branch_values") or []) if v}
+        vals |= {str(v) for v in (t.get("_synth_branch_values") or []) if v}
+        return vals
+
+    def _compat(a: set, b: set) -> bool:
+        return not a or not b or bool(a & b)
+
+    def _declares(c: dict, dim: str, state: str) -> bool:
+        return any("初始" in er and dim in er and state in er
+                   for er in (c.get("expected_results") or []))
+
+    for t in tos:
+        tbv = _bv(t)
+        for ref in (t.get("precondition_state_refs") or []):
+            ent = ref.get("entity")
+            dim = ref.get("dimension")
+            state = ref.get("state")
+            if not (ent and dim and state) or state in ("(初始)", "(None)", "None"):
+                continue
+            # 同分支 post_state 生产者存在 → 无缺口
+            same = [p for p in producers.get((ent, dim, state), ())
+                    if p is not t and _compat(tbv, _bv(p))]
+            if same:
+                continue
+            # 同分支创建转换已声明初始值（S3 then_init 回退将命中）→ 无缺口
+            if any(c is not t and _compat(tbv, _bv(c)) and _declares(c, dim, state)
+                   for c in creations.get(ent, ())):
+                continue
+            cross = [p for p in producers.get((ent, dim, state), ()) if p is not t]
+            cross_info = "、".join(
+                f"{p.get('id', '?')}({'/'.join(sorted(_bv(p))) or '共享'})"
+                for p in cross) or "无生产者"
+            warnings.append(
+                f"S1.初始出生点未声明: {t.get('id')} 前置 {ent}.{dim}={state} "
+                f"无同分支生产者（{cross_info}），且 {ent} 创建转换未声明"
+                f"「{dim}初始为{state}」——若为分支出生态，请在承载该出生动作的"
+                f"创建转换 expected_results 补「{dim}初始为{state}」"
+                f"（glm5pr §3.1 多状态面出生值契约）")
+
+
 def _enrich_thens(entity_id: str, action: str, thens: list[dict],
                   constraint_steps: dict[str, list[dict]]) -> list[dict]:
     """Append field-validation Thens to a procedure's thens list.
@@ -1091,7 +1297,7 @@ def _resolve_phase_for_transition(entity: str, dimension: str, from_state: str,
     # (计划结束/取消结束 P5, 待归档 P4), 抬升到该状态相位.
     if preconditions:
         sr_phase, sr_state = _max_state_ref_phase(
-            preconditions, entity, dimension, state)
+            preconditions, entity, dimension, state, branch_value=branch_value)
         if sr_phase > best_phase:
             best_phase = sr_phase
             best_basis = f"{base_basis} → bumped to P{sr_phase} (state_ref {sr_state})"
@@ -1217,7 +1423,8 @@ def _max_precondition_phase(
 
 
 def _max_state_ref_phase(preconditions: list | None, entity: str,
-                         dimension: str, state: AgentState) -> tuple[int, str]:
+                         dimension: str, state: AgentState,
+                         branch_value: str = "") -> tuple[int, str]:
     """结构化跨维度 state_ref 抬升 (P2 dict 前置专用).
 
     文本版 _max_precondition_phase 对 dict 前置是死代码 (isinstance str 过滤),
@@ -1225,11 +1432,20 @@ def _max_state_ref_phase(preconditions: list | None, entity: str,
     因此两边都漏, 卡在 P1。这里按 (entity, dimension) 精确排除"同一状态机"的
     自我引用 (如 T-025 引用 计划状态.暂停 之于 计划状态 转移是套套逻辑, 自身
     from/to 已表达), 其余跨维度 state_ref 取最大相位。
+
+    branch_value（branch_values 生命周期归属改造）：非空时 state_ref 相位优先
+    在该分支的 per-branch 视图查询，miss 落回全局链（退化安全，行为与旧版一致）。
+    收发样品链归属能力验证分支后，其跨维度门禁「项目.通知状态.已确认」须按
+    能力验证链（已确认=P2）而非全局链（=P6）抬升——否则样品发放仍被拖到评价后。
     """
     if not preconditions:
         return 0, ""
     dep_map = state.get("dep_state_phase_map", {})
     pt = state.get("phase_table", {})
+    ptb = ((state.get("phase_table_by_branch") or {}).get(branch_value)
+           if branch_value else None)
+    b_dep = ((state.get("dep_state_phase_map_by_branch") or {}).get(branch_value)
+             if branch_value else None)
     max_phase = 0
     max_state = ""
     for prec in preconditions:
@@ -1245,7 +1461,14 @@ def _max_state_ref_phase(preconditions: list | None, entity: str,
             continue
         if re_ent == entity and re_dim == dimension:
             continue  # 同一状态机自我引用, 套套逻辑, 不抬升
-        p = get_state_phase(re_ent, re_dim, re_st, dep_map, pt)
+        # per-branch 视图优先（与 _resolve_phase 查询序一致：主实体 ptb → 依赖实体 b_dep）
+        p = None
+        if ptb is not None and re_ent == pt.get("primary_entity"):
+            p = (ptb.get("state_to_phase") or {}).get(re_dim, {}).get(re_st)
+        if p is None and b_dep:
+            p = (b_dep.get(re_ent) or {}).get(re_dim, {}).get(re_st)
+        if p is None:
+            p = get_state_phase(re_ent, re_dim, re_st, dep_map, pt)
         if p is not None and p > max_phase:
             max_phase = p
             max_state = f"{re_ent}.{re_dim}.{re_st}"
@@ -1532,10 +1755,20 @@ def _generate_type1(state: AgentState, indices: dict,
             # （渲染层按 given_type 选格式，不再文本匹配）。
             givens.extend(detached_state_givens)
             # constraint 独立 Given：业务约束行（渲染层 `约束：`）。
-            givens.extend(constraint_texts)
+            # 按 description 精确去重：继承前置与 P2 分支值注入可能同文重复，
+            # 塌缩避免同一约束在 proc 里出现两次。
+            _seen_constraints: set[str] = set()
+            for _cg in constraint_texts:
+                _key = _cg.get("description", "")
+                if _key and _key in _seen_constraints:
+                    continue
+                _seen_constraints.add(_key)
+                givens.append(_cg)
             # BDD: append branch-dimension Givens (generic, from branch_dimensions)
             # e.g. Given: E-PROJ.项目类型 = 能力验证 (分支条件)
             givens.extend(_extract_branch_givens(to, cm))
+            # S1-a/S1-b: 共享 TO 的合成分支声明（同动作传播 / 闭包域）
+            givens.extend(to.get("_synth_branch_givens") or [])
 
             # When: business event (declarative) + actor + action
             # BDD: strip "[维度=值]" suffix from action — it's a P2 marker, not spec
@@ -1580,7 +1813,10 @@ def _generate_type1(state: AgentState, indices: dict,
             _ctx = cm.get("_context", {}) or {}
             _pc = _ctx.get("prohibition_config", {}) or {}
             _neg_prefixes = _pc.get("negation_prefixes",
-                ["不可", "不能", "不得", "禁止", "不允许", "无法", "无权", "未被", "未"])
+                ["不可", "不能", "不得", "禁止", "不允许", "无法", "无权", "未被"])
+            # 默认前缀不含「未」：状态名前缀「未发送/未收样/未缴费」是枚举态值非
+            # 禁止词，命中 prohibition_re 会把「未发送」状态 + 「发送」动词误判为
+            # 负向分支（v13 PROC-076 根因）。「未被」保留（真正禁止形态）。
             _action_verbs = _pc.get("action_verbs",
                 ["选入", "纳入", "启动", "提交", "保存", "删除", "修改", "新增",
                  "审批", "批准", "通过", "归档", "重启", "暂停", "结束", "发放",
@@ -1718,13 +1954,20 @@ def _generate_type1(state: AgentState, indices: dict,
                         target=loc, expectation=er, kind="behavior"
                     ))
                 else:
-                    # dedup_group="transition_target": 渲染层在存在
-                    # "transition_flow"(状态流转:from→to)时省略本断言——
-                    # from→to 已隐含目标状态,保留信息最全的一条。
-                    thens.append(_make_then(
-                        target=loc, expectation=f"状态转换为{to_state}", kind="state",
-                        dedup_group="transition_target",
-                    ))
+                    # E15: form_selected_state 创建转换（T-058 新增标准库）——
+                    # 创建目标状态由表单所选值决定，硬断言"状态转换为{to_state}"
+                    # 是假精确（表单可选停用）。跳过合成，改由 expected_results
+                    # 承载"状态为表单所选值（启用/停用）"。
+                    _to_traits = to.get("risk_traits", []) or to.get("traits", []) or []
+                    _form_selected = "form_selected_state" in _to_traits
+                    if not _form_selected:
+                        # dedup_group="transition_target": 渲染层在存在
+                        # "transition_flow"(状态流转:from→to)时省略本断言——
+                        # from→to 已隐含目标状态,保留信息最全的一条。
+                        thens.append(_make_then(
+                            target=loc, expectation=f"状态转换为{to_state}", kind="state",
+                            dedup_group="transition_target",
+                        ))
                     # V10 fix (S1-side, transition coverage): append a Then
                     # containing the literal "{from}→{to}" form so that
                     # coverage_matrix branches like "待选入→已选入" match.
@@ -2030,6 +2273,27 @@ def _generate_type1(state: AgentState, indices: dict,
             if to_state and any(kw in to_state for kw in _REJECTION_ACTION_KEYWORDS):
                 _is_already_rejection = True
 
+            # B5: 兄弟退回转换抑制 —— 同 entity+dimension+from 下已存在目标态含
+            # 退回/驳回/撤销/退款 的转换时，审核通过转换不再生成退回变体
+            # （T-062 的兄弟 T-063 已是模型化退回，v13 PROC-063 即此重复变体）。
+            # 状态机已建模退回边 = 需求显式声明，无需框架再合成同义变体。
+            _sibling_reject_exists = False
+            if from_state and dimension:
+                for _st in (cm.get('transition_obligations') or []):
+                    if not isinstance(_st, dict):
+                        continue
+                    if _st.get('entity') != entity or _st.get('dimension') != dimension:
+                        continue
+                    if _st.get('from') != from_state:
+                        continue
+                    if _st.get('id') == to.get('id') \
+                            or _st.get('transition_id') == to.get('transition_id'):
+                        continue
+                    if any(kw in str(_st.get('to', '') or '')
+                           for kw in _REJECTION_ACTION_KEYWORDS):
+                        _sibling_reject_exists = True
+                        break
+
             # v29 #14 fix: only generate rejection variant for true APPROVE
             # actions (审核通过/批准/同意/确认), not for business progression
             # actions (发放样品/提交报名/etc.).
@@ -2076,6 +2340,7 @@ def _generate_type1(state: AgentState, indices: dict,
                 )
 
             if ("audit" in risk_traits and not _is_already_rejection
+                    and not _sibling_reject_exists
                     and _is_approve_action and not _negative_branch_flag):
                 # Fix-2: skip rejection variant for negative_branch procedures —
                 # they already express rejection via the main Then clause.
@@ -2515,12 +2780,25 @@ def _apply_stage_hint(eo: dict, phase: int, phase_basis: str, givens: list,
         return phase, phase_basis, givens
 
     givens2 = list(givens)
-    if new_given is not None and not any(
-        isinstance(g, dict) and g.get('target') == new_given['target']
-        and g.get('state') == new_given['state']
-        for g in givens2
-    ):
-        givens2.append(new_given)
+    if new_given is not None:
+        # D9：anchor_state 存在时替换 givens[0]（object_existence 创建锚
+        # restatement，或「操作入口可用」占位）为锚定状态 restatement，而非
+        # 仅追加——无状态前置操作的真实业务前置是「对象处于目标阶段状态」，
+        # 对象已存在（创建态）只是唯一定锚时的占位。已含真实状态前置
+        # （state 非空非"存在"）则保留原主给定，锚定状态并入。
+        _g0 = givens2[0] if givens2 and isinstance(givens2[0], dict) else None
+        _is_placeholder = bool(_g0) and (
+            _g0.get('given_type') == 'restatement'
+            or _g0.get('state') in ('', '存在')
+        )
+        if _is_placeholder:
+            givens2[0] = new_given
+        elif not any(
+            isinstance(g, dict) and g.get('target') == new_given['target']
+            and g.get('state') == new_given['state']
+            for g in givens2
+        ):
+            givens2.append(new_given)
 
     if hinted > phase:
         return hinted, f"stage_hint.{eo.get('id', '')}.P{hinted}", givens2
@@ -2688,7 +2966,7 @@ def _creation_proc_phase(creation_to_ids: list | None, prior_procs: list | None)
 _FORM_ENTRY_CRUD_VERBS = ("新增", "创建", "编辑", "修改")
 
 
-def _field_data_given(cm: dict, entity: str) -> dict | None:
+def _field_data_given(cm: dict, entity: str, eo: dict | None = None) -> dict | None:
     """从 entity_details 派生「字段数据上下文」Given（创建/编辑表单的字段清单）。
 
     数据驱动：字段名与 desc **全文**原样来自 P1 的 entity_details.attributes，
@@ -2696,9 +2974,25 @@ def _field_data_given(cm: dict, entity: str) -> dict | None:
     自动获取申请人部门"）同样列入——这正是创建/编辑用例里用户应知晓的字段语义。
     实体缺失或无 attributes 返回 None（不硬生成空行）。
 
+    ``eo.form_fields`` 优先：操作级字段清单覆盖（v13 评审 PROC-028/111/112 根因
+    ——修改备注表单只含报名编号+备注，却错挂实体全量 10 字段；测试项表单只含
+    标号/名称）。无声明回落 entity_details.attributes 全量。
+
     ``state`` 置空：字段数据不是业务状态，S3 Guard 1 逐 given 扫 state 做状态
     前置匹配时不得把它当 from_state（见 s3_dependency.py:706）。
     """
+    if isinstance(eo, dict) and eo.get('form_fields'):
+        parts: list[str] = []
+        for ff in eo['form_fields']:
+            if not isinstance(ff, dict) or not ff.get('name'):
+                continue
+            desc = str(ff.get('desc', '') or '').strip()
+            parts.append(f"{ff['name']}({desc})" if desc else ff['name'])
+        if parts:
+            return _make_given(
+                target=entity, state="", description="；".join(parts),
+                given_type="field_data",
+            )
     for ed in cm.get("_context", {}).get("entity_details", []) or []:
         if not isinstance(ed, dict) or ed.get("id") != entity:
             continue
@@ -2929,7 +3223,13 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
             # Tier 2 领域前置: CRUD/查看义务作用于业务生命周期对象 (topology>0)
             # 时, Given 声明"对象实例须已存在"(锚定创建转换 to_state), 相位
             # 不得早于对象创建相位。管理类实体 (topology 0) 不派生 → 保持 "=存在"。
-            dp_ref = object_existence(state["coverage_model"], state, entity)
+            # D18: 创建类 op（新增/创建）跳过 object_existence 锚——对象在本
+            # 操作中诞生，"{实体}已存在，处于{创建态}"是语义反义占位（v13
+            # PROC-034 误连 PROC-017/033/031 的根因）。givens[0] 落「操作入口
+            # 可用」，相位不被创建锚推高（新增项目=准备阶段 P0）。
+            _is_creation_op = op_name.startswith(("新增", "创建"))
+            dp_ref = (None if _is_creation_op
+                      else object_existence(state["coverage_model"], state, entity))
             if dp_ref:
                 givens = [_make_given(
                     target=dp_ref["object_entity"],
@@ -2959,7 +3259,7 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
             # 取…"）一并列入，补全表单语义。删除/查询/确认等无表单操作不补。
             # 追加在后：保持 givens[0]（状态前置）不变，S3 Guard 依 givens[0]。
             if op_name.startswith(_FORM_ENTRY_CRUD_VERBS):
-                fg = _field_data_given(state["coverage_model"], entity)
+                fg = _field_data_given(state["coverage_model"], entity, eo)
                 if fg:
                     givens = givens + [fg]
             when = _make_when(
@@ -2987,7 +3287,11 @@ def _generate_type5(state: AgentState, indices: dict, prior_procs: list | None =
                         expectation=er_text,
                         kind="behavior",
                     ))
-            op_hints = [f"导航至{entity_name}页面"]
+            # D13：导航页面覆盖——操作声明 page 时用声明页（如 提交审核
+            # 按钮在「报名信息批量处理页」而非审核任务页），否则回退实体页。
+            _page_ov = str(eo.get('page') or '').strip()
+            op_hints = ([f"导航至{_page_ov}"] if _page_ov
+                        else [f"导航至{entity_name}页面"])
 
             phase_name = (phase_table["phase_names"][phase]
                           if phase < len(phase_table["phase_names"]) else f"P{phase}")
@@ -4568,6 +4872,13 @@ def s1_generation_node(state: AgentState) -> dict:
     # Parse field-level validation constraint steps from entity_details
     entity_details = cm.get("_context", {}).get("entity_details", [])
     constraint_steps = parse_entity_constraints(entity_details)
+
+    # S1-a/S1-b: 共享 TO 的合成分支声明（原位写回 TO：
+    # _synth_branch_givens 渲染用 / _synth_branch_values 归属用，S3 消费）
+    _compute_synth_branch_declarations(tos, bds, warnings)
+    # 防线②：分支出生态初始值未声明的确定性告警（须在 S1-a/S1-b 之后——
+    # 消费 _synth_branch_values 做分支兼容判定）
+    _warn_undeclared_birth_states(tos, warnings)
 
     indices = {
         "eo_by_type": eo_by_type,

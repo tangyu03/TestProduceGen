@@ -1,0 +1,7981 @@
+{
+ "entity_obligations": [
+  {
+   "id": "EO-ATC-001",
+   "type": "attribute_config",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "attribute_name": "评分方式",
+   "attribute_desc": "支持分值和权重两种评价方式（20.7.1）",
+   "description": "覆盖项目的配置属性评分方式不同取值对流转的影响",
+   "suggested_action": "修改项目的评分方式，影响支持分值和权重两种评价方式（20.7.1）",
+   "coverage_priority": "medium",
+   "dimension": null,
+   "from": null,
+   "to": null,
+   "source_ref": "20.5.1.5项目新增表单增加监督员"
+  },
+  {
+   "id": "EO-CRU-001",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "新增项目",
+   "operation_category": "crud",
+   "description": "项目创建并进入状态流转；能力验证分支经设计方案编制后初始状态为待开始，测量审核分支受理报名后初始状态为报名中",
+   "expected_results": [
+    "项目创建并进入状态流转；能力验证分支经设计方案编制后初始状态为待开始，测量审核分支受理报名后初始状态为报名中"
+   ],
+   "suggested_action": "对项目执行新增项目",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.5项目新增表单增加监督员"
+  },
+  {
+   "id": "EO-CRU-002",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "删除项目",
+   "operation_category": "crud",
+   "description": "项目记录删除（推断）",
+   "expected_results": [
+    "项目记录删除（推断）"
+   ],
+   "suggested_action": "对项目执行删除项目",
+   "coverage_priority": "medium",
+   "source_ref": "20.2.3待办事项"
+  },
+  {
+   "id": "EO-CRU-003",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "设计方案编制",
+   "operation_category": "crud",
+   "description": "编制和更新设计方案等文件（9策划人员文件管理）",
+   "expected_results": [
+    "编制和更新设计方案等文件（9策划人员文件管理）"
+   ],
+   "suggested_action": "对项目执行设计方案编制",
+   "coverage_priority": "medium",
+   "source_ref": "19.1方案设计阶段",
+   "linked_transitions": [
+    "T-001"
+   ]
+  },
+  {
+   "id": "EO-CRU-004",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "文件整理",
+   "operation_category": "file",
+   "description": "系统开启整理任务并提示用户'归档任务已开启，请稍后查看'",
+   "expected_results": [
+    "系统开启整理任务并提示用户'归档任务已开启，请稍后查看'",
+    "整理完成后操作列会显示【查看归档】按钮"
+   ],
+   "suggested_action": "对项目执行文件整理",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.1文件整理",
+   "stage_hint": {
+    "anchor_state": {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "已结束"
+    }
+   }
+  },
+  {
+   "id": "EO-CRU-005",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "代码导入",
+   "operation_category": "file",
+   "description": "导入报名机构的三方代码",
+   "expected_results": [
+    "导入报名机构的三方代码"
+   ],
+   "suggested_action": "对项目执行代码导入",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.2机构代码导入"
+  },
+  {
+   "id": "EO-CRU-006",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "批量处理",
+   "operation_category": "ui",
+   "description": "点击操作列中的'批量处理'按钮跳转到报名信息批量处理页面",
+   "expected_results": [
+    "点击操作列中的'批量处理'按钮跳转到报名信息批量处理页面"
+   ],
+   "suggested_action": "对项目执行批量处理",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.3项目批量操作"
+  },
+  {
+   "id": "EO-CRU-007",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "消息发送",
+   "operation_category": "ui",
+   "description": "如系统验证通过则将消息按选择的方式进行发送",
+   "expected_results": [
+    "如系统验证通过则将消息按选择的方式进行发送"
+   ],
+   "suggested_action": "对项目执行消息发送",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.4优化消息发送功能"
+  },
+  {
+   "id": "EO-CRU-008",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "查询项目",
+   "operation_category": "query",
+   "description": "查询并在列表中分页展示所有符合条件的数据记录",
+   "expected_results": [
+    "查询并在列表中分页展示所有符合条件的数据记录"
+   ],
+   "suggested_action": "对项目执行查询项目",
+   "coverage_priority": "medium",
+   "source_ref": "20.8.3.1项目查询与统计"
+  },
+  {
+   "id": "EO-CRU-009",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "上传结果通知单",
+   "operation_category": "file",
+   "description": "结果通知单上传成功，可批量提交审核（推断）",
+   "expected_results": [
+    "结果通知单上传成功，可批量提交审核（推断）"
+   ],
+   "suggested_action": "对项目执行上传结果通知单",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.3项目批量操作",
+   "stage_hint": {
+    "anchor_state": {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报告审核中"
+    }
+   }
+  },
+  {
+   "id": "EO-CRU-010",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "上传证书",
+   "operation_category": "file",
+   "description": "证书上传成功，可批量提交审核（推断）",
+   "expected_results": [
+    "证书上传成功，可批量提交审核（推断）"
+   ],
+   "suggested_action": "对项目执行上传证书",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.3项目批量操作",
+   "stage_hint": {
+    "anchor_state": {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报告审核中"
+    }
+   }
+  },
+  {
+   "id": "EO-CRU-011",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "导入历史数据",
+   "operation_category": "file",
+   "description": "对往年项目数据进行分析整理，并导入到系统中为数据分析提供关键数据",
+   "expected_results": [
+    "对往年项目数据进行分析整理，并导入到系统中为数据分析提供关键数据"
+   ],
+   "suggested_action": "对项目执行导入历史数据",
+   "coverage_priority": "medium",
+   "source_ref": "20.11其他"
+  },
+  {
+   "id": "EO-CRU-012",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "查询历史项目",
+   "operation_category": "query",
+   "description": "查询并在列表中分页展示所有符合条件的数据记录",
+   "expected_results": [
+    "查询并在列表中分页展示所有符合条件的数据记录"
+   ],
+   "suggested_action": "对项目执行查询历史项目",
+   "coverage_priority": "medium",
+   "source_ref": "20.11.1.1历史数据列表"
+  },
+  {
+   "id": "EO-CRU-013",
+   "type": "crud_operation",
+   "entity": "E-XM",
+   "entity_name": "项目",
+   "operation_name": "查询统计数据",
+   "operation_category": "query",
+   "description": "点击相应的菜单，进入到相应的统计页面，进行相应的操作",
+   "expected_results": [
+    "点击相应的菜单，进入到相应的统计页面，进行相应的操作"
+   ],
+   "suggested_action": "对项目执行查询统计数据",
+   "coverage_priority": "medium",
+   "source_ref": "20.8统计分析"
+  },
+  {
+   "id": "EO-CRU-014",
+   "type": "crud_operation",
+   "entity": "E-BMJL",
+   "entity_name": "报名记录",
+   "operation_name": "发票上传",
+   "operation_category": "file",
+   "description": "发票上传后会显示在此列表中，点击文件地址后的'x'可以移除文件（表单提交后生效）",
+   "expected_results": [
+    "发票上传后会显示在此列表中，点击文件地址后的'x'可以移除文件（表单提交后生效）"
+   ],
+   "suggested_action": "对报名记录执行发票上传",
+   "coverage_priority": "medium",
+   "source_ref": "20.10.2.2修改发票上传功能",
+   "linked_transitions": [
+    "T-013"
+   ]
+  },
+  {
+   "id": "EO-CRU-015",
+   "type": "crud_operation",
+   "entity": "E-BMJL",
+   "entity_name": "报名记录",
+   "operation_name": "修改备注",
+   "operation_category": "crud",
+   "description": "点击提交表单保存财务备注",
+   "expected_results": [
+    "点击提交表单保存财务备注"
+   ],
+   "suggested_action": "对报名记录执行修改备注",
+   "coverage_priority": "medium",
+   "source_ref": "20.10.2.1项目列表增加财务备注字段",
+   "form_fields": [
+    {
+     "name": "报名编号",
+     "desc": "只读显示当前报名记录编号"
+    },
+    {
+     "name": "财务备注",
+     "desc": "选填，可修改备注内容"
+    }
+   ]
+  },
+  {
+   "id": "EO-CRU-016",
+   "type": "crud_operation",
+   "entity": "E-BMJL",
+   "entity_name": "报名记录",
+   "operation_name": "提交结果报告",
+   "operation_category": "file",
+   "description": "参加者在完成测试后，提交结果报告",
+   "expected_results": [
+    "参加者在完成测试后，提交结果报告"
+   ],
+   "suggested_action": "对报名记录执行提交结果报告",
+   "coverage_priority": "medium",
+   "source_ref": "19.4能力验证参加者工作流程分析",
+   "linked_transitions": [
+    "T-021"
+   ],
+   "stage_hint": {
+    "anchor_state": {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果待提交"
+    }
+   }
+  },
+  {
+   "id": "EO-CRU-017",
+   "type": "crud_operation",
+   "entity": "E-BMJL",
+   "entity_name": "报名记录",
+   "operation_name": "上传缴费证明",
+   "operation_category": "file",
+   "description": "参加者上传缴费证明",
+   "expected_results": [
+    "参加者上传缴费证明"
+   ],
+   "suggested_action": "对报名记录执行上传缴费证明",
+   "coverage_priority": "medium",
+   "source_ref": "18能力验证参加者",
+   "linked_transitions": [
+    "T-011"
+   ],
+   "stage_hint": {
+    "anchor_state": {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名成功"
+    }
+   }
+  },
+  {
+   "id": "EO-CRU-018",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "样品制备",
+   "operation_category": "crud",
+   "description": "编制样品制备方案，执行样品制备",
+   "expected_results": [
+    "编制样品制备方案，执行样品制备"
+   ],
+   "suggested_action": "对样品执行样品制备",
+   "coverage_priority": "medium",
+   "source_ref": "11样品制备人员",
+   "linked_transitions": [
+    "T-012"
+   ]
+  },
+  {
+   "id": "EO-CRU-019",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "样品核查",
+   "operation_category": "crud",
+   "description": "负责样品的配置、核查和一致性测试，生成核查记录表",
+   "expected_results": [
+    "负责样品的配置、核查和一致性测试，生成核查记录表"
+   ],
+   "suggested_action": "对样品执行样品核查",
+   "coverage_priority": "medium",
+   "source_ref": "19.1实施阶段",
+   "linked_transitions": [
+    "T-017",
+    "T-018"
+   ]
+  },
+  {
+   "id": "EO-CRU-020",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "样品领用登记",
+   "operation_category": "crud",
+   "description": "样品领用出库登记，样品状态为待核查",
+   "expected_results": [
+    "样品领用出库登记，样品状态为待核查"
+   ],
+   "suggested_action": "对样品执行样品领用登记",
+   "coverage_priority": "medium",
+   "source_ref": "19.3项目状态分析",
+   "linked_transitions": [
+    "T-045"
+   ],
+   "covered_by": "T-045"
+  },
+  {
+   "id": "EO-CRU-021",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "样品发放",
+   "operation_category": "crud",
+   "description": "您xxxx项目的样品已发出，请知悉",
+   "expected_results": [
+    "您xxxx项目的样品已发出，请知悉"
+   ],
+   "suggested_action": "对样品执行样品发放",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.3.2操作节点增加用户短信通知",
+   "linked_transitions": [
+    "T-020"
+   ]
+  },
+  {
+   "id": "EO-CRU-022",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "出入库登记",
+   "operation_category": "crud",
+   "description": "样品出入库登记和管理（推断）",
+   "expected_results": [
+    "样品出入库登记和管理（推断）"
+   ],
+   "suggested_action": "对样品执行出入库登记",
+   "coverage_priority": "medium",
+   "source_ref": "12样品管理员"
+  },
+  {
+   "id": "EO-CRU-023",
+   "type": "crud_operation",
+   "entity": "E-YP",
+   "entity_name": "样品",
+   "operation_name": "查询样品",
+   "operation_category": "query",
+   "description": "查询样品信息（推断）",
+   "expected_results": [
+    "查询样品信息（推断）"
+   ],
+   "suggested_action": "对样品执行查询样品",
+   "coverage_priority": "medium",
+   "source_ref": "12样品管理员"
+  },
+  {
+   "id": "EO-CRU-024",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "评价",
+   "operation_category": "crud",
+   "description": "评价人员找到评价项对应单元格可以输入或调整评价分数",
+   "expected_results": [
+    "评价人员找到评价项对应单元格可以输入或调整评价分数",
+    "确定：按钮，点击提交结果"
+   ],
+   "suggested_action": "对评价执行评价",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.2协同评价",
+   "linked_transitions": [
+    "T-032"
+   ]
+  },
+  {
+   "id": "EO-CRU-025",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "结果确认",
+   "operation_category": "crud",
+   "description": "点击后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭",
+   "expected_results": [
+    "点击后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭"
+   ],
+   "suggested_action": "对评价执行结果确认",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.3评价确认",
+   "linked_transitions": [
+    "T-034"
+   ]
+  },
+  {
+   "id": "EO-CRU-026",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "完善评价细则",
+   "operation_category": "crud",
+   "description": "确定：按钮，点击后保存完善后的测试项目数据",
+   "expected_results": [
+    "确定：按钮，点击后保存完善后的测试项目数据"
+   ],
+   "suggested_action": "对评价执行完善评价细则",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.1测试项目、评价细则完善"
+  },
+  {
+   "id": "EO-CRU-027",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "导出评价结果",
+   "operation_category": "file",
+   "description": "评价人员点击项目列表操作列中的'导出'按钮，下载评价结果",
+   "expected_results": [
+    "评价人员点击项目列表操作列中的'导出'按钮，下载评价结果"
+   ],
+   "suggested_action": "对评价执行导出评价结果",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.4评价结果导出"
+  },
+  {
+   "id": "EO-CRU-028",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "保存历史",
+   "operation_category": "crud",
+   "description": "将当前评价结果保存为历史结果",
+   "expected_results": [
+    "将当前评价结果保存为历史结果"
+   ],
+   "suggested_action": "对评价执行保存历史",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.3评价确认"
+  },
+  {
+   "id": "EO-CRU-029",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "调整细则",
+   "operation_category": "ui",
+   "description": "点击打开评价细节完善页面，配置完成后回到本页面将会刷新本页面数据",
+   "expected_results": [
+    "点击打开评价细节完善页面，配置完成后回到本页面将会刷新本页面数据"
+   ],
+   "suggested_action": "对评价执行调整细则",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.3评价确认"
+  },
+  {
+   "id": "EO-CRU-030",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "配置统计规则",
+   "operation_category": "config",
+   "description": "评价组长可在此弹窗中配置统计规则",
+   "expected_results": [
+    "评价组长可在此弹窗中配置统计规则"
+   ],
+   "suggested_action": "对评价执行配置统计规则",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.3评价确认"
+  },
+  {
+   "id": "EO-CRU-031",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "统计分析",
+   "operation_category": "query",
+   "description": "对评价进行统计，生成评价统计表（推断）",
+   "expected_results": [
+    "对评价进行统计，生成评价统计表（推断）"
+   ],
+   "suggested_action": "对评价执行统计分析",
+   "coverage_priority": "medium",
+   "source_ref": "19.1报告编制和结果通知"
+  },
+  {
+   "id": "EO-CRU-032",
+   "type": "crud_operation",
+   "entity": "E-PJ",
+   "entity_name": "评价",
+   "operation_name": "下载历史记录",
+   "operation_category": "file",
+   "description": "点击文件链接即可下载评价历史结果",
+   "expected_results": [
+    "点击文件链接即可下载评价历史结果"
+   ],
+   "suggested_action": "对评价执行下载历史记录",
+   "coverage_priority": "medium",
+   "source_ref": "20.7.1.3评价确认"
+  },
+  {
+   "id": "EO-CRU-033",
+   "type": "crud_operation",
+   "entity": "E-TASK",
+   "entity_name": "审核任务",
+   "operation_name": "批量审核",
+   "operation_category": "crud",
+   "description": "点击进行批量审核操作，所选任务按审核结果更新（推断）",
+   "expected_results": [
+    "点击进行批量审核操作，所选任务按审核结果更新（推断）"
+   ],
+   "suggested_action": "对审核任务执行批量审核",
+   "coverage_priority": "medium",
+   "source_ref": "20.9.1.4任务批量处理",
+   "linked_transitions": [
+    "T-062",
+    "T-063"
+   ]
+  },
+  {
+   "id": "EO-CRU-034",
+   "type": "crud_operation",
+   "entity": "E-TASK",
+   "entity_name": "审核任务",
+   "operation_name": "提交审核",
+   "operation_category": "crud",
+   "description": "对选择记录进行任务提交操作，如没有选择记录将提示用户选择记录信息",
+   "expected_results": [
+    "对选择记录进行任务提交操作，如没有选择记录将提示用户选择记录信息"
+   ],
+   "suggested_action": "对审核任务执行提交审核",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.3项目批量操作",
+   "linked_transitions": [
+    "T-061"
+   ],
+   "page": "报名信息批量处理页"
+  },
+  {
+   "id": "EO-CRU-035",
+   "type": "crud_operation",
+   "entity": "E-TASK",
+   "entity_name": "审核任务",
+   "operation_name": "查询审核任务",
+   "operation_category": "query",
+   "description": "查询审批流程列表数据（推断）",
+   "expected_results": [
+    "查询审批流程列表数据（推断）"
+   ],
+   "suggested_action": "对审核任务执行查询审核任务",
+   "coverage_priority": "medium",
+   "source_ref": "20.9.1.5审批流程列表导出"
+  },
+  {
+   "id": "EO-CRU-036",
+   "type": "crud_operation",
+   "entity": "E-TASK",
+   "entity_name": "审核任务",
+   "operation_name": "导出审批列表",
+   "operation_category": "file",
+   "description": "点击'导出'按钮，导出满足当前查询条件的数据",
+   "expected_results": [
+    "点击'导出'按钮，导出满足当前查询条件的数据"
+   ],
+   "suggested_action": "对审核任务执行导出审批列表",
+   "coverage_priority": "medium",
+   "source_ref": "20.9.1.5审批流程列表导出"
+  },
+  {
+   "id": "EO-CRU-037",
+   "type": "crud_operation",
+   "entity": "E-TASK",
+   "entity_name": "审核任务",
+   "operation_name": "签章",
+   "operation_category": "crud",
+   "description": "进行签章操作时自动代入预置签章位置信息，减少手动调整操作",
+   "expected_results": [
+    "进行签章操作时自动代入预置签章位置信息，减少手动调整操作"
+   ],
+   "suggested_action": "对审核任务执行签章",
+   "coverage_priority": "medium",
+   "source_ref": "20.9.1.2预置签章位置信息"
+  },
+  {
+   "id": "EO-CRU-038",
+   "type": "crud_operation",
+   "entity": "E-JFTZ",
+   "entity_name": "缴费通知单",
+   "operation_name": "编制缴费通知",
+   "operation_category": "crud",
+   "description": "编制缴纳测量审核费用通知，生成缴费通知书",
+   "expected_results": [
+    "编制缴纳测量审核费用通知，生成缴费通知书"
+   ],
+   "suggested_action": "对缴费通知单执行编制缴费通知",
+   "coverage_priority": "medium",
+   "source_ref": "19.3项目状态分析"
+  },
+  {
+   "id": "EO-CRU-039",
+   "type": "crud_operation",
+   "entity": "E-FY",
+   "entity_name": "缴费单",
+   "operation_name": "上传付款单",
+   "operation_category": "file",
+   "description": "点击提交表单，录入付款信息并上传付款底单",
+   "expected_results": [
+    "点击提交表单，录入付款信息并上传付款底单"
+   ],
+   "suggested_action": "对缴费单执行上传付款单",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.2.1已报名项目增加多次付款功能",
+   "linked_transitions": [
+    "T-011"
+   ]
+  },
+  {
+   "id": "EO-CRU-040",
+   "type": "crud_operation",
+   "entity": "E-FY",
+   "entity_name": "缴费单",
+   "operation_name": "缴费单退款",
+   "operation_category": "crud",
+   "description": "退款后更新'项目费用'为实际付款金额",
+   "expected_results": [
+    "退款后更新'项目费用'为实际付款金额"
+   ],
+   "suggested_action": "对缴费单执行缴费单退款",
+   "coverage_priority": "medium",
+   "source_ref": "20.10.2.3缴费单退款"
+  },
+  {
+   "id": "EO-CRU-041",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "审核实验室",
+   "operation_category": "crud",
+   "description": "如果审核结果为通过，实验室状态变更为'启用'，并为当前数据生成该数据的快照记录",
+   "expected_results": [
+    "如果审核结果为通过，实验室状态变更为'启用'，并为当前数据生成该数据的快照记录"
+   ],
+   "suggested_action": "对实验室执行审核实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.1.2实验室审核",
+   "linked_transitions": [
+    "T-054",
+    "T-055"
+   ]
+  },
+  {
+   "id": "EO-CRU-042",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "修改实验室",
+   "operation_category": "crud",
+   "description": "【确认】按钮：提交修改内容",
+   "expected_results": [
+    "【确认】按钮：提交修改内容"
+   ],
+   "suggested_action": "对实验室执行修改实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.1.3实验室修改",
+   "linked_transitions": [
+    "T-052",
+    "T-053"
+   ]
+  },
+  {
+   "id": "EO-CRU-043",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "删除实验室",
+   "operation_category": "crud",
+   "description": "删除实验室信息记录（推断）",
+   "expected_results": [
+    "删除实验室信息记录（推断）"
+   ],
+   "suggested_action": "对实验室执行删除实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.3.1实验室信息"
+  },
+  {
+   "id": "EO-CRU-044",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "停用实验室",
+   "operation_category": "crud",
+   "description": "停用（启用状态显示）按钮，状态立即改变",
+   "expected_results": [
+    "停用（启用状态显示）按钮，状态立即改变"
+   ],
+   "suggested_action": "对实验室执行停用实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.1.1实验室列表与查询",
+   "linked_transitions": [
+    "T-056"
+   ]
+  },
+  {
+   "id": "EO-CRU-045",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "启用实验室",
+   "operation_category": "crud",
+   "description": "启用（停用状态显示）按钮，状态立即改变",
+   "expected_results": [
+    "启用（停用状态显示）按钮，状态立即改变"
+   ],
+   "suggested_action": "对实验室执行启用实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.1.1实验室列表与查询",
+   "linked_transitions": [
+    "T-057"
+   ]
+  },
+  {
+   "id": "EO-CRU-046",
+   "type": "crud_operation",
+   "entity": "E-LAB",
+   "entity_name": "实验室",
+   "operation_name": "查询实验室",
+   "operation_category": "query",
+   "description": "查询并在列表中分页展示所有符合条件的数据记录",
+   "expected_results": [
+    "查询并在列表中分页展示所有符合条件的数据记录"
+   ],
+   "suggested_action": "对实验室执行查询实验室",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.1.1实验室列表与查询"
+  },
+  {
+   "id": "EO-CRU-047",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "新增标准库",
+   "operation_category": "crud",
+   "description": "点击提交表单，创建标准库",
+   "expected_results": [
+    "点击提交表单，创建标准库"
+   ],
+   "suggested_action": "对标准库执行新增标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.2新增标准库",
+   "linked_transitions": [
+    "T-058"
+   ],
+   "covered_by": "T-058"
+  },
+  {
+   "id": "EO-CRU-048",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "修改标准库",
+   "operation_category": "crud",
+   "description": "点击提交表单保存修改",
+   "expected_results": [
+    "点击提交表单保存修改"
+   ],
+   "suggested_action": "对标准库执行修改标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.3修改标准库"
+  },
+  {
+   "id": "EO-CRU-049",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "删除标准库",
+   "operation_category": "crud",
+   "description": "点击确定，进行删除操作",
+   "expected_results": [
+    "点击确定，进行删除操作"
+   ],
+   "suggested_action": "对标准库执行删除标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.4删除标准库"
+  },
+  {
+   "id": "EO-CRU-050",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "停用标准库",
+   "operation_category": "crud",
+   "description": "确认后状态立即改变，列表刷新",
+   "expected_results": [
+    "确认后状态立即改变，列表刷新"
+   ],
+   "suggested_action": "对标准库执行停用标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.5停用/启用标准库",
+   "linked_transitions": [
+    "T-059"
+   ]
+  },
+  {
+   "id": "EO-CRU-051",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "启用标准库",
+   "operation_category": "crud",
+   "description": "确认后状态立即改变，列表刷新",
+   "expected_results": [
+    "确认后状态立即改变，列表刷新"
+   ],
+   "suggested_action": "对标准库执行启用标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.5停用/启用标准库",
+   "linked_transitions": [
+    "T-060"
+   ]
+  },
+  {
+   "id": "EO-CRU-052",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "管理测试项",
+   "operation_category": "ui",
+   "description": "点击后，页面跳转或打开一个新标签页，进入该标准库的专属测试项管理界面",
+   "expected_results": [
+    "点击后，页面跳转或打开一个新标签页，进入该标准库的专属测试项管理界面"
+   ],
+   "suggested_action": "对标准库执行管理测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.6进入测试项管理界面"
+  },
+  {
+   "id": "EO-CRU-053",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "查询标准库",
+   "operation_category": "query",
+   "description": "查询并在列表中分页展示所有符合条件的数据记录",
+   "expected_results": [
+    "查询并在列表中分页展示所有符合条件的数据记录"
+   ],
+   "suggested_action": "对标准库执行查询标准库",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.1标准库列表与查询"
+  },
+  {
+   "id": "EO-CRU-054",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "新增测试项",
+   "operation_category": "crud",
+   "description": "点击提交表单，新增测试项",
+   "expected_results": [
+    "点击提交表单，新增测试项"
+   ],
+   "suggested_action": "对标准库执行新增测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.8新增测试项",
+   "form_fields": [
+    {
+     "name": "标号",
+     "desc": "测试项编号"
+    },
+    {
+     "name": "名称",
+     "desc": "测试项名称"
+    }
+   ]
+  },
+  {
+   "id": "EO-CRU-055",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "修改测试项",
+   "operation_category": "crud",
+   "description": "点击提交表单，系统校验后保存，刷新列表中的数据信息",
+   "expected_results": [
+    "点击提交表单，系统校验后保存，刷新列表中的数据信息"
+   ],
+   "suggested_action": "对标准库执行修改测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.9修改测试项",
+   "form_fields": [
+    {
+     "name": "标号",
+     "desc": "测试项编号"
+    },
+    {
+     "name": "名称",
+     "desc": "测试项名称"
+    }
+   ]
+  },
+  {
+   "id": "EO-CRU-056",
+   "type": "crud_operation",
+   "entity": "E-BZ",
+   "entity_name": "标准库",
+   "operation_name": "删除测试项",
+   "operation_category": "crud",
+   "description": "点击【确定】按钮进行删除操作，含有子项的记录不允许删除",
+   "expected_results": [
+    "点击【确定】按钮进行删除操作，含有子项的记录不允许删除"
+   ],
+   "suggested_action": "对标准库执行删除测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.2.10删除测试项"
+  },
+  {
+   "id": "EO-CRU-057",
+   "type": "crud_operation",
+   "entity": "E-ZLY",
+   "entity_name": "子领域",
+   "operation_name": "管理测试项",
+   "operation_category": "ui",
+   "description": "点击后，页面跳转或打开一个新标签页，进入该子领域的专属测试项管理界面",
+   "expected_results": [
+    "点击后，页面跳转或打开一个新标签页，进入该子领域的专属测试项管理界面"
+   ],
+   "suggested_action": "对子领域执行管理测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.3.1进入测试项管理界面"
+  },
+  {
+   "id": "EO-CRU-058",
+   "type": "crud_operation",
+   "entity": "E-ZLY",
+   "entity_name": "子领域",
+   "operation_name": "新增测试项",
+   "operation_category": "crud",
+   "description": "点击提交表单，系统校验后保存，新标准库出现在列表中",
+   "expected_results": [
+    "点击提交表单，系统校验后保存，新标准库出现在列表中"
+   ],
+   "suggested_action": "对子领域执行新增测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.3.3新增测试项"
+  },
+  {
+   "id": "EO-CRU-059",
+   "type": "crud_operation",
+   "entity": "E-ZLY",
+   "entity_name": "子领域",
+   "operation_name": "删除测试项",
+   "operation_category": "crud",
+   "description": "点击【确定】按钮，删除数据。数据删除前会做前置判断，存在子项的数据不可以删除",
+   "expected_results": [
+    "点击【确定】按钮，删除数据。数据删除前会做前置判断，存在子项的数据不可以删除"
+   ],
+   "suggested_action": "对子领域执行删除测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.3.4删除测试项"
+  },
+  {
+   "id": "EO-CRU-060",
+   "type": "crud_operation",
+   "entity": "E-ZLY",
+   "entity_name": "子领域",
+   "operation_name": "查询测试项",
+   "operation_category": "query",
+   "description": "查询并在列表中分页展示所有符合条件的数据记录",
+   "expected_results": [
+    "查询并在列表中分页展示所有符合条件的数据记录"
+   ],
+   "suggested_action": "对子领域执行查询测试项",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.3.2测试项列表与结构展示"
+  },
+  {
+   "id": "EO-CRU-061",
+   "type": "crud_operation",
+   "entity": "E-CYX",
+   "entity_name": "常用测试项",
+   "operation_name": "另存常用",
+   "operation_category": "crud",
+   "description": "点击保存常用项数据",
+   "expected_results": [
+    "点击保存常用项数据"
+   ],
+   "suggested_action": "对常用测试项执行另存常用",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.7增加常用子领域测试项编辑能力"
+  },
+  {
+   "id": "EO-CRU-062",
+   "type": "crud_operation",
+   "entity": "E-CYX",
+   "entity_name": "常用测试项",
+   "operation_name": "删除常用项",
+   "operation_category": "crud",
+   "description": "选择常用项下列表中的项目后的'删除'图标可以删除此常用项",
+   "expected_results": [
+    "选择常用项下列表中的项目后的'删除'图标可以删除此常用项"
+   ],
+   "suggested_action": "对常用测试项执行删除常用项",
+   "coverage_priority": "medium",
+   "source_ref": "20.5.1.7增加常用子领域测试项编辑能力"
+  },
+  {
+   "id": "EO-CRU-063",
+   "type": "crud_operation",
+   "entity": "E-TZGG",
+   "entity_name": "通知公告",
+   "operation_name": "维护通知公告",
+   "operation_category": "crud",
+   "description": "对信息发布的内容进行维护，包括通知信息",
+   "expected_results": [
+    "对信息发布的内容进行维护，包括通知信息"
+   ],
+   "suggested_action": "对通知公告执行维护通知公告",
+   "coverage_priority": "medium",
+   "source_ref": "3.2功能要求"
+  },
+  {
+   "id": "EO-CRU-064",
+   "type": "crud_operation",
+   "entity": "E-JL",
+   "entity_name": "信息发送记录",
+   "operation_name": "查询发送记录",
+   "operation_category": "query",
+   "description": "点击查询数据",
+   "expected_results": [
+    "点击查询数据"
+   ],
+   "suggested_action": "对信息发送记录执行查询发送记录",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.4.1信息发送记录"
+  },
+  {
+   "id": "EO-CRU-065",
+   "type": "crud_operation",
+   "entity": "E-JL",
+   "entity_name": "信息发送记录",
+   "operation_name": "查看消息详情",
+   "operation_category": "query",
+   "description": "点击可查看消息详细内容",
+   "expected_results": [
+    "点击可查看消息详细内容"
+   ],
+   "suggested_action": "对信息发送记录执行查看消息详情",
+   "coverage_priority": "medium",
+   "source_ref": "20.4.4.1信息发送记录"
+  }
+ ],
+ "transition_obligations": [
+  {
+   "id": "T-001",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": null,
+   "to": "待开始",
+   "action": "设计方案编制",
+   "role": "策划人员",
+   "preconditions": [],
+   "expected_results": [
+    "项目于准备阶段立项建立，设计方案编制后项目状态为待开始"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1方案设计阶段",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e01；⓪创建转换；能力验证分支（与T-040受理用户测量审核报名创建分立），Step2 value=能力验证变为本条；示例e01对齐"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-002",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "待开始",
+   "to": "报名中",
+   "action": "能力验证计划发布",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "项目处于待开始状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "待开始"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为报名中",
+    "发布能力验证计划通知或邀请函"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "comment": "源自e02；③；项目进入报名中联动开启报名记录创建（XC XC-001）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "待开始",
+     "raw_text": "项目处于待开始状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-003",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": null,
+   "to": "报名待审核",
+   "action": "报名",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "项目处于报名中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     }
+    },
+    {
+     "text": "实验室处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录创建，状态为报名待审核",
+    "生成报名表"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e03；⓪创建转换；跨主体门禁落state_ref（项目报名中为流程表驻留值门禁；实验室启用门禁依据20.3.1'需经管理用户审核通过后方可用于项目报名'，镜像XC由框架补）；能力验证分支（与T-041分立），Step2 value=能力验证变为本条；§5修复C03/C08：门禁端点由E-PJ更正为E-XM（项目状态维度建模于E-XM，E-PJ仅建模评价状态），同步更正e03/e08/e09台账简写；本条为E-BMJL创建转换，现携指向父实体E-XM的state_ref前置，C08组合判定维持（E-LAB.启用为第三方业务门禁，不影响业务归属组合判定）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-JFTZ",
+     "target_dimension": "缴费通知单状态",
+     "effect_desc": "报名记录创建后系统自动初始化缴费通知单为未发送；报名审核通过后系统自动发送缴费通知单"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报名中",
+     "raw_text": "项目处于报名中状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "启用",
+     "raw_text": "实验室处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-004",
+   "entity": "E-BMJL",
+   "dimension": "费用状态",
+   "from": null,
+   "to": "待缴费",
+   "action": "报名",
+   "role": "能力验证参加者",
+   "preconditions": [],
+   "expected_results": [
+    "费用状态初始化为待缴费"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e04；⓪创建转换；e03同动作拆行（一动作多状态面），能力验证分支"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-005",
+   "entity": "E-BMJL",
+   "dimension": "发票状态",
+   "from": null,
+   "to": "待开票",
+   "action": "报名",
+   "role": "能力验证参加者",
+   "preconditions": [],
+   "expected_results": [
+    "发票状态初始化为待开票"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e05；⓪创建转换；e03同动作拆行（一动作多状态面），能力验证分支"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-006",
+   "entity": "E-JFTZ",
+   "dimension": "缴费通知单状态",
+   "from": null,
+   "to": "未发送",
+   "action": "报名",
+   "role": "system",
+   "preconditions": [],
+   "expected_results": [
+    "缴费通知单自动初始化为未发送"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "comment": "源自e06；⓪创建转换；报名记录创建后系统自动初始化缴费通知单为未发送（联动，见因果E-BMJL变为E-JFTZ），role=system；台账行actor为报名动作主体；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-007",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": null,
+   "to": "未发送",
+   "action": "能力验证计划发布",
+   "role": "项目管理员",
+   "preconditions": [],
+   "expected_results": [
+    "通知状态初始化为未发送"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "comment": "源自e07；⓪创建转换；与T-002同动作拆行（一动作多状态面）；测量审核共用（19.3发票开具行预通知状态列'未发送'为驻留值）；维度名19.3枚举称'通知状态'、流程表列称'预通知状态'，两口径并列；§5修复C32：本条原为E-BMJL创建（action=报名，行4），19.1预通知状态列首现于'能力验证计划发布'行（行3，值未发送）早于报名记录创建，出生点被后移，故维度迁E-XM项目级、动作改锚首现动作'能力验证计划发布'，E-BMJL不再承载初始化（e07/T-007同步改写）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-008",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报名待审核",
+   "to": "报名成功",
+   "action": "报名审核",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于报名待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名待审核"
+     }
+    },
+    {
+     "text": "项目处于报名中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     }
+    },
+    {
+     "text": "报名审核结果=通过",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为报名成功",
+    "短信通知：您xxx项目的报名信息审核通过，请知悉"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；20.5.3.2操作节点增加用户短信通知",
+   "note": {
+    "branch_dimension": "报名审核结果",
+    "comment": "源自e08；③；路径分歧：通过分支，Step2 value=通过变为本条；两流程共用；缴费通知单联动发送见T-010; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-JFTZ",
+     "target_dimension": "缴费通知单状态",
+     "effect_desc": "报名记录创建后系统自动初始化缴费通知单为未发送；报名审核通过后系统自动发送缴费通知单"
+    },
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "短信通知：您xxx项目的报名信息审核通过，请知悉"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "报名审核结果",
+     "value": "通过"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名待审核",
+     "raw_text": "报名记录处于报名待审核状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报名中",
+     "raw_text": "项目处于报名中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-BMJL",
+     "name": "报名审核结果"
+    },
+    "value": "通过"
+   }
+  },
+  {
+   "id": "T-009",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报名待审核",
+   "to": "报名退回",
+   "action": "报名审核",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于报名待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名待审核"
+     }
+    },
+    {
+     "text": "项目处于报名中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     }
+    },
+    {
+     "text": "报名审核结果=退回修改",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为报名退回",
+    "短信通知：您xxx项目的报名信息审核未通过，请知悉"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit",
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段；20.5.3.2操作节点增加用户短信通知",
+   "note": {
+    "branch_dimension": "报名审核结果",
+    "comment": "源自e09；③；路径分歧：退回修改分支，Step2 value=退回修改变为本条；两流程共用；退回后重新提交见T-030; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "短信通知：您xxx项目的报名信息审核未通过，请知悉"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "报名审核结果",
+     "value": "退回修改"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名待审核",
+     "raw_text": "报名记录处于报名待审核状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报名中",
+     "raw_text": "项目处于报名中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-BMJL",
+     "name": "报名审核结果"
+    },
+    "value": "退回修改"
+   }
+  },
+  {
+   "id": "T-010",
+   "entity": "E-JFTZ",
+   "dimension": "缴费通知单状态",
+   "from": "未发送",
+   "to": "已发送",
+   "action": "发送缴费通知",
+   "role": "system",
+   "preconditions": [
+    {
+     "text": "缴费通知单处于未发送状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-JFTZ",
+      "dimension": "缴费通知单状态",
+      "state": "未发送"
+     }
+    },
+    {
+     "text": "报名记录处于报名成功状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名成功"
+     }
+    }
+   ],
+   "expected_results": [
+    "缴费通知单变为已发送"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；10项目管理员",
+   "note": {
+    "comment": "源自e10；③；跨主体门禁落state_ref（门禁值取同动作拆行事件e08对应分支consequence'报名成功'）；报名审核通过后系统自动发送缴费通知单（role=system）；动作短语取10项目管理员职责'发送缴费通知'；两流程共用（19.3报名审核行同落点）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-JFTZ",
+     "dimension": "缴费通知单状态",
+     "state": "未发送",
+     "raw_text": "缴费通知单处于未发送状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名成功",
+     "raw_text": "报名记录处于报名成功状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-011",
+   "entity": "E-BMJL",
+   "dimension": "费用状态",
+   "from": "待缴费",
+   "to": "已缴费",
+   "action": "缴费",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "费用处于待缴费状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "费用状态",
+      "state": "待缴费"
+     }
+    },
+    {
+     "text": "报名记录处于报名成功状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名成功"
+     }
+    }
+   ],
+   "expected_results": [
+    "费用状态变为已缴费"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e11；③；同实体跨维度门禁（报名记录状态=报名成功）落state_ref；支持多次付款（20.5.2.1），已缴费后重复付款不改变状态；'审核通过后方可缴费'门禁已表达，不写因果；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "费用状态",
+     "state": "待缴费",
+     "raw_text": "费用处于待缴费状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名成功",
+     "raw_text": "报名记录处于报名成功状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-012",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": null,
+   "to": "待核查",
+   "action": "样品制备",
+   "role": "样品制备人员",
+   "preconditions": [],
+   "expected_results": [
+    "样品制备完成，样品状态为待核查（推断）"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；11样品制备人员",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e12；⓪创建转换；样品状态'待核查'首现于19.1缴费行，结合11样品制备人员职责'编制样品制备方案，执行样品制备'补创建事件；能力验证分支（与T-045样品领用登记分立）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-013",
+   "entity": "E-BMJL",
+   "dimension": "发票状态",
+   "from": "待开票",
+   "to": "已开票",
+   "action": "发票开具",
+   "role": "财务管理人员",
+   "preconditions": [
+    {
+     "text": "发票处于待开票状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "发票状态",
+      "state": "待开票"
+     }
+    },
+    {
+     "text": "报名记录处于报名成功状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名成功"
+     }
+    }
+   ],
+   "expected_results": [
+    "发票状态变为已开票",
+    "生成发票"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e13；③；同行费用状态列原文'已缴费/未缴费'为或值驻留，不构成门禁；20.10.2.2发票上传支持多次分批上传（op发票上传关联本条）；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "发票状态",
+     "state": "待开票",
+     "raw_text": "发票处于待开票状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名成功",
+     "raw_text": "报名记录处于报名成功状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-014",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "未发送",
+   "to": "待确认",
+   "action": "能力验证预通知",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "通知处于未发送状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "未发送"
+     }
+    }
+   ],
+   "expected_results": [
+    "预通知发送，通知状态变为待确认",
+    "生成预通知、用户信息表"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e14；③；能力验证分支（与T-050已审核变为待确认分立，同action不同frm），Step2 value=能力验证变为本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "未发送",
+     "raw_text": "通知处于未发送状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-015",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报名成功",
+   "to": "结果待提交",
+   "action": "能力验证预通知",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于报名成功状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名成功"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为结果待提交"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e15；③；两流程共用（19.1/19.3能力验证预通知行同落点）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名成功",
+     "raw_text": "报名记录处于报名成功状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-016",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "报名中",
+   "to": "进行中",
+   "action": "能力验证预通知",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "项目处于报名中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为进行中（推断）"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e16；③；19.3枚举含'进行中'，19.1实施阶段自预通知起进入参加者测试，项目状态列此后未再标注，据阶段语义补链；能力验证分支（与T-065待开始变为进行中分立）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报名中",
+     "raw_text": "项目处于报名中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-017",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": "待核查",
+   "to": "已核查",
+   "action": "样品核查",
+   "role": "样品制备人员",
+   "preconditions": [
+    {
+     "text": "样品处于待核查状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "待核查"
+     }
+    },
+    {
+     "text": "报名记录处于结果待提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果待提交"
+     }
+    }
+   ],
+   "expected_results": [
+    "样品状态变为已核查",
+    "生成核查记录表"
+   ],
+   "risk_traits": [
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e17；③；跨主体门禁落state_ref（流程表样品核查行报名记录状态列'结果待提交'驻留值门禁）；留痕要求：核查记录表；两流程共用"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-YP",
+     "dimension": "样品状态",
+     "state": "待核查",
+     "raw_text": "样品处于待核查状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果待提交",
+     "raw_text": "报名记录处于结果待提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-018",
+   "entity": "E-BMJL",
+   "dimension": "报名记录样品状态",
+   "from": null,
+   "to": "待发样",
+   "action": "样品核查",
+   "role": "样品制备人员",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果待提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果待提交"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录样品状态初始化为待发样"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e18；⓪创建转换；本维度创建转换即样品核查行'已核查、待发样'顿号快照的第二落点（逐值登记）；维度初值=待发样；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-YP",
+     "target_dimension": "样品状态",
+     "effect_desc": "报名记录样品状态初始化为待发样"
+    }
+   ],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果待提交",
+     "raw_text": "报名记录处于结果待提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-019",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "待确认",
+   "to": "已确认",
+   "action": "接收能力验证计划并确认",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "通知处于待确认状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "待确认"
+     }
+    }
+   ],
+   "expected_results": [
+    "通知状态变为已确认"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.4能力验证参加者工作流程分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e19；③；能力验证分支（action/role/来源19.4均能力验证专属），落点值取19.1/19.3样品发放行预通知状态列'已确认'，动作短语取19.4参加者流程；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "待确认",
+     "raw_text": "通知处于待确认状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-020",
+   "entity": "E-BMJL",
+   "dimension": "报名记录样品状态",
+   "from": "待发样",
+   "to": "待收样",
+   "action": "样品发放,作业指导书发送",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录样品处于待发样状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录样品状态",
+      "state": "待发样"
+     }
+    },
+    {
+     "text": "通知处于已确认状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "已确认"
+     }
+    }
+   ],
+   "expected_results": [
+    "样品发出，报名记录样品状态变为待收样",
+    "记录快递单号或者软件访问路径",
+    "短信通知：您xxxx项目的样品已发出，请知悉"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e20；③；能力验证分支（source_ref仅19.1流程表，无19.2证据，测量审核侧无独立样品发放转换），跨维度门禁：19.1样品发放行预通知状态列'已确认'（通知状态）落state_ref；歧义：原文列值'已发样'与枚举值'待收样'同节点两口径并列取枚举"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-YP",
+     "target_dimension": "样品状态",
+     "effect_desc": "样品发出，报名记录样品状态变为待收样"
+    },
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "短信通知：您xxxx项目的样品已发出，请知悉"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录样品状态",
+     "state": "待发样",
+     "raw_text": "报名记录样品处于待发样状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "已确认",
+     "raw_text": "通知处于已确认状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-021",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果待提交",
+   "to": "结果已提交",
+   "action": "参加者测试与结果提交",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果待提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果待提交"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为结果已提交",
+    "提交测试结果、报名表盖章版"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1实施阶段；19.3项目状态分析",
+   "note": {
+    "comment": "源自e21；③；测量审核行action为'参加者测试与结果提交，返样'，同节点并列口径；样品侧落点分立见T-022/T-023/T-024"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果待提交",
+     "raw_text": "报名记录处于结果待提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-022",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": "已核查",
+   "to": "已还样",
+   "action": "参加者测试与结果提交",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "样品处于已核查状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "已核查"
+     }
+    },
+    {
+     "text": "还样情况=已还样",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "样品归还后状态变为已还样，待复核"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "还样情况",
+    "comment": "源自e22；序判④，语义forward（还样复核循环），语义优先；路径分歧：已还样分支，Step2 value=已还样变为本条；19.1表格'已还样、待核查'快照限定词'已还样'立为独立状态（与首次待核查区分），复核落点见T-028；还样情况维度名为语义命名，分支值取表格原文；19.4'归还样品：参加者归还样品'; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "还样情况",
+     "value": "已还样"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-YP",
+     "dimension": "样品状态",
+     "state": "已核查",
+     "raw_text": "样品处于已核查状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-YP",
+     "name": "还样情况"
+    },
+    "value": "已还样"
+   }
+  },
+  {
+   "id": "T-023",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": "已核查",
+   "to": "已核查",
+   "action": "参加者测试与结果提交",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "样品处于已核查状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "已核查"
+     }
+    },
+    {
+     "text": "还样情况=无需还样",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "无需还样，样品状态保持已核查"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "branch_dimension": "还样情况",
+    "inferred": true,
+    "comment": "源自e23；⑤自环forward＋inferred；路径分歧：无需还样分支，Step2 value=无需还样变为本条; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": true,
+   "repeat_condition": "参加者测试与结果提交 源自e23；⑤自环forward＋inferred；路径分歧：无需还样分支，Step2 value=无需还样变为本条 无需还样，样品状态保持已核查",
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "还样情况",
+     "value": "无需还样"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-YP",
+     "dimension": "样品状态",
+     "state": "已核查",
+     "raw_text": "样品处于已核查状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-YP",
+     "name": "还样情况"
+    },
+    "value": "无需还样"
+   }
+  },
+  {
+   "id": "T-024",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": "已核查",
+   "to": "已还样",
+   "action": "参加者测试与结果提交，返样",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "样品处于已核查状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "已核查"
+     }
+    }
+   ],
+   "expected_results": [
+    "返样后样品状态变为已还样，待复核"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e24；序判④，语义forward（返样复核循环），语义优先；测量审核分支（与T-022能力验证已还样分支同落点）；19.3返样行'待核查'按'已还样'立态（返样待复核，与首次待核查区分），复核落点T-028"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-YP",
+     "dimension": "样品状态",
+     "state": "已核查",
+     "raw_text": "样品处于已核查状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-025",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果已提交",
+   "to": "结果已提交",
+   "action": "结果报告回收",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    },
+    {
+     "text": "测试结果审核=通过",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "测试报告审核通过，结果保持已提交"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析",
+   "note": {
+    "branch_dimension": "测试结果审核",
+    "inferred": true,
+    "comment": "源自e25；⑤自环forward＋inferred；路径分歧：通过分支，Step2 value=通过变为本条；原文'结果已提交/结果退回修改'斜杠或值逐值拆行；两流程共用; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": true,
+   "repeat_condition": "结果报告回收 源自e25；⑤自环forward＋inferred；路径分歧：通过分支，Step2 value=通过变为本条；原文'结果已提交/结果退回修改'斜杠或值逐值拆行；两流程共用 测试报告审核通",
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "测试结果审核",
+     "value": "通过"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-BMJL",
+     "name": "测试结果审核"
+    },
+    "value": "通过"
+   }
+  },
+  {
+   "id": "T-026",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果已提交",
+   "to": "结果退回修改",
+   "action": "结果报告回收",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    },
+    {
+     "text": "测试结果审核=退回",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "测试报告审核未通过，结果退回修改",
+    "短信通知：您xxxx项目测试报告审核未通过，请知悉"
+   ],
+   "risk_traits": [
+    "branch",
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知",
+   "note": {
+    "branch_dimension": "测试结果审核",
+    "comment": "源自e26；③；路径分歧：退回分支，Step2 value=退回变为本条；退回后重新提交见T-027；两流程共用; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "短信通知：您xxxx项目测试报告审核未通过，请知悉"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "测试结果审核",
+     "value": "退回"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-BMJL",
+     "name": "测试结果审核"
+    },
+    "value": "退回"
+   }
+  },
+  {
+   "id": "T-027",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果退回修改",
+   "to": "结果已提交",
+   "action": "重新提交结果",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果退回修改状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果退回修改"
+     }
+    }
+   ],
+   "expected_results": [
+    "重新提交后结果已提交（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1报告编制和结果通知",
+   "note": {
+    "inferred": true,
+    "comment": "源自e27；序判④，语义forward（退回修改后重新提交），语义优先；据20.5.3.2测试结果审核通过/退回循环及'结果已提交/结果退回修改'并列口径补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果退回修改",
+     "raw_text": "报名记录处于结果退回修改状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-028",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": "已还样",
+   "to": "已核查",
+   "action": "结果报告回收",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "样品处于已还样状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "已还样"
+     }
+    }
+   ],
+   "expected_results": [
+    "回收复核后样品状态变为已核查"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "comment": "源自e28；③；测量审核结果报告回收行样品状态列'已核查'（已还样复核）；能力验证同行列空缺，按平行流程共用"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-YP",
+     "dimension": "样品状态",
+     "state": "已还样",
+     "raw_text": "样品处于已还样状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-029",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报名待审核",
+   "to": "已撤销",
+   "action": "撤销报名",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录处于报名待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名待审核"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为已撤销（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "inferred": true,
+    "comment": "源自e29；③；报名行'报名待审核/已撤销'斜杠分支值'已撤销'，原文无显式动作短语，按语义补最小链"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名待审核",
+     "raw_text": "报名记录处于报名待审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-030",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报名退回",
+   "to": "报名待审核",
+   "action": "重新提交报名",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录处于报名退回状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名退回"
+     }
+    }
+   ],
+   "expected_results": [
+    "重新提交后回到报名待审核（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.1实施阶段",
+   "note": {
+    "inferred": true,
+    "comment": "源自e30；序判④，语义forward（退回修改后重新提交进入审核），语义优先；报名退回无出边，按图完整性补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报名退回",
+     "raw_text": "报名记录处于报名退回状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-031",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": null,
+   "to": "待评价",
+   "action": "选择评价人员",
+   "role": "项目管理员",
+   "preconditions": [],
+   "expected_results": [
+    "评价任务初始化为待评价（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.7.1.2协同评价",
+   "note": {
+    "inferred": true,
+    "comment": "源自e31；⓪创建转换；'新建项目时项目管理员可以选择评价人员'，评价任务随评价人员选择初始化为待评价；联动XC XC-002（E-XM待开始变为E-PJ待评价）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-032[a]",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": "待评价",
+   "to": "评价中",
+   "action": "评价人员评价 [评分方式=分值]",
+   "role": "评价人员",
+   "preconditions": [
+    {
+     "text": "评价处于待评价状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-PJ",
+      "dimension": "评价状态",
+      "state": "待评价"
+     }
+    },
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    },
+    {
+     "text": "评价组长已完善测试项目及评价细则",
+     "type": "event_ref",
+     "ref": null
+    },
+    {
+     "text": "评分方式=分值",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "评价状态变为评价中",
+    "若评分方式=分值，则按累加计算得分",
+    "若评分方式=权重，则按加权计算得分"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.7.1.2协同评价；20.7.1项目列表",
+   "note": {
+    "branch_dimension": "评分方式",
+    "comment": "源自e32；③；跨主体门禁落state_ref；结果差异型：评分方式分值/权重路径与落点相同共用本条，expected_results逐值若句式；event_ref为一次性完成信号（完善评价细则）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "评分方式",
+     "value": "分值"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-PJ",
+     "dimension": "评价状态",
+     "state": "待评价",
+     "raw_text": "评价处于待评价状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "unparsed",
+    "text": "评分方式=分值",
+    "reason": "type 未实现(v1)"
+   }
+  },
+  {
+   "id": "T-032[b]",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": "待评价",
+   "to": "评价中",
+   "action": "评价人员评价 [评分方式=权重]",
+   "role": "评价人员",
+   "preconditions": [
+    {
+     "text": "评价处于待评价状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-PJ",
+      "dimension": "评价状态",
+      "state": "待评价"
+     }
+    },
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    },
+    {
+     "text": "评价组长已完善测试项目及评价细则",
+     "type": "event_ref",
+     "ref": null
+    },
+    {
+     "text": "评分方式=权重",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "评价状态变为评价中",
+    "若评分方式=分值，则按累加计算得分",
+    "若评分方式=权重，则按加权计算得分"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.7.1.2协同评价；20.7.1项目列表",
+   "note": {
+    "branch_dimension": "评分方式",
+    "comment": "源自e32；③；跨主体门禁落state_ref；结果差异型：评分方式分值/权重路径与落点相同共用本条，expected_results逐值若句式；event_ref为一次性完成信号（完善评价细则）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "评分方式",
+     "value": "权重"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-PJ",
+     "dimension": "评价状态",
+     "state": "待评价",
+     "raw_text": "评价处于待评价状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "unparsed",
+    "text": "评分方式=权重",
+    "reason": "type 未实现(v1)"
+   }
+  },
+  {
+   "id": "T-033",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": "评价中",
+   "to": "评价中",
+   "action": "提交评价结果",
+   "role": "评价人员",
+   "preconditions": [
+    {
+     "text": "评价处于评价中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-PJ",
+      "dimension": "评价状态",
+      "state": "评价中"
+     }
+    }
+   ],
+   "expected_results": [
+    "点击提交结果，评价分数记录到系统"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.7.1.2协同评价",
+   "note": {
+    "inferred": true,
+    "comment": "源自e33；⑤自环forward＋inferred；确定按钮提交本人评价结果，状态停留评价中；评价人员只能对自己的评价结果进行修改（BR-016）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": true,
+   "repeat_condition": "提交评价结果 源自e33；⑤自环forward＋inferred；确定按钮提交本人评价结果，状态停留评价中；评价人员只能对自己的评价结果进行修改（BR-016） 点击提交结果，评价分数记录到系统",
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-PJ",
+     "dimension": "评价状态",
+     "state": "评价中",
+     "raw_text": "评价处于评价中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-034",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": "评价中",
+   "to": "已关闭",
+   "action": "确认评价结果",
+   "role": "评价组长",
+   "preconditions": [
+    {
+     "text": "评价处于评价中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-PJ",
+      "dimension": "评价状态",
+      "state": "评价中"
+     }
+    }
+   ],
+   "expected_results": [
+    "点击后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭"
+   ],
+   "risk_traits": [
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.7.1.3评价确认",
+   "note": {
+    "comment": "源自e34；③；落点'已关闭'据'项目评价状态关闭'语义命名（维度inferred成对标注）；关键操作留痕（BR-027）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "点击后将当前结果正式提交为项目的最终评价结果，项目评价状态关闭"
+    }
+   ],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-PJ",
+     "dimension": "评价状态",
+     "state": "评价中",
+     "raw_text": "评价处于评价中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-035",
+   "entity": "E-PJ",
+   "dimension": "评价状态",
+   "from": "评价中",
+   "to": "评价中",
+   "action": "退回修改",
+   "role": "评价组长",
+   "preconditions": [
+    {
+     "text": "评价处于评价中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-PJ",
+      "dimension": "评价状态",
+      "state": "评价中"
+     }
+    }
+   ],
+   "expected_results": [
+    "点击后将当前评价结果保存为历史结果，并开启下一轮评价"
+   ],
+   "risk_traits": [
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.7.1.3评价确认",
+   "note": {
+    "inferred": true,
+    "comment": "源自e35；⑤自环forward＋inferred；开启下一轮评价，状态停留评价中"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": true,
+   "repeat_condition": "退回修改 源自e35；⑤自环forward＋inferred；开启下一轮评价，状态停留评价中 点击后将当前评价结果保存为历史结果，并开启下一轮评价",
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-PJ",
+     "dimension": "评价状态",
+     "state": "评价中",
+     "raw_text": "评价处于评价中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-036",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果已提交",
+   "to": "报告/证书审核中",
+   "action": "编制结果报告",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    }
+   ],
+   "expected_results": [
+    "报告、结果通知编制，报名记录状态变为报告/证书审核中"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1报告编制和结果通知",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e36；③；能力验证分支（与T-066编制结果通知单分立），Step2 value=能力验证变为本条"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-037",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "进行中",
+   "to": "报告审核中",
+   "action": "编制结果报告",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "项目处于进行中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "进行中"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为报告审核中（推断）"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e37；③；19.3枚举含'报告审核中'，与报告编制审核阶段（技术主管审核、授权签字人批准）对应，据枚举与阶段语义补链；能力验证分支（与T-067分立）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "进行中",
+     "raw_text": "项目处于进行中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-038",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "报告/证书审核中",
+   "to": "报告/证书已发布",
+   "action": "发放结果报告和证书",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "报名记录处于报告/证书审核中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报告/证书审核中"
+     }
+    },
+    {
+     "text": "审核任务处于审批通过状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-TASK",
+      "dimension": "任务状态",
+      "state": "审批通过"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录状态变为报告/证书已发布",
+    "发放结果报告和证书",
+    "短信通知：您xxx项目的结果通知单已发布，请知悉"
+   ],
+   "risk_traits": [
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知",
+   "note": {
+    "comment": "源自e38；③；跨主体门禁落state_ref（技术主管审核与授权签字人/实验室负责人批准任务完成，19.1'技术主管审核，授权签字人批准…项目管理员发放结果通知单和证书'）；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-XM",
+     "target_dimension": "通知状态",
+     "effect_desc": "短信通知：您xxx项目的结果通知单已发布，请知悉"
+    }
+   ],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "报告/证书审核中",
+     "raw_text": "报名记录处于报告/证书审核中状态",
+     "pattern": "p1_inherited"
+    },
+    {
+     "entity": "E-TASK",
+     "dimension": "任务状态",
+     "state": "审批通过",
+     "raw_text": "审核任务处于审批通过状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-039",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "报告审核中",
+   "to": "已结束",
+   "action": "发放结果报告和证书",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "项目处于报告审核中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报告审核中"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为已结束（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析",
+   "note": {
+    "inferred": true,
+    "comment": "源自e39；③；19.3枚举'已结束'与流程终点对应，20.5.1.1已结束项目可文件整理，据枚举与阶段语义补链；两流程共用"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报告审核中",
+     "raw_text": "项目处于报告审核中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-040",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": null,
+   "to": "报名中",
+   "action": "受理用户测量审核报名",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "实验室处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "测量审核项目创建，项目状态为报名中"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e40；⓪创建转换；测量审核分支（先受理报名后立项，与T-001分立），Step2 value=测量审核变为本条；预通知状态出生点=项目创建（19.3测量审核流无'能力验证计划发布'宿主动作，镜像T-007能力验证面的初始化声明），作业指导书编制（T-046）前置'未发送'由本条建立"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "启用",
+     "raw_text": "实验室处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-041",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": null,
+   "to": "报名待审核",
+   "action": "受理用户测量审核报名",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "实验室处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "报名记录创建，状态为报名待审核",
+    "生成报名表"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e41；⓪创建转换；跨主体门禁落state_ref；测量审核分支（与T-003报名分立），Step2 value=测量审核变为本条；§5修复C08同族自报：本条不携E-XM state_ref前置系诚实建模——测量审核流程中受理报名为首个动作，E-XM.项目状态'报名中'由同动作T-040（E-XM 初始变为报名中）建立，动作前项目尚不存在（19.3枚举无'初始'值），加门禁将时序倒置；父实体绑定由T-040/T-041同动作共创建承载，与T-003前置门禁同为组合归属表达"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "启用",
+     "raw_text": "实验室处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-042",
+   "entity": "E-BMJL",
+   "dimension": "费用状态",
+   "from": null,
+   "to": "待缴费",
+   "action": "受理用户测量审核报名",
+   "role": "项目管理员",
+   "preconditions": [],
+   "expected_results": [
+    "费用状态初始化为待缴费"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e42；⓪创建转换；e41同动作拆行（一动作多状态面），测量审核分支"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-043",
+   "entity": "E-BMJL",
+   "dimension": "发票状态",
+   "from": null,
+   "to": "待开票",
+   "action": "受理用户测量审核报名",
+   "role": "项目管理员",
+   "preconditions": [],
+   "expected_results": [
+    "发票状态初始化为待开票"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e43；⓪创建转换；e41同动作拆行（一动作多状态面），测量审核分支"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-044",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "报名中",
+   "to": "待开始",
+   "action": "设计方案编制",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "项目处于报名中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为待开始"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e44；序判④，语义forward（测量审核先受理报名后方案设计立项），语义优先；测量审核分支"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "报名中",
+     "raw_text": "项目处于报名中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-045",
+   "entity": "E-YP",
+   "dimension": "样品状态",
+   "from": null,
+   "to": "待核查",
+   "action": "样品领用登记",
+   "role": "样品管理员",
+   "preconditions": [],
+   "expected_results": [
+    "样品领用出库登记，样品状态为待核查"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e45；⓪创建转换；测量审核分支（库存领用，与T-012样品制备分立）；12样品管理员'样品出入库登记和管理'"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-046",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "未发送",
+   "to": "待审核",
+   "action": "作业指导书编制",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "通知处于未发送状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "未发送"
+     }
+    }
+   ],
+   "expected_results": [
+    "作业指导书/预通知编制完成，提交审核，通知状态变为待审核（推断）",
+    "生成作业指导书"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "未发送",
+     "raw_text": "通知处于未发送状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-047",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "待审核",
+   "to": "已审核",
+   "action": "审核预通知",
+   "role": "技术主管",
+   "preconditions": [
+    {
+     "text": "通知处于待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "待审核"
+     }
+    },
+    {
+     "text": "通知审核结果=通过",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "预通知审核通过，通知状态变为已审核（推断）"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析；7技术主管",
+   "note": {
+    "branch_dimension": "通知审核结果",
+    "inferred": true,
+    "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过变为本条；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "通知审核结果",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "待审核",
+     "raw_text": "通知处于待审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-XM",
+     "name": "通知审核结果"
+    },
+    "value": "通过"
+   }
+  },
+  {
+   "id": "T-048",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "待审核",
+   "to": "退回",
+   "action": "退回预通知",
+   "role": "技术主管",
+   "preconditions": [
+    {
+     "text": "通知处于待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "待审核"
+     }
+    },
+    {
+     "text": "通知审核结果=退回",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "预通知审核退回，通知状态变为退回（推断）"
+   ],
+   "risk_traits": [
+    "branch",
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "通知审核结果",
+    "inferred": true,
+    "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回变为本条；退回后修改重提见T-049；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "通知审核结果",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "待审核",
+     "raw_text": "通知处于待审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-XM",
+     "name": "通知审核结果"
+    },
+    "value": "退回"
+   }
+  },
+  {
+   "id": "T-049",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "退回",
+   "to": "待审核",
+   "action": "修改预通知",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "通知处于退回状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "退回"
+     }
+    }
+   ],
+   "expected_results": [
+    "修改后重新提交审核（推断）"
+   ],
+   "risk_traits": [
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "inferred": true,
+    "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "退回",
+     "raw_text": "通知处于退回状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-050",
+   "entity": "E-XM",
+   "dimension": "通知状态",
+   "from": "已审核",
+   "to": "待确认",
+   "action": "能力验证预通知",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "通知处于已审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "已审核"
+     }
+    }
+   ],
+   "expected_results": [
+    "预通知发送，通知状态变为待确认"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与T-014未发送变为待确认分立，同action不同frm）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "通知状态",
+     "state": "已审核",
+     "raw_text": "通知处于已审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-051",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": null,
+   "to": "待审核",
+   "action": "机构新增实验室信息",
+   "role": "公众客户",
+   "preconditions": [],
+   "expected_results": [
+    "实验室信息提交，状态为待审核"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.3.1实验室信息",
+   "note": {
+    "comment": "源自e51；⓪创建转换；动作短语保留原文主语线索'机构新增实验室信息'；审核通过后方可用于项目报名（BR-002/T-003/T-041门禁）"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-052",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "启用",
+   "to": "待审核",
+   "action": "机构修改实验室信息",
+   "role": "公众客户",
+   "preconditions": [
+    {
+     "text": "实验室处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "修改提交后重新进入审核（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.3.1实验室信息；20.4.1.3实验室修改",
+   "note": {
+    "comment": "源自e52；序判④，语义forward（修改后重新进入审核），语义优先；'机构新增/修改实验室信息后需经管理用户审核通过后方可用于项目报名'"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "启用",
+     "raw_text": "实验室处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-053",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "退回修改",
+   "to": "待审核",
+   "action": "机构修改实验室信息",
+   "role": "公众客户",
+   "preconditions": [
+    {
+     "text": "实验室处于退回修改状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "退回修改"
+     }
+    }
+   ],
+   "expected_results": [
+    "修改重提后进入待审核（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.3.1实验室信息；20.4.1.3实验室修改",
+   "note": {
+    "inferred": true,
+    "comment": "源自e53；序判④，语义forward（退回后修改重提），语义优先；审核循环闭合补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "退回修改",
+     "raw_text": "实验室处于退回修改状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-054",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "待审核",
+   "to": "启用",
+   "action": "实验室审核",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "实验室处于待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "待审核"
+     }
+    },
+    {
+     "text": "审核结果=通过",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "实验室状态变更为'启用'",
+    "如果审核结果为通过，为当前数据生成该数据的快照记录"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.4.1.2实验室审核",
+   "note": {
+    "branch_dimension": "审核结果",
+    "comment": "源自e54；③；路径分歧：通过分支，Step2 value=通过变为本条；原文'使用人员'按模块归属系统管理人员；关键操作留痕; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "审核结果",
+     "value": "通过"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "待审核",
+     "raw_text": "实验室处于待审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-LAB",
+     "name": "审核结果"
+    },
+    "value": "通过"
+   }
+  },
+  {
+   "id": "T-055",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "待审核",
+   "to": "退回修改",
+   "action": "实验室审核",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "实验室处于待审核状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "待审核"
+     }
+    },
+    {
+     "text": "审核结果=退回修改",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "实验室状态变更为'退回修改'，必须填写'审核意见'"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit",
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.4.1.2实验室审核",
+   "note": {
+    "branch_dimension": "审核结果",
+    "comment": "源自e55；③；路径分歧：退回修改分支，Step2 value=退回修改变为本条；歧义：原文落点'已退回'与20.3.1枚举'退回修改'两口径并列取枚举；退回后修改重提见T-053; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "审核结果",
+     "value": "退回修改"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "待审核",
+     "raw_text": "实验室处于待审核状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-LAB",
+     "name": "审核结果"
+    },
+    "value": "退回修改"
+   }
+  },
+  {
+   "id": "T-056",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "启用",
+   "to": "停用",
+   "action": "停用实验室",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "实验室处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "停用（启用状态显示）按钮，状态立即改变为停用"
+   ],
+   "risk_traits": [],
+   "direction": "lateral",
+   "priority": "P1",
+   "source_ref": "20.4.1.1实验室列表与查询",
+   "note": {
+    "comment": "源自e56；②to为侧挂状态（停用）变为lateral"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "启用",
+     "raw_text": "实验室处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-057",
+   "entity": "E-LAB",
+   "dimension": "实验室状态",
+   "from": "停用",
+   "to": "启用",
+   "action": "启用实验室",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "实验室处于停用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "停用"
+     }
+    }
+   ],
+   "expected_results": [
+    "启用（停用状态显示）按钮，状态立即改变为启用"
+   ],
+   "risk_traits": [],
+   "direction": "resume",
+   "priority": "P1",
+   "source_ref": "20.4.1.1实验室列表与查询",
+   "note": {
+    "comment": "源自e57；②frm为侧挂状态（停用）变为resume"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-LAB",
+     "dimension": "实验室状态",
+     "state": "停用",
+     "raw_text": "实验室处于停用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-058",
+   "entity": "E-BZ",
+   "dimension": "标准库状态",
+   "from": null,
+   "to": "启用",
+   "action": "新增标准库",
+   "role": "系统管理人员",
+   "preconditions": [],
+   "expected_results": [
+    "点击提交表单，创建标准库，状态为表单所选值（启用/停用）"
+   ],
+   "risk_traits": [
+    "form_selected_state"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.4.2.2新增标准库",
+   "note": {
+    "comment": "源自e58；⓪创建转换；表单状态单选含启用/停用（必填），缺省取启用，停用创建为表单分支差异经属性承载；form_selected_state=创建转换的目标状态由表单所选值决定，S1 不合成'状态转换为{to}'硬断言"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-059",
+   "entity": "E-BZ",
+   "dimension": "标准库状态",
+   "from": "启用",
+   "to": "停用",
+   "action": "停用标准库",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "标准库处于启用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BZ",
+      "dimension": "标准库状态",
+      "state": "启用"
+     }
+    }
+   ],
+   "expected_results": [
+    "确认后状态立即改变为停用，列表刷新"
+   ],
+   "risk_traits": [],
+   "direction": "lateral",
+   "priority": "P1",
+   "source_ref": "20.4.2.5停用/启用标准库",
+   "note": {
+    "comment": "源自e59；②to为侧挂状态（停用）变为lateral；停用的标准库在项目创建等环节不可被选择（BR-004）"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BZ",
+     "dimension": "标准库状态",
+     "state": "启用",
+     "raw_text": "标准库处于启用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-060",
+   "entity": "E-BZ",
+   "dimension": "标准库状态",
+   "from": "停用",
+   "to": "启用",
+   "action": "启用标准库",
+   "role": "系统管理人员",
+   "preconditions": [
+    {
+     "text": "标准库处于停用状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BZ",
+      "dimension": "标准库状态",
+      "state": "停用"
+     }
+    }
+   ],
+   "expected_results": [
+    "确认后状态立即改变为启用，列表刷新"
+   ],
+   "risk_traits": [],
+   "direction": "resume",
+   "priority": "P1",
+   "source_ref": "20.4.2.5停用/启用标准库",
+   "note": {
+    "comment": "源自e60；②frm为侧挂状态（停用）变为resume"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BZ",
+     "dimension": "标准库状态",
+     "state": "停用",
+     "raw_text": "标准库处于停用状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-061",
+   "entity": "E-TASK",
+   "dimension": "任务状态",
+   "from": null,
+   "to": "待审批",
+   "action": "生成审核任务",
+   "role": "system",
+   "preconditions": [],
+   "expected_results": [
+    "用户通过表单或审核一个已存在的任务，生成一个新的审核任务",
+    "系统发送短信通知相关负责人：您有一个新的xxx审核任务，请及时处理"
+   ],
+   "risk_traits": [
+    "audit"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.9.1.3增加任务提醒",
+   "note": {
+    "comment": "源自e61；⓪创建转换；系统自动生成（role=system）；流程处理人审批顺序为提交申请时签字人的选择顺序（BR-019）；任务创建短信提醒见BR-018"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-062",
+   "entity": "E-TASK",
+   "dimension": "任务状态",
+   "from": "待审批",
+   "to": "审批通过",
+   "action": "批量审核",
+   "role": [
+    "技术主管",
+    "授权签字人",
+    "实验室负责人",
+    "审核人员"
+   ],
+   "preconditions": [
+    {
+     "text": "任务处于待审批状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-TASK",
+      "dimension": "任务状态",
+      "state": "待审批"
+     }
+    },
+    {
+     "text": "审核结果=同意",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "点击进行批量审核操作，所选任务审批通过（推断）"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit",
+    "data_constraint"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "20.9.1.4任务批量处理",
+   "note": {
+    "branch_dimension": "审核结果",
+    "comment": "源自e62；③；路径分歧：同意分支，Step2 value=同意变为本条；data_constraint：系统会根据任务节点的类型及内容判断当前节点是否可以被批量处理；多执行者写role列表（collaborative）; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "审核结果",
+     "value": "同意"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-TASK",
+     "dimension": "任务状态",
+     "state": "待审批",
+     "raw_text": "任务处于待审批状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-TASK",
+     "name": "审核结果"
+    },
+    "value": "同意"
+   }
+  },
+  {
+   "id": "T-063",
+   "entity": "E-TASK",
+   "dimension": "任务状态",
+   "from": "待审批",
+   "to": "审批退回",
+   "action": "批量审核",
+   "role": [
+    "技术主管",
+    "授权签字人",
+    "实验室负责人",
+    "审核人员"
+   ],
+   "preconditions": [
+    {
+     "text": "任务处于待审批状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-TASK",
+      "dimension": "任务状态",
+      "state": "待审批"
+     }
+    },
+    {
+     "text": "审核结果=退回",
+     "type": "constraint",
+     "ref": null
+    }
+   ],
+   "expected_results": [
+    "点击进行批量审核操作，所选任务审批退回（推断）"
+   ],
+   "risk_traits": [
+    "branch",
+    "audit",
+    "rollback",
+    "data_constraint"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.9.1.4任务批量处理",
+   "note": {
+    "branch_dimension": "审核结果",
+    "comment": "源自e63；③；路径分歧：退回分支，Step2 value=退回变为本条；退回后重新提交见T-064; 分支无实质差异(单组合)"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "审核结果",
+     "value": "退回"
+    }
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-TASK",
+     "dimension": "任务状态",
+     "state": "待审批",
+     "raw_text": "任务处于待审批状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": {
+    "type": "field_equals",
+    "field": {
+     "entity": "E-TASK",
+     "name": "审核结果"
+    },
+    "value": "退回"
+   }
+  },
+  {
+   "id": "T-064",
+   "entity": "E-TASK",
+   "dimension": "任务状态",
+   "from": "审批退回",
+   "to": "待审批",
+   "action": "重新提交任务",
+   "role": [
+    "策划人员",
+    "项目管理员"
+   ],
+   "preconditions": [
+    {
+     "text": "任务处于审批退回状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-TASK",
+      "dimension": "任务状态",
+      "state": "审批退回"
+     }
+    }
+   ],
+   "expected_results": [
+    "修改后重新提交审批（推断）"
+   ],
+   "risk_traits": [
+    "rollback"
+   ],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "20.9.1.4任务批量处理",
+   "note": {
+    "inferred": true,
+    "comment": "源自e64；序判④，语义forward（退回后修改重提），语义优先；审批循环闭合补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [],
+   "precondition_state_refs": [
+    {
+     "entity": "E-TASK",
+     "dimension": "任务状态",
+     "state": "审批退回",
+     "raw_text": "任务处于审批退回状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-065",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "待开始",
+   "to": "进行中",
+   "action": "能力验证预通知",
+   "role": "项目管理员",
+   "preconditions": [
+    {
+     "text": "项目处于待开始状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "待开始"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为进行中（推断）"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e65；③；测量审核分支（实施阶段开始，与T-016报名中变为进行中分立，同action不同frm）；19.3枚举含'进行中'，据阶段语义补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "待开始",
+     "raw_text": "项目处于待开始状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-066",
+   "entity": "E-BMJL",
+   "dimension": "报名记录状态",
+   "from": "结果已提交",
+   "to": "报告/证书审核中",
+   "action": "编制结果通知单",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "报名记录处于结果已提交状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    }
+   ],
+   "expected_results": [
+    "结果通知单编制，报名记录状态变为报告/证书审核中"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "comment": "源自e66；③；测量审核分支（与T-036编制结果报告分立），Step2 value=测量审核变为本条"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录状态",
+     "state": "结果已提交",
+     "raw_text": "报名记录处于结果已提交状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-067",
+   "entity": "E-XM",
+   "dimension": "项目状态",
+   "from": "进行中",
+   "to": "报告审核中",
+   "action": "编制结果通知单",
+   "role": "策划人员",
+   "preconditions": [
+    {
+     "text": "项目处于进行中状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "进行中"
+     }
+    }
+   ],
+   "expected_results": [
+    "项目状态变为报告审核中（推断）"
+   ],
+   "risk_traits": [
+    "branch"
+   ],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e67；③；测量审核分支（与T-037分立）；19.3枚举含'报告审核中'，据枚举与阶段语义补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "测量审核"
+    }
+   ],
+   "branch_values": [
+    "测量审核"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-XM",
+     "dimension": "项目状态",
+     "state": "进行中",
+     "raw_text": "项目处于进行中状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-068",
+   "entity": "E-BMJL",
+   "dimension": "报名记录样品状态",
+   "from": "待收样",
+   "to": "已收样",
+   "action": "接收样品",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录样品处于待收样状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录样品状态",
+      "state": "待收样"
+     }
+    }
+   ],
+   "expected_results": [
+    "参加者接收样品，状态变为已收样（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P0",
+   "source_ref": "19.4能力验证参加者工作流程分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e68；③；能力验证分支（role/来源19.4均能力验证专属），19.4参加者流程'接收样品：参加者接收样品'，19.3枚举含'已收样'，补链"
+   },
+   "coverage_priority": "high",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [
+    {
+     "target_entity": "E-YP",
+     "target_dimension": "样品状态",
+     "effect_desc": "参加者接收样品，状态变为已收样（推断）"
+    }
+   ],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录样品状态",
+     "state": "待收样",
+     "raw_text": "报名记录样品处于待收样状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  },
+  {
+   "id": "T-069",
+   "entity": "E-BMJL",
+   "dimension": "报名记录样品状态",
+   "from": "已收样",
+   "to": "已确认",
+   "action": "确认收样",
+   "role": "能力验证参加者",
+   "preconditions": [
+    {
+     "text": "报名记录样品处于已收样状态",
+     "type": "state_ref",
+     "ref": {
+      "entity": "E-BMJL",
+      "dimension": "报名记录样品状态",
+      "state": "已收样"
+     }
+    }
+   ],
+   "expected_results": [
+    "收样确认后状态变为已确认（推断）"
+   ],
+   "risk_traits": [],
+   "direction": "forward",
+   "priority": "P1",
+   "source_ref": "19.3项目状态分析",
+   "note": {
+    "branch_dimension": "项目类型",
+    "inferred": true,
+    "comment": "源自e69；③；能力验证分支（role=能力验证参加者），19.3枚举'已确认'为报名记录样品状态终值，与预通知确认机制对齐，收样确认补链"
+   },
+   "coverage_priority": "critical",
+   "is_repeatable": false,
+   "repeat_condition": null,
+   "side_effects": [],
+   "branch_path": [
+    {
+     "dimension": "项目类型",
+     "value": "能力验证"
+    }
+   ],
+   "branch_values": [
+    "能力验证"
+   ],
+   "precondition_state_refs": [
+    {
+     "entity": "E-BMJL",
+     "dimension": "报名记录样品状态",
+     "state": "已收样",
+     "raw_text": "报名记录样品处于已收样状态",
+     "pattern": "p1_inherited"
+    }
+   ],
+   "constraint_predicate": null
+  }
+ ],
+ "cross_entity_obligations": [
+  {
+   "id": "CO-001",
+   "type": "cross_entity",
+   "constraint_id": null,
+   "causal_type": "auto",
+   "enabler_entity": "E-BMJL",
+   "enabler_dimension": "报名记录状态",
+   "enabler_state": "报名待审核",
+   "enabler_transition_id": "T-003",
+   "enabler_role": "能力验证参加者",
+   "dependent_entity": "E-JFTZ",
+   "dependent_transition_id": "T-006",
+   "dependent_dimension": "缴费通知单状态",
+   "dependent_condition": "未发送",
+   "dependent_role": null,
+   "aggregation": null,
+   "ref_to": null,
+   "trigger": "报名记录创建/报名审核通过后缴费通知单自动初始化与发送",
+   "trigger_source": "expected_results",
+   "rollback_propagation": false,
+   "confidence": "high",
+   "desc": "报名记录创建后系统自动初始化缴费通知单为未发送；报名审核通过后系统自动发送缴费通知单",
+   "coverage_priority": "medium",
+   "suggested_action": "对E-JFTZ执行使其缴费通知单状态由None变为未发送的操作",
+   "merged_from": [],
+   "source_ref": "19.1实施阶段"
+  },
+  {
+   "id": "CO-002",
+   "type": "cross_entity",
+   "constraint_id": "XC-002",
+   "causal_type": "auto",
+   "enabler_entity": "E-XM",
+   "enabler_dimension": "项目状态",
+   "enabler_state": "待开始",
+   "enabler_transition_id": "T-001",
+   "enabler_role": "策划人员",
+   "dependent_entity": "E-PJ",
+   "dependent_transition_id": "T-031",
+   "dependent_dimension": "评价状态",
+   "dependent_condition": "待评价",
+   "dependent_role": "项目管理员",
+   "aggregation": null,
+   "ref_to": null,
+   "trigger": null,
+   "trigger_source": null,
+   "rollback_propagation": false,
+   "confidence": "high",
+   "desc": "联动: T-001新建项目时项目管理员选择评价人员，联动初始化评价任务为待评价",
+   "coverage_priority": "critical",
+   "suggested_action": "对E-PJ执行使其进入待评价状态的操作",
+   "merged_from": [],
+   "source_ref": "20.7.1.2协同评价"
+  },
+  {
+   "id": "CO-003",
+   "type": "cross_entity",
+   "constraint_id": null,
+   "causal_type": "lifecycle",
+   "enabler_entity": "E-BMJL",
+   "enabler_dimension": "报名记录状态",
+   "enabler_state": "报名待审核",
+   "enabler_transition_id": "T-003",
+   "enabler_role": "能力验证参加者",
+   "dependent_entity": "E-JFTZ",
+   "dependent_transition_id": "T-006",
+   "dependent_dimension": "缴费通知单状态",
+   "dependent_condition": "未发送",
+   "dependent_role": null,
+   "aggregation": null,
+   "ref_to": null,
+   "trigger": null,
+   "trigger_source": null,
+   "rollback_propagation": false,
+   "confidence": "high",
+   "desc": "E-BMJL 与 E-JFTZ 生命周期同步",
+   "coverage_priority": "high",
+   "suggested_action": "对E-JFTZ执行使其进入未发送状态的操作",
+   "merged_from": [],
+   "source_ref": null
+  }
+ ],
+ "constraint_obligations": [
+  {
+   "id": "RO-BR-001",
+   "type": "business_rule",
+   "constraint_id": "BR-001",
+   "entities_involved": [
+    "E-TZGG"
+   ],
+   "constrained_entity": "E-TZGG",
+   "category": "display",
+   "restrictive": true,
+   "description": "对新旧通知内容进行区分显示，15天内发布的通知在内容前标注'new'标识，超过15天后此标识自动隐藏",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 对新旧通知内容进行区分显示，15天内发布的通知在内容前标注'new'标识，超过15天后此标识自动隐藏",
+   "source_ref": "20.2.1通知公告"
+  },
+  {
+   "id": "RO-BR-002",
+   "type": "business_rule",
+   "constraint_id": "BR-002",
+   "entities_involved": [
+    "E-LAB",
+    "E-BMJL"
+   ],
+   "constrained_entity": "E-LAB",
+   "category": "validation",
+   "restrictive": true,
+   "description": "机构新增/修改实验室信息后需经管理用户审核通过后方可用于项目报名",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 机构新增/修改实验室信息后需经管理用户审核通过后方可用于项目报名",
+   "source_ref": "20.3.1实验室信息"
+  },
+  {
+   "id": "RO-BR-003",
+   "type": "business_rule",
+   "constraint_id": "BR-003",
+   "entities_involved": [
+    "E-LAB"
+   ],
+   "constrained_entity": "E-LAB",
+   "category": "validation",
+   "restrictive": false,
+   "description": "【确认】按钮提交审核结果，如果审核结果为通过，为当前数据生成该数据的快照记录",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 【确认】按钮提交审核结果，如果审核结果为通过，为当前数据生成该数据的快照记录",
+   "source_ref": "20.4.1.2实验室审核"
+  },
+  {
+   "id": "RO-BR-004",
+   "type": "business_rule",
+   "constraint_id": "BR-004",
+   "entities_involved": [
+    "E-BZ",
+    "E-XM"
+   ],
+   "constrained_entity": "E-BZ",
+   "category": "validation",
+   "restrictive": true,
+   "description": "停用的标准库在项目创建等环节不可被选择",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 停用的标准库在项目创建等环节不可被选择",
+   "source_ref": "20.4.2.5停用/启用标准库"
+  },
+  {
+   "id": "RO-BR-005",
+   "type": "business_rule",
+   "constraint_id": "BR-005",
+   "entities_involved": [
+    "E-BZ"
+   ],
+   "constrained_entity": "E-BZ",
+   "category": "validation",
+   "restrictive": true,
+   "description": "点击【确定】按钮进行删除操作，含有子项的记录不允许删除",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 点击【确定】按钮进行删除操作，含有子项的记录不允许删除",
+   "source_ref": "20.4.2.10删除测试项"
+  },
+  {
+   "id": "RO-BR-006",
+   "type": "business_rule",
+   "constraint_id": "BR-006",
+   "entities_involved": [
+    "E-ZLY"
+   ],
+   "constrained_entity": "E-ZLY",
+   "category": "validation",
+   "restrictive": true,
+   "description": "点击【确定】按钮删除数据，数据删除前会做前置判断，存在子项的数据不可以删除",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 点击【确定】按钮删除数据，数据删除前会做前置判断，存在子项的数据不可以删除",
+   "source_ref": "20.4.3.4删除测试项"
+  },
+  {
+   "id": "RO-BR-007",
+   "type": "business_rule",
+   "constraint_id": "BR-007",
+   "entities_involved": [
+    "E-JL"
+   ],
+   "constrained_entity": "E-JL",
+   "category": "authorization",
+   "restrictive": true,
+   "description": "信息发送记录只有系统管理员和项目管理员可以查看",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 信息发送记录只有系统管理员和项目管理员可以查看",
+   "source_ref": "20.4.4.1信息发送记录"
+  },
+  {
+   "id": "RO-BR-008",
+   "type": "business_rule",
+   "constraint_id": "BR-008",
+   "entities_involved": [
+    "E-XM"
+   ],
+   "constrained_entity": "E-XM",
+   "category": "validation",
+   "restrictive": true,
+   "description": "能力验证消息发送页面接收人1和接收人2不能同时为空",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 能力验证消息发送页面接收人1和接收人2不能同时为空",
+   "source_ref": "20.5.1.4优化消息发送功能"
+  },
+  {
+   "id": "RO-BR-009",
+   "type": "business_rule",
+   "constraint_id": "BR-009",
+   "entities_involved": [
+    "E-XM"
+   ],
+   "constrained_entity": "E-XM",
+   "category": "validation",
+   "restrictive": false,
+   "description": "未结束的项目可以进行消息发送",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 未结束的项目可以进行消息发送",
+   "source_ref": "20.5.1.4优化消息发送功能"
+  },
+  {
+   "id": "RO-BR-010",
+   "type": "business_rule",
+   "constraint_id": "BR-010",
+   "entities_involved": [
+    "E-XM"
+   ],
+   "constrained_entity": "E-XM",
+   "category": "validation",
+   "restrictive": true,
+   "description": "测量审核消息发送页面接收人1必填",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 测量审核消息发送页面接收人1必填",
+   "source_ref": "20.6.1.2优化消息发送功能"
+  },
+  {
+   "id": "RO-BR-011",
+   "type": "business_rule",
+   "constraint_id": "BR-011",
+   "entities_involved": [
+    "E-XM"
+   ],
+   "constrained_entity": "E-XM",
+   "category": "usability",
+   "restrictive": false,
+   "description": "在项目人员信息区域中的技术主管、实验室负责人、授权签字人字段，如果其备选人有且仅有一个时默认填充为备选值",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 在项目人员信息区域中的技术主管、实验室负责人、授权签字人字段，如果其备选人有且仅有一个时默认填充为备选值",
+   "source_ref": "20.5.1.6默认填充技术主管、实验室负责人、授权签字人；20.6.1.4默认填充技术主管、实验室负责人、授权签字人"
+  },
+  {
+   "id": "RO-BR-012",
+   "type": "business_rule",
+   "constraint_id": "BR-012",
+   "entities_involved": [
+    "E-FY"
+   ],
+   "constrained_entity": "E-FY",
+   "category": "validation",
+   "restrictive": false,
+   "description": "修改已报名项目的付款验证，可以多次进行付款操作，不对付款金额进行校验限制",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 修改已报名项目的付款验证，可以多次进行付款操作，不对付款金额进行校验限制",
+   "source_ref": "20.5.2.1已报名项目增加多次付款功能；20.6.2.1已报名项目增加多次付款功能"
+  },
+  {
+   "id": "RO-BR-013",
+   "type": "business_rule",
+   "constraint_id": "BR-013",
+   "entities_involved": [
+    "E-BMJL"
+   ],
+   "constrained_entity": "E-BMJL",
+   "category": "notification",
+   "restrictive": true,
+   "description": "系统在每天上午9点对系统中的证书信息进行查询，如证书距到期时间等于30天则以邮件方式对用户进行提醒，并抄送项目管理员",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 系统在每天上午9点对系统中的证书信息进行查询，如证书距到期时间等于30天则以邮件方式对用户进行提醒，并抄送项目管理员",
+   "source_ref": "20.5.2.3增加证书到期前30天提醒功能；20.6.2.3增加证书到期前30天提醒功能"
+  },
+  {
+   "id": "RO-BR-014",
+   "type": "business_rule",
+   "constraint_id": "BR-014",
+   "entities_involved": [
+    "E-BMJL"
+   ],
+   "constrained_entity": "E-BMJL",
+   "category": "notification",
+   "restrictive": false,
+   "description": "管理用户对报名信息操作后使用短信方式对用户进行通知：报名审核通过/退回修改、样品已发出、测试报告审核通过/未通过、结果通知单已发布节点",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 管理用户对报名信息操作后使用短信方式对用户进行通知：报名审核通过/退回修改、样品已发出、测试报告审核通过/未通过、结果通知单已发布节点",
+   "source_ref": "20.5.3.2操作节点增加用户短信通知；20.6.3.2操作节点增加用户短信通知"
+  },
+  {
+   "id": "RO-BR-015",
+   "type": "business_rule",
+   "constraint_id": "BR-015",
+   "entities_involved": [
+    "E-PJ"
+   ],
+   "constrained_entity": "E-PJ",
+   "category": "computation",
+   "restrictive": false,
+   "description": "评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 评价支持分值和权重两种方式，分值按累加计算得分，权重按加权计算得分",
+   "source_ref": "20.7.1项目列表"
+  },
+  {
+   "id": "RO-BR-016",
+   "type": "business_rule",
+   "constraint_id": "BR-016",
+   "entities_involved": [
+    "E-PJ"
+   ],
+   "constrained_entity": "E-PJ",
+   "category": "authorization",
+   "restrictive": true,
+   "description": "新建项目时项目管理员可以选择评价人员，评价人员只能对自己的评价结果进行修改，不能查看和修改其他评价人员的评价结果",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 新建项目时项目管理员可以选择评价人员，评价人员只能对自己的评价结果进行修改，不能查看和修改其他评价人员的评价结果",
+   "source_ref": "20.7.1.2协同评价"
+  },
+  {
+   "id": "RO-BR-017",
+   "type": "business_rule",
+   "constraint_id": "BR-017",
+   "entities_involved": [
+    "E-PJ"
+   ],
+   "constrained_entity": "E-PJ",
+   "category": "validation",
+   "restrictive": true,
+   "description": "评价完善页面此处只能新增一级测试项目",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 评价完善页面此处只能新增一级测试项目",
+   "source_ref": "20.7.1.1测试项目、评价细则完善"
+  },
+  {
+   "id": "RO-BR-018",
+   "type": "business_rule",
+   "constraint_id": "BR-018",
+   "entities_involved": [
+    "E-TASK"
+   ],
+   "constrained_entity": "E-TASK",
+   "category": "notification",
+   "restrictive": false,
+   "description": "用户通过表单或审核一个已存在的任务生成一个新的审核任务时，系统发送短信通知相关负责人：您有一个新的xxx审核任务，请及时处理",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 用户通过表单或审核一个已存在的任务生成一个新的审核任务时，系统发送短信通知相关负责人：您有一个新的xxx审核任务，请及时处理",
+   "source_ref": "20.9.1.3增加任务提醒"
+  },
+  {
+   "id": "RO-BR-019",
+   "type": "business_rule",
+   "constraint_id": "BR-019",
+   "entities_involved": [
+    "E-TASK"
+   ],
+   "constrained_entity": "E-TASK",
+   "category": "authorization",
+   "restrictive": false,
+   "description": "重构测量审核结果通知单审批流程，将原来多个流程合并为一个流程，并设置流程处理人审批顺序为提交申请时签字人的选择顺序",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 重构测量审核结果通知单审批流程，将原来多个流程合并为一个流程，并设置流程处理人审批顺序为提交申请时签字人的选择顺序",
+   "source_ref": "20.9.1.1测量审核结果通知单审核流程优化"
+  },
+  {
+   "id": "RO-BR-020",
+   "type": "business_rule",
+   "constraint_id": "BR-020",
+   "entities_involved": [
+    "E-TASK"
+   ],
+   "constrained_entity": "E-TASK",
+   "category": "restrictive",
+   "restrictive": true,
+   "description": "系统预设若干自定义流程（4个以内），用于用户选择并提交文档审核的自定义流程，并支持相应的签章",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 系统预设若干自定义流程（4个以内），用于用户选择并提交文档审核的自定义流程，并支持相应的签章",
+   "source_ref": "20.9.1.6增加自定义流程"
+  },
+  {
+   "id": "RO-BR-021",
+   "type": "business_rule",
+   "constraint_id": "BR-021",
+   "entities_involved": [
+    "E-TASK"
+   ],
+   "constrained_entity": "E-TASK",
+   "category": "usability",
+   "restrictive": false,
+   "description": "系统内增加电子签章位置信息，当进行签章操作时自动代入此位置信息减少手动调整操作",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 系统内增加电子签章位置信息，当进行签章操作时自动代入此位置信息减少手动调整操作",
+   "source_ref": "20.9.1.2预置签章位置信息"
+  },
+  {
+   "id": "RO-BR-022",
+   "type": "business_rule",
+   "constraint_id": "BR-022",
+   "entities_involved": [
+    "E-TASK"
+   ],
+   "constrained_entity": "E-TASK",
+   "category": "display",
+   "restrictive": false,
+   "description": "优化审核流程详情的显示效果，在页面上完整展示审核流程，并用不同的颜色对各个状态的节点进行标记",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 优化审核流程详情的显示效果，在页面上完整展示审核流程，并用不同的颜色对各个状态的节点进行标记",
+   "source_ref": "20.9.1.7优化流程信息展示效果"
+  },
+  {
+   "id": "RO-BR-023",
+   "type": "business_rule",
+   "constraint_id": "BR-023",
+   "entities_involved": [
+    "E-FY"
+   ],
+   "constrained_entity": "E-FY",
+   "category": "validation",
+   "restrictive": true,
+   "description": "退款金额必填，不能为大于当前缴费金额",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 退款金额必填，不能为大于当前缴费金额",
+   "source_ref": "20.10.2.3缴费单退款"
+  },
+  {
+   "id": "RO-BR-024",
+   "type": "business_rule",
+   "constraint_id": "BR-024",
+   "entities_involved": [
+    "E-FY"
+   ],
+   "constrained_entity": "E-FY",
+   "category": "computation",
+   "restrictive": false,
+   "description": "退款金额多次退款做累加处理，付款金额-退款金额=实际付款，退款后更新项目费用为实际付款金额",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 退款金额多次退款做累加处理，付款金额-退款金额=实际付款，退款后更新项目费用为实际付款金额",
+   "source_ref": "20.10.2.3缴费单退款"
+  },
+  {
+   "id": "RO-BR-025",
+   "type": "business_rule",
+   "constraint_id": "BR-025",
+   "entities_involved": [
+    "E-BMJL"
+   ],
+   "constrained_entity": "E-BMJL",
+   "category": "restrictive",
+   "restrictive": true,
+   "description": "在网络和服务器正常运行的情况下，平台应支持至少300个同时在线用户数；并发100时，每个页面响应时间不超过5秒；单次报名操作成功率应达到95%以上",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 在网络和服务器正常运行的情况下，平台应支持至少300个同时在线用户数；并发100时，每个页面响应时间不超过5秒；单次报名操作成功率应达到95%以上",
+   "source_ref": "21.3性能要求"
+  },
+  {
+   "id": "RO-BR-026",
+   "type": "business_rule",
+   "constraint_id": "BR-026",
+   "entities_involved": [
+    "E-BZ",
+    "E-ZLY"
+   ],
+   "constrained_entity": "E-BZ",
+   "category": "usability",
+   "restrictive": true,
+   "description": "操作完成时有统一规范的提示信息，例如删除操作时系统可提示警示框'您确认删除记录吗？操作不可恢复！'，用户点击确认后平台才执行删除操作",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 操作完成时有统一规范的提示信息，例如删除操作时系统可提示警示框'您确认删除记录吗？操作不可恢复！'，用户点击确认后平台才执行删除操作",
+   "source_ref": "3.6可用性要求"
+  },
+  {
+   "id": "RO-BR-027",
+   "type": "business_rule",
+   "constraint_id": "BR-027",
+   "entities_involved": [
+    "E-BMJL",
+    "E-YP",
+    "E-PJ",
+    "E-LAB",
+    "E-TASK"
+   ],
+   "constrained_entity": "E-BMJL",
+   "category": "validation",
+   "restrictive": false,
+   "description": "对关键操作进行留痕处理，系统将自动记录操作者的身份、时间戳、操作细节及结果，生成不可篡改的审计日志，确保所有操作均可追踪和复核",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 对关键操作进行留痕处理，系统将自动记录操作者的身份、时间戳、操作细节及结果，生成不可篡改的审计日志，确保所有操作均可追踪和复核",
+   "source_ref": "20.11.1.2安全性相关内容优化；20.11其他"
+  },
+  {
+   "id": "RO-BR-028",
+   "type": "business_rule",
+   "constraint_id": "BR-028",
+   "entities_involved": [
+    "E-YP"
+   ],
+   "constrained_entity": "E-YP",
+   "category": "validation",
+   "restrictive": false,
+   "description": "参加者测试与结果提交节点样品流转分已还样/无需还样两种情形：已还样的样品归还后状态由已核查变为已还样（返样待复核），测量审核经结果报告回收复核转已核查；无需还样的样品不归还、状态保持已核查",
+   "enforcement": "conditional",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证规则约束: 参加者测试与结果提交节点样品流转分已还样/无需还样两种情形：已还样的样品归还后状态由已核查变为已还样（返样待复核），测量审核经结果报告回收复核转已核查；无需还样的样品不归还、状态保持已核查",
+   "source_ref": "19.1实施阶段；19.4能力验证参加者工作流程分析；19.3项目状态分析"
+  },
+  {
+   "id": "RO-BR-029",
+   "type": "business_rule",
+   "constraint_id": "XC-001",
+   "entities_involved": [
+    "E-XM",
+    "E-BMJL"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-001] 报名待审核; 联动: T-002项目进入报名中后联动开启报名记录创建，新记录初始化为报名待审核",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 报名待审核",
+   "source_ref": "19.1实施阶段"
+  },
+  {
+   "id": "RO-BR-030",
+   "type": "business_rule",
+   "constraint_id": "XC-003",
+   "entities_involved": [
+    "E-BMJL",
+    "E-YP"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-003] 状态=待核查; precondition'报名记录处于结果待提交状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=待核查",
+   "source_ref": "19.1实施阶段；19.3项目状态分析"
+  },
+  {
+   "id": "RO-BR-031",
+   "type": "business_rule",
+   "constraint_id": "XC-004",
+   "entities_involved": [
+    "E-XM",
+    "E-BMJL"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-004] 状态=待发样; precondition'通知处于已确认状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=待发样",
+   "source_ref": "19.1实施阶段；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知"
+  },
+  {
+   "id": "RO-BR-032",
+   "type": "business_rule",
+   "constraint_id": "XC-005",
+   "entities_involved": [
+    "E-BMJL",
+    "E-PJ"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-005] 状态=待评价; precondition'报名记录处于结果已提交状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=待评价",
+   "source_ref": "20.7.1.2协同评价；20.7.1项目列表"
+  },
+  {
+   "id": "RO-BR-033",
+   "type": "business_rule",
+   "constraint_id": "XC-006",
+   "entities_involved": [
+    "E-TASK",
+    "E-BMJL"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-006] 状态=报告/证书审核中; precondition'审核任务处于审批通过状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=报告/证书审核中",
+   "source_ref": "19.1报告编制和结果通知；19.3项目状态分析；20.5.3.2操作节点增加用户短信通知"
+  },
+  {
+   "id": "RO-BR-034",
+   "type": "business_rule",
+   "constraint_id": "XC-007",
+   "entities_involved": [
+    "E-LAB",
+    "E-XM"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-007] 状态=None; precondition'实验室处于启用状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=None",
+   "source_ref": "19.3项目状态分析"
+  },
+  {
+   "id": "RO-BR-035",
+   "type": "business_rule",
+   "constraint_id": "XC-008",
+   "entities_involved": [
+    "E-LAB",
+    "E-BMJL"
+   ],
+   "category": "validation",
+   "restrictive": false,
+   "description": "[来源于XC-008] 状态=None; precondition'实验室处于启用状态'",
+   "enforcement": "mandatory",
+   "ref_to_existing_br": null,
+   "coverage_priority": "medium",
+   "suggested_action": "验证跨实体约束: 状态=None",
+   "source_ref": "19.3项目状态分析"
+  }
+ ],
+ "_context": {
+  "source": "P1 v19.2",
+  "generated_at": "2026-09-07T11:12:06.240731+08:00",
+  "p1_meta": {
+   "version": "19.2",
+   "source": "网数中心能力验证服务平台升级维护项目-需求分析与设计1116_2089153243181768704",
+   "document_scope": "§3.2；§3.6；§5–§18；§19.1；§19.2；§19.3；§19.4；§20.2–§20.11；§21.3。平行流程差异说明：§19.1能力验证与§19.2/§19.3测量审核为平行流程，收缩为同一组实体承载，差异经项目类型分支（能力验证/测量审核）与转换分立承载；测量审核预通知含审核环节（待审核/退回/已审核/退回闭环），能力验证预通知未体现审核环节；能力验证样品含还样分支（已还样/无需还样，归还落'已还样'独立状态），测量审核默认返样落'已还样'并于结果报告回收行复核（已还样变为已核查）；测量审核项目先受理报名（报名中）后经设计方案编制转待开始，能力验证项目经设计方案编制创建（待开始）后计划发布转报名中；角色章节§6–§18为正文标题序号；§5修复C32：通知状态（流程表列称'预通知状态'）经19.1首现行'能力验证计划发布'（行3，值未发送）判定为项目级状态面，承载实体由E-BMJL迁至E-XM，创建转换t07动作锚定'能力验证计划发布'",
+   "has_critical_ambiguity": false,
+   "consistency_check": "warnings",
+   "ambiguity_list": [
+    {
+     "amb_id": "AMB-FIX-001",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-003（源自 T-017 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-002",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-004（源自 T-020 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-003",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-005（源自 T-032 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-004",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-006（源自 T-038 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-005",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-007（源自 T-040 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-006",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C04: 补镜像 XC-008（源自 T-041 的跨实体前置条件）",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-007",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-XM.新增项目 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-008",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-XM.删除项目 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-009",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BMJL.修改备注 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-010",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 自动回填 E-YP.样品制备 变为 T-012",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-011",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-YP.出入库登记 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-012",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-PJ.评价 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-013",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-PJ.保存历史 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-014",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-TASK.签章 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-015",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-JFTZ.编制缴费通知 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-016",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-LAB.删除实验室 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-017",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BZ.修改标准库 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-018",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BZ.删除标准库 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-019",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BZ.新增测试项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-020",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BZ.修改测试项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-021",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-BZ.删除测试项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-022",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-ZLY.新增测试项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-023",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-ZLY.删除测试项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-024",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-CYX.另存常用 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-025",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-CYX.删除常用项 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    },
+    {
+     "amb_id": "AMB-FIX-026",
+     "severity": "minor",
+     "concept": "Step6 自动修复",
+     "description": "C12: 未命中候选，自动标注 E-TZGG.维护通知公告 为属性操作",
+     "assumption": "",
+     "suggestion": ""
+    }
+   ],
+   "pipeline_trace": {
+    "step0_events": 69,
+    "step1_entities": [
+     "E-XM",
+     "E-BMJL",
+     "E-YP",
+     "E-PJ",
+     "E-TASK",
+     "E-JFTZ",
+     "E-FY",
+     "E-LAB",
+     "E-BZ",
+     "E-ZLY",
+     "E-CYX",
+     "E-TZGG",
+     "E-JL"
+    ],
+    "step2_structural_relations": 9,
+    "step3_branch_dimensions": 8,
+    "step3_branch_tt_backfilled": 16,
+    "step3_branch_tt_deviations": 0,
+    "step4_transitions": 69,
+    "step4_transition_relations": 1,
+    "step4_roles": 19,
+    "step4_precondition_stats": {
+     "total_preconditions": 79,
+     "state_ref_count": 66,
+     "event_ref_count": 1,
+     "constraint_count": 12,
+     "state_ref_resolved_count": 66,
+     "state_ref_unresolved_count": 0
+    },
+    "step5_invalid_transitions": 0,
+    "step5_cross_entity": 8,
+    "step5_business_rules": 28
+   }
+  },
+  "branch_dimensions": [
+   {
+    "dimension": "项目类型",
+    "entity": "E-XM",
+    "values": [
+     "能力验证",
+     "测量审核"
+    ],
+    "impact_scope": "E-XM.项目状态、E-BMJL.报名记录状态、E-XM.通知状态、E-YP.样品状态路径分立",
+    "evidence": "③；隐式分支：19.1能力验证与19.3测量审核平行流程表格列体现，20.8.3.1项目类型下拉选项'能力验证、测量审核'命名",
+    "branches": [
+     {
+      "value": "能力验证",
+      "target_transition": "T-001"
+     },
+     {
+      "value": "测量审核",
+      "target_transition": "T-040"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-001",
+      "T-003",
+      "T-004",
+      "T-005",
+      "T-012",
+      "T-014",
+      "T-016",
+      "T-019",
+      "T-020",
+      "T-024",
+      "T-036",
+      "T-037",
+      "T-040",
+      "T-041",
+      "T-042",
+      "T-043",
+      "T-044",
+      "T-045",
+      "T-046",
+      "T-050",
+      "T-065",
+      "T-066",
+      "T-067",
+      "T-068",
+      "T-069"
+     ],
+     "cross_entity": [
+      "XC-002",
+      "XC-004"
+     ],
+     "business_rules": [
+      "BR-008",
+      "BR-010"
+     ]
+    },
+    "affected_obligations": [
+     "T-001",
+     "T-002",
+     "T-003",
+     "T-004",
+     "T-005",
+     "T-012",
+     "T-014",
+     "T-016",
+     "T-019",
+     "T-020",
+     "T-024",
+     "T-028",
+     "T-036",
+     "T-037",
+     "T-040",
+     "T-041",
+     "T-042",
+     "T-043",
+     "T-044",
+     "T-045",
+     "T-046",
+     "T-049",
+     "T-050",
+     "T-065",
+     "T-066",
+     "T-067",
+     "T-068",
+     "T-069"
+    ]
+   },
+   {
+    "dimension": "报名审核结果",
+    "entity": "E-BMJL",
+    "values": [
+     "通过",
+     "退回修改"
+    ],
+    "impact_scope": "E-BMJL.报名记录状态报名审核落点分立（报名成功/报名退回）",
+    "evidence": "②；运行时选择型：20.5.3.2报名审核短信节点'通过/退回修改'命名",
+    "branches": [
+     {
+      "value": "通过",
+      "target_transition": "T-008"
+     },
+     {
+      "value": "退回修改",
+      "target_transition": "T-009"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-008",
+      "T-009"
+     ],
+     "cross_entity": [],
+     "business_rules": [
+      "BR-014"
+     ]
+    },
+    "affected_obligations": [
+     "T-008",
+     "T-009"
+    ]
+   },
+   {
+    "dimension": "测试结果审核",
+    "entity": "E-BMJL",
+    "values": [
+     "通过",
+     "退回"
+    ],
+    "impact_scope": "E-BMJL.报名记录状态结果报告回收落点分立（自环/结果退回修改）",
+    "evidence": "②；运行时选择型：20.5.3.2测试结果审核节点'通过/退回'命名",
+    "branches": [
+     {
+      "value": "通过",
+      "target_transition": "T-025"
+     },
+     {
+      "value": "退回",
+      "target_transition": "T-026"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-025",
+      "T-026"
+     ],
+     "cross_entity": [],
+     "business_rules": [
+      "BR-014"
+     ]
+    },
+    "affected_obligations": [
+     "T-025",
+     "T-026"
+    ]
+   },
+   {
+    "dimension": "还样情况",
+    "entity": "E-YP",
+    "values": [
+     "已还样",
+     "无需还样"
+    ],
+    "impact_scope": "E-YP.样品状态参加者测试落点分立（已还样/已核查自环）",
+    "evidence": "③；隐式分支：19.1参加者测试与结果提交行样品状态列斜杠'已还样、待核查/无需还样'，维度名为语义命名，分支值取表格原文",
+    "branches": [
+     {
+      "value": "已还样",
+      "target_transition": "T-022"
+     },
+     {
+      "value": "无需还样",
+      "target_transition": "T-023"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-022",
+      "T-023"
+     ],
+     "cross_entity": [],
+     "business_rules": [
+      "BR-028"
+     ]
+    },
+    "affected_obligations": [
+     "T-022",
+     "T-023"
+    ]
+   },
+   {
+    "dimension": "审核结果",
+    "entity": "E-LAB",
+    "values": [
+     "通过",
+     "退回修改"
+    ],
+    "impact_scope": "E-LAB.实验室状态审核落点分立（启用/退回修改）",
+    "evidence": "②；运行时选择型：20.4.1.2审核结果单选框'通过/退回修改'",
+    "branches": [
+     {
+      "value": "通过",
+      "target_transition": "T-054"
+     },
+     {
+      "value": "退回修改",
+      "target_transition": "T-055"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-054",
+      "T-055"
+     ],
+     "cross_entity": [
+      "XC-007",
+      "XC-008"
+     ],
+     "business_rules": [
+      "BR-003",
+      "BR-019"
+     ]
+    },
+    "affected_obligations": [
+     "T-054",
+     "T-055",
+     "T-062",
+     "T-063"
+    ]
+   },
+   {
+    "dimension": "通知审核结果",
+    "entity": "E-XM",
+    "values": [
+     "通过",
+     "退回"
+    ],
+    "impact_scope": "E-XM.通知状态预通知审核落点分立（已审核/退回）",
+    "evidence": "③；隐式分支：19.3作业指导书行预通知状态列'待审核/退回/已审核'斜杠取值维度体现；§5修复C32：维度随E-XM.通知状态迁项目级",
+    "branches": [
+     {
+      "value": "通过",
+      "target_transition": "T-047"
+     },
+     {
+      "value": "退回",
+      "target_transition": "T-048"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-047",
+      "T-048"
+     ],
+     "cross_entity": [],
+     "business_rules": [
+      "BR-014"
+     ]
+    },
+    "affected_obligations": [
+     "T-047",
+     "T-048"
+    ]
+   },
+   {
+    "dimension": "评分方式",
+    "entity": "E-XM",
+    "values": [
+     "分值",
+     "权重"
+    ],
+    "impact_scope": "E-PJ.评价状态评价计算结果差异（路径与落点相同，共用转换，expected_results若句式承载）",
+    "evidence": "①；配置型：创建时定、互斥、影响后续计算，20.7.1.2项目信息含评分方式字段，20.7.1'支持分值和权重两种评价方式'",
+    "branches": [
+     {
+      "value": "分值",
+      "target_transition": "T-032"
+     },
+     {
+      "value": "权重",
+      "target_transition": "T-032"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-032"
+     ],
+     "cross_entity": [],
+     "business_rules": [
+      "BR-015"
+     ]
+    },
+    "affected_obligations": [
+     "T-032[a]",
+     "T-032[b]"
+    ]
+   },
+   {
+    "dimension": "审核结果",
+    "entity": "E-TASK",
+    "values": [
+     "同意",
+     "退回"
+    ],
+    "impact_scope": "E-TASK.任务状态批量审核落点分立（审批通过/审批退回）",
+    "evidence": "②；运行时选择型：20.9.1.4审核结果下拉'同意、退回'",
+    "branches": [
+     {
+      "value": "同意",
+      "target_transition": "T-062"
+     },
+     {
+      "value": "退回",
+      "target_transition": "T-063"
+     }
+    ],
+    "coverage": {
+     "transitions": [
+      "T-062",
+      "T-063"
+     ],
+     "cross_entity": [
+      "XC-006"
+     ],
+     "business_rules": [
+      "BR-003",
+      "BR-019"
+     ]
+    },
+    "affected_obligations": [
+     "T-054",
+     "T-055",
+     "T-062",
+     "T-063"
+    ]
+   }
+  ],
+  "transition_splits": {
+   "T-032": [
+    "T-032[a]",
+    "T-032[b]"
+   ]
+  },
+  "structural_relations": [
+   {
+    "from": "E-XM",
+    "to": "E-BMJL",
+    "relation_type": "composition",
+    "cardinality": "1:N",
+    "ownership_dimension": "business_ownership",
+    "desc": "项目为报名记录的业务归属容器：项目发布后参加者报名生成报名记录，每条报名记录隶属于一个项目",
+    "confidence": "high",
+    "note": {
+     "comment": "判定(c)：报名记录有独立创建流程（报名/受理用户测量审核报名），为core流程实体且dependent成立（缴费通知单/缴费单随记录建立，见19.3列结构与20.10缴费信息）；management_dimension复核：报名记录由项目管理员维护跟踪（10项目管理员'对用户报名记录状态、用户缴费情况等进行的维护与跟踪'）；§5修复C08：组合判定维持（修法a）——E-BMJL创建转换T-003已携指向父实体E-XM的state_ref前置（E-XM.项目状态=报名中，端点由E-PJ同步更正见T-003 note），E-LAB.启用为第三方参与资格门禁，仅约束哪些实验室可报名，不影响项目对报名记录的业务归属"
+    }
+   },
+   {
+    "from": "E-BMJL",
+    "to": "E-JFTZ",
+    "relation_type": "composition",
+    "cardinality": "1:1",
+    "ownership_dimension": "business_ownership",
+    "desc": "报名记录创建后系统自动初始化缴费通知单，每条报名记录必有缴费通知单",
+    "confidence": "high",
+    "note": {
+     "comment": "判定(b)：缴费通知单无独立创建，随报名记录自动入initial（未发送）；判(b)且1:1，复核'每条A必有B'成立；management_dimension：缴费通知单发送状态由系统维护"
+    }
+   },
+   {
+    "from": "E-BMJL",
+    "to": "E-FY",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "缴费单记录参加者的付款，支持多次付款，可能永不创建",
+    "confidence": "medium",
+    "note": {
+     "comment": "判定(d)：缴费单有独立创建前提（缴费动作）且可能永不创建，不满足(c)（managed非core）；management_dimension：付款/退款由参加者录入、财务人员退款维护"
+    }
+   },
+   {
+    "from": "E-XM",
+    "to": "E-YP",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "样品随项目实施制备/领用并发放至参加实验室，业务上隶属项目批次",
+    "confidence": "medium",
+    "note": {
+     "comment": "判定(d)：样品有独立创建流程（样品制备/样品领用登记），因E-YP的dependent未获文档直写按三步判定②降(d)＋medium；management_dimension：样品由样品制备人员/样品管理员管理（11/12）"
+    }
+   },
+   {
+    "from": "E-XM",
+    "to": "E-PJ",
+    "relation_type": "reference",
+    "cardinality": "1:1",
+    "ownership_dimension": "configuration_source",
+    "desc": "新建项目时选择评价人员生成评价，评价隶属项目，多轮评价经历史结果承载",
+    "confidence": "medium",
+    "note": {
+     "comment": "判定(d)：评价有独立创建流程（选择评价人员），因E-PJ的dependent未获文档直写按三步判定②降(d)＋medium；management_dimension：评价由评价组长确认维护（20.7.1.3）"
+    }
+   },
+   {
+    "from": "E-BZ",
+    "to": "E-XM",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "标准库为项目检测项目录入提供测试项选择来源，项目独立创建",
+    "confidence": "high",
+    "note": {
+     "comment": "判定(a)：标准库为项目提供配置/模板（测试项），项目独立创建；management_dimension：标准库由系统管理人员维护（20.4.2）"
+    }
+   },
+   {
+    "from": "E-BZ",
+    "to": "E-ZLY",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "子领域测试项管理由表单方式变更为选择方式，选择数据来源于标准库",
+    "confidence": "high",
+    "note": {
+     "comment": "判定(a)：标准库为子领域提供测试项配置来源，子领域独立存在；management_dimension：子领域测试项由系统管理人员维护（20.4.3）"
+    }
+   },
+   {
+    "from": "E-LAB",
+    "to": "E-BMJL",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "实验室（机构）为报名的发起主体，每条报名记录关联一个实验室",
+    "confidence": "high",
+    "note": {
+     "comment": "判定(d)：实验室仅为报名记录的发起人/持有人，按'A仅为B发起人降(d)'；management_dimension：实验室信息由公众客户维护、系统管理人员审核"
+    }
+   },
+   {
+    "from": "E-YP",
+    "to": "E-BMJL",
+    "relation_type": "reference",
+    "cardinality": "1:N",
+    "ownership_dimension": "configuration_source",
+    "desc": "样品经核查后发放至报名记录对应的参加实验室（待发样变为待收样）",
+    "confidence": "medium",
+    "note": {
+     "comment": "判定(d)：样品与报名记录为发放关联，报名记录独立创建且可能不涉及样品（无需还样）；management_dimension：发样由项目管理员执行、接收由参加者确认"
+    }
+   }
+  ],
+  "transition_relations": [
+   {
+    "from": "E-BMJL",
+    "to": "E-JFTZ",
+    "desc": "报名记录创建后系统自动初始化缴费通知单为未发送；报名审核通过后系统自动发送缴费通知单",
+    "trigger": "报名记录创建/报名审核通过后缴费通知单自动初始化与发送",
+    "trigger_source": "expected_results",
+    "evidence_transitions": [
+     "T-003",
+     "T-008",
+     "T-006",
+     "T-010"
+    ],
+    "rollback_propagation": false,
+    "confidence": "high",
+    "note": {
+     "comment": "流程表'缴费通知单'列明写：报名行=未发送、报名审核行=已发送；门禁对照：'审核通过后方可缴费'不写因果（Y需操作且precondition已表达）"
+    }
+   }
+  ],
+  "state_info": {
+   "E-XM": {
+    "entity_name": "项目",
+    "dimensions": [
+     {
+      "dimension_name": "项目状态",
+      "states": [
+       "待开始",
+       "报名中",
+       "进行中",
+       "报告审核中",
+       "已结束"
+      ],
+      "initial": "待开始",
+      "terminal": [
+       "已结束"
+      ],
+      "phase_mapping": {
+       "待开始": 0,
+       "报名中": 1,
+       "进行中": 2,
+       "报告审核中": 3,
+       "已结束": 4
+      },
+      "phase_mapping_by_branch": {
+       "能力验证": {
+        "待开始": 0,
+        "报名中": 1,
+        "进行中": 2,
+        "报告审核中": 3,
+        "已结束": 4
+       },
+       "测量审核": {
+        "报名中": 0,
+        "待开始": 1,
+        "进行中": 2,
+        "报告审核中": 3,
+        "已结束": 4
+       }
+      }
+     },
+     {
+      "dimension_name": "通知状态",
+      "states": [
+       "未发送",
+       "待确认",
+       "待审核",
+       "退回",
+       "已审核",
+       "已批准",
+       "已确认"
+      ],
+      "initial": "未发送",
+      "terminal": [
+       "已确认"
+      ],
+      "phase_mapping": {
+       "未发送": 0,
+       "待确认": 1,
+       "待审核": 2,
+       "退回": 3,
+       "已审核": 4,
+       "已批准": 5,
+       "已确认": 6
+      },
+      "phase_mapping_by_branch": {
+       "能力验证": {
+        "未发送": 0,
+        "待确认": 1,
+        "已确认": 2,
+        "待审核": 0,
+        "退回": 0,
+        "已审核": 0,
+        "已批准": 0
+       },
+       "测量审核": {
+        "未发送": 0,
+        "待确认": 1,
+        "待审核": 2,
+        "退回": 3,
+        "已审核": 4,
+        "已批准": 5,
+        "已确认": 6
+       }
+      }
+     }
+    ]
+   },
+   "E-BMJL": {
+    "entity_name": "报名记录",
+    "dimensions": [
+     {
+      "dimension_name": "报名记录状态",
+      "states": [
+       "报名待审核",
+       "报名退回",
+       "报名成功",
+       "结果待提交",
+       "结果已提交",
+       "结果退回修改",
+       "报告/证书审核中",
+       "报告/证书已发布",
+       "已撤销"
+      ],
+      "initial": "报名待审核",
+      "terminal": [
+       "报告/证书已发布",
+       "已撤销"
+      ],
+      "phase_mapping": {
+       "报名待审核": 0,
+       "报名退回": 1,
+       "报名成功": 2,
+       "结果待提交": 3,
+       "结果已提交": 4,
+       "结果退回修改": 5,
+       "报告/证书审核中": 6,
+       "报告/证书已发布": 7,
+       "已撤销": 7
+      }
+     },
+     {
+      "dimension_name": "报名记录样品状态",
+      "states": [
+       "待发样",
+       "待收样",
+       "已收样",
+       "已确认"
+      ],
+      "initial": "待发样",
+      "terminal": [
+       "已确认"
+      ],
+      "phase_mapping": {
+       "待发样": 0,
+       "待收样": 1,
+       "已收样": 2,
+       "已确认": 3
+      }
+     },
+     {
+      "dimension_name": "费用状态",
+      "states": [
+       "待缴费",
+       "已缴费"
+      ],
+      "initial": "待缴费",
+      "terminal": [
+       "已缴费"
+      ],
+      "phase_mapping": {
+       "待缴费": 0,
+       "已缴费": 1
+      }
+     },
+     {
+      "dimension_name": "发票状态",
+      "states": [
+       "待开票",
+       "已开票"
+      ],
+      "initial": "待开票",
+      "terminal": [
+       "已开票"
+      ],
+      "phase_mapping": {
+       "待开票": 0,
+       "已开票": 1
+      }
+     }
+    ]
+   },
+   "E-YP": {
+    "entity_name": "样品",
+    "dimensions": [
+     {
+      "dimension_name": "样品状态",
+      "states": [
+       "待核查",
+       "已核查",
+       "已还样"
+      ],
+      "initial": "待核查",
+      "terminal": [],
+      "phase_mapping": {
+       "待核查": 0,
+       "已核查": 1,
+       "已还样": 2
+      }
+     }
+    ]
+   },
+   "E-PJ": {
+    "entity_name": "评价",
+    "dimensions": [
+     {
+      "dimension_name": "评价状态",
+      "states": [
+       "待评价",
+       "评价中",
+       "已关闭"
+      ],
+      "initial": "待评价",
+      "terminal": [
+       "已关闭"
+      ],
+      "phase_mapping": {
+       "待评价": 0,
+       "评价中": 1,
+       "已关闭": 2
+      }
+     }
+    ]
+   },
+   "E-TASK": {
+    "entity_name": "审核任务",
+    "dimensions": [
+     {
+      "dimension_name": "任务状态",
+      "states": [
+       "待审批",
+       "审批通过",
+       "审批退回"
+      ],
+      "initial": "待审批",
+      "terminal": [
+       "审批通过"
+      ],
+      "phase_mapping": {
+       "待审批": 0,
+       "审批通过": 3,
+       "审批退回": 2
+      }
+     }
+    ]
+   },
+   "E-JFTZ": {
+    "entity_name": "缴费通知单",
+    "dimensions": [
+     {
+      "dimension_name": "缴费通知单状态",
+      "states": [
+       "未发送",
+       "已发送"
+      ],
+      "initial": "未发送",
+      "terminal": [
+       "已发送"
+      ],
+      "phase_mapping": {
+       "未发送": 0,
+       "已发送": 1
+      }
+     }
+    ]
+   },
+   "E-FY": {
+    "entity_name": "缴费单",
+    "dimensions": []
+   },
+   "E-LAB": {
+    "entity_name": "实验室",
+    "dimensions": [
+     {
+      "dimension_name": "实验室状态",
+      "states": [
+       "待审核",
+       "启用",
+       "停用",
+       "退回修改"
+      ],
+      "initial": "待审核",
+      "terminal": [],
+      "phase_mapping": {
+       "待审核": 0,
+       "启用": 1,
+       "停用": 2,
+       "退回修改": 3
+      }
+     }
+    ]
+   },
+   "E-BZ": {
+    "entity_name": "标准库",
+    "dimensions": [
+     {
+      "dimension_name": "标准库状态",
+      "states": [
+       "启用",
+       "停用"
+      ],
+      "initial": "启用",
+      "terminal": [],
+      "phase_mapping": {
+       "启用": 0,
+       "停用": 0
+      }
+     }
+    ]
+   },
+   "E-ZLY": {
+    "entity_name": "子领域",
+    "dimensions": []
+   },
+   "E-CYX": {
+    "entity_name": "常用测试项",
+    "dimensions": []
+   },
+   "E-TZGG": {
+    "entity_name": "通知公告",
+    "dimensions": []
+   },
+   "E-JL": {
+    "entity_name": "信息发送记录",
+    "dimensions": []
+   }
+  },
+  "roles": [
+   {
+    "id": "r01",
+    "name": "公众客户",
+    "readonly": false
+   },
+   {
+    "id": "r02",
+    "name": "超级管理员",
+    "readonly": false
+   },
+   {
+    "id": "r03",
+    "name": "项目管理员",
+    "readonly": false
+   },
+   {
+    "id": "r04",
+    "name": "评价人员",
+    "readonly": false
+   },
+   {
+    "id": "r05",
+    "name": "审核人员",
+    "readonly": false
+   },
+   {
+    "id": "r06",
+    "name": "财务人员",
+    "readonly": false
+   },
+   {
+    "id": "r07",
+    "name": "实验室负责人",
+    "readonly": false
+   },
+   {
+    "id": "r08",
+    "name": "技术主管",
+    "readonly": false
+   },
+   {
+    "id": "r09",
+    "name": "授权签字人",
+    "readonly": false
+   },
+   {
+    "id": "r10",
+    "name": "策划人员",
+    "readonly": false
+   },
+   {
+    "id": "r11",
+    "name": "样品制备人员",
+    "readonly": false
+   },
+   {
+    "id": "r12",
+    "name": "样品管理员",
+    "readonly": false
+   },
+   {
+    "id": "r13",
+    "name": "统计人员",
+    "readonly": false
+   },
+   {
+    "id": "r14",
+    "name": "质量专员",
+    "readonly": true
+   },
+   {
+    "id": "r15",
+    "name": "财务管理人员",
+    "readonly": false
+   },
+   {
+    "id": "r16",
+    "name": "系统管理人员",
+    "readonly": false
+   },
+   {
+    "id": "r17",
+    "name": "能力验证参加者",
+    "readonly": false
+   },
+   {
+    "id": "r18",
+    "name": "监督员",
+    "readonly": true
+   },
+   {
+    "id": "r19",
+    "name": "评价组长",
+    "readonly": false
+   }
+  ],
+  "entity_details": [
+   {
+    "id": "E-XM",
+    "name": "项目",
+    "type": "core",
+    "desc": "能力验证/测量审核项目载体，承载项目状态流转、项目级预通知状态、评价、报告与证书发放",
+    "attributes": [
+     {
+      "name": "项目类型",
+      "desc": "能力验证/测量审核（20.8.3.1项目类型选项）",
+      "is_config": false
+     },
+     {
+      "name": "产品类型",
+      "desc": "下拉选项为系统内所有的产品信息（20.8.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "项目名称",
+      "desc": "项目名称（20.8.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "子领域",
+      "desc": "项目所属子领域（20.7.1.2）",
+      "is_config": false
+     },
+     {
+      "name": "评分方式",
+      "desc": "支持分值和权重两种评价方式（20.7.1）",
+      "is_config": true
+     },
+     {
+      "name": "依据标准",
+      "desc": "项目依据标准（20.7.1.2）",
+      "is_config": false
+     },
+     {
+      "name": "监督员",
+      "desc": "项目新增表单新增监督员字段，导出项目通知书时填充到对应位置（20.5.1.5）",
+      "is_config": false
+     },
+     {
+      "name": "技术主管",
+      "desc": "项目人员信息字段，备选人有且仅有一个时默认填充（20.5.1.6）",
+      "is_config": false
+     },
+     {
+      "name": "实验室负责人",
+      "desc": "项目人员信息字段，备选人有且仅有一个时默认填充（20.5.1.6）",
+      "is_config": false
+     },
+     {
+      "name": "授权签字人",
+      "desc": "项目人员信息字段，备选人有且仅有一个时默认填充（20.5.1.6）",
+      "is_config": false
+     },
+     {
+      "name": "项目费用",
+      "desc": "项目费用金额，退款后更新为实际付款金额（20.8.4.1；20.10.2.3）",
+      "is_config": false
+     },
+     {
+      "name": "所属年度",
+      "desc": "项目所属年度（20.8.3.1）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-BMJL",
+    "name": "报名记录",
+    "type": "core",
+    "desc": "参加者对项目的报名记录，承载报名审核、结果提交、报告/证书发布、费用与发票、样品物流（预通知确认状态面经§5修复C32迁E-XM项目级）",
+    "attributes": [
+     {
+      "name": "报名编号",
+      "desc": "报名记录编号（20.8.3.2）",
+      "is_config": false
+     },
+     {
+      "name": "统一社会信用代码",
+      "desc": "报名实验室统一社会信用代码（20.8.3.2）",
+      "is_config": false
+     },
+     {
+      "name": "实验室名称",
+      "desc": "报名实验室名称（20.8.3.2）",
+      "is_config": false
+     },
+     {
+      "name": "行政区划",
+      "desc": "报名实验室行政区划（20.8.3.2）",
+      "is_config": false
+     },
+     {
+      "name": "报名时间",
+      "desc": "报名时间（20.8.3.2）",
+      "is_config": false
+     },
+     {
+      "name": "评价得分",
+      "desc": "评价得分（20.8.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "评价结果",
+      "desc": "评价结果（20.8.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "证书编号",
+      "desc": "证书编号（20.8.4.1；20.11.1.1）",
+      "is_config": false
+     },
+     {
+      "name": "证书时间",
+      "desc": "证书时间（20.11.1.1）",
+      "is_config": false
+     },
+     {
+      "name": "财务备注",
+      "desc": "财务备注字段，管理人员可修改备注内容（20.10.2.1）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-YP",
+    "name": "样品",
+    "type": "core",
+    "desc": "能力验证物品/样品及其制备、核查、发放与还样复核",
+    "attributes": []
+   },
+   {
+    "id": "E-PJ",
+    "name": "评价",
+    "type": "core",
+    "desc": "项目评价任务，承载协同评价、评价确认与评价结果导出",
+    "attributes": [
+     {
+      "name": "及格分",
+      "desc": "及格分录入后跟随其他结果一起记录到系统中（20.7.1.3）",
+      "is_config": false
+     },
+     {
+      "name": "统计规则",
+      "desc": "每个统计规则由一个低值、一个高值组成，判断规则为大于等于低值，小于高值（20.7.1.3）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-TASK",
+    "name": "审核任务",
+    "type": "core",
+    "desc": "流程审批任务，覆盖通知/报告/证书等文档审核与批量处理",
+    "attributes": [
+     {
+      "name": "任务类型",
+      "desc": "审核类型名称，如结果通知单审核（20.9.1.3）",
+      "is_config": false
+     },
+     {
+      "name": "创建时间",
+      "desc": "审批流程列表创建时间查询参数（20.9.1.5）",
+      "is_config": false
+     },
+     {
+      "name": "审核意见",
+      "desc": "批量审核表单审核意见，选填（20.9.1.4）",
+      "is_config": false
+     },
+     {
+      "name": "签章位置信息",
+      "desc": "系统内增加电子签章位置信息，签章操作时自动代入（20.9.1.2）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-JFTZ",
+    "name": "缴费通知单",
+    "type": "managed",
+    "desc": "随报名记录自动初始化的缴费通知单，承载发送状态",
+    "attributes": []
+   },
+   {
+    "id": "E-FY",
+    "name": "缴费单",
+    "type": "managed",
+    "desc": "参加者付款记录，支持多次付款与退款冲抵",
+    "attributes": [
+     {
+      "name": "支付方式",
+      "desc": "下拉选择框，必填（20.5.2.1）",
+      "is_config": false
+     },
+     {
+      "name": "支付账户名称",
+      "desc": "文本输入框，必填（20.5.2.1）",
+      "is_config": false
+     },
+     {
+      "name": "汇款金额",
+      "desc": "文本输入框，必填，默认为项目费用金额（20.5.2.1）",
+      "is_config": false
+     },
+     {
+      "name": "付款底单",
+      "desc": "文件选择框，必填（20.5.2.1）",
+      "is_config": false
+     },
+     {
+      "name": "付款项目",
+      "desc": "文本输入框，只读，内容为当前报名编号（20.5.2.1）",
+      "is_config": false
+     },
+     {
+      "name": "退款金额",
+      "desc": "多次退款金额做累加处理，退款金额使用红色字体且大于0时显示（20.10.2.3）",
+      "is_config": false
+     },
+     {
+      "name": "实际付款",
+      "desc": "付款金额-退款金额=实际付款（20.10.2.3）",
+      "is_config": false
+     },
+     {
+      "name": "管理备注",
+      "desc": "用于记录退款原因等内容（20.10.2.3）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-LAB",
+    "name": "实验室",
+    "type": "core",
+    "desc": "机构实验室信息，承载新增/修改送审、审核、停用启用",
+    "attributes": [
+     {
+      "name": "实验室编号",
+      "desc": "文本输入框，模糊查询（20.4.1.1）",
+      "is_config": false
+     },
+     {
+      "name": "实验室名称",
+      "desc": "实验室名称（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "统一社会信用代码",
+      "desc": "统一社会信用代码（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "法人名称",
+      "desc": "法人名称（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "企业类型",
+      "desc": "企业类型（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "企业规模",
+      "desc": "企业规模（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "CNAS",
+      "desc": "已获CNAS认可及证书号（20.4.1.3）",
+      "is_config": false
+     },
+     {
+      "name": "CMA",
+      "desc": "已获CMA认可及证书编号（20.4.1.3）",
+      "is_config": false
+     },
+     {
+      "name": "邮箱",
+      "desc": "邮箱（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "座机号码",
+      "desc": "座机号码（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "地址",
+      "desc": "行政区域、详细地址（20.4.1.3）",
+      "is_config": false
+     },
+     {
+      "name": "联系人",
+      "desc": "联系人（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "联系电话",
+      "desc": "联系电话（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "默认实验室",
+      "desc": "默认实验室标识（20.3.1）",
+      "is_config": false
+     },
+     {
+      "name": "证明文件",
+      "desc": "证明文件表单提示：请上传营业执照或其他证书材料（20.3.1）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-BZ",
+    "name": "标准库",
+    "type": "managed",
+    "desc": "标准集合基础数据，为项目与子领域测试项提供配置来源",
+    "attributes": [
+     {
+      "name": "标准库编号",
+      "desc": "文本输入框，必填（20.4.2.2）",
+      "is_config": false
+     },
+     {
+      "name": "标准库名称",
+      "desc": "文本输入框，必填（20.4.2.2）",
+      "is_config": false
+     },
+     {
+      "name": "描述",
+      "desc": "文本输入框，选填（20.4.2.2）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-ZLY",
+    "name": "子领域",
+    "type": "managed",
+    "desc": "子领域基础数据及其测试项选择管理（由表单方式变更为选择方式，数据来源于标准库）",
+    "attributes": []
+   },
+   {
+    "id": "E-CYX",
+    "name": "常用测试项",
+    "type": "managed",
+    "desc": "用户另存保存的常用测试项/评价细则组合，降低项目录入难度",
+    "attributes": [
+     {
+      "name": "名称",
+      "desc": "常用项名称，文件输入框必填（20.5.1.7）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-TZGG",
+    "name": "通知公告",
+    "type": "managed",
+    "desc": "平台信息发布内容，超级管理员维护，首页区分新旧显示",
+    "attributes": [
+     {
+      "name": "标题",
+      "desc": "通知标题（推断）",
+      "is_config": false
+     },
+     {
+      "name": "内容",
+      "desc": "通知内容（推断）",
+      "is_config": false
+     },
+     {
+      "name": "发布时间",
+      "desc": "15天内发布的通知标注new标识的计时基准（20.2.1）",
+      "is_config": false
+     }
+    ]
+   },
+   {
+    "id": "E-JL",
+    "name": "信息发送记录",
+    "type": "managed",
+    "desc": "系统信息发送历史记录，仅系统管理员和项目管理员可查看",
+    "attributes": [
+     {
+      "name": "接收号码",
+      "desc": "文本输入框，模糊匹配（20.4.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "发送方式",
+      "desc": "下拉选项：短信，邮件，站内信（20.4.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "发送时间",
+      "desc": "时间范围选择框，精确匹配（20.4.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "发送人",
+      "desc": "发送记录内容（20.4.4）",
+      "is_config": false
+     },
+     {
+      "name": "发送结果",
+      "desc": "发送记录内容（20.4.4）",
+      "is_config": false
+     },
+     {
+      "name": "消息标题",
+      "desc": "列表展示字段（20.4.4.1）",
+      "is_config": false
+     },
+     {
+      "name": "消息内容",
+      "desc": "列表展示字段（20.4.4.1）",
+      "is_config": false
+     }
+    ]
+   }
+  ],
+  "prohibition_config": {
+   "action_verbs": [
+    "编制",
+    "发布",
+    "报名",
+    "审核",
+    "审批",
+    "批准",
+    "缴费",
+    "开具",
+    "核查",
+    "发放",
+    "发送",
+    "提交",
+    "回收",
+    "评价",
+    "统计",
+    "确认",
+    "撤销",
+    "停用",
+    "启用",
+    "修改",
+    "删除",
+    "新增",
+    "导入",
+    "整理",
+    "上传",
+    "下载",
+    "导出",
+    "退回",
+    "登记",
+    "制备",
+    "领用",
+    "归还",
+    "接收",
+    "选择",
+    "生成",
+    "归档",
+    "另存",
+    "签章",
+    "填充"
+   ],
+   "prohibit_keywords": [
+    "不能同时为空",
+    "不允许删除",
+    "不可以删除",
+    "不可被选择",
+    "不能大于当前缴费金额",
+    "不能查看和修改其他评价人员的评价结果",
+    "操作不可恢复"
+   ]
+  },
+  "permissions": [
+   {
+    "role": "项目管理员",
+    "operations": [
+     "查询项目",
+     "新增项目",
+     "文件整理",
+     "代码导入",
+     "批量处理",
+     "消息发送",
+     "导出数据",
+     "打包下载",
+     "查询统计数据"
+    ]
+   },
+   {
+    "role": "系统管理人员",
+    "operations": [
+     "查询实验室",
+     "下载证明文件",
+     "查询标准库",
+     "查询信息发送记录",
+     "查看消息详情",
+     "导入历史数据",
+     "查询历史项目"
+    ]
+   },
+   {
+    "role": "能力验证参加者",
+    "operations": [
+     "查询项目",
+     "下载文件",
+     "上传缴费证明",
+     "上传结果报告",
+     "意见反馈"
+    ]
+   },
+   {
+    "role": "评价人员",
+    "operations": [
+     "查询项目",
+     "导出评价结果"
+    ]
+   },
+   {
+    "role": "评价组长",
+    "operations": [
+     "查询项目",
+     "下载历史记录"
+    ]
+   },
+   {
+    "role": "财务人员",
+    "operations": [
+     "查询缴费信息",
+     "导出缴费数据",
+     "查询收入统计"
+    ]
+   },
+   {
+    "role": "财务管理人员",
+    "operations": [
+     "查询缴费信息",
+     "导出缴费数据",
+     "发票下载"
+    ]
+   },
+   {
+    "role": "超级管理员",
+    "operations": [
+     "维护通知公告",
+     "权限分配",
+     "查询信息发送记录"
+    ]
+   },
+   {
+    "role": "统计人员",
+    "operations": [
+     "查询统计数据",
+     "导出统计数据"
+    ]
+   },
+   {
+    "role": "技术主管",
+    "operations": [
+     "查询审核任务",
+     "导出审批列表"
+    ]
+   },
+   {
+    "role": "实验室负责人",
+    "operations": [
+     "查询审核任务"
+    ]
+   },
+   {
+    "role": "授权签字人",
+    "operations": [
+     "查询审核任务",
+     "导出审批列表"
+    ]
+   },
+   {
+    "role": "审核人员",
+    "operations": [
+     "查询审核任务",
+     "导出审批列表"
+    ]
+   },
+   {
+    "role": "策划人员",
+    "operations": [
+     "查询项目",
+     "下载文件"
+    ]
+   },
+   {
+    "role": "样品制备人员",
+    "operations": [
+     "查询样品"
+    ]
+   },
+   {
+    "role": "样品管理员",
+    "operations": [
+     "查询样品",
+     "出入库登记"
+    ]
+   },
+   {
+    "role": "公众客户",
+    "operations": [
+     "查询项目",
+     "浏览通知公告",
+     "意见反馈"
+    ]
+   },
+   {
+    "role": "质量专员",
+    "operations": [
+     "查询统计数据"
+    ]
+   },
+   {
+    "role": "监督员",
+    "operations": []
+   }
+  ],
+  "xc_to_br_mapping": [
+   {
+    "xc_id": "XC-002",
+    "status": "co"
+   },
+   {
+    "xc_id": "XC-001",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-003",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-004",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-005",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-006",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-007",
+    "status": "br"
+   },
+   {
+    "xc_id": "XC-008",
+    "status": "br"
+   }
+  ],
+  "judgments": [
+   {
+    "category": "EO-ATC source_ref",
+    "desc": "EO-ATC-001 P1 属性无 source_ref 字段，透传实体首条操作 source_ref=20.5.1.5项目新增表单增加监督员"
+   },
+   {
+    "category": "EO-CRU stage_hint",
+    "desc": "EO-CRU-004(文件整理) 透传 stage_hint={'anchor_state': {'entity': 'E-XM', 'dimension': '项目状态', 'state': '已结束'}}"
+   },
+   {
+    "category": "EO-CRU stage_hint",
+    "desc": "EO-CRU-009(上传结果通知单) 透传 stage_hint={'anchor_state': {'entity': 'E-XM', 'dimension': '项目状态', 'state': '报告审核中'}}"
+   },
+   {
+    "category": "EO-CRU stage_hint",
+    "desc": "EO-CRU-010(上传证书) 透传 stage_hint={'anchor_state': {'entity': 'E-XM', 'dimension': '项目状态', 'state': '报告审核中'}}"
+   },
+   {
+    "category": "EO-CRU stage_hint",
+    "desc": "EO-CRU-016(提交结果报告) 透传 stage_hint={'anchor_state': {'entity': 'E-BMJL', 'dimension': '报名记录状态', 'state': '结果待提交'}}"
+   },
+   {
+    "category": "EO-CRU stage_hint",
+    "desc": "EO-CRU-017(上传缴费证明) 透传 stage_hint={'anchor_state': {'entity': 'E-BMJL', 'dimension': '报名记录状态', 'state': '报名成功'}}"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-001: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-002: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-003: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-004: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-005: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-012: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-014: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-016: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-019: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-020: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-024: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-028: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch split delete base",
+    "desc": "T-032: 删除原TO(主TO不再输出),生成2个分支TO"
+   },
+   {
+    "category": "branch_injected invalid",
+    "desc": "T-032[a]: 分支值 分值 非法于 E-PJ.评分方式，降级 constraint"
+   },
+   {
+    "category": "branch_injected invalid",
+    "desc": "T-032[b]: 分支值 权重 非法于 E-PJ.评分方式，降级 constraint"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-036: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-037: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-040: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-041: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-042: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-043: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-044: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-045: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-046: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-047: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-048: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-049: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-050: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-065: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-066: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-067: 生命周期归属 ['测量审核']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-068: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "branch_values owned",
+    "desc": "T-069: 生命周期归属 ['能力验证']，不展开变体（伪变体抑制）"
+   },
+   {
+    "category": "crud_init_dedup",
+    "desc": "EO-CRU-020 被初始化转换 T-045 覆盖（er 文本包含），去重"
+   },
+   {
+    "category": "crud_init_dedup",
+    "desc": "EO-CRU-047 被初始化转换 T-058 覆盖（er 文本包含），去重"
+   },
+   {
+    "category": "CO auto XC dependent ambiguous",
+    "desc": "XC-001: target_condition='报名待审核' 无法唯一确定 dependent，候选 3 个 ['T-003', 'T-030', 'T-041'] (from=None, to=报名待审核)，升级跳过(不取第一条)"
+   },
+   {
+    "category": "CO auto XC dependent resolved",
+    "desc": "XC-002: dependent=T-031 (from=None, to=待评价, via=resolved, candidates=['T-031'])"
+   },
+   {
+    "category": "CO lifecycle source_ref",
+    "desc": "SR E-BMJL->E-JFTZ: structural_relations 无 source_ref，置 null"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-XM.项目状态: derived 5 phases, terminals pinned to 4"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-XM.通知状态: derived 7 phases, terminals pinned to 6"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-BMJL.报名记录状态: derived 9 phases, terminals pinned to 7"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-BMJL.报名记录样品状态: derived 4 phases, terminals pinned to 3"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-BMJL.费用状态: derived 2 phases, terminals pinned to 1"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-BMJL.发票状态: derived 2 phases, terminals pinned to 1"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-YP.样品状态: derived 3 phases, terminals pinned to 2"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-PJ.评价状态: derived 3 phases, terminals pinned to 2"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-TASK.任务状态: derived 3 phases, terminals pinned to 3"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-JFTZ.缴费通知单状态: derived 2 phases, terminals pinned to 1"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-LAB.实验室状态: derived 4 phases, terminals pinned to 3"
+   },
+   {
+    "category": "phase_mapping_derived",
+    "desc": "E-BZ.标准库状态: derived 2 phases, terminals pinned to 0"
+   },
+   {
+    "category": "phase_mapping_by_branch",
+    "desc": "E-XM.项目状态: per-branch lifecycle phases for ['测量审核', '能力验证']; 能力验证 initial=待开始; 测量审核 initial=报名中"
+   },
+   {
+    "category": "phase_mapping_by_branch",
+    "desc": "E-XM.通知状态: per-branch lifecycle phases for ['测量审核', '能力验证']; 能力验证 initial=未发送; 测量审核 initial=未发送"
+   }
+  ],
+  "warnings": [
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-XM.项目状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-XM.通知状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-BMJL.报名记录状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-YP.样品状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-TASK.任务状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-LAB.实验室状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   },
+   {
+    "category": "phase_mapping cycle detected",
+    "desc": "E-XM.通知状态: forward_adj 有环（P1 direction 可能有误，backward 边被标成 forward），降级用 states 列表顺序作为 phase_mapping"
+   }
+  ],
+  "snapshot": {
+   "to_index_size": 71,
+   "co_list_size": 3,
+   "xc_status_summary": {
+    "total_xc": 8,
+    "as_co": 1,
+    "as_br": 7
+   },
+   "precondition_state_refs_coverage": {
+    "total_preconditions": 84,
+    "total_state_refs_expected": 68,
+    "total_state_refs_resolved": 68,
+    "unresolved_count": 0,
+    "p1_inherited_count": 68,
+    "p2_filled_count": 0
+   },
+   "phase_mapping_coverage": {
+    "dims_with_phase_mapping": 12,
+    "dims_total": 12
+   }
+  },
+  "self_check": {
+   "no_branch_scenarios": true,
+   "all_xc_have_status": true,
+   "enabler_state_valid_or_judgment": true,
+   "restrictive_category_preserved": true,
+   "id_globally_unique": true,
+   "p1_root_nodes_complete": true,
+   "all_skipped_xc_have_br": true,
+   "precondition_state_refs_complete": true
+  },
+  "field_registry": {
+   "E-XM.项目类型": {
+    "entity": "E-XM",
+    "name": "项目类型",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "能": "能力验证",
+     "能力": "能力验证",
+     "能力验": "能力验证",
+     "测": "测量审核",
+     "测量": "测量审核",
+     "测量审": "测量审核"
+    },
+    "strip_suffix": null,
+    "values": [
+     "能力验证",
+     "测量审核"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "未发送"
+     },
+     {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "报名中"
+     },
+     {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "待确认"
+     },
+     {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "进行中"
+     },
+     {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "已审核"
+     },
+     {
+      "entity": "E-XM",
+      "dimension": "项目状态",
+      "state": "待开始"
+     }
+    ]
+   },
+   "E-BMJL.报名审核结果": {
+    "entity": "E-BMJL",
+    "name": "报名审核结果",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "通": "通过",
+     "退": "退回修改",
+     "退回": "退回修改",
+     "退回修": "退回修改"
+    },
+    "strip_suffix": null,
+    "values": [
+     "通过",
+     "退回修改"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "报名待审核"
+     }
+    ]
+   },
+   "E-BMJL.测试结果审核": {
+    "entity": "E-BMJL",
+    "name": "测试结果审核",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "通": "通过",
+     "退": "退回"
+    },
+    "strip_suffix": null,
+    "values": [
+     "通过",
+     "退回"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-BMJL",
+      "dimension": "报名记录状态",
+      "state": "结果已提交"
+     }
+    ]
+   },
+   "E-YP.还样情况": {
+    "entity": "E-YP",
+    "name": "还样情况",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "已": "已还样",
+     "已还": "已还样",
+     "无": "无需还样",
+     "无需": "无需还样",
+     "无需还": "无需还样"
+    },
+    "strip_suffix": null,
+    "values": [
+     "已还样",
+     "无需还样"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-YP",
+      "dimension": "样品状态",
+      "state": "已核查"
+     }
+    ]
+   },
+   "E-LAB.审核结果": {
+    "entity": "E-LAB",
+    "name": "审核结果",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "通": "通过",
+     "退": "退回修改",
+     "退回": "退回修改",
+     "退回修": "退回修改"
+    },
+    "strip_suffix": null,
+    "values": [
+     "通过",
+     "退回修改"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-LAB",
+      "dimension": "实验室状态",
+      "state": "待审核"
+     }
+    ]
+   },
+   "E-XM.通知审核结果": {
+    "entity": "E-XM",
+    "name": "通知审核结果",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "通": "通过",
+     "退": "退回"
+    },
+    "strip_suffix": null,
+    "values": [
+     "通过",
+     "退回"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-XM",
+      "dimension": "通知状态",
+      "state": "待审核"
+     }
+    ]
+   },
+   "E-XM.评分方式": {
+    "entity": "E-XM",
+    "name": "评分方式",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "分": "分值",
+     "权": "权重"
+    },
+    "strip_suffix": null,
+    "values": [
+     "分值",
+     "权重"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": []
+   },
+   "E-TASK.审核结果": {
+    "entity": "E-TASK",
+    "name": "审核结果",
+    "kind": "attribute",
+    "value_type": "str",
+    "ref_state_dimension": null,
+    "aliases": [],
+    "count_aliases": [],
+    "value_normalization": {
+     "同": "同意",
+     "退": "退回"
+    },
+    "strip_suffix": null,
+    "values": [
+     "同意",
+     "退回"
+    ],
+    "value_closed_set": null,
+    "populated_anchors": [
+     {
+      "entity": "E-TASK",
+      "dimension": "任务状态",
+      "state": "待审批"
+     }
+    ]
+   }
+  }
+ }
+}

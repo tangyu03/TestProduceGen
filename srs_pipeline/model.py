@@ -514,12 +514,30 @@ class DomainModel:
     def _backfill_branch_coverage(self):
         """Step6：按转换 note.branch_dimension（支持';'分隔多值）与
         BR 顶层 branch_dimensions（add_br 归一化）、XC 的'分支[维度='前缀或
-        source_transition 命中，回填三层 coverage。"""
+        source_transition 命中，回填三层 coverage。
+
+        同名维度碰撞消歧（v13 评审 PROC-049/050/062/064 根因）：note
+        branch_dimension 只记维度名、不记实体，纯按名回填会把 E-LAB 的
+        T-054/055 与 E-TASK 的 T-062/063 同时塞进两个「审核结果」BD →
+        P2 按 coverage 命中把 E-LAB 值（通过/退回修改）注进 E-TASK 转换。
+        同名时按实体归属分流：转换实体 == BD 实体 者归本 BD；跨实体转换
+        （无任何同名 BD 声明该实体，如 项目类型 影响 E-BMJL）才全收。
+        唯一名维度保持全量 name 匹配（跨实体分支合法用例不受影响）。"""
+        name_hits = {}
+        for d in self.branch_dimensions:
+            name_hits.setdefault(d["dimension"], []).append(d["entity"])
         for d in self.branch_dimensions:
             name = d["dimension"]
-            t_ids = [t["id"] for t in self.transitions
-                     if name in re.split(r"[;；]",
-                                         t["note"].get("branch_dimension", ""))]
+            collision = len(name_hits[name]) > 1
+            same_name_entities = set(name_hits[name])
+            t_ids = []
+            for t in self.transitions:
+                if name not in re.split(r"[;；]",
+                                        t["note"].get("branch_dimension", "")):
+                    continue
+                if not collision or d["entity"] == t["entity"] \
+                        or t["entity"] not in same_name_entities:
+                    t_ids.append(t["id"])
             d["coverage"] = {
                 "transitions": t_ids,
                 "cross_entity": sorted({x["id"] for x in self.cross_entity
