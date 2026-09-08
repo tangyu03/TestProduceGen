@@ -941,6 +941,61 @@ def _warn_undeclared_birth_states(tos: list[dict], warnings: list) -> None:
                 f"（glm5pr §3.1 多状态面出生值契约）")
 
 
+def _warn_borrowed_action_doc_identity(tos: list[dict], warnings: list) -> None:
+    """跨分支借用动作未声明单据身份的确定性告警（warning 非 error，不中断）。
+
+    背景（v13 评审四防线③·glm5pr §3.1 共享状态面分支单据身份契约）：
+    同一动作在 ≥2 个互斥分支组复用且起点不同（同action不同frm，如
+    「能力验证预通知」能力验证分支从未发送直发计划邀请函、测量审核分支
+    从已审核发出作业指导书）——动作名是系统功能词，不承载分支单据身份；
+    不声明则渲染输出通篇载体泛称（预通知），无法区分实义单据。契约要求
+    此类转换在 note.doc_identity 声明本分支实义单据、expected_results 用
+    限定名指称；本检查使声明缺失在 S1 层被看见（确定性，不依赖 LLM）。
+
+    判据（全结构化，无词表硬编码）：(entity, dimension, action) 相同、
+    branch_values 归属组 ≥2 且两两互斥、各组 from 集合不全同 → 组内每个
+    TO 须有 note.doc_identity；缺失即告警（按 id 去重——P2 主TO/分支TO
+    拆分同 id 多实例）。
+    """
+    def _frm(v):
+        return "初始" if v is None else str(v)
+
+    groups: dict = {}
+    for t in tos:
+        bv = frozenset(str(v) for v in (t.get("branch_values") or []) if v)
+        if not bv or not t.get("action") or not t.get("dimension"):
+            continue
+        groups.setdefault(
+            (t.get("entity"), t.get("dimension"), t.get("action")), []).append((t, bv))
+
+    seen: set = set()
+    for (_ent, _dim, act), members in groups.items():
+        by_bv: dict = {}
+        for t, bv in members:
+            by_bv.setdefault(bv, set()).add(t.get("from"))
+        if len(by_bv) < 2:
+            continue
+        keys = list(by_bv)
+        if not all(not (a & b) for i, a in enumerate(keys) for b in keys[i + 1:]):
+            continue
+        frm_sets = list(by_bv.values())
+        if all(a == b for a in frm_sets for b in frm_sets):
+            continue
+        shape = "；".join(
+            f"{'/'.join(sorted(bv))}:{'或'.join(sorted(_frm(v) for v in frms))}"
+            for bv, frms in by_bv.items())
+        for t, _bv in members:
+            tid = t.get("id")
+            if tid in seen or (t.get("note") or {}).get("doc_identity"):
+                continue
+            seen.add(tid)
+            warnings.append(
+                f"S1.跨分支借用动作未声明单据身份: {tid} 动作「{act}」跨互斥分支"
+                f"起点不同（{shape}），动作名为系统功能词不承载分支单据身份——"
+                f"请在 note 声明 doc_identity=本分支实义单据，expected_results "
+                f"用限定名指称（glm5pr §3.1 共享状态面分支单据身份契约）")
+
+
 def _enrich_thens(entity_id: str, action: str, thens: list[dict],
                   constraint_steps: dict[str, list[dict]]) -> list[dict]:
     """Append field-validation Thens to a procedure's thens list.
@@ -4879,6 +4934,9 @@ def s1_generation_node(state: AgentState) -> dict:
     # 防线②：分支出生态初始值未声明的确定性告警（须在 S1-a/S1-b 之后——
     # 消费 _synth_branch_values 做分支兼容判定）
     _warn_undeclared_birth_states(tos, warnings)
+    # 防线③：跨分支借用动作未声明单据身份的确定性告警（只消费 P1 级
+    # branch_values 与 note，与 S1-a/S1-b 无顺序依赖）
+    _warn_borrowed_action_doc_identity(tos, warnings)
 
     indices = {
         "eo_by_type": eo_by_type,

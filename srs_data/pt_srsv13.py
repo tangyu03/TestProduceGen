@@ -745,7 +745,7 @@ def build() -> DomainModel:
         expected_results=["项目于准备阶段立项建立，设计方案编制后项目状态为待开始"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.1方案设计阶段",
-        note={"branch_dimension": "项目类型", "comment": "源自e01；⓪创建转换；能力验证分支（与t40受理用户测量审核报名创建分立），Step2 value=能力验证→本条；示例e01对齐"},
+        note={"branch_dimension": "项目类型", "doc_identity": "设计方案", "comment": "源自e01；⓪创建转换；能力验证分支（与t40受理用户测量审核报名创建分立），Step2 value=能力验证→本条；示例e01对齐"},
         branch_values=["能力验证"],
     )
     m.add_trans(
@@ -908,7 +908,7 @@ def build() -> DomainModel:
         expected_results=["预通知发送，通知状态变为待确认", "生成预通知、用户信息表"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.1实施阶段",
-        note={"branch_dimension": "项目类型", "comment": "源自e14；③；能力验证分支（与t50已审核→待确认分立，同action不同frm），Step2 value=能力验证→本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
+        note={"branch_dimension": "项目类型", "doc_identity": "能力验证计划邀请函/通知", "comment": "源自e14；③；能力验证分支（与t50已审核→待确认分立，同action不同frm），Step2 value=能力验证→本条；歧义：原文'已发送/待确认'，19.3枚举值'待确认'，两口径并列取枚举值；§5修复C32：随维度迁E-XM（项目级预通知状态面）；本分支预通知实体=能力验证计划邀请函/通知（7技术主管'审核能力验证计划邀请函或通知'），与测量审核分支的作业指导书相区分"},
         branch_values=["能力验证"],
     )
     m.add_trans(
@@ -933,7 +933,7 @@ def build() -> DomainModel:
         expected_results=["项目状态变为进行中（推断）"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.1实施阶段；19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "inferred": True, "comment": "源自e16；③；19.3枚举含'进行中'，19.1实施阶段自预通知起进入参加者测试，项目状态列此后未再标注，据阶段语义补链；能力验证分支（与t65待开始→进行中分立）"},
+        note={"branch_dimension": "项目类型", "doc_identity": "能力验证计划邀请函/通知", "inferred": True, "comment": "源自e16；③；19.3枚举含'进行中'，19.1实施阶段自预通知起进入参加者测试，项目状态列此后未再标注，据阶段语义补链；能力验证分支（与t65待开始→进行中分立）"},
         branch_values=["能力验证"],
     )
     m.add_trans(
@@ -1289,7 +1289,7 @@ def build() -> DomainModel:
         expected_results=["项目状态变为待开始"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "comment": "源自e44；序判④，语义forward（测量审核先受理报名后方案设计立项），语义优先；测量审核分支"},
+        note={"branch_dimension": "项目类型", "doc_identity": "设计方案", "comment": "源自e44；序判④，语义forward（测量审核先受理报名后方案设计立项），语义优先；测量审核分支"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1312,7 +1312,7 @@ def build() -> DomainModel:
         expected_results=["作业指导书/预通知编制完成，提交审核，通知状态变为待审核（推断）", "生成作业指导书"],
         traits=["branch"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "inferred": True, "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
+        note={"branch_dimension": "项目类型", "doc_identity": "作业指导书", "inferred": True, "comment": "源自e46；③；通知状态'待审核'首现于19.3样品领用登记行，编制动作取同行组'作业指导书编制'，据列值与动作补链；测量审核分支（预通知含审核环节），本分支预通知实体=作业指导书（'作业指导书/预通知'同物，与能力验证分支的计划邀请函相区分）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1324,7 +1324,7 @@ def build() -> DomainModel:
             precond(text="通知审核结果=通过", ptype="constraint",
                     note={"comment": "分支值条件"}),
         ],
-        expected_results=["预通知审核通过，通知状态变为已审核（推断）"],
+        expected_results=["作业指导书/预通知审核通过，通知状态变为已审核（推断）"],
         traits=["branch", "audit"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析；7技术主管",
         note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e47；③；19.3作业指导书行'待审核/退回/已审核'斜杠分支值拆行；动作据7技术主管职责'审核能力验证计划邀请函或通知'命名；Step2 value=通过→本条；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
@@ -1339,7 +1339,7 @@ def build() -> DomainModel:
             precond(text="通知审核结果=退回", ptype="constraint",
                     note={"comment": "分支值条件"}),
         ],
-        expected_results=["预通知审核退回，通知状态变为退回（推断）"],
+        expected_results=["作业指导书/预通知审核退回，通知状态变为退回（推断）"],
         traits=["branch", "rollback"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
         note={"branch_dimension": "通知审核结果", "inferred": True, "comment": "源自e48；③；分支值'退回'取19.3通知状态列原文；Step2 value=退回→本条；退回后修改重提见t49；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
@@ -1352,7 +1352,7 @@ def build() -> DomainModel:
             precond(text="通知处于退回状态", ptype="state_ref",
                     ref=state_ref("E-XM", "通知状态", "退回")),
         ],
-        expected_results=["修改后重新提交审核（推断）"],
+        expected_results=["修改作业指导书/预通知后重新提交审核（推断）"],
         traits=["rollback"], direction="forward", priority="P1",
         source_ref="19.3项目状态分析",
         note={"inferred": True, "comment": "源自e49；序判④，语义forward（退回后修改重提进入审核循环），语义优先；审核循环闭合补链；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
@@ -1365,10 +1365,10 @@ def build() -> DomainModel:
             precond(text="通知处于已审核状态", ptype="state_ref",
                     ref=state_ref("E-XM", "通知状态", "已审核")),
         ],
-        expected_results=["预通知发送，通知状态变为待确认"],
+        expected_results=["作业指导书/预通知发送，通知状态变为待确认"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与t14未发送→待确认分立，同action不同frm）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
+        note={"branch_dimension": "项目类型", "doc_identity": "作业指导书", "comment": "源自e50；序判④，语义forward（审核通过后发送预通知），语义优先；测量审核分支（与t14未发送→待确认分立，同action不同frm，本分支承载单据=作业指导书）；§5修复C32：随维度迁E-XM（项目级预通知状态面）"},
         branch_values=["测量审核"],
     )
     m.add_trans(
@@ -1548,7 +1548,7 @@ def build() -> DomainModel:
         expected_results=["项目状态变为进行中（推断）"],
         traits=["branch"], direction="forward", priority="P0",
         source_ref="19.3项目状态分析",
-        note={"branch_dimension": "项目类型", "inferred": True, "comment": "源自e65；③；测量审核分支（实施阶段开始，与t16报名中→进行中分立，同action不同frm）；19.3枚举含'进行中'，据阶段语义补链"},
+        note={"branch_dimension": "项目类型", "doc_identity": "作业指导书", "inferred": True, "comment": "源自e65；③；测量审核分支（实施阶段开始，与t16报名中→进行中分立，同action不同frm，动作内容=发送已审核的作业指导书）；19.3枚举含'进行中'，据阶段语义补链"},
         branch_values=["测量审核"],
     )
     m.add_trans(

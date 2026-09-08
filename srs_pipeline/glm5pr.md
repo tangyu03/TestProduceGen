@@ -126,6 +126,8 @@ target_transition＝语义描述，以目标转换 action 词为锚（如"能力
 
 **多状态面出生值契约**：创建转换（frm=None）的 `to` 只覆盖本维度 initial；同一动作若同时建立同实体**其他**状态维度的出生值（平行流程型各分支创建面常见），必须在本条 `expected_results` 逐面声明「{维度名}初始为{值}」（如受理报名同时使预通知状态出生为未发送 → expected_results 含「预通知状态初始为未发送」）。该声明是消费转换在本分支唯一的创建根依据，漏声明 → 下游消费该状态的转换在本分支无生产者可挂（S1 会报「初始出生点未声明」告警）。声明只落一处：承载该出生动作的创建转换。
 
+**共享状态面分支单据身份契约**：「预通知」「通知」等是**载体类别词**，其下实义单据分支各异（能力验证＝能力验证计划邀请函/通知；测量审核＝作业指导书，SRS 19.1 行11 发送动作原文即「样品发放,作业指导书发送」）。凡 (a) 建立或承载分支实义单据的转换、(b) **跨分支共用动作且起点不同**（同action不同frm，如「能力验证预通知」从未发送直发 vs 已审核后发出），必须：`note` 声明 `doc_identity`＝本分支实义单据；`expected_results` 用限定名指称（「作业指导书/预通知发送」，勿写笼统「预通知发送」）。动作名沿用系统功能词**不改名**（同action不同frm 平行为建模语义）；分支归属由 branch_values 承载。漏声明 → S1 报「跨分支借用动作未声明单据身份」告警。
+
 `traits`：`audit`＝留痕要求；`rollback`＝回退/撤销；`branch`＝分支转换（路径分歧/结果差异均标）；`time_sensitive`＝超时/时限触发；`data_constraint`＝执行前置数据校验。
 
 侧挂状态＝文档以挂起/暂停/停用/恢复语义命名的状态，或本维度已被某条 lateral 转换指向的状态。
@@ -222,7 +224,14 @@ m.link_op_transition(entity, op, transitions, note=None)
 
 N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
 attr(name, desc, is_config=False)
-op(name, category, expected_results, source_ref, note=None)
+op(name, category, expected_results, source_ref, note=None,
+   linked_transitions=None, stage_hint=None, form_fields=None, page=None)
+# linked_transitions=[tid…]＝3.3 link_op_transition 的同义内联（二选一）；
+# stage_hint＝无状态前置操作（file/数据类等，相位被钉死在对象创建态时）的阶段
+#   挂载提示，二选一：{"anchor_state": {"entity","dimension","state"}}＝锚定该状态
+#   相位并追加其 restatement Given；{"min_phase": N}＝相位下限。语义＝
+#   max(当前相位, 提示相位)，只上提不前移；anchor_state 须指向已建模状态。
+# form_fields=[字段名…]＝表单字段清单覆盖（实体 attributes）；page=页面名＝Type5 导航页面覆盖
 precond(text, ptype, ref=None, note=None)
 state_ref(entity, dimension, state)
 ```
