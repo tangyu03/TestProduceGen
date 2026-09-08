@@ -4,7 +4,7 @@
 
 1. 实体/状态/转换由 §2 事件台账推导，判据唯一，无模式枚举。
 2. 机械项由框架校验（§5 修复）；语义项由你负责（台账完备/情形分合/分类/因果鉴别/标注诚实）。
-3. 顺序：§2 台账 → Step 1 实体 → Step 2 分支 → Step 3 转换 → Step 4 约束；每步以上一步产物为输入，推导中发现漏事件可回补台账重推。
+3. 顺序：§2 台账 → Step 1 实体 → Step 2 分支 → Step 3 转换 → Step 4 约束；每步以上一步产物为输入，推导中发现漏事件可回补台账重推。转换行的全部落盘检查（含创建转换五查）收束于 §3.1。
 4. `build()` 交付后仅框架回喂可改（写作过程中的推导迭代、回补台账不受限）；动词/权限回写不算回修。装配期归一（编号移交、target_transition 回填、角色引用归一）框架自理，作者免回填。
 
 ## 1 契约
@@ -25,7 +25,7 @@ def build() -> DomainModel:
     return m
 ```
 
-- 元数据结构化落盘供框架校验。document_scope＝章节号清单（"§19.1；§19.3；§20.2–§20.11"，平行流程差异说明附后）；产物 source_ref 须落在声明章节内；收缩平行流程 → 分支降属性或补最小链，差异注于 scope。
+- 元数据结构化落盘供框架校验。document_scope＝章节号清单（"§4.1；§6.2；§7.2–§7.9"，平行流程差异说明附后）；产物 source_ref 须落在声明章节内；收缩平行流程 → 分支降属性或补最小链，差异注于 scope。
 - 编号：事件 `e01…`、转换 `t01…`、XC `x01…`、BR `b01…`、invalid `i01…`、角色 `r01…`（小写无横线）；实体 ID＝`E-{2~6 字母缩写}`；角色 id 直接落盘，引用一律走 `name`。
 - API 全用关键字参数，唯一例外 `state_ref` 三参同型可位置式。
 - source_ref 非空且可定位原文，子项号真实，复合引用以 `；` 分隔。XC 继承宿主 source_ref：镜像/联动取 `source_transition` 所指转换的 ref；4.5判取持有对应 precondition 的转换的 ref。
@@ -56,7 +56,7 @@ m.add_event(eid, entity=E-ID, dimension, action, actor, precondition, consequenc
 - precondition＝自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁；门禁值取同动作拆行事件中对应分支的 consequence），无内容填字符串 `"初始"`。
 - 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如"到期提醒"）入 Step 4 BR（notification/timing）。
 - 粒度：一事件一 (entity, dimension)；一动作多状态面 → 拆行，每状态面一条 `add_event`，action 与 actor 相同，关联仅由转换 note 互引承载。
-- 表格列：状态列取值随行动作变化 → 逐行逐列登记事件（entity＝状态面承载主体的 E-ID）。单元格多值双形态：顿号并列（"已核查、待发样"）＝快照，逐值登记落点；斜杠（"待核查/无需还样"）＝或语义分支值，逐值拆行登记。自环事件仅落动作的业务对象维度，行内其他列未变值按门禁判定写入 precondition，不立事件；他实体状态列的驻留值为动作对象/输入前提 → precondition；创建缺失 → minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底。
+- 表格列：状态列取值随行动作变化 → 逐行逐列登记事件（entity＝状态面承载主体的 E-ID）。单元格多值双形态：顿号并列（"值A、值B"）＝快照，逐值登记落点；斜杠（"值A/值B"）＝或语义分支值，逐值拆行登记。自环事件仅落动作的业务对象维度，行内其他列未变值按门禁判定写入 precondition，不立事件；他实体状态列的驻留值为动作对象/输入前提 → precondition；创建缺失 → minor 补一条创建事件（inferred 写依据）。台账完备性是根本职责，无机械兜底；交付前自查——原文每个状态变化语句均能指到台账事件，或给出落点判定③的排除理由。
 
 ## Step 1 实体
 
@@ -108,9 +108,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 (c) 先于 (d)；A 仅为发起人/持有人/操作对象 → 降 (d)；B 核心产出属第三方 C → 改 C→B；判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B → 归 (d)。dependent 三步：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
 
-**(b) 伴随创建编码契约**：判 (b) 实体的创建转换（frm=None）一律携指向父实体已存在态的 `state_ref` 前置，不论业务上是否另有门禁（一个前置可身兼门禁与伴随证据两职）——编码约定（供 C17 豁免与 C03 端点校验识别），非业务要求，不必另找理由。锚点必须指向父实体实际持有该状态的维度（项目状态挂 E-XM 非 E-PJ）；锚错 → C03 降级 constraint、C17 回退误判 (d)。
-
-**同动作共创建**：父实体的对应状态由同一动作建立（如「受理报名」同动作使项目状态出生"报名中"并创建报名记录）→ 创建转换不携该 state_ref 前置（动作前父实体尚未处该态，携之即时序倒置），组合归属由同动作共创建承载，note 自报「同动作共创建」。
+判 (b) 实体的创建行编码义务（伴随创建 state_ref 前置 / 同动作共创建）→ §3.1 创建转换五查①。
 
 ## Step 2 分支
 
@@ -118,7 +116,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 准入判据＝可锚定转换：影响状态机路径或转换结果的取值维度才是分支维度，纯查询/筛选仅作实体属性。分支 values＝文档命名的条件/情形；状态落点值不作分支值（落点差异经转换分立承载）；角色差异由转换 role 字段承载。注册前逐 value 自查台账锚点：value 路径在台账无事件 → 维度降为实体属性，或按 document_scope 补最小创建链。
 
-target_transition＝语义描述，以目标转换 action 词为锚（如"能力验证计划发布转换"）；同动作多转换时括注 frm→to 或分支值消歧。指向规则：路径分歧各 value 指向该分支路径**首条（创建）转换**，结果差异各 value 指向共用转换；只锚首条，后续转换归属由转换层 `branch_values` 承载（§3.1 归属铁律），不在 branches 重复。框架自动匹配精确 tid，模型免回填。
+target_transition＝语义描述，以目标转换 action 词为锚（「〈动作〉转换」，如「文件归档转换」）；同动作多转换时括注 frm→to 或分支值消歧。指向规则：路径分歧各 value 指向该分支路径**首条（创建）转换**，结果差异各 value 指向共用转换；只锚首条，后续转换归属由转换层 `branch_values` 承载（§3.1 归属铁律），不在 branches 重复。框架自动匹配精确 tid，模型免回填。
 
 ## Step 3 转换与因果
 
@@ -126,9 +124,7 @@ target_transition＝语义描述，以目标转换 action 词为锚（如"能力
 
 转换＝已登记状态空间上的边，台账每条事件在其 (entity, dimension) 上落一条转换。构造前提：entity 已登记；dimension ∈ 该实体维度；frm/to ∈ 该维度 states；frm=None 仅限创建转换（to＝initial）。必填：`tid, action, role, preconditions, expected_results, traits, direction, priority, source_ref`。`note.comment` 引用事件 id。
 
-**多状态面出生值契约**：创建转换的 to 只覆盖本维度 initial；同一动作同时建立同实体其他维度的出生值 → 本条 expected_results 逐面声明「{维度名}初始为{值}」（面名照维度注册名，不加单据限定名；如受理报名 →「预通知状态初始为未发送」），只落承载出生动作的创建转换一处。漏声明 → 下游消费转换在本分支无生产者可挂（S1 告警"初始出生点未声明"）。
-
-**共享状态面分支单据身份契约**：「预通知」「通知」是载体类别词，分支实义单据各异（能力验证＝计划邀请函/通知；测量审核＝作业指导书，原文动作即「样品发放,作业指导书发送」）。凡 (a) 建立或承载分支实义单据的转换、(b) 跨分支共用动作且起点不同（同 action 不同 frm，如「能力验证预通知」从未发送直发 vs 已审核后发出），须：note 声明 doc_identity＝本分支实义单据；expected_results 用限定名指称（「作业指导书/预通知发送」，勿笼统写「预通知发送」）。动作名沿用系统功能词不改名（同 action 不同 frm 即建模平行）；分支归属由 branch_values 承载。漏声明 → S1 告警"跨分支借用动作未声明单据身份"。
+**单据身份（载体词 ≠ 实义单据；所有转换适用）**：动作名是系统功能词，常为载体类别词——「通知」「申请」「回执」类词只标识单据类别，不标识具体单据；同一动作可被互斥分支在不同起点复用，各分支实义单据可能不同。凡 (a) 建立或承载分支实义单据、(b) 跨分支共用动作且起点不同（同 action 不同 frm）的转换，须：note 声明 `doc_identity`＝本分支实义单据；expected_results 用限定名指称「〈实义单据〉〈载体词〉〈动作〉」。动作名沿用系统功能词不改名——同 action 不同 frm 即建模平行，不改名也是 C2 告警（同 (entity,dim,action) 跨互斥分支组且 from 集不同）的识别前提；分支归属由 branch_values 承载。与逐字铁律不冲突：action＝调用层功能名（逐字），expected_results＝结果层描述（可带实义单据限定）。漏声明 → S1"跨分支借用动作未声明单据身份"。例：载体词「预通知」，两分支实义分别为计划邀请函、作业指导书 → 后者写「作业指导书预通知发送」，勿笼统写「预通知发送」。
 
 `traits`：`audit`＝留痕要求；`rollback`＝回退/撤销；`branch`＝分支转换（路径分歧/结果差异均标）；`time_sensitive`＝超时/时限触发；`data_constraint`＝执行前置数据校验。
 
@@ -147,14 +143,15 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 **分支落盘**（同一动作因分支值立出不同转换）：
 - 路径分歧（中间态或落点不同）→ 分立多条：各携对应分支值 precondition（ptype=constraint）、声明 `branch_values=[本条仅在的分支值]`、role 取该分支执行者、标签同根后缀（t02/t02b）、traits 含 `branch`、note.branch_dimension 填维度名。
 - 结果差异（路径与落点均同、仅结果措辞异）→ 共用一条：expected_results 逐值用"若{维度}={值}，则…"，traits 含 `branch`，不声明 branch_values。
-- **归属铁律**：branch_values＝转换的生命周期身份（声明后 P2 不再为其 all-values 展开，S0/S1 相位在归属分支 lifecycle 链内取值）。自查：(frm,to) 路径仅在单一分支值的流程表/叙述出现 → 必须声明；两分支皆有该动作与路径 → 共享不声明。**平行流程型**（同一维度在多章节各有完整生命周期，且创建转换落点次序互逆，如 §19.1 能力验证 vs §19.3 测量审核）：除两条创建转换互为分立外，各分支全部后续推进转换均须声明 branch_values，仅两分支共有收尾动作共享；漏声明 → 他分支子图被污染成环，相位链退化为枚举序。
+- **归属铁律**：branch_values＝转换的生命周期身份（声明后 P2 不再为其 all-values 展开，S0/S1 相位在归属分支 lifecycle 链内取值）。自查：(frm,to) 路径仅在单一分支值的流程表/叙述出现 → 必须声明；两分支皆有该动作与路径 → 共享不声明。**平行流程型**（同一维度在多个章节/模式各有完整生命周期，且两条创建转换落点次序互逆）：除两条创建转换互为分立外，各分支全部后续推进转换均须声明 branch_values，仅两分支共有的收尾动作共享；漏声明 → 他分支子图被污染成环，相位链退化为枚举序。例：甲分支先受理报名后方案设计，乙分支先方案设计后受理报名，两创建转换互为分立。
 
-**创建转换五查**（frm=None 落盘前逐项过，各项依对应条款处理）：
-① 判 (b) → 携父实体已存在态 state_ref 前置；父实体状态由同动作建立 → 改用同动作共创建（§1.5）；
-② 同动作建立同实体他维度出生值 → expected_results 逐面声明「{维度名}初始为{值}」；
-③ 承载分支实义单据或跨分支借用动作 → note.doc_identity＋expected_results 限定名；
-④ 平行流程型的后续推进转换 → branch_values（归属铁律）；
-⑤ action＝该状态面在流程表的首现动作；状态面首现早于本实体创建动作 → 该状态面归首现动作的承载主体，不挂本实体（C32）。
+**创建转换五查**（frm=None 落盘前逐项过；①②⑤含完整判据，③④为通用条款在本行的触发提醒）：
+
+① **伴随创建前置**：判 (b)（§1.5 四元）实体的创建转换一律携指向父实体已存在态的 `state_ref` 前置——编码约定（供 C17 豁免与 C03 端点校验识别），非业务要求，可身兼门禁与伴随证据两职，不必另找理由；锚点指向父实体实际持有该状态的 (实体, 维度)，勿凭语义相近的旁系实体臆指，锚错 → C03 降级 constraint、C17 回退误判 (d)。父实体所需状态由本动作同批才建立 → 不携该前置（携之即时序倒置），改由同动作拆行共创建承载，note 自报「同动作共创建」。例：受理报名同动作使项目状态出生「报名中」并创建报名记录 → 报名记录创建行不携父状态门禁。
+② **多面出生值**：创建转换的 to 只覆盖本维度 initial；同一动作同时建立同实体其他维度的出生值 → 本条 expected_results 逐面声明「{维度名}初始为{值}」——面名照维度注册名，不加任何限定词（保住结构化判据的面名输入）；只落承载出生动作的创建转换一处。漏声明 → 下游消费转换在本分支无生产者可挂，S1"初始出生点未声明"。例：受理报名同动作点亮「预通知状态」→ 追加一行「预通知状态初始为未发送」。
+③ **单据身份**：本行建立/承载分支实义单据，或本 action 跨分支不同起点 → 按上文单据身份条款声明 doc_identity＋限定名。
+④ **分支归属**：按本节归属铁律自查 branch_values；平行流程型的后续推进转换一律声明。
+⑤ **首现动作**：action＝该状态面在流程表的首现动作；状态面首现早于本实体创建动作 → 该状态面归首现动作的承载主体，不挂本实体（C32）。
 
 ### 3.2 preconditions → `precond(text, ptype, ref, note)`
 
@@ -215,9 +212,9 @@ m.add_role(id, name, readonly=False)       # name＝原文角色名逐字复制
 m.add_permission(role, operations)         # role 用 name；operations 填具体操作名
 m.add_entity(id, name, desc, type="core", tags, attributes, state_dimensions, operations)
 # state_dimensions 元素（键名精确 dimension_name）：
-#   {"dimension_name": "项目状态", "states": ["待开始", "报名中"],
-#    "initial": "待开始", "terminal": ["已结束"],
-#    "inferred": ["进行中"], "note": {"comment": "依据…"}}
+#   {"dimension_name": "订单状态", "states": ["待支付", "已支付"],
+#    "initial": "待支付", "terminal": ["已完成"],
+#    "inferred": ["已发货"], "note": {"comment": "依据…"}}
 m.add_structural(frm, to, relation_type, cardinality, ownership_dimension, desc, confidence="high", note=None)
 m.add_branch_dimension(dimension, entity, values, impact_scope, evidence, branches)
 m.add_trans(tid, entity, dimension, frm, to, action, role, preconditions, expected_results, traits, direction, priority, source_ref, note=None, branch_values=None)
@@ -246,10 +243,12 @@ state_ref(entity, dimension, state)
 
 ## 7 专项
 
-- 分支分立/共用/归属自查见 §3.1 分支落盘。
+- 分支分立/共用/归属自查见 §3.1 分支落盘；创建行全查见 §3.1 创建转换五查。
 - system 触发：超时/自动触发且改变状态的事件 role="system"，traits 可含 `time_sensitive`，走完整推导。
 
 ## 8 示例
+
+示例取自一已交付项目，示范编码模式而非绑定词汇；迁移到其他项目时替换实体/维度/状态词，模式不变。
 
 ```python
 # 台账（创建事件；precondition 无内容填字符串"初始"）：
