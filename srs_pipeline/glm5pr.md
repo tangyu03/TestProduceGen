@@ -5,7 +5,7 @@
 1. 实体/状态/转换由 §2 事件台账推导，判据唯一，无模式枚举。
 2. 机械项由框架校验（§5 修复）；语义项由你负责（台账完备/情形分合/分类/因果鉴别/标注诚实）。
 3. 顺序：§2 台账 → Step 1 实体 → Step 2 分支 → Step 3 转换 → Step 4 约束；每步以上一步产物为输入，推导中发现漏事件可回补台账重推。
-4. `build()` 一经写出，仅框架回喂可改；动词/权限回写不算回修。装配期归一（编号移交、target_transition 回填、角色引用归一）框架自理，作者免回填。
+4. `build()` 交付后仅框架回喂可改（写作过程中的推导迭代、回补台账不受限）；动词/权限回写不算回修。装配期归一（编号移交、target_transition 回填、角色引用归一）框架自理，作者免回填。
 
 ## 1 契约
 
@@ -108,7 +108,9 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 (c) 先于 (d)；A 仅为发起人/持有人/操作对象 → 降 (d)；B 核心产出属第三方 C → 改 C→B；判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B → 归 (d)。dependent 三步：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
 
-**(b) 伴随创建编码契约**：判 (b) 实体的创建转换（frm=None）一律携指向父实体已存在态的 `state_ref` 前置，不论业务上是否另有门禁（一个前置可身兼门禁与伴随证据两职）。此为编码约定，非业务要求，不必另找理由。锚点必须指向父实体实际持有该状态的维度；
+**(b) 伴随创建编码契约**：判 (b) 实体的创建转换（frm=None）一律携指向父实体已存在态的 `state_ref` 前置，不论业务上是否另有门禁（一个前置可身兼门禁与伴随证据两职）——编码约定（供 C17 豁免与 C03 端点校验识别），非业务要求，不必另找理由。锚点必须指向父实体实际持有该状态的维度（项目状态挂 E-XM 非 E-PJ）；锚错 → C03 降级 constraint、C17 回退误判 (d)。
+
+**同动作共创建**：父实体的对应状态由同一动作建立（如「受理报名」同动作使项目状态出生"报名中"并创建报名记录）→ 创建转换不携该 state_ref 前置（动作前父实体尚未处该态，携之即时序倒置），组合归属由同动作共创建承载，note 自报「同动作共创建」。
 
 ## Step 2 分支
 
@@ -124,9 +126,9 @@ target_transition＝语义描述，以目标转换 action 词为锚（如"能力
 
 转换＝已登记状态空间上的边，台账每条事件在其 (entity, dimension) 上落一条转换。构造前提：entity 已登记；dimension ∈ 该实体维度；frm/to ∈ 该维度 states；frm=None 仅限创建转换（to＝initial）。必填：`tid, action, role, preconditions, expected_results, traits, direction, priority, source_ref`。`note.comment` 引用事件 id。
 
-**多状态面出生值契约**：创建转换（frm=None）的 `to` 只覆盖本维度 initial；同一动作若同时建立同实体**其他**状态维度的出生值（平行流程型各分支创建面常见），必须在本条 `expected_results` 逐面声明「{维度名}初始为{值}」（如受理报名同时使预通知状态出生为未发送 → expected_results 含「预通知状态初始为未发送」）。该声明是消费转换在本分支唯一的创建根依据，漏声明 → 下游消费该状态的转换在本分支无生产者可挂（S1 会报「初始出生点未声明」告警）。声明只落一处：承载该出生动作的创建转换。
+**多状态面出生值契约**：创建转换的 to 只覆盖本维度 initial；同一动作同时建立同实体其他维度的出生值 → 本条 expected_results 逐面声明「{维度名}初始为{值}」（面名照维度注册名，不加单据限定名；如受理报名 →「预通知状态初始为未发送」），只落承载出生动作的创建转换一处。漏声明 → 下游消费转换在本分支无生产者可挂（S1 告警"初始出生点未声明"）。
 
-**共享状态面分支单据身份契约**：「预通知」「通知」等是**载体类别词**，其下实义单据分支各异（能力验证＝能力验证计划邀请函/通知；测量审核＝作业指导书，SRS 19.1 行11 发送动作原文即「样品发放,作业指导书发送」）。凡 (a) 建立或承载分支实义单据的转换、(b) **跨分支共用动作且起点不同**（同action不同frm，如「能力验证预通知」从未发送直发 vs 已审核后发出），必须：`note` 声明 `doc_identity`＝本分支实义单据；`expected_results` 用限定名指称（「作业指导书/预通知发送」，勿写笼统「预通知发送」）。动作名沿用系统功能词**不改名**（同action不同frm 平行为建模语义）；分支归属由 branch_values 承载。漏声明 → S1 报「跨分支借用动作未声明单据身份」告警。
+**共享状态面分支单据身份契约**：「预通知」「通知」是载体类别词，分支实义单据各异（能力验证＝计划邀请函/通知；测量审核＝作业指导书，原文动作即「样品发放,作业指导书发送」）。凡 (a) 建立或承载分支实义单据的转换、(b) 跨分支共用动作且起点不同（同 action 不同 frm，如「能力验证预通知」从未发送直发 vs 已审核后发出），须：note 声明 doc_identity＝本分支实义单据；expected_results 用限定名指称（「作业指导书/预通知发送」，勿笼统写「预通知发送」）。动作名沿用系统功能词不改名（同 action 不同 frm 即建模平行）；分支归属由 branch_values 承载。漏声明 → S1 告警"跨分支借用动作未声明单据身份"。
 
 `traits`：`audit`＝留痕要求；`rollback`＝回退/撤销；`branch`＝分支转换（路径分歧/结果差异均标）；`time_sensitive`＝超时/时限触发；`data_constraint`＝执行前置数据校验。
 
@@ -145,7 +147,14 @@ priority：P0＝主流程必经；P1＝分支/回退/驳回等业务必需非主
 **分支落盘**（同一动作因分支值立出不同转换）：
 - 路径分歧（中间态或落点不同）→ 分立多条：各携对应分支值 precondition（ptype=constraint）、声明 `branch_values=[本条仅在的分支值]`、role 取该分支执行者、标签同根后缀（t02/t02b）、traits 含 `branch`、note.branch_dimension 填维度名。
 - 结果差异（路径与落点均同、仅结果措辞异）→ 共用一条：expected_results 逐值用"若{维度}={值}，则…"，traits 含 `branch`，不声明 branch_values。
-- **归属铁律**：branch_values＝转换的生命周期身份（声明后 P2 不再为其 all-values 展开，S0/S1 相位在归属分支 lifecycle 链内取值）。自查：(frm,to) 路径仅在单一分支值的流程表/叙述出现 → 必须声明；两分支皆有该动作与路径 → 共享不声明。**平行流程型**（同一维度在多章节各有完整生命周期，且创建转换落点次序互逆）：除两条创建转换互为分立外，各分支全部后续推进转换均须声明 branch_values，仅两分支共有收尾动作共享；漏声明 → 他分支子图被污染成环，相位链退化为枚举序。
+- **归属铁律**：branch_values＝转换的生命周期身份（声明后 P2 不再为其 all-values 展开，S0/S1 相位在归属分支 lifecycle 链内取值）。自查：(frm,to) 路径仅在单一分支值的流程表/叙述出现 → 必须声明；两分支皆有该动作与路径 → 共享不声明。**平行流程型**（同一维度在多章节各有完整生命周期，且创建转换落点次序互逆，如 §19.1 能力验证 vs §19.3 测量审核）：除两条创建转换互为分立外，各分支全部后续推进转换均须声明 branch_values，仅两分支共有收尾动作共享；漏声明 → 他分支子图被污染成环，相位链退化为枚举序。
+
+**创建转换五查**（frm=None 落盘前逐项过，各项依对应条款处理）：
+① 判 (b) → 携父实体已存在态 state_ref 前置；父实体状态由同动作建立 → 改用同动作共创建（§1.5）；
+② 同动作建立同实体他维度出生值 → expected_results 逐面声明「{维度名}初始为{值}」；
+③ 承载分支实义单据或跨分支借用动作 → note.doc_identity＋expected_results 限定名；
+④ 平行流程型的后续推进转换 → branch_values（归属铁律）；
+⑤ action＝该状态面在流程表的首现动作；状态面首现早于本实体创建动作 → 该状态面归首现动作的承载主体，不挂本实体（C32）。
 
 ### 3.2 preconditions → `precond(text, ptype, ref, note)`
 
@@ -188,7 +197,7 @@ BR → `m.add_br()`：仅规范性约束句生成（纯描述性叙述不生成�
 
 ## 5 修复
 
-回喂格式：`[{"check": "<校验码>", "labels": ["t07"], "expected": "…"}]`。最小修复：只改回喂点名项；修补 confidence≤medium；根源漏事件 → 先补 `add_event` 再补转换（回喂触发的补事件是合法回修）。
+回喂格式：`[{"check": "<校验码>", "labels": ["t07"], "expected": "…"}]`。最小修复：改回喂点名项及其连带依赖（台账简写、state_ref 端点、分支/引用注册、note 锚点），无关段落不碰；修补 confidence≤medium；根源漏事件 → 先补 `add_event` 再补转换（回喂触发的补事件是合法回修）。
 
 CLI：critical 中断时回喂 JSON 默认控制台打印（不落盘，`--feedback <路径>` 可选落盘），由 `build_feedback` 确定性生成（check＝校验码，labels＝消息文本抽取的候选/被修条目，expected＝修法指引全文）；将打印 JSON 投给 LLM 触发再生成，勿手工改数据文件。
 
@@ -226,11 +235,10 @@ N(inferred=False, comment="", conflict="", branch_dimension="", role=None)
 attr(name, desc, is_config=False)
 op(name, category, expected_results, source_ref, note=None,
    linked_transitions=None, stage_hint=None, form_fields=None, page=None)
-# linked_transitions=[tid…]＝3.3 link_op_transition 的同义内联（二选一）；
-# stage_hint＝无状态前置操作（file/数据类等，相位被钉死在对象创建态时）的阶段
-#   挂载提示，二选一：{"anchor_state": {"entity","dimension","state"}}＝锚定该状态
-#   相位并追加其 restatement Given；{"min_phase": N}＝相位下限。语义＝
-#   max(当前相位, 提示相位)，只上提不前移；anchor_state 须指向已建模状态。
+# linked_transitions=[tid…]＝link_op_transition 的内联等价（与 3.3 显式登记二选一）
+# stage_hint＝无状态前置操作（file/数据类，相位被钉死在对象创建态）的阶段挂载提示，二选一：
+#   {"anchor_state":{"entity","dimension","state"}}＝锚定该状态相位并追加其 restatement Given（须指向已建模状态）
+#   {"min_phase":N}＝相位下限；语义＝max(当前相位, 提示相位)，只上提不前移
 # form_fields=[字段名…]＝表单字段清单覆盖（实体 attributes）；page=页面名＝Type5 导航页面覆盖
 precond(text, ptype, ref=None, note=None)
 state_ref(entity, dimension, state)
