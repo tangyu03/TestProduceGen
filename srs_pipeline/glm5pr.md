@@ -51,7 +51,7 @@ def build() -> DomainModel:
 m.add_event(eid, entity=E-ID, dimension, action, actor, precondition, consequence, source_ref)
 ```
 
-- action＝原文动作短语逐字：主语线索承载 actor 语义（"机构新增实验室信息"保留原文，不改写为"实验室新增"）。
+- action＝原文动作短语逐字：主语线索承载 actor 语义（"管理处新增设备信息"保留原文，不改写为"设备新增"）。
 - consequence：在情形空间取值（停留原情形也算落点，落为自环）。
 - precondition＝自身状态值，或 `自身状态值；E-ID.状态值`（跨主体门禁；门禁值取同动作拆行事件中对应分支的 consequence），无内容填字符串 `"初始"`。
 - 落点判定（按序）：① 动作使某主体情形空间变化 → 记该 (entity, dimension)；变化落在其他实体上 → 记那个实体。② 仅创建记录且该实体无状态面 → 非事件，转③。③ 无情形落点 → 用户可执行操作入 Step 1 operations；约束措辞入 Step 4 BR；系统行为（定时/自动触发、无状态落点，如"到期提醒"）入 Step 4 BR（notification/timing）。
@@ -74,7 +74,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 
 ### 1.3 状态推导
 
-为每个事件写出前置情形＝precondition＋先前 consequence。分合判据：
+为每个事件写出前置情形＝precondition＋先前 consequence。分合判据（Accept(S)＝以 S 为前置可执行的动作集合，含跨主体门禁命中）：
 
 | 比较 | 结果 |
 |---|---|
@@ -106,7 +106,7 @@ entity 列即分组结果；分组唯一依据是原文命名；有状态变更�
 | (c) B 有独立创建流程，B 是 core 流程实体（type=core 且有 dependent），A 为其业务归属容器 | composition | business_ownership |
 | (d) B 有独立创建流程/前置条件/可能永不创建，且不满足 (c) | reference | configuration_source |
 
-(c) 先于 (d)；A 仅为发起人/持有人/操作对象 → 降 (d)；B 核心产出属第三方 C → 改 C→B；判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B → 归 (d)。dependent 三步：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium。`management_dimension` 必须复核并写 comment。
+(c) 先于 (d)；A 仅为发起人/持有人/操作对象 → 降 (d)；B 核心产出属第三方 C → 改 C→B；判 (b) 且 1:1 → 复核"每条 A 必有 B"，可能无 B → 归 (d)。dependent 三步：①文档直写 B 的下级实体 → 有；②未写 → 按 (d)＋`confidence=medium`；③后续揭示 → 升级 (c)，confidence 保持 medium（判定结果落 note）。`management_dimension` 必须复核并写 comment。
 
 判 (b) 实体的创建行编码义务（伴随创建 state_ref 前置 / 同动作共创建）→ §3.1 创建转换五查①。
 
@@ -177,7 +177,7 @@ frm/to＝实体 ID，描述 X 的变化直接致 Y 的变化；两实体间的�
 - Q2：门禁已由 Y 侧 precondition 或既有 XC 表达？已表达 → 止于 Q2，不写因果、不标记。
 - Q3：上级作下级门禁 → 约束（标记 `[待写入]`）；下级全完成上级自动推进 → 因果。
 
-来源表：`desc`（显式句式 B 完成后 A 变）/ `expected_results`（含 E2 影响）/ `action`（preconditions 含 E1 的 state_ref）/ `bidi_coupling`。`evidence_transitions`：desc/business_rule 可空（comment 注明位置），其余必填局部标签。confidence：显式 high，推导 medium，修补≤medium。写入前扫描已有 add_causal，同 (frm,to) 去重仅升级：desc/trigger 以 `;` 合并、evidence_transitions 并集、rollback 取或；add_causal 无 causal_pairs 参数。
+来源表：`desc`（显式句式 B 完成后 A 变）/ `expected_results`（含 E2 影响）/ `action`（preconditions 含 E1 的 state_ref）/ `bidi_coupling`（双向耦合：X↔Y 状态变化互为因果）。`evidence_transitions`：desc/business_rule 可空（comment 注明位置），其余必填局部标签。confidence：显式 high，推导 medium，修补≤medium。写入前扫描已有 add_causal，同 (frm,to) 去重仅升级：desc/trigger 以 `;` 合并、evidence_transitions 并集、rollback 取或；add_causal 无 causal_pairs 参数。
 
 ## Step 4 约束
 
@@ -185,7 +185,7 @@ frm/to＝实体 ID，描述 X 的变化直接致 Y 的变化；两实体间的�
 
 invalid → `m.add_invalid()`：仅明文禁止的状态转换（"不允许/不可以从X到Y"）。
 
-XC → `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（4.5判对应 3.4 鉴别判为约束）；source_transition 一律填生产者转换（达 source_state 的转换）；镜像 XC 可省略（框架补）。target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
+XC → `m.add_xc()`：`xc_source ∈ {镜像, 联动, 4.5判, 分支差异}`（4.5判＝3.4 因果鉴别 Q1/Q3 判为约束的跨实体门禁）；source_transition 一律填生产者转换（达 source_state 的转换）；镜像 XC 可省略（框架补）。target_transition：镜像/联动必填（联动 target_condition＝该转换的 to 新值），4.5判可空（desc 含 BR 标签），分支差异可缺省。
 
 BR → `m.add_br()`：仅规范性约束句生成（纯描述性叙述不生成）；一句一 BR。三字段各自判定：
 - **category**＝管什么：`validation`（默认）/`computation`/`authorization`/`timing`/`notification`/`usability`/`display`；纯限制性规则（不属任何业务域）→ `restrictive`。
