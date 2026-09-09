@@ -15,6 +15,16 @@ from .escape import find_forbidden, find_unescaped
 PURE_BRANCH_WORDS = ("纯计算", "计算型", "纯展示", "展示型",
                      "纯筛选", "筛选型", "纯查询", "查询型", "仅影响")
 
+# 结果性门禁状态标记（C33 的判别词，与 glm5pr §2「聚合/记录成对动作前置一致」的
+# "结果性门禁"术语对齐）。子记录转换的 from 态含任一标记 → 视为"结果提交里程碑"，
+# 聚合级（composition 父容器）同动作转换必须把该子记录状态作为跨主体门禁镜像过去。
+# 判别刻意收窄到"结果"里程碑：①发放结果报告和证书（子记录 报告/证书审核中→已发布、
+# 父容器 报告审核中→已结束）的门禁应是子记录 to 态（发布后项目才结束），纳入会给出
+# 错误修法；②能力验证预通知/受理报名等成对动作的子记录 from 态（报名成功等）是
+# 报名阶段信号，父容器 进行中 由预通知推动、本就先于结果提交，不构成漏门禁。若领域
+# 词表不同，仅需在此扩展标记集——这是本检查唯一的领域词依赖点。
+_RESULT_GATE_STATE_MARKERS = ("结果",)
+
 
 @dataclass
 class Issue:
@@ -102,7 +112,8 @@ class Validator:
                   self.c25_inv_mirror_target_transition,
                   self.c26_inv_event_entity, self.c27_inv_event_coverage,
                   self.c28_inv_branch_br_hook, self.c29_inv_op_ref_entity,
-                  self.c30_inv_op_link, self.c31_inv_branch_tt_deviation):
+                  self.c30_inv_op_link, self.c31_inv_branch_tt_deviation,
+                  self.c33_aggregate_gate_mirror):
             c()
         for fn in self._extra:
             fn(self, self.report)
@@ -1162,3 +1173,61 @@ class Validator:
                 f"P2 精确匹配将失败（走 all-values 兜底）",
                 "改写描述为动作词锚定形态（如「xxx转换（frm变为to）」），"
                 "使其唯一命中该维度实体的转换"))
+
+    @staticmethod
+    def _is_result_gate_state(state: str) -> bool:
+        """子记录转换 from 态是否属"结果提交里程碑"（结果性门禁）。
+
+        判别词集中定义在 _RESULT_GATE_STATE_MARKERS（与 glm5pr §2 术语对齐）；
+        返回 False 的 from 态（如 报告/证书审核中、报名成功）不纳入 C33——见该
+        常量注释的收窄理由（T-039 发放类 / 预通知类误报防护）。
+        """
+        return bool(state) and any(m in state for m in _RESULT_GATE_STATE_MARKERS)
+
+    def c33_aggregate_gate_mirror(self):
+        """聚合/记录成对动作前置一致（结果性门禁镜像）。
+
+        同一业务动作既落记录级（composition 子实体）又落聚合级（父容器）状态面时，
+        聚合级转换前置须携带子记录的结果性跨主体门禁（自身状态值；E-ID.结果态），
+        只写自身状态值视为漏门禁——相位对齐与依赖连边会失败：如编制结果报告/通知单，
+        项目 进行中→报告审核中 缺 E-BMJL.报名记录状态.结果已提交，报告编制类用例
+        会错误排到结果提交/评价之前（PROC-068~070 先于 PROC-074~077/082~085）。"""
+        r = self.report
+        children = {}
+        for rel in self.m.structural_relations:
+            if rel["relation_type"] == "composition":
+                children.setdefault(rel["from"], []).append(rel["to"])
+        if not children:
+            return
+        # 子记录转换按 (实体, 动作) 索引；仅关注从"结果*"态出发的转换——
+        # 其 from 态即结果性门禁（结果待提交/结果已提交），须镜像到聚合级同动作转换。
+        # 判别词见 _is_result_gate_state / _RESULT_GATE_STATE_MARKERS。
+        child_pairs = {}
+        for t in self.m.transitions:
+            frm = t.get("from")
+            if self._is_result_gate_state(str(frm)):
+                child_pairs.setdefault((t["entity"], t["action"]), []).append(t)
+        for parent in sorted(children):
+            for pt in self.m.transitions:
+                if pt["entity"] != parent:
+                    continue
+                gates = {}      # 门禁 (实体,维度,状态) -> 携带它的子记录转换 id 列表
+                for child in children[parent]:
+                    for ct in child_pairs.get((child, pt["action"]), []):
+                        gates.setdefault(
+                            (child, ct["dimension"], ct["from"]), []).append(ct["id"])
+                if not gates:
+                    continue
+                have = self._extract_refs(pt)
+                for gate, ctids in sorted(gates.items()):
+                    if gate in have:
+                        continue
+                    r.error("C33", self._hint(
+                        pt["id"],
+                        f"聚合级转换缺记录级结果性门禁 "
+                        f"{gate[0]}.{gate[1]}.{gate[2]}（子记录同动作转换 "
+                        f"{'/'.join(ctids)} 已携带）",
+                        "前置补为 自身状态值；E-ID.结果态（跨主体 state_ref），"
+                        "不得只写自身状态值",
+                        "编制结果报告：E-XM.项目状态 进行中→报告审核中 前置须含 "
+                        "E-BMJL.报名记录状态.结果已提交"), pt["id"])

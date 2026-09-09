@@ -1437,37 +1437,38 @@ def _classify_state_types(tos: list[dict], primary: str) -> dict[str, dict[str, 
     return dict(state_type_map)
 
 
-def _entry_from_gated_preconditions(
+def _apply_gated_preconditions(
     entity: str, dim: str, tos: list[dict], phase_table: dict,
     rel_phase_map: dict,
-) -> int | None:
-    """策略 0 推广：按转换锚定 + 沿相对相位回传（2026-08-25）。
+) -> dict | None:
+    """门禁前置锚定：入口门禁整体平移 vs 阶段门禁钉住目标态及之后（2026-09-08）。
 
-    旧维度入口锚定（dimension_entry_anchors 配置）是为 E-PJ.评价状态 单点手写
-    的——评价维度转换零跨实体前置，策略 0/5 扫描不到门禁信号 → 入口=0 → 评价
-    用例挤 P0。第一性解法：把领域事实「评价以报名记录.结果已提交为前提」作为
-    state_ref 前置落在评价的第一个活动转换上（与 Fix 2b T-025 同一通道），本
-    函数把该门禁沿维度相对相位回传到入口态。
+    旧实现（_entry_from_gated_preconditions）把门禁一律沿相对相位回传入口态并
+    **整条维度平移**——对"入口门禁"正确（生命周期整体在门禁后才开始，如
+    E-PJ.评价状态：待评价→评价中 前置 报名记录.结果已提交 →
+    {待评价:4, 评价中:5, ...}），但对"阶段门禁"会误伤早期态：E-XM.项目状态
+    T-037/T-067(进行中→报告审核中) 前置 结果已提交 若整体平移得 {待开始:2,
+    报名中:3, 进行中:4, 报告审核中:5, 已结束:6}，把项目早期创建/报名用例
+    错误拖后（PROC-008/020 相位被抬）。
 
-    语义（与 _compute_entry_phase 策略 0 同源的 +1：活动后置于门禁态）：
-      - 携带对主实体主维度 state_ref 前置的转换 = 门禁转换，其**目标态**相位
-        = ref_phase + 1（不是入口态——修正旧策略 0「所有前置都当入口门禁」的
-        假设，门禁作用在目标态上）。
-      - 入口态相位 = 目标态相位 - 相对相位差（rel_phase_map[target]，即入口到
-        目标态的步数）。入口态即 rel_phase_map 最小值态。
-      - 多门禁取 min（最早的门禁决定入口）。无门禁 → None（退回原逻辑）。
-    E-PJ.评价状态：T-046(待评价→评价中) 前置 报名记录.结果已提交(P3) →
-    评价中 = 3+1 = 4，入口待评价 = 4-1 = 3 → {待评价:3, 评价中:4, 已确认:5,
-    退回修改:4}（与 ㊿ 手写 dimension_entry_anchors 的布局一致，但由数据长出）。
+    阶段门禁语义：门禁作用在**目标态**上，只把目标态及之后的相对相位钉到
+    ref_phase+1，早期态保持相对相位不动。判别：门禁转换的 from 若等于维度
+    入口态（rel 最小的态）→ 入口门禁（整条平移）；否则 → 阶段门禁（后缀平移）。
+    E-XM.项目状态：进行中→报告审核中 前置 结果已提交(P4) → 报告审核中=5、
+    已结束=6，待开始/报名中/进行中保持 0/1/2。
+
+    返回 None = 无门禁（退回原逻辑）；否则返回该维度完整相位映射。
     """
     primary_entity = phase_table.get("primary_entity", "")
     primary_dim = phase_table.get("primary_dimension", "")
     primary_states = phase_table.get("state_to_phase", {}).get(primary_dim, {})
-    if not rel_phase_map:
+    if not rel_phase_map or not primary_states:
         return None
     entity_tos = [t for t in tos if t.get("entity") == entity and t.get("dimension") == dim]
+    entry_state = min(rel_phase_map, key=rel_phase_map.get)
 
-    candidates: list[int] = []
+    # 每条门禁：入口门禁标记 + 目标态 + 位移量 delta = ref_phase + 1 - rel[目标态]。
+    gates: list[tuple[bool, str, int]] = []
     for to in entity_tos:
         ref_phase = None
         for prec in to.get("preconditions", []) or []:
@@ -1483,11 +1484,24 @@ def _entry_from_gated_preconditions(
         if ref_phase is None:
             continue
         target = (to.get("to") or "").strip()
-        offset = int(rel_phase_map.get(target, 0))  # 目标态距入口的相对步数
-        candidates.append(ref_phase + 1 - offset)
-    if not candidates:
+        if target not in rel_phase_map:
+            continue
+        frm = (to.get("from") or "").strip()
+        is_entry = (not frm) or frm == entry_state
+        delta = (ref_phase + 1) - int(rel_phase_map.get(target, 0))
+        gates.append((is_entry, target, delta))
+    if not gates:
         return None
-    return min(candidates)
+
+    out: dict[str, int] = {}
+    for s, p in rel_phase_map.items():
+        p = int(p)
+        best = 0
+        for is_entry, target, delta in gates:
+            if is_entry or p >= int(rel_phase_map[target]):
+                best = max(best, delta)
+        out[s] = p + max(0, best)
+    return out
 
 
 def _compute_entry_phase(
@@ -2055,13 +2069,15 @@ def _derive_dep_state_phase_map(
                 primary_state_names = set(
                     (phase_table.get('state_to_phase', {}) or {}).get(primary_dim_s, {}).keys()
                 )
-                # 门禁前置锚定：扫描该维度转换对主实体主维度的 state_ref 前置，
-                # 沿相对相位回传入口态（_entry_from_gated_preconditions，2026-08-25
-                # 取代 dimension_entry_anchors 单点配置）。无门禁 → 回落策略 0/5。
-                _entry = _entry_from_gated_preconditions(
+                # 门禁前置锚定：入口门禁整体平移 / 阶段门禁只钉目标态及之后
+                # （_apply_gated_preconditions，2026-09-08 取代旧整条平移实现）。
+                # 无门禁 → 回落策略 0/5。
+                gated = _apply_gated_preconditions(
                     entity, dim, tos, phase_table, merged,
                 )
-                if _entry is None:
+                if gated is not None:
+                    dim_map[dim] = gated
+                else:
                     _entry = 0
                     if not (set(merged.keys()) & primary_state_names):
                         _entry = _compute_entry_phase(
@@ -2069,10 +2085,10 @@ def _derive_dep_state_phase_map(
                             structural=structural, cos=cos,
                             transition_relations=transition_relations, restrict_05=True,
                         )
-                if _entry:
-                    dim_map[dim] = {s: int(_entry) + int(p) for s, p in merged.items()}
-                else:
-                    dim_map[dim] = {s: int(p) for s, p in merged.items()}
+                    if _entry:
+                        dim_map[dim] = {s: int(_entry) + int(p) for s, p in merged.items()}
+                    else:
+                        dim_map[dim] = {s: int(p) for s, p in merged.items()}
                 continue  # skip fixpoint / sub-sm / cyclic branches
             # ── End V08 fix ────────────────────────────────────────
             all_states = set()
