@@ -5,13 +5,25 @@
 
 ---
 
+## 2026-09-09 ㊿-I 聚合/记录镜像在 S0 相位层强制（补 ㊿-H 闭环）
+
+**问题**（用户反馈）：按 ㊿-H 修完提示词/校验/S0 后重新生成模型（coverage_obligations.json 10:03）与产物（output.md 10:08），编制结果报告/通知单 仍排在 结果已提交、评价 之前。根因：P2 重新生成的模型仍漏挂 T-037/T-067/T-039 的跨主体门禁（提示词铁律未被 LLM 遵循）→ S0 `_apply_gated_preconditions` 无门禁可锚 → E-XM.项目状态 报告审核中=3 < 结果已提交=4，排序复现错误。
+
+**决策**（不改输入数据/产物）：把聚合/记录镜像不变式从"门禁存在才生效"升级为 S0 结构性强制——新增 `_enforce_aggregate_gate_mirror`（nodes/s0_topology.py，与 V11 同规则）：composition 父容器/子记录同动作、forward、非入口转换对，强制 相位(父.to) ≥ 相位(子.from)+1，不足则抬目标态并级联本维度后续态（保持相对间距、顺序无关）；全局与 per-branch 视图各自强制。纯结构判别（composition+同动作+相位数值），无领域词。
+
+**验证**（coverage_obligations.json → main.py 全管线重跑）：
+- E-XM.项目状态 = {待开始:0, 报名中:1, 进行中:2, 报告审核中:5, 已结束:7}（全局与 能力验证/测量审核 per-branch 视图一致）；E-PJ/E-YP/E-JFTZ 相位零变化；
+- 排序：结果已提交=PROC-070(P4) → 评价中=PROC-076/077(P5) → 编制结果报告=PROC-083(P5)、编制结果通知单=PROC-084(P5)，报告编制用例不再排在提交结果/评价之前；
+- V11（verify/checks/v11_aggregate_gate_mirror.py）在新产物上 0 fail；pytest 21 passed；
+- 提示词铁律（glm5pr §2/§3.2）保留——模型仍应显式携带门禁；S0.M 强制会在模型漏挂时抬升相位并记 warning（output 内可回溯），V11 作为最终校验。
+
 ## 2026-09-08 ㊿-H 门禁语义区分：入口门禁整体平移 vs 阶段门禁只钉目标态及之后
 
 **问题**（用户反馈）：v13 输出 PROC-068~070（编制结果报告/通知单，项目状态→报告审核中）排在 PROC-074~077（结果已提交）、PROC-082~085（评价中）之前，不合理。根因：P1 聚合级转换 T-037/T-067（E-XM.项目状态 进行中→报告审核中）漏挂记录级结果性门禁 E-BMJL.报名记录状态.结果已提交（记录级孪生 T-036/T-066 有）→ S0 相位 报告审核中=3 < 结果已提交=4。
 
 **决策**（不改输入数据/产物，三层根修）：
 1. **提示词层**（srs_pipeline/glm5pr.md）：§2/§3.2 新增「聚合/记录成对动作前置一致」铁律——聚合级转换须携带与记录级一致的跨主体结果性门禁（编制结果报告/通知单 为实例）。
-2. **校验层**（srs_pipeline/validate.py C33）：composition 父容器与子记录同动作成对转换时，聚合级缺子记录"结果*"态门禁 → error（确定性检出，命中 T-037/T-067，无误报；补门禁后 0 问题）。
+2. **校验层**（verify/checks/v11_aggregate_gate_mirror.py V11，纯结构检查、无领域词）：composition 父容器阶段转换的目标态相位 < 子记录同动作转换的 from 态相位 → fail（确定性检出，命中 T-037/T-067/T-039；补门禁后 0 问题）。原 srs_pipeline/validate.py C33（依赖"结果"判别词）已删除，由 V11 完全覆盖。
 3. **S0 相位层**（nodes/s0_topology.py）：`_entry_from_gated_preconditions`（整条平移）替换为 `_apply_gated_preconditions`——门禁转换 from=入口态 → 入口门禁（整条平移，E-PJ.评价状态 行为不变）；from=后期态 → 阶段门禁（只把目标态及之后钉到 ref_phase+1，早期态保持相对相位）。落地：E-XM.项目状态 {待开始:0, 报名中:1, 进行中:2, 报告审核中:5, 已结束:6}（旧实现给 {2,3,4,5,6}，把项目早期创建/报名用例错误拖后）。
 
 **验证**（`_compute_s0_deterministic` 重跑 pt_coverage_obligationsv13.json）：

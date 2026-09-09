@@ -28,7 +28,7 @@ CHECK_MODULES = [
     "v01_dependency_closure", "v02_guard_polarity", "v03_action_ownership",
     "v04_builtin_entity_protect", "v05_dimension_combo", "v06_time_control",
     "v07_role_permission", "v08_phase_consistency", "v09_dedup_instances",
-    "v10_coverage_matrix",
+    "v10_coverage_matrix", "v11_aggregate_gate_mirror",
 ]
 
 

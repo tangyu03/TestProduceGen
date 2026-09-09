@@ -3166,6 +3166,126 @@ def _detect_structural_contradictions(
 # S0 invariant enforcement helpers
 # ---------------------------------------------------------------------------
 
+def _enforce_aggregate_gate_mirror(
+    primary: str,
+    primary_state_to_phase: dict,
+    dep_state_phase_map: dict,
+    tos: list,
+    structural: list,
+    state_info: dict,
+    warnings: list,
+) -> list:
+    """聚合/记录同动作镜像强制（与 V11 同规则，2026-09-09）。
+
+    同一业务动作既落聚合级（composition 父容器）又落记录级（子实体）状态面时，
+    聚合级转换目标态相位不得低于子记录同动作转换的 from 态相位（forward、非入口
+    转换）。即使模型漏挂跨主体门禁（如 T-037/T-067 缺 E-BMJL.结果已提交），S0
+    也据此把父容器 to 态相位抬到 子记录 from 相位+1 并级联本维度后续态——保证
+    聚合动作用例不排到记录里程碑之前（编制结果报告/通知单 须在 结果已提交、评价
+    之后）。纯结构判别：composition 关系 + 同动作 + 相位数值，无领域词。
+
+    入口转换（from=initial）与回退/重发边（目标相位<来源相位）不参与（与 V11
+    豁免一致）。返回更新后的 warnings。
+    """
+    from collections import defaultdict
+
+    children = defaultdict(list)
+    for rel in structural or []:
+        if rel.get("relation_type") == "composition":
+            children.setdefault(rel.get("from"), []).append(rel.get("to"))
+    if not children:
+        return warnings
+
+    def dim_map(entity, dim):
+        if entity == primary:
+            return primary_state_to_phase.get(dim) or {}
+        ent = dep_state_phase_map.get(entity) or {}
+        return ent.get(dim) or {}
+
+    def entry_state(entity, dim):
+        ent = state_info.get(entity) or {}
+        for d in ent.get("dimensions") or []:
+            if d.get("dimension_name") == dim:
+                return d.get("initial")
+        return None
+
+    def phase_of(entity, dim, state):
+        return dim_map(entity, dim).get(state)
+
+    by_ent_act = defaultdict(list)
+    for t in tos:
+        if not isinstance(t, dict):
+            continue
+        by_ent_act[(t.get("entity"), t.get("action"))].append(t)
+
+    rounds = 0
+    changed = True
+    while changed and rounds < 16:
+        changed = False
+        rounds += 1
+        for parent in sorted(children):
+            parent_dims = {t.get("dimension") for t in tos
+                           if isinstance(t, dict) and t.get("entity") == parent
+                           and t.get("dimension")}
+            for pdim in parent_dims:
+                pmap = dim_map(parent, pdim)
+                if not pmap:
+                    continue
+                req: dict = {}
+                for pt in tos:
+                    if (not isinstance(pt, dict) or pt.get("entity") != parent
+                            or pt.get("dimension") != pdim):
+                        continue
+                    pfrm = (pt.get("from") or "").strip()
+                    pto = (pt.get("to") or "").strip()
+                    if not pfrm or not pto:
+                        continue
+                    entry = entry_state(parent, pdim)
+                    if entry and pfrm == entry:
+                        continue  # 入口转换：跟踪标尺独立，不参与镜像
+                    pto_phase = pmap.get(pto)
+                    pfrm_phase = pmap.get(pfrm)
+                    if pto_phase is None or pfrm_phase is None:
+                        continue
+                    if pto_phase < pfrm_phase:
+                        continue  # 回退/重发边：相位倒退，不要求对齐记录里程碑
+                    for child in children[parent]:
+                        child_max = None
+                        for ct in by_ent_act.get((child, pt.get("action")), []):
+                            if not isinstance(ct, dict):
+                                continue
+                            cfrm = (ct.get("from") or "").strip()
+                            if not cfrm:
+                                continue
+                            cph = phase_of(child, ct.get("dimension"), cfrm)
+                            if cph is None:
+                                continue
+                            child_max = cph if child_max is None else max(child_max, cph)
+                        if child_max is not None and pto_phase < child_max:
+                            req[pto] = max(req.get(pto, pto_phase), child_max + 1)
+                if not req:
+                    continue
+                # 顺序无关的最小修复：按当前相位序单遍重排，保留相对间距。
+                new_map: dict = {}
+                prev_base = prev_new = None
+                for s in sorted(pmap, key=lambda x: int(pmap[x])):
+                    base = int(pmap[s])
+                    new = max(base, req.get(s, base))
+                    if prev_base is not None and prev_new is not None:
+                        new = max(new, prev_new + (base - prev_base))
+                    new_map[s] = new
+                    prev_base, prev_new = base, new
+                for s, v in new_map.items():
+                    if pmap.get(s) != v:
+                        pmap[s] = v
+                        changed = True
+                if changed:
+                    warnings.append(
+                        f"S0.M 聚合/记录镜像强制: {parent}.{pdim} "
+                        f"{sorted(req)}→{sorted((s, pmap[s]) for s in req)}")
+    return warnings
+
+
 def _enforce_s0_invariants(
     primary: str,
     phase_table: dict,
@@ -3499,8 +3619,19 @@ def _compute_s0_deterministic(cm: dict, warnings: list[str]) -> dict:
                 state_info=state_info, branch_value=_b,
             )
             dep_state_phase_map_by_branch[_b] = _dep_b
+            warnings = _enforce_aggregate_gate_mirror(
+                primary, _pt_b.get('state_to_phase') or {}, _dep_b,
+                _tos_b, structural, state_info, warnings)
         warnings.append(
             f"S0.4b: per-branch dep_state_phase_map for {sorted(dep_state_phase_map_by_branch)}")
+
+    # 聚合/记录同动作镜像不变式强制（与 V11 同规则）：即使模型漏挂跨主体门禁
+    # （如 T-037/T-067 缺 E-BMJL.结果已提交），S0 也保证 composition 父容器
+    # 阶段转换目标态相位 ≥ 子记录同动作转换 from 态相位+1——编制结果报告/通知单
+    # 的用例不会排到 结果已提交/评价 之前。全局视图与 per-branch 视图各自强制。
+    warnings = _enforce_aggregate_gate_mirror(
+        primary, phase_table.get('state_to_phase') or {}, dep_state_phase_map,
+        tos, structural, state_info, warnings)
 
     # 排序修复 A 的相位对齐已迁至 S1 之后（s1_generation.
     # _align_same_action_phases_post_s1）——S0 阶段真实相位尚未派生完成

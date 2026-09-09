@@ -64,6 +64,7 @@ class CheckResult:
             "V08": "相位一致性检查通过：终态=最大相位、forward 迁移相位递增、状态未坍缩",
             "V09": "去重检查通过：无重复 (givens,when,thens) 合并、单例实体未复制",
             "V10": "覆盖矩阵检查通过：每个模型化义务（T-*/EO-*/RO-BR-*/IT）均有 source_ids/embedded_brs 用例引用，状态机状态全覆盖",
+            "V11": "聚合门禁镜像检查通过：所有 composition 父容器阶段转换的目标态相位 ≥ 子记录同动作转换的 from 态相位，无跨主体里程碑倒挂",
         }
         return reasons.get(self.check_id, "检查通过，无违规项")
 
